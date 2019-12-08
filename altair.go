@@ -52,7 +52,70 @@ func executeCommand() {
 		},
 	}
 
-	rootCmd.AddCommand(runCmd)
+	migrateCmd := &cobra.Command{
+		Use:   "migrate",
+		Short: "Do a migration.",
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := fabricateConnection(); err != nil {
+				return
+			}
+
+			if err := fabricateMigration(); err != nil {
+				return
+			}
+
+			if err := migration.Up(); err != nil && err.Error() != "no change" {
+				journal.Error(fmt.Sprintln("Migration error because of:", err), err).SetTags("altair", "main").Log()
+				return
+			}
+
+			journal.Info("Migration migrate process is complete").SetTags("altair", "main").Log()
+		},
+	}
+
+	migrateDownCmd := &cobra.Command{
+		Use:   "migrate:down",
+		Short: "Down the migration.",
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := fabricateConnection(); err != nil {
+				return
+			}
+
+			if err := fabricateMigration(); err != nil {
+				return
+			}
+
+			if err := migration.Down(); err != nil && err.Error() != "no change" {
+				journal.Error(fmt.Sprintln("Migration error because of:", err), err).SetTags("altair", "main").Log()
+				return
+			}
+
+			journal.Info("Migration down process is complete").SetTags("altair", "main").Log()
+		},
+	}
+
+	migrateRollbackCmd := &cobra.Command{
+		Use:   "migrate:rollback",
+		Short: "Rollback the migration.",
+		Run: func(cmd *cobra.Command, args []string) {
+			if err := fabricateConnection(); err != nil {
+				return
+			}
+
+			if err := fabricateMigration(); err != nil {
+				return
+			}
+
+			if err := migration.Steps(-1); err != nil && err.Error() != "no change" {
+				journal.Error(fmt.Sprintln("Migration error because of:", err), err).SetTags("altair", "main").Log()
+				return
+			}
+
+			journal.Info("Migration rollback one step process is complete").SetTags("altair", "main").Log()
+		},
+	}
+
+	rootCmd.AddCommand(runCmd, migrateCmd, migrateDownCmd, migrateRollbackCmd)
 	_ = rootCmd.Execute()
 }
 
@@ -102,13 +165,13 @@ func fabricateMigration() error {
 		DatabaseName:    os.Getenv("DATABASE_NAME"),
 	})
 	if err != nil {
-		journal.Error(fmt.Sprintln("Fabricate migration error:", err), err).SetTags("levelup", "main").Log()
+		journal.Error(fmt.Sprintln("Fabricate migration error:", err), err).SetTags("altair", "main").Log()
 		return err
 	}
 
 	m, err := migrate.NewWithDatabaseInstance("file://migration", "mysql", driver)
 	if err != nil {
-		journal.Error(fmt.Sprintln("Fabricate migration error:", err), err).SetTags("levelup", "main").Log()
+		journal.Error(fmt.Sprintln("Fabricate migration error:", err), err).SetTags("altair", "main").Log()
 		return err
 	}
 	migration = m
@@ -120,9 +183,9 @@ func closeMigration() {
 	if migration != nil {
 		s, err := migration.Close()
 		if err != nil {
-			journal.Error(fmt.Sprintln("Close migration error:", err), err).SetTags("levelup", "main").Log()
-			journal.Error(fmt.Sprintln("Source:", s), s).SetTags("levelup", "main").Log()
+			journal.Error(fmt.Sprintln("Close migration error:", err), err).SetTags("altair", "main").Log()
+			journal.Error(fmt.Sprintln("Source:", s), s).SetTags("altair", "main").Log()
 		}
-		journal.Info("Success closing migration.").SetTags("levelup", "main").Log()
+		journal.Info("Success closing migration.").SetTags("altair", "main").Log()
 	}
 }
