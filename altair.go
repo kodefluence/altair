@@ -7,6 +7,7 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/subosito/gotenv"
 
 	"github.com/codefluence-x/journal"
 	"github.com/spf13/cobra"
@@ -20,6 +21,7 @@ var (
 )
 
 func main() {
+	_ = gotenv.Load()
 	executeCommand()
 }
 
