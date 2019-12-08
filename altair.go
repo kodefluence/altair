@@ -45,7 +45,10 @@ func executeCommand() {
 		Use:   "run",
 		Short: "Run API gateway services.",
 		Run: func(cmd *cobra.Command, args []string) {
-			fabricateConnection()
+			if err := fabricateConnection(); err != nil {
+				journal.Error("Error running altair:", err).SetTags("altair", "main").Log()
+				return
+			}
 		},
 	}
 
