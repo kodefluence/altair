@@ -7,6 +7,11 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+
 	"github.com/subosito/gotenv"
 
 	"github.com/codefluence-x/journal"
@@ -18,6 +23,8 @@ var (
 	mysqlConnMaxLifetime time.Duration
 	mysqlMaxIdleConn     int
 	mysqlMaxOpenConn     int
+
+	migration *migrate.Migrate
 )
 
 func main() {
@@ -83,5 +90,36 @@ func closeConnection() {
 		}
 
 		journal.Info("Success closing mysql writer and reader connection.").SetTags("altair", "main").Log()
+	}
+}
+
+func fabricateMigration() error {
+	driver, err := mysql.WithInstance(mysqlDB, &mysql.Config{
+		MigrationsTable: "db_versions",
+		DatabaseName:    os.Getenv("DATABASE_NAME"),
+	})
+	if err != nil {
+		journal.Error(fmt.Sprintln("Fabricate migration error:", err), err).SetTags("levelup", "main").Log()
+		return err
+	}
+
+	m, err := migrate.NewWithDatabaseInstance("file://migration", "mysql", driver)
+	if err != nil {
+		journal.Error(fmt.Sprintln("Fabricate migration error:", err), err).SetTags("levelup", "main").Log()
+		return err
+	}
+	migration = m
+
+	return nil
+}
+
+func closeMigration() {
+	if migration != nil {
+		s, err := migration.Close()
+		if err != nil {
+			journal.Error(fmt.Sprintln("Close migration error:", err), err).SetTags("levelup", "main").Log()
+			journal.Error(fmt.Sprintln("Source:", s), s).SetTags("levelup", "main").Log()
+		}
+		journal.Info("Success closing migration.").SetTags("levelup", "main").Log()
 	}
 }
