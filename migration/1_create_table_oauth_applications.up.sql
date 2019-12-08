@@ -19,4 +19,4 @@ CREATE TABLE `oauth_applications` (
   KEY `uid_secret` (`client_uid`, `client_secret`),
   KEY `uid_secret_revoked_at` (`client_uid`, `client_secret`, `revoked_at`),
   KEY `owner_id` (`owner_id`)
-) ENGINE=InnoDB CHARSET=utf8 COLLATE=utf8_general_ci
+) ENGINE=InnoDB CHARSET=utf8 COLLATE=utf8_general_ci;
