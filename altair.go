@@ -200,6 +200,10 @@ func runAPI() {
 	gin.SetMode(gin.ReleaseMode)
 
 	apiEngine = gin.New()
-	apiEngine.Run(":" + os.Getenv("APP_PORT"))
 	apiEngine.GET("/health", controller.Health)
+	if err := apiEngine.Run(":" + os.Getenv("APP_PORT")); err != nil {
+		journal.Error("Error running api engine", err).
+			SetTags("altair", "main").
+			Log()
+	}
 }
