@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -14,6 +15,7 @@ import (
 
 	"github.com/subosito/gotenv"
 
+	"github.com/codefluence-x/altair/controller"
 	"github.com/codefluence-x/journal"
 	"github.com/spf13/cobra"
 )
@@ -25,6 +27,8 @@ var (
 	mysqlMaxOpenConn     int
 
 	migration *migrate.Migrate
+
+	apiEngine *gin.Engine
 )
 
 func main() {
@@ -49,6 +53,8 @@ func executeCommand() {
 				journal.Error("Error running altair:", err).SetTags("altair", "main").Log()
 				return
 			}
+
+			runAPI()
 		},
 	}
 
@@ -188,4 +194,12 @@ func closeMigration() {
 		}
 		journal.Info("Success closing migration.").SetTags("altair", "main").Log()
 	}
+}
+
+func runAPI() {
+	gin.SetMode(gin.ReleaseMode)
+
+	apiEngine = gin.New()
+	apiEngine.Run(":" + os.Getenv("APP_PORT"))
+	apiEngine.GET("/health", controller.Health)
 }
