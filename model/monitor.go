@@ -17,6 +17,7 @@ func monitor(ctx context.Context, modelName, query string, f func() error) error
 			AddField("duration_in_ms", elapsedTime).
 			AddField("model_name", modelName).
 			AddField("query", query).
+			SetTags("model", "monitor").
 			Log()
 		return err
 	}
@@ -26,6 +27,7 @@ func monitor(ctx context.Context, modelName, query string, f func() error) error
 		AddField("duration_in_ms", elapsedTime).
 		AddField("model_name", modelName).
 		AddField("query", query).
+		SetTags("model", "monitor").
 		Log()
 	return nil
 }
