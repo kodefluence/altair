@@ -11,4 +11,5 @@ require (
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/spf13/cobra v0.0.5
 	github.com/subosito/gotenv v1.2.0
+	gotest.tools v2.2.0+incompatible
 )
