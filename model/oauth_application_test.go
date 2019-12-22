@@ -136,5 +136,27 @@ func TestOauthApplication(t *testing.T) {
 				})
 			})
 		})
+
+		t.Run("Count", func(t *testing.T) {
+			t.Run("Return total data of oauth application", func(t *testing.T) {
+				db, mockdb, err := sqlmock.New()
+				if err != nil {
+					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+				}
+
+				rows := sqlmock.NewRows([]string{"total"})
+				rows.AddRow(100)
+
+				mockdb.ExpectQuery(`select count\(\*\) as total from oauth_applications where revoked_at is null`).
+					WillReturnRows(rows)
+
+				oauthApplicationModel := model.OauthApplication(db)
+				total, err := oauthApplicationModel.Count(context.Background())
+
+				assert.Equal(t, 100, total)
+				assert.Nil(t, err)
+				assert.Nil(t, mockdb.ExpectationsWereMet())
+			})
+		})
 	})
 }
