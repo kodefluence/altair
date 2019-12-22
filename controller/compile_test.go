@@ -3,14 +3,13 @@ package controller_test
 import (
 	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
-	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/codefluence-x/altair/controller"
 	"github.com/codefluence-x/altair/core"
+	"github.com/codefluence-x/altair/mock"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -26,7 +25,7 @@ func TestCompile(t *testing.T) {
 			})
 
 			controller.Compile(engine, gracefullController)
-			w := performRequest(engine, gracefullController.Method(), gracefullController.Path(), nil)
+			w := mock.PerformRequest(engine, gracefullController.Method(), gracefullController.Path(), nil)
 
 			assert.Equal(t, http.StatusOK, w.Code)
 			assert.Equal(t, "OK", w.Body.String())
@@ -39,7 +38,7 @@ func TestCompile(t *testing.T) {
 				})
 
 				controller.Compile(engine, gracefullPostController)
-				w := performRequest(engine, gracefullPostController.Method(), gracefullPostController.Path(), strings.NewReader(`{"object":"testing"}`))
+				w := mock.PerformRequest(engine, gracefullPostController.Method(), gracefullPostController.Path(), strings.NewReader(`{"object":"testing"}`))
 
 				assert.Equal(t, http.StatusOK, w.Code)
 				assert.Equal(t, "OK", w.Body.String())
@@ -51,7 +50,7 @@ func TestCompile(t *testing.T) {
 				})
 
 				controller.Compile(engine, gracefullPostBodyErrorController)
-				w := performRequest(engine, gracefullPostBodyErrorController.Method(), gracefullPostBodyErrorController.Path(), errRequestReader{})
+				w := mock.PerformRequest(engine, gracefullPostBodyErrorController.Method(), gracefullPostBodyErrorController.Path(), errRequestReader{})
 
 				assert.Equal(t, http.StatusOK, w.Code)
 				assert.Equal(t, "OK", w.Body.String())
@@ -66,7 +65,7 @@ func TestCompile(t *testing.T) {
 			})
 
 			controller.Compile(engine, notGracefullController)
-			w := performRequest(engine, notGracefullController.Method(), notGracefullController.Path(), nil)
+			w := mock.PerformRequest(engine, notGracefullController.Method(), notGracefullController.Path(), nil)
 
 			assert.Equal(t, http.StatusInternalServerError, w.Code)
 			assert.Equal(t, "Are you kidding me? The server is just crash!", w.Body.String())
@@ -79,7 +78,7 @@ func TestCompile(t *testing.T) {
 				})
 
 				controller.Compile(engine, panicStringController)
-				w := performRequest(engine, panicStringController.Method(), panicStringController.Path(), nil)
+				w := mock.PerformRequest(engine, panicStringController.Method(), panicStringController.Path(), nil)
 
 				var response responseExample
 				err := json.Unmarshal([]byte(w.Body.String()), &response)
@@ -95,7 +94,7 @@ func TestCompile(t *testing.T) {
 				})
 
 				controller.Compile(engine, panicErrorController)
-				w := performRequest(engine, panicErrorController.Method(), panicErrorController.Path(), nil)
+				w := mock.PerformRequest(engine, panicErrorController.Method(), panicErrorController.Path(), nil)
 
 				var response responseExample
 				err := json.Unmarshal([]byte(w.Body.String()), &response)
@@ -110,7 +109,7 @@ func TestCompile(t *testing.T) {
 				})
 
 				controller.Compile(engine, panicOtherController)
-				w := performRequest(engine, panicOtherController.Method(), panicOtherController.Path(), nil)
+				w := mock.PerformRequest(engine, panicOtherController.Method(), panicOtherController.Path(), nil)
 
 				var response responseExample
 				err := json.Unmarshal([]byte(w.Body.String()), &response)
@@ -159,11 +158,4 @@ func NewFakeController(path, method string, mockHandler func(c *gin.Context)) co
 		mockHandler: mockHandler,
 		method:      method,
 	}
-}
-
-func performRequest(r http.Handler, method, path string, body io.Reader) *httptest.ResponseRecorder {
-	req, _ := http.NewRequest(method, path, body)
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	return w
 }
