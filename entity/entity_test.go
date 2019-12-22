@@ -8,30 +8,30 @@ import (
 )
 
 func TestEntity(t *testing.T) {
-	t.Run("ResponseError", func(t *testing.T) {
-		responseError := entity.ResponseError{
+	t.Run("ErrorObject", func(t *testing.T) {
+		errorObject := entity.ErrorObject{
 			Code:    "ERR001",
 			Message: "Some error messages",
 		}
 
-		assert.Equal(t, "Error: Some error messages, Code: ERR001", responseError.Error())
+		assert.Equal(t, "Error: Some error messages, Code: ERR001", errorObject.Error())
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		responseError := entity.Error{
-			Errors: []entity.ResponseError{
-				entity.ResponseError{
+		err := entity.Error{
+			Errors: []entity.ErrorObject{
+				entity.ErrorObject{
 					Code:    "ERR001",
 					Message: "Some error messages",
 				},
-				entity.ResponseError{
+				entity.ErrorObject{
 					Code:    "ERR002",
 					Message: "Some error messages",
 				},
 			},
 		}
 
-		assert.Equal(t, "Service error because of:\nError: Some error messages, Code: ERR001\nError: Some error messages, Code: ERR002\n", responseError.Error())
+		assert.Equal(t, "Service error because of:\nError: Some error messages, Code: ERR001\nError: Some error messages, Code: ERR002\n", err.Error())
 	})
 
 }

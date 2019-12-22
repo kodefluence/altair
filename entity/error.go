@@ -2,18 +2,18 @@ package entity
 
 import "fmt"
 
-type ResponseError struct {
+type ErrorObject struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
 }
 
-func (re ResponseError) Error() string {
-	return fmt.Sprintf("Error: %s, Code: %s", re.Message, re.Code)
+func (eo ErrorObject) Error() string {
+	return fmt.Sprintf("Error: %s, Code: %s", eo.Message, eo.Code)
 }
 
 type Error struct {
 	HttpStatus int
-	Errors     []ResponseError
+	Errors     []ErrorObject
 }
 
 func (e Error) Error() string {
