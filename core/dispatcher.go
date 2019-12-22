@@ -1,3 +1,7 @@
 package core
 
-type OauthDispatcher interface{}
+type OauthDispatcher interface {
+	Application() OauthApplicationDispatcher
+}
+
+type OauthApplicationDispatcher interface{}
