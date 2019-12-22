@@ -74,10 +74,6 @@ func TestCompile(t *testing.T) {
 
 		t.Run("Controller panic and compiler recover", func(t *testing.T) {
 			t.Run("Panic is a string", func(t *testing.T) {
-				expectedBody := responseExample{
-					Meta: gin.H{"http_status": http.StatusInternalServerError},
-				}
-
 				panicStringController := NewFakeController("/panic_string", "GET", func(c *gin.Context) {
 					panic("Panic with string")
 				})
@@ -89,14 +85,10 @@ func TestCompile(t *testing.T) {
 				err := json.Unmarshal([]byte(w.Body.String()), &response)
 
 				assert.Equal(t, http.StatusInternalServerError, w.Code)
-				assert.EqualValues(t, expectedBody.Meta["http_status"], response.Meta["http_status"])
 				assert.Nil(t, err, "error should be nil")
 			})
 
 			t.Run("Panic is an error", func(t *testing.T) {
-				expectedBody := responseExample{
-					Meta: gin.H{"http_status": http.StatusInternalServerError},
-				}
 
 				panicErrorController := NewFakeController("/panic_error", "GET", func(c *gin.Context) {
 					panic(errors.New("Panic with an error"))
@@ -109,15 +101,10 @@ func TestCompile(t *testing.T) {
 				err := json.Unmarshal([]byte(w.Body.String()), &response)
 
 				assert.Equal(t, http.StatusInternalServerError, w.Code)
-				assert.EqualValues(t, expectedBody.Meta["http_status"], response.Meta["http_status"])
 				assert.Nil(t, err, "error should be nil")
 			})
 
 			t.Run("Panic is neither error or string", func(t *testing.T) {
-				expectedBody := responseExample{
-					Meta: gin.H{"http_status": http.StatusInternalServerError},
-				}
-
 				panicOtherController := NewFakeController("/panic_other", "GET", func(c *gin.Context) {
 					panic(responseExample{})
 				})
@@ -129,7 +116,6 @@ func TestCompile(t *testing.T) {
 				err := json.Unmarshal([]byte(w.Body.String()), &response)
 
 				assert.Equal(t, http.StatusInternalServerError, w.Code)
-				assert.EqualValues(t, expectedBody.Meta["http_status"], response.Meta["http_status"])
 				assert.Nil(t, err, "error should be nil")
 			})
 		})

@@ -119,6 +119,5 @@ func logRequestInfo(trackID uuid.UUID, c *gin.Context, ctrl core.Controller, ela
 func internalServerErrorResponse(trackID uuid.UUID, c *gin.Context) {
 	c.JSON(http.StatusInternalServerError, gin.H{
 		"message": fmt.Sprintf("Something is not right, help us fix this problem. Contribute to https://github.com/codefluence-x/altair. Or help us by give this code '%s' to the admin of this site.", trackID),
-		"meta":    gin.H{"http_status": http.StatusInternalServerError},
 	})
 }
