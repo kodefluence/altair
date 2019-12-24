@@ -25,8 +25,20 @@ func TestErrorObject(t *testing.T) {
 		ctx := context.WithValue(context.Background(), "track_id", uuid.New())
 		errorObject := eobject.InternalServerError(ctx)
 		expectedErrorObject := entity.ErrorObject{
-			Code:    "ERR500",
+			Code:    "ERR0500",
 			Message: fmt.Sprintf("Something is not right, help us fix this problem. Contribute to https://github.com/codefluence-x/altair. Or help us by give this code '%v' to the admin of this site.", ctx.Value("track_id")),
+		}
+
+		assert.Equal(t, expectedErrorObject.Code, errorObject.Code)
+		assert.Equal(t, expectedErrorObject.Message, errorObject.Message)
+		assert.Equal(t, expectedErrorObject.Error(), errorObject.Error())
+	})
+
+	t.Run("Bad request error", func(t *testing.T) {
+		errorObject := eobject.BadRequestError("query parameter")
+		expectedErrorObject := entity.ErrorObject{
+			Code:    "ERR0400",
+			Message: fmt.Sprintf("You've send malformed request in your `%s`", "query parameter"),
 		}
 
 		assert.Equal(t, expectedErrorObject.Code, errorObject.Code)
