@@ -6,6 +6,6 @@ import (
 	"github.com/codefluence-x/altair/entity"
 )
 
-type OauthApplicationSerializer interface {
+type OauthApplicationFormater interface {
 	ApplicationList(ctx context.Context, applications []entity.OauthApplication) []entity.OauthApplicationJSON
 }

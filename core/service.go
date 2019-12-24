@@ -7,5 +7,5 @@ import (
 )
 
 type ApplicationManager interface {
-	List(ctx context.Context, offset, limit int) ([]entity.OauthApplicationJSON, error)
+	List(ctx context.Context, offset, limit int) ([]entity.OauthApplicationJSON, int, *entity.Error)
 }
