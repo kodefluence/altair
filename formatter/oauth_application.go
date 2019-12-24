@@ -5,6 +5,7 @@ import (
 
 	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
+	"github.com/codefluence-x/altair/util"
 )
 
 type oauthApplication struct{}
@@ -28,7 +29,7 @@ func (oa oauthApplication) ApplicationList(ctx context.Context, applications []e
 		}
 
 		if v.OwnerID.Valid {
-			oauthApplicationJSON[k].OwnerID = toIntPointer(int(v.OwnerID.Int64))
+			oauthApplicationJSON[k].OwnerID = util.IntToPointer(int(v.OwnerID.Int64))
 		}
 
 		if v.RevokedAt.Valid {
