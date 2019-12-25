@@ -16,6 +16,9 @@ import (
 	"github.com/subosito/gotenv"
 
 	"github.com/codefluence-x/altair/controller"
+	"github.com/codefluence-x/altair/formatter"
+	"github.com/codefluence-x/altair/model"
+	"github.com/codefluence-x/altair/service"
 	"github.com/codefluence-x/journal"
 	"github.com/spf13/cobra"
 )
@@ -199,8 +202,24 @@ func closeMigration() {
 func runAPI() {
 	gin.SetMode(gin.ReleaseMode)
 
+	// Model
+	oauthModel := model.OauthApplication(mysqlDB)
+
+	// Formatter
+	applicationFormatter := formatter.OauthApplication()
+
+	// Service
+	applicationManager := service.ApplicationManager(applicationFormatter, oauthModel)
+
 	apiEngine = gin.New()
 	apiEngine.GET("/health", controller.Health)
+
+	internalEngine := apiEngine.Group("", gin.BasicAuth(gin.Accounts{
+		os.Getenv("BASIC_AUTH_USERNAME"): os.Getenv("BASIC_AUTH_PASSWORD"),
+	}))
+
+	controller.Compile(internalEngine, controller.Oauth().Application().List(applicationManager))
+
 	if err := apiEngine.Run(":" + os.Getenv("APP_PORT")); err != nil {
 		journal.Error("Error running api engine", err).
 			SetTags("altair", "main").
