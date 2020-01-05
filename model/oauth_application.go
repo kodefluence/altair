@@ -76,6 +76,26 @@ func (oa *oauthApplication) Count(ctx context.Context) (int, error) {
 
 	return total, err
 }
+
+func (oa *oauthApplication) One(ctx context.Context, ID int) (entity.OauthApplication, error) {
+	var data entity.OauthApplication
+
+	err := monitor(ctx, oa.Name(), query.SelectOneOauthApplication, func() error {
+
+		ctxWithTimeout, cf := context.WithTimeout(ctx, time.Second*10)
+		defer cf()
+
+		row := oa.db.QueryRowContext(ctxWithTimeout, query.SelectOneOauthApplication, ID)
+		return row.Scan(
+			&data.ID, &data.OwnerID, &data.Description,
+			&data.Scopes, &data.ClientUID, &data.ClientSecret,
+			&data.RevokedAt, &data.CreatedAt, &data.UpdatedAt,
+		)
+	})
+
+	return data, err
+}
+
 func (oa *oauthApplication) Create(ctx context.Context, data entity.OauthApplicationJSON, txs ...*sql.Tx) (int, error) {
 	var lastInsertedId int
 	var dbExecutable core.DBExecutable

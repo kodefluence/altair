@@ -144,6 +144,21 @@ func (mr *MockOauthApplicationModelMockRecorder) Paginate(ctx, offset, limit int
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Paginate", reflect.TypeOf((*MockOauthApplicationModel)(nil).Paginate), ctx, offset, limit)
 }
 
+// One mocks base method
+func (m *MockOauthApplicationModel) One(ctx context.Context, ID int) (entity.OauthApplication, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "One", ctx, ID)
+	ret0, _ := ret[0].(entity.OauthApplication)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// One indicates an expected call of One
+func (mr *MockOauthApplicationModelMockRecorder) One(ctx, ID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "One", reflect.TypeOf((*MockOauthApplicationModel)(nil).One), ctx, ID)
+}
+
 // Count mocks base method
 func (m *MockOauthApplicationModel) Count(ctx context.Context) (int, error) {
 	m.ctrl.T.Helper()
