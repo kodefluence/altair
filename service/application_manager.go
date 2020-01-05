@@ -11,19 +11,19 @@ import (
 )
 
 type applicationManager struct {
-	formatter  core.OauthApplicationFormater
-	oauthModel core.OauthApplicationModel
+	formatter             core.OauthApplicationFormater
+	oauthApplicationModel core.OauthApplicationModel
 }
 
-func ApplicationManager(formatter core.OauthApplicationFormater, oauthModel core.OauthApplicationModel) core.ApplicationManager {
+func ApplicationManager(formatter core.OauthApplicationFormater, oauthApplicationModel core.OauthApplicationModel) core.ApplicationManager {
 	return &applicationManager{
-		formatter:  formatter,
-		oauthModel: oauthModel,
+		formatter:             formatter,
+		oauthApplicationModel: oauthApplicationModel,
 	}
 }
 
 func (am *applicationManager) List(ctx context.Context, offset, limit int) ([]entity.OauthApplicationJSON, int, *entity.Error) {
-	oauthApplications, err := am.oauthModel.Paginate(ctx, offset, limit)
+	oauthApplications, err := am.oauthApplicationModel.Paginate(ctx, offset, limit)
 	if err != nil {
 		journal.Error("Error paginating oauth applications", err).
 			AddField("offset", offset).
@@ -37,7 +37,7 @@ func (am *applicationManager) List(ctx context.Context, offset, limit int) ([]en
 		}
 	}
 
-	total, err := am.oauthModel.Count(ctx)
+	total, err := am.oauthApplicationModel.Count(ctx)
 	if err != nil {
 		journal.Error("Error count total of oauth applications", err).
 			AddField("offset", offset).
