@@ -7,6 +7,7 @@ import (
 	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/eobject"
+	"github.com/codefluence-x/journal"
 )
 
 type applicationManager struct {
@@ -24,6 +25,12 @@ func ApplicationManager(formatter core.OauthApplicationFormater, oauthModel core
 func (am *applicationManager) List(ctx context.Context, offset, limit int) ([]entity.OauthApplicationJSON, int, *entity.Error) {
 	oauthApplications, err := am.oauthModel.Paginate(ctx, offset, limit)
 	if err != nil {
+		journal.Error("Error paginating oauth applications", err).
+			AddField("offset", offset).
+			AddField("limit", limit).
+			SetTags("service", "application_manager", "paginate").
+			Log()
+
 		return []entity.OauthApplicationJSON(nil), 0, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
@@ -32,6 +39,12 @@ func (am *applicationManager) List(ctx context.Context, offset, limit int) ([]en
 
 	total, err := am.oauthModel.Count(ctx)
 	if err != nil {
+		journal.Error("Error count total of oauth applications", err).
+			AddField("offset", offset).
+			AddField("limit", limit).
+			SetTags("service", "application_manager", "count").
+			Log()
+
 		return []entity.OauthApplicationJSON(nil), 0, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
