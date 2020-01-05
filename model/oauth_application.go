@@ -76,7 +76,7 @@ func (oa *oauthApplication) Count(ctx context.Context) (int, error) {
 
 	return total, err
 }
-func (oa *oauthApplication) Create(ctx context.Context, data *entity.OauthApplicationJSON, txs ...*sql.Tx) (int, error) {
+func (oa *oauthApplication) Create(ctx context.Context, data entity.OauthApplicationJSON, txs ...*sql.Tx) (int, error) {
 	var lastInsertedId int
 	var dbExecutable core.DBExecutable
 

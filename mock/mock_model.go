@@ -160,7 +160,7 @@ func (mr *MockOauthApplicationModelMockRecorder) Count(ctx interface{}) *gomock.
 }
 
 // Create mocks base method
-func (m *MockOauthApplicationModel) Create(ctx context.Context, data *entity.OauthApplicationJSON, txs ...*sql.Tx) (int, error) {
+func (m *MockOauthApplicationModel) Create(ctx context.Context, data entity.OauthApplicationJSON, txs ...*sql.Tx) (int, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, data}
 	for _, a := range txs {
