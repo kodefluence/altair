@@ -18,15 +18,7 @@ func (oa oauthApplication) ApplicationList(ctx context.Context, applications []e
 	oauthApplicationJSON := make([]entity.OauthApplicationJSON, len(applications))
 
 	for k, v := range applications {
-		oauthApplicationJSON[k] = entity.OauthApplicationJSON{
-			ID:           &v.ID,
-			Description:  &v.Description,
-			Scopes:       &v.Scopes,
-			ClientUID:    &v.ClientUID,
-			ClientSecret: &v.ClientSecret,
-			CreatedAt:    &v.CreatedAt,
-			UpdatedAt:    &v.UpdatedAt,
-		}
+		oauthApplicationJSON[k] = oa.Application(ctx, v)
 
 		if v.OwnerID.Valid {
 			oauthApplicationJSON[k].OwnerID = util.IntToPointer(int(v.OwnerID.Int64))
@@ -38,4 +30,16 @@ func (oa oauthApplication) ApplicationList(ctx context.Context, applications []e
 	}
 
 	return oauthApplicationJSON
+}
+
+func (oa oauthApplication) Application(ctx context.Context, application entity.OauthApplication) entity.OauthApplicationJSON {
+	return entity.OauthApplicationJSON{
+		ID:           &application.ID,
+		Description:  &application.Description,
+		Scopes:       &application.Scopes,
+		ClientUID:    &application.ClientUID,
+		ClientSecret: &application.ClientSecret,
+		CreatedAt:    &application.CreatedAt,
+		UpdatedAt:    &application.UpdatedAt,
+	}
 }

@@ -47,3 +47,17 @@ func (mr *MockOauthApplicationFormaterMockRecorder) ApplicationList(ctx, applica
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApplicationList", reflect.TypeOf((*MockOauthApplicationFormater)(nil).ApplicationList), ctx, applications)
 }
+
+// Application mocks base method
+func (m *MockOauthApplicationFormater) Application(ctx context.Context, application entity.OauthApplication) entity.OauthApplicationJSON {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Application", ctx, application)
+	ret0, _ := ret[0].(entity.OauthApplicationJSON)
+	return ret0
+}
+
+// Application indicates an expected call of Application
+func (mr *MockOauthApplicationFormaterMockRecorder) Application(ctx, application interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Application", reflect.TypeOf((*MockOauthApplicationFormater)(nil).Application), ctx, application)
+}
