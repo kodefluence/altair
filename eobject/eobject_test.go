@@ -45,4 +45,18 @@ func TestErrorObject(t *testing.T) {
 		assert.Equal(t, expectedErrorObject.Message, errorObject.Message)
 		assert.Equal(t, expectedErrorObject.Error(), errorObject.Error())
 	})
+
+	t.Run("Not found error", func(t *testing.T) {
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, "track_id", "1234567890")
+		errorObject := eobject.NotFoundError(ctx, "some entity")
+		expectedErrorObject := entity.ErrorObject{
+			Code:    "ERR0404",
+			Message: fmt.Sprintf("Resource of `%s` is not found, please report to admin of this site with this code `%v` if you think this is an error.", "some entity", ctx.Value("track_id")),
+		}
+
+		assert.Equal(t, expectedErrorObject.Code, errorObject.Code)
+		assert.Equal(t, expectedErrorObject.Message, errorObject.Message)
+		assert.Equal(t, expectedErrorObject.Error(), errorObject.Error())
+	})
 }

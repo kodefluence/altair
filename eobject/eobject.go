@@ -24,3 +24,10 @@ func BadRequestError(in string) entity.ErrorObject {
 		Message: fmt.Sprintf("You've send malformed request in your `%s`", in),
 	}
 }
+
+func NotFoundError(ctx context.Context, entityType string) entity.ErrorObject {
+	return entity.ErrorObject{
+		Code:    "ERR0404",
+		Message: fmt.Sprintf("Resource of `%s` is not found, please report to admin of this site with this code `%v` if you think this is an error.", entityType, ctx.Value("track_id")),
+	}
+}
