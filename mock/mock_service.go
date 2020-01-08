@@ -49,3 +49,33 @@ func (mr *MockApplicationManagerMockRecorder) List(ctx, offset, limit interface{
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockApplicationManager)(nil).List), ctx, offset, limit)
 }
+
+// One mocks base method
+func (m *MockApplicationManager) One(ctx context.Context, ID int) (entity.OauthApplicationJSON, *entity.Error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "One", ctx, ID)
+	ret0, _ := ret[0].(entity.OauthApplicationJSON)
+	ret1, _ := ret[1].(*entity.Error)
+	return ret0, ret1
+}
+
+// One indicates an expected call of One
+func (mr *MockApplicationManagerMockRecorder) One(ctx, ID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "One", reflect.TypeOf((*MockApplicationManager)(nil).One), ctx, ID)
+}
+
+// Create mocks base method
+func (m *MockApplicationManager) Create(ctx context.Context, e entity.OauthApplicationJSON) (entity.OauthApplicationJSON, *entity.Error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Create", ctx, e)
+	ret0, _ := ret[0].(entity.OauthApplicationJSON)
+	ret1, _ := ret[1].(*entity.Error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create
+func (mr *MockApplicationManagerMockRecorder) Create(ctx, e interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockApplicationManager)(nil).Create), ctx, e)
+}
