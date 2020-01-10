@@ -18,3 +18,7 @@ func (a application) List(applicationManager core.ApplicationManager) core.Contr
 func (a application) One(applicationManager core.ApplicationManager) core.Controller {
 	return app.One(applicationManager)
 }
+
+func (a application) Create(applicationManager core.ApplicationManager) core.Controller {
+	return app.Create(applicationManager)
+}
