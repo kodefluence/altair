@@ -219,6 +219,7 @@ func runAPI() {
 	}))
 
 	controller.Compile(internalEngine, controller.Oauth().Application().List(applicationManager))
+	controller.Compile(internalEngine, controller.Oauth().Application().One(applicationManager))
 
 	if err := apiEngine.Run(":" + os.Getenv("APP_PORT")); err != nil {
 		journal.Error("Error running api engine", err).

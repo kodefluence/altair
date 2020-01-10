@@ -14,3 +14,7 @@ func Application() core.OauthApplicationDispatcher {
 func (a application) List(applicationManager core.ApplicationManager) core.Controller {
 	return app.List(applicationManager)
 }
+
+func (a application) One(applicationManager core.ApplicationManager) core.Controller {
+	return app.One(applicationManager)
+}

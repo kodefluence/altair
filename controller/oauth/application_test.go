@@ -18,6 +18,7 @@ func TestApplication(t *testing.T) {
 
 		assert.NotPanics(t, func() {
 			oauth.Application().List(applicationManager)
+			oauth.Application().One(applicationManager)
 		})
 	})
 }
