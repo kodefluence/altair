@@ -10,7 +10,10 @@ mock_formatter:
 mock_model:
 	mockgen -source core/model.go -destination mock/mock_model.go -package mock
 
-mock_all: mock_service mock_formatter mock_model
+mock_validator:
+	mockgen -source core/validator.go -destination mock/mock_validator.go -package mock
+
+mock_all: mock_service mock_formatter mock_model mock_validator
 
 generate_blueprint:
 	snowboard apib -o blueprint/_output/API.apib blueprint/API.md
