@@ -19,21 +19,13 @@ func (oa oauthApplication) ApplicationList(ctx context.Context, applications []e
 
 	for k, v := range applications {
 		oauthApplicationJSON[k] = oa.Application(ctx, v)
-
-		if v.OwnerID.Valid {
-			oauthApplicationJSON[k].OwnerID = util.IntToPointer(int(v.OwnerID.Int64))
-		}
-
-		if v.RevokedAt.Valid {
-			oauthApplicationJSON[k].RevokedAt = &v.RevokedAt.Time
-		}
 	}
 
 	return oauthApplicationJSON
 }
 
 func (oa oauthApplication) Application(ctx context.Context, application entity.OauthApplication) entity.OauthApplicationJSON {
-	return entity.OauthApplicationJSON{
+	oauthApplicationJSON := entity.OauthApplicationJSON{
 		ID:           &application.ID,
 		Description:  &application.Description,
 		Scopes:       &application.Scopes,
@@ -42,4 +34,14 @@ func (oa oauthApplication) Application(ctx context.Context, application entity.O
 		CreatedAt:    &application.CreatedAt,
 		UpdatedAt:    &application.UpdatedAt,
 	}
+
+	if application.OwnerID.Valid {
+		oauthApplicationJSON.OwnerID = util.IntToPointer(int(application.OwnerID.Int64))
+	}
+
+	if application.RevokedAt.Valid {
+		oauthApplicationJSON.RevokedAt = &application.RevokedAt.Time
+	}
+
+	return oauthApplicationJSON
 }
