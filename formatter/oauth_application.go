@@ -27,6 +27,7 @@ func (oa oauthApplication) ApplicationList(ctx context.Context, applications []e
 func (oa oauthApplication) Application(ctx context.Context, application entity.OauthApplication) entity.OauthApplicationJSON {
 	oauthApplicationJSON := entity.OauthApplicationJSON{
 		ID:           &application.ID,
+		OwnerType:    &application.OwnerType,
 		Description:  &application.Description,
 		Scopes:       &application.Scopes,
 		ClientUID:    &application.ClientUID,

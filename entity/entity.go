@@ -10,6 +10,7 @@ import (
 type OauthApplication struct {
 	ID           int
 	OwnerID      sql.NullInt64
+	OwnerType    string
 	Description  string
 	Scopes       string
 	ClientUID    string
@@ -22,6 +23,7 @@ type OauthApplication struct {
 type OauthApplicationJSON struct {
 	ID           *int       `json:"id"`
 	OwnerID      *int       `json:"owner_id"`
+	OwnerType    *string    `json:"owner_type"`
 	Description  *string    `json:"description"`
 	Scopes       *string    `json:"scopes"`
 	ClientUID    *string    `json:"client_uid"`

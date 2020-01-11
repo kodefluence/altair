@@ -45,7 +45,7 @@ func (oa *oauthApplication) Paginate(ctx context.Context, offset, limit int) ([]
 			var oauthApplication entity.OauthApplication
 
 			err := rows.Scan(
-				&oauthApplication.ID, &oauthApplication.OwnerID, &oauthApplication.Description,
+				&oauthApplication.ID, &oauthApplication.OwnerID, &oauthApplication.OwnerType, &oauthApplication.Description,
 				&oauthApplication.Scopes, &oauthApplication.ClientUID, &oauthApplication.ClientSecret,
 				&oauthApplication.RevokedAt, &oauthApplication.CreatedAt, &oauthApplication.UpdatedAt,
 			)
@@ -87,7 +87,7 @@ func (oa *oauthApplication) One(ctx context.Context, ID int) (entity.OauthApplic
 
 		row := oa.db.QueryRowContext(ctxWithTimeout, query.SelectOneOauthApplication, ID)
 		return row.Scan(
-			&data.ID, &data.OwnerID, &data.Description,
+			&data.ID, &data.OwnerID, &data.OwnerType, &data.Description,
 			&data.Scopes, &data.ClientUID, &data.ClientSecret,
 			&data.RevokedAt, &data.CreatedAt, &data.UpdatedAt,
 		)
@@ -110,7 +110,7 @@ func (oa *oauthApplication) Create(ctx context.Context, data entity.OauthApplica
 
 	err := monitor(ctx, oa.Name(), query.InsertOauthApplication, func() error {
 
-		res, err := dbExecutable.Exec(query.InsertOauthApplication, *data.OwnerID, *data.Description, *data.Scopes, *data.ClientUID, *data.ClientSecret)
+		res, err := dbExecutable.Exec(query.InsertOauthApplication, *data.OwnerID, *data.OwnerType, *data.Description, *data.Scopes, *data.ClientUID, *data.ClientSecret)
 		if err != nil {
 			return err
 		}
