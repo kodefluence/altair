@@ -1,6 +1,6 @@
 # Altair - Light Weight and Robust API Gateway
 
-Open source api gateway written in Go.
+Open source API gateway written in Go.
 
 ## Feature
 
@@ -8,3 +8,11 @@ Open source api gateway written in Go.
 - [ ] Oauth Authorization
 - [ ] Response Caching
 - [ ] JWT
+
+## Usage
+
+### Open Internal API Documentation
+
+```bash
+  make open_blueprint
+```
