@@ -12,7 +12,7 @@ import (
 type application struct {
 }
 
-func Application() core.ApplicationValidator {
+func Application() core.OauthApplicationValidator {
 	return application{}
 }
 
