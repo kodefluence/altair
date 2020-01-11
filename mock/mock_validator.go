@@ -11,37 +11,39 @@ import (
 	reflect "reflect"
 )
 
-// MockApplicationValidator is a mock of ApplicationValidator interface
-type MockApplicationValidator struct {
+// MockOauthApplicationValidator is a mock of OauthApplicationValidator interface
+type MockOauthApplicationValidator struct {
 	ctrl     *gomock.Controller
-	recorder *MockApplicationValidatorMockRecorder
+	recorder *MockOauthApplicationValidatorMockRecorder
 }
 
-// MockApplicationValidatorMockRecorder is the mock recorder for MockApplicationValidator
-type MockApplicationValidatorMockRecorder struct {
-	mock *MockApplicationValidator
+// MockOauthApplicationValidatorMockRecorder is the mock recorder for MockOauthApplicationValidator
+type MockOauthApplicationValidatorMockRecorder struct {
+	mock *MockOauthApplicationValidator
 }
 
-// NewMockApplicationValidator creates a new mock instance
-func NewMockApplicationValidator(ctrl *gomock.Controller) *MockApplicationValidator {
-	mock := &MockApplicationValidator{ctrl: ctrl}
-	mock.recorder = &MockApplicationValidatorMockRecorder{mock}
+// NewMockOauthApplicationValidator creates a new mock instance
+func NewMockOauthApplicationValidator(ctrl *gomock.Controller) *MockOauthApplicationValidator {
+	mock := &MockOauthApplicationValidator{ctrl: ctrl}
+	mock.recorder = &MockOauthApplicationValidatorMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockApplicationValidator) EXPECT() *MockApplicationValidatorMockRecorder {
+func (m *MockOauthApplicationValidator) EXPECT() *MockOauthApplicationValidatorMockRecorder {
 	return m.recorder
 }
 
 // ValidateCreate mocks base method
-func (m *MockApplicationValidator) ValidateCreate(ctx context.Context, data entity.OauthApplicationJSON) {
+func (m *MockOauthApplicationValidator) ValidateCreate(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "ValidateCreate", ctx, data)
+	ret := m.ctrl.Call(m, "ValidateCreate", ctx, data)
+	ret0, _ := ret[0].(*entity.Error)
+	return ret0
 }
 
 // ValidateCreate indicates an expected call of ValidateCreate
-func (mr *MockApplicationValidatorMockRecorder) ValidateCreate(ctx, data interface{}) *gomock.Call {
+func (mr *MockOauthApplicationValidatorMockRecorder) ValidateCreate(ctx, data interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateCreate", reflect.TypeOf((*MockApplicationValidator)(nil).ValidateCreate), ctx, data)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateCreate", reflect.TypeOf((*MockOauthApplicationValidator)(nil).ValidateCreate), ctx, data)
 }
