@@ -59,4 +59,16 @@ func TestErrorObject(t *testing.T) {
 		assert.Equal(t, expectedErrorObject.Message, errorObject.Message)
 		assert.Equal(t, expectedErrorObject.Error(), errorObject.Error())
 	})
+
+	t.Run("Validation error", func(t *testing.T) {
+		errorObject := eobject.ValidationError("`owner_type` object is empty")
+		expectedErrorObject := entity.ErrorObject{
+			Code:    "ERR1442",
+			Message: fmt.Sprintf("Validation error because of: %s", "`owner_type` object is empty"),
+		}
+
+		assert.Equal(t, expectedErrorObject.Code, errorObject.Code)
+		assert.Equal(t, expectedErrorObject.Message, errorObject.Message)
+		assert.Equal(t, expectedErrorObject.Error(), errorObject.Error())
+	})
 }

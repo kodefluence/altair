@@ -31,3 +31,10 @@ func NotFoundError(ctx context.Context, entityType string) entity.ErrorObject {
 		Message: fmt.Sprintf("Resource of `%s` is not found, please report to admin of this site with this code `%v` if you think this is an error.", entityType, ctx.Value("track_id")),
 	}
 }
+
+func ValidationError(msg string) entity.ErrorObject {
+	return entity.ErrorObject{
+		Code:    "ERR1442",
+		Message: fmt.Sprintf("Validation error because of: %s", msg),
+	}
+}
