@@ -32,6 +32,18 @@ type OauthAccessGrant struct {
 	RevokedAT          mysql.NullTime
 }
 
+type OauthAccessGrantJSON struct {
+	ID                 *int       `json:"id"`
+	OauthApplicationID *int       `json:"oauth_application_id"`
+	ResourceOwnerID    *int       `json:"resource_owner_id"`
+	Code               *string    `json:"code"`
+	RedirectURI        *string    `json:"redirect_uri"`
+	Scopes             *string    `json:"scopes"`
+	ExpiresIn          *int       `json:"expires_in"`
+	CreatedAt          *time.Time `json:"created_at"`
+	RevokedAT          *time.Time `json:"revoked_at"`
+}
+
 type OauthAccessToken struct {
 	ID                 int
 	OauthApplicationID int
@@ -41,6 +53,17 @@ type OauthAccessToken struct {
 	ExpiresIn          time.Time
 	CreatedAt          time.Time
 	RevokedAT          mysql.NullTime
+}
+
+type OauthAccessTokenJSON struct {
+	ID                 *int       `json:"id"`
+	OauthApplicationID *int       `json:"oauth_application_id"`
+	ResourceOwnerID    *int       `json:"resource_owner_id"`
+	Token              *string    `json:"token"`
+	Scopes             *string    `json:"scopes"`
+	ExpiresIn          *int       `json:"expires_in"`
+	CreatedAt          *time.Time `json:"created_at"`
+	RevokedAT          *time.Time `json:"revoked_at"`
 }
 
 type OauthApplicationJSON struct {
