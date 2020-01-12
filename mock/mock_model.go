@@ -159,6 +159,21 @@ func (mr *MockOauthApplicationModelMockRecorder) One(ctx, ID interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "One", reflect.TypeOf((*MockOauthApplicationModel)(nil).One), ctx, ID)
 }
 
+// OneByUIDandSecret mocks base method
+func (m *MockOauthApplicationModel) OneByUIDandSecret(ctx context.Context, clientUID, clientSecret string) (entity.OauthApplication, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OneByUIDandSecret", ctx, clientUID, clientSecret)
+	ret0, _ := ret[0].(entity.OauthApplication)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// OneByUIDandSecret indicates an expected call of OneByUIDandSecret
+func (mr *MockOauthApplicationModelMockRecorder) OneByUIDandSecret(ctx, clientUID, clientSecret interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OneByUIDandSecret", reflect.TypeOf((*MockOauthApplicationModel)(nil).OneByUIDandSecret), ctx, clientUID, clientSecret)
+}
+
 // Count mocks base method
 func (m *MockOauthApplicationModel) Count(ctx context.Context) (int, error) {
 	m.ctrl.T.Helper()

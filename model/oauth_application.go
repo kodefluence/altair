@@ -96,6 +96,25 @@ func (oa *oauthApplication) One(ctx context.Context, ID int) (entity.OauthApplic
 	return data, err
 }
 
+func (oa *oauthApplication) OneByUIDandSecret(ctx context.Context, clientUID, clientSecret string) (entity.OauthApplication, error) {
+	var data entity.OauthApplication
+
+	err := monitor(ctx, oa.Name(), query.SelectOneByUIDandSecret, func() error {
+
+		ctxWithTimeout, cf := context.WithTimeout(ctx, time.Second*10)
+		defer cf()
+
+		row := oa.db.QueryRowContext(ctxWithTimeout, query.SelectOneByUIDandSecret, clientUID, clientSecret)
+		return row.Scan(
+			&data.ID, &data.OwnerID, &data.OwnerType, &data.Description,
+			&data.Scopes, &data.ClientUID, &data.ClientSecret,
+			&data.RevokedAt, &data.CreatedAt, &data.UpdatedAt,
+		)
+	})
+
+	return data, err
+}
+
 func (oa *oauthApplication) Create(ctx context.Context, data entity.OauthApplicationJSON, txs ...*sql.Tx) (int, error) {
 	var lastInsertedId int
 	var dbExecutable core.DBExecutable

@@ -19,6 +19,7 @@ type OauthApplicationModel interface {
 	HasName
 	Paginate(ctx context.Context, offset, limit int) ([]entity.OauthApplication, error)
 	One(ctx context.Context, ID int) (entity.OauthApplication, error)
+	OneByUIDandSecret(ctx context.Context, clientUID, clientSecret string) (entity.OauthApplication, error)
 	Count(ctx context.Context) (int, error)
 	Create(ctx context.Context, data entity.OauthApplicationJSON, txs ...*sql.Tx) (int, error)
 }

@@ -338,4 +338,57 @@ func TestOauthApplication(t *testing.T) {
 			})
 		})
 	})
+
+	t.Run("OneByUIDandSecret", func(t *testing.T) {
+		t.Run("Given oauth application id", func(t *testing.T) {
+			t.Run("Return entity oauth application", func(t *testing.T) {
+				db, mockdb, err := sqlmock.New()
+				if err != nil {
+					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+				}
+
+				data := entity.OauthApplication{
+					ID: 1,
+				}
+
+				rows := sqlmock.NewRows(oauthApplicationModelRows).
+					AddRow(
+						data.ID, data.OwnerID, data.OwnerType, data.Description,
+						data.Scopes, data.ClientUID, data.ClientSecret,
+						data.RevokedAt, data.CreatedAt, data.UpdatedAt,
+					)
+
+				mockdb.ExpectQuery(`select \* from oauth_applications where client_uid = \? and client_secret = \? limit 1`).
+					WithArgs("sample_client_uid", "sample_client_secret").
+					WillReturnRows(rows)
+
+				oauthApplicationModel := model.OauthApplication(db)
+				dataFromDB, err := oauthApplicationModel.OneByUIDandSecret(context.Background(), "sample_client_uid", "sample_client_secret")
+
+				assert.Nil(t, err)
+				assert.Nil(t, mockdb.ExpectationsWereMet())
+				assert.Equal(t, data, dataFromDB)
+			})
+
+			t.Run("Row not found in database", func(t *testing.T) {
+				t.Run("Return sql.ErrNoRows error", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					mockdb.ExpectQuery(`select \* from oauth_applications where client_uid = \? and client_secret = \? limit 1`).
+						WithArgs("sample_client_uid", "sample_client_secret").
+						WillReturnError(sql.ErrNoRows)
+
+					oauthApplicationModel := model.OauthApplication(db)
+					dataFromDB, err := oauthApplicationModel.OneByUIDandSecret(context.Background(), "sample_client_uid", "sample_client_secret")
+
+					assert.NotNil(t, err)
+					assert.Nil(t, mockdb.ExpectationsWereMet())
+					assert.Equal(t, entity.OauthApplication{}, dataFromDB)
+				})
+			})
+		})
+	})
 }
