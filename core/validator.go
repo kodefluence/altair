@@ -6,6 +6,6 @@ import (
 	"github.com/codefluence-x/altair/entity"
 )
 
-type OauthApplicationValidator interface {
-	ValidateCreate(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error
+type OauthValidator interface {
+	ValidateApplication(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error
 }

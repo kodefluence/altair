@@ -19,6 +19,7 @@ import (
 	"github.com/codefluence-x/altair/formatter"
 	"github.com/codefluence-x/altair/model"
 	"github.com/codefluence-x/altair/service"
+	"github.com/codefluence-x/altair/validator"
 	"github.com/codefluence-x/journal"
 	"github.com/spf13/cobra"
 )
@@ -208,8 +209,11 @@ func runAPI() {
 	// Formatter
 	applicationFormatter := formatter.OauthApplication()
 
+	// Validator
+	oauthValidator := validator.Oauth()
+
 	// Service
-	applicationManager := service.ApplicationManager(applicationFormatter, oauthModel)
+	applicationManager := service.ApplicationManager(applicationFormatter, oauthModel, oauthValidator)
 
 	apiEngine = gin.New()
 	apiEngine.GET("/health", controller.Health)

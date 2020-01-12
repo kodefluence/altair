@@ -14,10 +14,10 @@ import (
 type applicationManager struct {
 	formatter             core.OauthApplicationFormater
 	oauthApplicationModel core.OauthApplicationModel
-	applicationValidator  core.OauthApplicationValidator
+	applicationValidator  core.OauthValidator
 }
 
-func ApplicationManager(formatter core.OauthApplicationFormater, oauthApplicationModel core.OauthApplicationModel, applicationValidator core.OauthApplicationValidator) core.ApplicationManager {
+func ApplicationManager(formatter core.OauthApplicationFormater, oauthApplicationModel core.OauthApplicationModel, applicationValidator core.OauthValidator) core.ApplicationManager {
 	return &applicationManager{
 		formatter:             formatter,
 		oauthApplicationModel: oauthApplicationModel,
@@ -59,7 +59,7 @@ func (am *applicationManager) List(ctx context.Context, offset, limit int) ([]en
 }
 
 func (am *applicationManager) Create(ctx context.Context, e entity.OauthApplicationJSON) (entity.OauthApplicationJSON, *entity.Error) {
-	if err := am.applicationValidator.ValidateCreate(ctx, e); err != nil {
+	if err := am.applicationValidator.ValidateApplication(ctx, e); err != nil {
 		journal.Error("Got validation error from oauth application validator", err).
 			AddField("data", e).
 			SetTags("service", "application_manager", "create", "model_create").

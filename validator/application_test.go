@@ -14,7 +14,7 @@ import (
 
 func TestApplication(t *testing.T) {
 
-	t.Run("ValidateCreate", func(t *testing.T) {
+	t.Run("ValidateApplication", func(t *testing.T) {
 		t.Run("Given context and oauth application json data", func(t *testing.T) {
 			t.Run("Return nil", func(t *testing.T) {
 				data := entity.OauthApplicationJSON{
@@ -23,8 +23,8 @@ func TestApplication(t *testing.T) {
 					Description: util.StringToPointer("This is description"),
 					Scopes:      util.StringToPointer("public users"),
 				}
-				applicationValidator := validator.Application()
-				assert.Nil(t, applicationValidator.ValidateCreate(context.Background(), data))
+				applicationValidator := validator.Oauth()
+				assert.Nil(t, applicationValidator.ValidateApplication(context.Background(), data))
 			})
 		})
 
@@ -42,8 +42,8 @@ func TestApplication(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("object `owner_type` is nil or not exists")),
 				}
 
-				applicationValidator := validator.Application()
-				err := applicationValidator.ValidateCreate(context.Background(), data)
+				applicationValidator := validator.Oauth()
+				err := applicationValidator.ValidateApplication(context.Background(), data)
 
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedError.HttpStatus, err.HttpStatus)
@@ -66,8 +66,8 @@ func TestApplication(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("object `owner_type` must be either of `confidential` or `public`")),
 				}
 
-				applicationValidator := validator.Application()
-				err := applicationValidator.ValidateCreate(context.Background(), data)
+				applicationValidator := validator.Oauth()
+				err := applicationValidator.ValidateApplication(context.Background(), data)
 
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedError.HttpStatus, err.HttpStatus)

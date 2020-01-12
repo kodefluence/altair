@@ -12,11 +12,11 @@ import (
 type application struct {
 }
 
-func Application() core.OauthApplicationValidator {
+func Oauth() core.OauthValidator {
 	return application{}
 }
 
-func (a application) ValidateCreate(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error {
+func (a application) ValidateApplication(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error {
 	var entityError = &entity.Error{}
 
 	if data.OwnerType == nil {
