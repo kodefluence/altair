@@ -79,3 +79,56 @@ func (mr *MockApplicationManagerMockRecorder) Create(ctx, e interface{}) *gomock
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockApplicationManager)(nil).Create), ctx, e)
 }
+
+// MockAuthorization is a mock of Authorization interface
+type MockAuthorization struct {
+	ctrl     *gomock.Controller
+	recorder *MockAuthorizationMockRecorder
+}
+
+// MockAuthorizationMockRecorder is the mock recorder for MockAuthorization
+type MockAuthorizationMockRecorder struct {
+	mock *MockAuthorization
+}
+
+// NewMockAuthorization creates a new mock instance
+func NewMockAuthorization(ctrl *gomock.Controller) *MockAuthorization {
+	mock := &MockAuthorization{ctrl: ctrl}
+	mock.recorder = &MockAuthorizationMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockAuthorization) EXPECT() *MockAuthorizationMockRecorder {
+	return m.recorder
+}
+
+// Grant mocks base method
+func (m *MockAuthorization) Grant(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (error, entity.OauthAccessGrantJSON) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Grant", ctx, authorizationReq)
+	ret0, _ := ret[0].(error)
+	ret1, _ := ret[1].(entity.OauthAccessGrantJSON)
+	return ret0, ret1
+}
+
+// Grant indicates an expected call of Grant
+func (mr *MockAuthorizationMockRecorder) Grant(ctx, authorizationReq interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Grant", reflect.TypeOf((*MockAuthorization)(nil).Grant), ctx, authorizationReq)
+}
+
+// Token mocks base method
+func (m *MockAuthorization) Token(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON) (error, entity.OauthAccessTokenJSON) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Token", ctx, accessTokenReq)
+	ret0, _ := ret[0].(error)
+	ret1, _ := ret[1].(entity.OauthAccessTokenJSON)
+	return ret0, ret1
+}
+
+// Token indicates an expected call of Token
+func (mr *MockAuthorizationMockRecorder) Token(ctx, accessTokenReq interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Token", reflect.TypeOf((*MockAuthorization)(nil).Token), ctx, accessTokenReq)
+}

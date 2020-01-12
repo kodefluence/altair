@@ -61,3 +61,54 @@ func (mr *MockOauthApplicationFormaterMockRecorder) Application(ctx, application
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Application", reflect.TypeOf((*MockOauthApplicationFormater)(nil).Application), ctx, application)
 }
+
+// MockOauthFormatter is a mock of OauthFormatter interface
+type MockOauthFormatter struct {
+	ctrl     *gomock.Controller
+	recorder *MockOauthFormatterMockRecorder
+}
+
+// MockOauthFormatterMockRecorder is the mock recorder for MockOauthFormatter
+type MockOauthFormatterMockRecorder struct {
+	mock *MockOauthFormatter
+}
+
+// NewMockOauthFormatter creates a new mock instance
+func NewMockOauthFormatter(ctrl *gomock.Controller) *MockOauthFormatter {
+	mock := &MockOauthFormatter{ctrl: ctrl}
+	mock.recorder = &MockOauthFormatterMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockOauthFormatter) EXPECT() *MockOauthFormatterMockRecorder {
+	return m.recorder
+}
+
+// AccessGrant mocks base method
+func (m *MockOauthFormatter) AccessGrant(e entity.OauthAccessGrant) entity.OauthAccessGrantJSON {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AccessGrant", e)
+	ret0, _ := ret[0].(entity.OauthAccessGrantJSON)
+	return ret0
+}
+
+// AccessGrant indicates an expected call of AccessGrant
+func (mr *MockOauthFormatterMockRecorder) AccessGrant(e interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessGrant", reflect.TypeOf((*MockOauthFormatter)(nil).AccessGrant), e)
+}
+
+// AccessToken mocks base method
+func (m *MockOauthFormatter) AccessToken(e entity.OauthAccessToken) entity.OauthAccessTokenJSON {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AccessToken", e)
+	ret0, _ := ret[0].(entity.OauthAccessTokenJSON)
+	return ret0
+}
+
+// AccessToken indicates an expected call of AccessToken
+func (mr *MockOauthFormatterMockRecorder) AccessToken(e interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessToken", reflect.TypeOf((*MockOauthFormatter)(nil).AccessToken), e)
+}
