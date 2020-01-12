@@ -20,6 +20,29 @@ type OauthApplication struct {
 	UpdatedAt    time.Time
 }
 
+type OauthAccessGrant struct {
+	ID                 int
+	OauthApplicationID int
+	ResourceOwnerID    int
+	Code               string
+	RedirectURI        string
+	Scopes             string
+	ExpiresIn          time.Time
+	CreatedAt          time.Time
+	RevokedAT          mysql.NullTime
+}
+
+type OauthAccessToken struct {
+	ID                 int
+	OauthApplicationID int
+	ResourceOwnerID    int
+	Token              string
+	Scopes             string
+	ExpiresIn          time.Time
+	CreatedAt          time.Time
+	RevokedAT          mysql.NullTime
+}
+
 type OauthApplicationJSON struct {
 	ID           *int       `json:"id"`
 	OwnerID      *int       `json:"owner_id"`
