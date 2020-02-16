@@ -60,6 +60,20 @@ func TestErrorObject(t *testing.T) {
 		assert.Equal(t, expectedErrorObject.Error(), errorObject.Error())
 	})
 
+	t.Run("Forbidden error", func(t *testing.T) {
+		ctx := context.Background()
+		ctx = context.WithValue(ctx, "track_id", "1234567890")
+		errorObject := eobject.ForbiddenError(ctx, "some entity")
+		expectedErrorObject := entity.ErrorObject{
+			Code:    "ERR0403",
+			Message: fmt.Sprintf("Resource of `%s` is forbidden to be accessed, please report to admin of this site with this code `%v` if you think this is an error.", "some entity", ctx.Value("track_id")),
+		}
+
+		assert.Equal(t, expectedErrorObject.Code, errorObject.Code)
+		assert.Equal(t, expectedErrorObject.Message, errorObject.Message)
+		assert.Equal(t, expectedErrorObject.Error(), errorObject.Error())
+	})
+
 	t.Run("Validation error", func(t *testing.T) {
 		errorObject := eobject.ValidationError("`owner_type` object is empty")
 		expectedErrorObject := entity.ErrorObject{
