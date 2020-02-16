@@ -62,6 +62,7 @@ type OauthAccessTokenJSON struct {
 	Token              *string    `json:"token"`
 	Scopes             *string    `json:"scopes"`
 	ExpiresIn          *int       `json:"expires_in"`
+	RedirectURI        *string    `json:"redirect_uri"`
 	CreatedAt          *time.Time `json:"created_at"`
 	RevokedAT          *time.Time `json:"revoked_at"`
 }
