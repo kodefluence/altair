@@ -15,3 +15,8 @@ type OauthFormatter interface {
 	AccessGrant(r entity.AuthorizationRequestJSON, e entity.OauthAccessGrant) entity.OauthAccessGrantJSON
 	AccessToken(r entity.AuthorizationRequestJSON, e entity.OauthAccessToken) entity.OauthAccessTokenJSON
 }
+
+type ModelFormater interface {
+	AccessTokenFromAuthorizationRequest(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessTokenInsertable
+	AccessGrantFromAuthorizationRequest(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessTokenInsertable
+}

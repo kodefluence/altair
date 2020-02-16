@@ -23,3 +23,14 @@ type OauthApplicationModel interface {
 	Count(ctx context.Context) (int, error)
 	Create(ctx context.Context, data entity.OauthApplicationJSON, txs ...*sql.Tx) (int, error)
 }
+
+type OauthAccessToken interface {
+	HasName
+	One(ctx context.Context, ID int) (entity.OauthAccessToken, error)
+	Create(ctx context.Context, data entity.OauthAccessTokenInsertable, txs ...*sql.Tx) (int, error)
+}
+
+type OauthAccessGrant interface {
+	HasName
+	One(ctx context.Context, ID int) (entity.OauthAccessGrant, error)
+}

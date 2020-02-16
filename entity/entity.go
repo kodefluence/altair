@@ -99,3 +99,6 @@ type AccessTokenRequestJSON struct {
 	Code        *string `json:"code"`
 	RedirectURI *string `json:"redirect_uri"`
 }
+
+type OauthAccessTokenInsertable struct {
+}
