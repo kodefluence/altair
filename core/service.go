@@ -13,6 +13,7 @@ type ApplicationManager interface {
 }
 
 type Authorization interface {
-	Grant(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (error, entity.OauthAccessGrantJSON)
-	Token(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON) (error, entity.OauthAccessTokenJSON)
+	Grant(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthAccessGrantJSON, *entity.Error)
+	GrantToken(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthAccessTokenJSON, *entity.Error)
+	Token(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON) (entity.OauthAccessTokenJSON, *entity.Error)
 }

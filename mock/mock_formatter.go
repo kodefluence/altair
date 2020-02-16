@@ -86,29 +86,29 @@ func (m *MockOauthFormatter) EXPECT() *MockOauthFormatterMockRecorder {
 }
 
 // AccessGrant mocks base method
-func (m *MockOauthFormatter) AccessGrant(e entity.OauthAccessGrant) entity.OauthAccessGrantJSON {
+func (m *MockOauthFormatter) AccessGrant(r entity.AuthorizationRequestJSON, e entity.OauthAccessGrant) entity.OauthAccessGrantJSON {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AccessGrant", e)
+	ret := m.ctrl.Call(m, "AccessGrant", r, e)
 	ret0, _ := ret[0].(entity.OauthAccessGrantJSON)
 	return ret0
 }
 
 // AccessGrant indicates an expected call of AccessGrant
-func (mr *MockOauthFormatterMockRecorder) AccessGrant(e interface{}) *gomock.Call {
+func (mr *MockOauthFormatterMockRecorder) AccessGrant(r, e interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessGrant", reflect.TypeOf((*MockOauthFormatter)(nil).AccessGrant), e)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessGrant", reflect.TypeOf((*MockOauthFormatter)(nil).AccessGrant), r, e)
 }
 
 // AccessToken mocks base method
-func (m *MockOauthFormatter) AccessToken(e entity.OauthAccessToken) entity.OauthAccessTokenJSON {
+func (m *MockOauthFormatter) AccessToken(r entity.AuthorizationRequestJSON, e entity.OauthAccessToken) entity.OauthAccessTokenJSON {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AccessToken", e)
+	ret := m.ctrl.Call(m, "AccessToken", r, e)
 	ret0, _ := ret[0].(entity.OauthAccessTokenJSON)
 	return ret0
 }
 
 // AccessToken indicates an expected call of AccessToken
-func (mr *MockOauthFormatterMockRecorder) AccessToken(e interface{}) *gomock.Call {
+func (mr *MockOauthFormatterMockRecorder) AccessToken(r, e interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessToken", reflect.TypeOf((*MockOauthFormatter)(nil).AccessToken), e)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessToken", reflect.TypeOf((*MockOauthFormatter)(nil).AccessToken), r, e)
 }

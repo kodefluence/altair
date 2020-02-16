@@ -104,11 +104,11 @@ func (m *MockAuthorization) EXPECT() *MockAuthorizationMockRecorder {
 }
 
 // Grant mocks base method
-func (m *MockAuthorization) Grant(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (error, entity.OauthAccessGrantJSON) {
+func (m *MockAuthorization) Grant(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthAccessGrantJSON, *entity.Error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Grant", ctx, authorizationReq)
-	ret0, _ := ret[0].(error)
-	ret1, _ := ret[1].(entity.OauthAccessGrantJSON)
+	ret0, _ := ret[0].(entity.OauthAccessGrantJSON)
+	ret1, _ := ret[1].(*entity.Error)
 	return ret0, ret1
 }
 
@@ -118,12 +118,27 @@ func (mr *MockAuthorizationMockRecorder) Grant(ctx, authorizationReq interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Grant", reflect.TypeOf((*MockAuthorization)(nil).Grant), ctx, authorizationReq)
 }
 
+// GrantToken mocks base method
+func (m *MockAuthorization) GrantToken(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthAccessTokenJSON, *entity.Error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GrantToken", ctx, authorizationReq)
+	ret0, _ := ret[0].(entity.OauthAccessTokenJSON)
+	ret1, _ := ret[1].(*entity.Error)
+	return ret0, ret1
+}
+
+// GrantToken indicates an expected call of GrantToken
+func (mr *MockAuthorizationMockRecorder) GrantToken(ctx, authorizationReq interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GrantToken", reflect.TypeOf((*MockAuthorization)(nil).GrantToken), ctx, authorizationReq)
+}
+
 // Token mocks base method
-func (m *MockAuthorization) Token(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON) (error, entity.OauthAccessTokenJSON) {
+func (m *MockAuthorization) Token(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON) (entity.OauthAccessTokenJSON, *entity.Error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Token", ctx, accessTokenReq)
-	ret0, _ := ret[0].(error)
-	ret1, _ := ret[1].(entity.OauthAccessTokenJSON)
+	ret0, _ := ret[0].(entity.OauthAccessTokenJSON)
+	ret1, _ := ret[1].(*entity.Error)
 	return ret0, ret1
 }
 

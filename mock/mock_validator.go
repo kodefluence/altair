@@ -6,10 +6,9 @@ package mock
 
 import (
 	context "context"
-	reflect "reflect"
-
 	entity "github.com/codefluence-x/altair/entity"
 	gomock "github.com/golang/mock/gomock"
+	reflect "reflect"
 )
 
 // MockOauthValidator is a mock of OauthValidator interface
