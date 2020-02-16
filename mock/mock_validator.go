@@ -47,3 +47,17 @@ func (mr *MockOauthValidatorMockRecorder) ValidateApplication(ctx, data interfac
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateApplication", reflect.TypeOf((*MockOauthValidator)(nil).ValidateApplication), ctx, data)
 }
+
+// ValidateAuthorizationGrant mocks base method
+func (m *MockOauthValidator) ValidateAuthorizationGrant(ctx context.Context, r entity.AuthorizationRequestJSON, application entity.OauthApplication) *entity.Error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateAuthorizationGrant", ctx, r, application)
+	ret0, _ := ret[0].(*entity.Error)
+	return ret0
+}
+
+// ValidateAuthorizationGrant indicates an expected call of ValidateAuthorizationGrant
+func (mr *MockOauthValidatorMockRecorder) ValidateAuthorizationGrant(ctx, r, application interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateAuthorizationGrant", reflect.TypeOf((*MockOauthValidator)(nil).ValidateAuthorizationGrant), ctx, r, application)
+}
