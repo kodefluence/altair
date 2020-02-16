@@ -32,10 +32,10 @@ func NotFoundError(ctx context.Context, entityType string) entity.ErrorObject {
 	}
 }
 
-func ForbiddenError(ctx context.Context, entityType string) entity.ErrorObject {
+func ForbiddenError(ctx context.Context, entityType, reason string) entity.ErrorObject {
 	return entity.ErrorObject{
 		Code:    "ERR0403",
-		Message: fmt.Sprintf("Resource of `%s` is forbidden to be accessed, please report to admin of this site with this code `%v` if you think this is an error.", entityType, ctx.Value("track_id")),
+		Message: fmt.Sprintf("Resource of `%s` is forbidden to be accessed, because of: %s. Please report to admin of this site with this code `%v` if you think this is an error.", entityType, reason, ctx.Value("track_id")),
 	}
 }
 

@@ -63,10 +63,10 @@ func TestErrorObject(t *testing.T) {
 	t.Run("Forbidden error", func(t *testing.T) {
 		ctx := context.Background()
 		ctx = context.WithValue(ctx, "track_id", "1234567890")
-		errorObject := eobject.ForbiddenError(ctx, "some entity")
+		errorObject := eobject.ForbiddenError(ctx, "some entity", "your requested scope not exists in this applcation")
 		expectedErrorObject := entity.ErrorObject{
 			Code:    "ERR0403",
-			Message: fmt.Sprintf("Resource of `%s` is forbidden to be accessed, please report to admin of this site with this code `%v` if you think this is an error.", "some entity", ctx.Value("track_id")),
+			Message: fmt.Sprintf("Resource of `%s` is forbidden to be accessed, because of: %s. Please report to admin of this site with this code `%v` if you think this is an error.", "some entity", "your requested scope not exists in this applcation", ctx.Value("track_id")),
 		}
 
 		assert.Equal(t, expectedErrorObject.Code, errorObject.Code)
