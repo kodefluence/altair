@@ -83,6 +83,8 @@ type OauthApplicationJSON struct {
 type AuthorizationRequestJSON struct {
 	ResponseType *string `json:"response_type"`
 
+	ResourceOwnerID *int `json:"resource_owner_id"`
+
 	ClientUID    *string `json:"client_uid"`
 	ClientSecret *string `json:"client_secret"`
 
@@ -101,4 +103,9 @@ type AccessTokenRequestJSON struct {
 }
 
 type OauthAccessTokenInsertable struct {
+	OauthApplicationID int
+	ResourceOwnerID    int
+	Token              string
+	Scopes             string
+	ExpiresIn          time.Time
 }
