@@ -103,6 +103,21 @@ func (m *MockAuthorization) EXPECT() *MockAuthorizationMockRecorder {
 	return m.recorder
 }
 
+// Grantor mocks base method
+func (m *MockAuthorization) Grantor(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (interface{}, *entity.Error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Grantor", ctx, authorizationReq)
+	ret0, _ := ret[0].(interface{})
+	ret1, _ := ret[1].(*entity.Error)
+	return ret0, ret1
+}
+
+// Grantor indicates an expected call of Grantor
+func (mr *MockAuthorizationMockRecorder) Grantor(ctx, authorizationReq interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Grantor", reflect.TypeOf((*MockAuthorization)(nil).Grantor), ctx, authorizationReq)
+}
+
 // Grant mocks base method
 func (m *MockAuthorization) Grant(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthAccessGrantJSON, *entity.Error) {
 	m.ctrl.T.Helper()
