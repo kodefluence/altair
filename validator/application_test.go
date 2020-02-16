@@ -2,6 +2,7 @@ package validator_test
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -73,6 +74,61 @@ func TestApplication(t *testing.T) {
 				assert.Equal(t, expectedError.HttpStatus, err.HttpStatus)
 				assert.Equal(t, expectedError.Error(), err.Error())
 				assert.Equal(t, expectedError.Errors, err.Errors)
+			})
+		})
+	})
+
+	t.Run("ValidateAuthorizationGrant", func(t *testing.T) {
+		t.Run("Given context, authorization request and oauth application", func(t *testing.T) {
+			t.Run("No scopes given", func(t *testing.T) {
+				authorizationRequest := entity.AuthorizationRequestJSON{
+					Scopes: util.StringToPointer(""),
+				}
+
+				oauthApplication := entity.OauthApplication{
+					Scopes: "public users stores",
+				}
+
+				applicationValidator := validator.Oauth()
+				err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
+				assert.Nil(t, err)
+			})
+
+			t.Run("Request scopes is unavailable in oauth application", func(t *testing.T) {
+				authorizationRequest := entity.AuthorizationRequestJSON{
+					Scopes: util.StringToPointer("public users stores"),
+				}
+
+				oauthApplication := entity.OauthApplication{
+					Scopes: "public users",
+				}
+
+				applicationValidator := validator.Oauth()
+				err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
+
+				expectedErr := &entity.Error{
+					HttpStatus: http.StatusForbidden,
+					Errors:     eobject.Wrap(eobject.ForbiddenError(context.Background(), "application", fmt.Sprintf("your requested scopes `(%v)` is not exists in application", []string{"stores"}))),
+				}
+
+				assert.NotNil(t, err)
+				assert.Equal(t, expectedErr.Error(), err.Error())
+				assert.Equal(t, expectedErr.HttpStatus, err.HttpStatus)
+				assert.Equal(t, expectedErr.Errors, err.Errors)
+			})
+
+			t.Run("Request scopes is available in oauth application", func(t *testing.T) {
+				authorizationRequest := entity.AuthorizationRequestJSON{
+					Scopes: util.StringToPointer("public users"),
+				}
+
+				oauthApplication := entity.OauthApplication{
+					Scopes: "public users stores",
+				}
+
+				applicationValidator := validator.Oauth()
+				err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
+				assert.Nil(t, err)
 			})
 		})
 	})

@@ -2,7 +2,9 @@ package validator
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
@@ -13,10 +15,10 @@ type application struct {
 }
 
 func Oauth() core.OauthValidator {
-	return application{}
+	return &application{}
 }
 
-func (a application) ValidateApplication(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error {
+func (a *application) ValidateApplication(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error {
 	var entityError = &entity.Error{}
 
 	if data.OwnerType == nil {
@@ -32,5 +34,36 @@ func (a application) ValidateApplication(ctx context.Context, data entity.OauthA
 		return entityError
 	}
 
+	return nil
+}
+
+func (a *application) ValidateAuthorizationGrant(ctx context.Context, r entity.AuthorizationRequestJSON, application entity.OauthApplication) *entity.Error {
+	requestScopes := strings.Fields(*r.Scopes)
+	applicationScopes := strings.Fields(application.Scopes)
+
+	var invalidScope []string
+
+	for _, rs := range requestScopes {
+
+		scopeNotExists := true
+
+		for _, as := range applicationScopes {
+			if rs == as {
+				scopeNotExists = false
+				break
+			}
+		}
+
+		if scopeNotExists {
+			invalidScope = append(invalidScope, rs)
+		}
+	}
+
+	if len(invalidScope) > 0 {
+		return &entity.Error{
+			HttpStatus: http.StatusForbidden,
+			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "application", fmt.Sprintf("your requested scopes `(%v)` is not exists in application", invalidScope))),
+		}
+	}
 	return nil
 }
