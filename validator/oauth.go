@@ -88,7 +88,7 @@ func (a *application) ValidateAuthorizationGrant(ctx context.Context, r entity.A
 	if *r.ResponseType == "token" && application.OwnerType != "confidential" {
 		return &entity.Error{
 			HttpStatus: http.StatusForbidden,
-			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "application", "your response type is not allowed in this application")),
+			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "your response type is not allowed in this application")),
 		}
 	}
 

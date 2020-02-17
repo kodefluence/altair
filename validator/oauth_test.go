@@ -168,5 +168,36 @@ func TestApplication(t *testing.T) {
 				assert.Equal(t, expectedErr.Errors, err.Errors)
 			})
 		})
+
+		t.Run("Given context, authorization request with token and oauth application", func(t *testing.T) {
+			t.Run("application is not confidential", func(t *testing.T) {
+				authorizationRequest := entity.AuthorizationRequestJSON{
+					ResponseType:    util.StringToPointer("token"),
+					ResourceOwnerID: util.IntToPointer(1),
+					RedirectURI:     util.StringToPointer("www.github.com"),
+					Scopes:          util.StringToPointer(""),
+				}
+
+				oauthApplication := entity.OauthApplication{
+					Scopes: "public users stores",
+				}
+
+				ctx := context.Background()
+
+				expectedErr := &entity.Error{
+					HttpStatus: http.StatusForbidden,
+					Errors: eobject.Wrap(
+						eobject.ForbiddenError(ctx, "access_token", "your response type is not allowed in this application"),
+					),
+				}
+
+				applicationValidator := validator.Oauth()
+				err := applicationValidator.ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication)
+				assert.NotNil(t, err)
+				assert.Equal(t, expectedErr.Error(), err.Error())
+				assert.Equal(t, expectedErr.HttpStatus, err.HttpStatus)
+				assert.Equal(t, expectedErr.Errors, err.Errors)
+			})
+		})
 	})
 }
