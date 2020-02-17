@@ -38,6 +38,25 @@ func (a *application) ValidateApplication(ctx context.Context, data entity.Oauth
 }
 
 func (a *application) ValidateAuthorizationGrant(ctx context.Context, r entity.AuthorizationRequestJSON, application entity.OauthApplication) *entity.Error {
+	var entityErr = &entity.Error{}
+
+	if r.ResponseType == nil {
+		entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`response_type can't be empty`))
+	}
+
+	if r.ResourceOwnerID == nil {
+		entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`resource_owner_id can't be empty`))
+	}
+
+	if r.RedirectURI == nil {
+		entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`redirect_uri can't be empty`))
+	}
+
+	if len(entityErr.Errors) > 0 {
+		entityErr.HttpStatus = http.StatusUnprocessableEntity
+		return entityErr
+	}
+
 	requestScopes := strings.Fields(*r.Scopes)
 	applicationScopes := strings.Fields(application.Scopes)
 
@@ -65,5 +84,13 @@ func (a *application) ValidateAuthorizationGrant(ctx context.Context, r entity.A
 			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "application", fmt.Sprintf("your requested scopes `(%v)` is not exists in application", invalidScope))),
 		}
 	}
+
+	if *r.ResponseType == "token" && application.OwnerType != "confidential" {
+		return &entity.Error{
+			HttpStatus: http.StatusForbidden,
+			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "application", "your response type is not allowed in this application")),
+		}
+	}
+
 	return nil
 }

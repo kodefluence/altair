@@ -82,7 +82,10 @@ func TestApplication(t *testing.T) {
 		t.Run("Given context, authorization request and oauth application", func(t *testing.T) {
 			t.Run("No scopes given", func(t *testing.T) {
 				authorizationRequest := entity.AuthorizationRequestJSON{
-					Scopes: util.StringToPointer(""),
+					ResponseType:    util.StringToPointer("code"),
+					ResourceOwnerID: util.IntToPointer(1),
+					RedirectURI:     util.StringToPointer("www.github.com"),
+					Scopes:          util.StringToPointer(""),
 				}
 
 				oauthApplication := entity.OauthApplication{
@@ -96,7 +99,10 @@ func TestApplication(t *testing.T) {
 
 			t.Run("Request scopes is unavailable in oauth application", func(t *testing.T) {
 				authorizationRequest := entity.AuthorizationRequestJSON{
-					Scopes: util.StringToPointer("public users stores"),
+					ResponseType:    util.StringToPointer("code"),
+					ResourceOwnerID: util.IntToPointer(1),
+					RedirectURI:     util.StringToPointer("www.github.com"),
+					Scopes:          util.StringToPointer("public users stores"),
 				}
 
 				oauthApplication := entity.OauthApplication{
@@ -119,7 +125,10 @@ func TestApplication(t *testing.T) {
 
 			t.Run("Request scopes is available in oauth application", func(t *testing.T) {
 				authorizationRequest := entity.AuthorizationRequestJSON{
-					Scopes: util.StringToPointer("public users"),
+					ResponseType:    util.StringToPointer("code"),
+					ResourceOwnerID: util.IntToPointer(1),
+					RedirectURI:     util.StringToPointer("www.github.com"),
+					Scopes:          util.StringToPointer("public users"),
 				}
 
 				oauthApplication := entity.OauthApplication{
@@ -129,6 +138,34 @@ func TestApplication(t *testing.T) {
 				applicationValidator := validator.Oauth()
 				err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
 				assert.Nil(t, err)
+			})
+		})
+
+		t.Run("Given context, authorization request without response type, resource owner id, redirect_uri and oauth application", func(t *testing.T) {
+			t.Run("Return unprocessable entity", func(t *testing.T) {
+				authorizationRequest := entity.AuthorizationRequestJSON{
+					Scopes: util.StringToPointer(""),
+				}
+
+				oauthApplication := entity.OauthApplication{
+					Scopes: "public users stores",
+				}
+
+				expectedErr := &entity.Error{
+					HttpStatus: http.StatusUnprocessableEntity,
+					Errors: eobject.Wrap(
+						eobject.ValidationError(`response_type can't be empty`),
+						eobject.ValidationError(`resource_owner_id can't be empty`),
+						eobject.ValidationError(`redirect_uri can't be empty`),
+					),
+				}
+
+				applicationValidator := validator.Oauth()
+				err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
+				assert.NotNil(t, err)
+				assert.Equal(t, expectedErr.Error(), err.Error())
+				assert.Equal(t, expectedErr.HttpStatus, err.HttpStatus)
+				assert.Equal(t, expectedErr.Errors, err.Errors)
 			})
 		})
 	})
