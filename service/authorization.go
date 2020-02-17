@@ -13,17 +13,20 @@ import (
 
 type authorization struct {
 	oauthApplicationModel core.OauthApplicationModel
+	oauthAccessTokenModel core.OauthAccessTokenModel
 	modelFormatter        core.ModelFormater
 	oauthValidator        core.OauthValidator
 }
 
 func Authorization(
 	oauthApplicationModel core.OauthApplicationModel,
+	oauthAccessTokenModel core.OauthAccessTokenModel,
 	modelFormatter core.ModelFormater,
 	oauthValidator core.OauthValidator,
 ) core.Authorization {
 	return &authorization{
 		oauthApplicationModel: oauthApplicationModel,
+		oauthAccessTokenModel: oauthAccessTokenModel,
 		modelFormatter:        modelFormatter,
 		oauthValidator:        oauthValidator,
 	}

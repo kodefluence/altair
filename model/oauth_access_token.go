@@ -14,7 +14,7 @@ type oauthAccessToken struct {
 	db *sql.DB
 }
 
-func OauthAccessToken(db *sql.DB) core.OauthAccessToken {
+func OauthAccessToken(db *sql.DB) core.OauthAccessTokenModel {
 	return &oauthAccessToken{
 		db: db,
 	}
