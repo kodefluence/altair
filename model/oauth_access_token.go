@@ -48,7 +48,25 @@ func (oat *oauthAccessToken) One(ctx context.Context, ID int) (entity.OauthAcces
 }
 
 func (oat *oauthAccessToken) Create(ctx context.Context, data entity.OauthAccessTokenInsertable, txs ...*sql.Tx) (int, error) {
-	var id int
+	var lastInsertedId int
+	var dbExecutable core.DBExecutable
 
-	return id, nil
+	dbExecutable = oat.db
+	if len(txs) > 0 {
+		dbExecutable = txs[0]
+	}
+
+	err := monitor(ctx, oat.Name(), query.InsertOauthAccessToken, func() error {
+		result, err := dbExecutable.Exec(query.InsertOauthAccessToken, data.OauthApplicationID, data.ResourceOwnerID, data.Token, data.ExpiresIn)
+		if err != nil {
+			return err
+		}
+
+		id, err := result.LastInsertId()
+		lastInsertedId = int(id)
+
+		return err
+	})
+
+	return lastInsertedId, err
 }

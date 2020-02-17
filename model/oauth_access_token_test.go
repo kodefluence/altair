@@ -2,6 +2,7 @@ package model_test
 
 import (
 	"context"
+	"database/sql"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -70,25 +71,24 @@ func TestOauthAccessToken(t *testing.T) {
 				assert.Equal(t, data, dataFromDB)
 			})
 
-			// t.Run("Row not found in database", func(t *testing.T) {
-			// 	t.Run("Return sql.ErrNoRows error", func(t *testing.T) {
-			// 		db, mockdb, err := sqlmock.New()
-			// 		if err != nil {
-			// 			t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-			// 		}
+			t.Run("Row not found in database", func(t *testing.T) {
+				db, mockdb, err := sqlmock.New()
+				if err != nil {
+					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+				}
 
-			// 		mockdb.ExpectQuery(`select \* from oauth_applications where id = \?`).
-			// 			WithArgs(1).
-			// 			WillReturnError(sql.ErrNoRows)
+				mockdb.ExpectQuery(`select \* from oauth_access_tokens where id = \? limit 1`).
+					WithArgs(1).
+					WillReturnError(sql.ErrNoRows)
 
-			// 		oauthApplicationModel := model.OauthApplication(db)
-			// 		dataFromDB, err := oauthApplicationModel.One(context.Background(), 1)
+				oauthAccessTokenModel := model.OauthAccessToken(db)
+				dataFromDB, err := oauthAccessTokenModel.One(context.Background(), 1)
 
-			// 		assert.NotNil(t, err)
-			// 		assert.Nil(t, mockdb.ExpectationsWereMet())
-			// 		assert.Equal(t, entity.OauthApplication{}, dataFromDB)
-			// 	})
-			// })
+				assert.NotNil(t, err)
+				assert.Equal(t, sql.ErrNoRows, err)
+				assert.Nil(t, mockdb.ExpectationsWereMet())
+				assert.Equal(t, entity.OauthAccessToken{}, dataFromDB)
+			})
 		})
 	})
 }
