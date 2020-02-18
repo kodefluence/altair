@@ -14,8 +14,10 @@ import (
 type authorization struct {
 	oauthApplicationModel core.OauthApplicationModel
 	oauthAccessTokenModel core.OauthAccessTokenModel
-	modelFormatter        core.ModelFormater
 	oauthValidator        core.OauthValidator
+
+	modelFormatter core.ModelFormater
+	oauthFormatter core.OauthFormatter
 }
 
 func Authorization(
@@ -23,12 +25,14 @@ func Authorization(
 	oauthAccessTokenModel core.OauthAccessTokenModel,
 	modelFormatter core.ModelFormater,
 	oauthValidator core.OauthValidator,
+	oauthFormatter core.OauthFormatter,
 ) core.Authorization {
 	return &authorization{
 		oauthApplicationModel: oauthApplicationModel,
 		oauthAccessTokenModel: oauthAccessTokenModel,
 		modelFormatter:        modelFormatter,
 		oauthValidator:        oauthValidator,
+		oauthFormatter:        oauthFormatter,
 	}
 }
 
@@ -64,16 +68,44 @@ func (a *authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 	return oauthAccessGrantJSON, nil
 }
 
-// WIP
 func (a *authorization) GrantToken(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthAccessTokenJSON, *entity.Error) {
-	var oauthAccessTokenJSON entity.OauthAccessTokenJSON
-
-	_, err := a.findAndValidateApplication(ctx, authorizationReq)
-	if err != nil {
-		return oauthAccessTokenJSON, err
+	oauthApplication, entityErr := a.findAndValidateApplication(ctx, authorizationReq)
+	if entityErr != nil {
+		return entity.OauthAccessTokenJSON{}, entityErr
 	}
 
-	return oauthAccessTokenJSON, nil
+	id, err := a.oauthAccessTokenModel.Create(ctx, a.modelFormatter.AccessTokenFromAuthorizationRequest(authorizationReq, oauthApplication))
+	if err != nil {
+
+		journal.Error("Error creating access token", err).
+			AddField("request", authorizationReq).
+			AddField("application", oauthApplication).
+			SetTags("service", "authorization", "grant_token").
+			Log()
+
+		return entity.OauthAccessTokenJSON{}, &entity.Error{
+			HttpStatus: http.StatusInternalServerError,
+			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+		}
+	}
+
+	oauthAccessToken, err := a.oauthAccessTokenModel.One(ctx, id)
+	if err != nil {
+
+		journal.Error("Error selecting one access token", err).
+			AddField("request", authorizationReq).
+			AddField("last_inserted_id", id).
+			AddField("application", oauthApplication).
+			SetTags("service", "authorization", "grant_token").
+			Log()
+
+		return entity.OauthAccessTokenJSON{}, &entity.Error{
+			HttpStatus: http.StatusInternalServerError,
+			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+		}
+	}
+
+	return a.oauthFormatter.AccessToken(authorizationReq, oauthAccessToken), nil
 }
 
 func (a *authorization) findAndValidateApplication(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthApplication, *entity.Error) {
