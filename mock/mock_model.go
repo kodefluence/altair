@@ -281,31 +281,31 @@ func (mr *MockOauthAccessTokenModelMockRecorder) Create(ctx, data interface{}, t
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOauthAccessTokenModel)(nil).Create), varargs...)
 }
 
-// MockOauthAccessGrant is a mock of OauthAccessGrant interface
-type MockOauthAccessGrant struct {
+// MockOauthAccessGrantModel is a mock of OauthAccessGrantModel interface
+type MockOauthAccessGrantModel struct {
 	ctrl     *gomock.Controller
-	recorder *MockOauthAccessGrantMockRecorder
+	recorder *MockOauthAccessGrantModelMockRecorder
 }
 
-// MockOauthAccessGrantMockRecorder is the mock recorder for MockOauthAccessGrant
-type MockOauthAccessGrantMockRecorder struct {
-	mock *MockOauthAccessGrant
+// MockOauthAccessGrantModelMockRecorder is the mock recorder for MockOauthAccessGrantModel
+type MockOauthAccessGrantModelMockRecorder struct {
+	mock *MockOauthAccessGrantModel
 }
 
-// NewMockOauthAccessGrant creates a new mock instance
-func NewMockOauthAccessGrant(ctrl *gomock.Controller) *MockOauthAccessGrant {
-	mock := &MockOauthAccessGrant{ctrl: ctrl}
-	mock.recorder = &MockOauthAccessGrantMockRecorder{mock}
+// NewMockOauthAccessGrantModel creates a new mock instance
+func NewMockOauthAccessGrantModel(ctrl *gomock.Controller) *MockOauthAccessGrantModel {
+	mock := &MockOauthAccessGrantModel{ctrl: ctrl}
+	mock.recorder = &MockOauthAccessGrantModelMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockOauthAccessGrant) EXPECT() *MockOauthAccessGrantMockRecorder {
+func (m *MockOauthAccessGrantModel) EXPECT() *MockOauthAccessGrantModelMockRecorder {
 	return m.recorder
 }
 
 // Name mocks base method
-func (m *MockOauthAccessGrant) Name() string {
+func (m *MockOauthAccessGrantModel) Name() string {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Name")
 	ret0, _ := ret[0].(string)
@@ -313,13 +313,13 @@ func (m *MockOauthAccessGrant) Name() string {
 }
 
 // Name indicates an expected call of Name
-func (mr *MockOauthAccessGrantMockRecorder) Name() *gomock.Call {
+func (mr *MockOauthAccessGrantModelMockRecorder) Name() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockOauthAccessGrant)(nil).Name))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockOauthAccessGrantModel)(nil).Name))
 }
 
 // One mocks base method
-func (m *MockOauthAccessGrant) One(ctx context.Context, ID int) (entity.OauthAccessGrant, error) {
+func (m *MockOauthAccessGrantModel) One(ctx context.Context, ID int) (entity.OauthAccessGrant, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "One", ctx, ID)
 	ret0, _ := ret[0].(entity.OauthAccessGrant)
@@ -328,7 +328,7 @@ func (m *MockOauthAccessGrant) One(ctx context.Context, ID int) (entity.OauthAcc
 }
 
 // One indicates an expected call of One
-func (mr *MockOauthAccessGrantMockRecorder) One(ctx, ID interface{}) *gomock.Call {
+func (mr *MockOauthAccessGrantModelMockRecorder) One(ctx, ID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "One", reflect.TypeOf((*MockOauthAccessGrant)(nil).One), ctx, ID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "One", reflect.TypeOf((*MockOauthAccessGrantModel)(nil).One), ctx, ID)
 }
