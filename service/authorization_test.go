@@ -30,6 +30,7 @@ func TestAuthorization(t *testing.T) {
 				modelFormatter := formatter.Model(time.Hour * 4)
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatter := formatter.Oauth()
+				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
 				ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
 
@@ -68,6 +69,7 @@ func TestAuthorization(t *testing.T) {
 				}
 
 				oauthAccessTokenInsertable := modelFormatter.AccessTokenFromAuthorizationRequest(authorizationRequest, oauthApplication)
+				oauthAccessTokenJSON := oauthFormatter.AccessToken(authorizationRequest, oauthAccessToken)
 
 				gomock.InOrder(
 					oauthApplicationModel.EXPECT().
@@ -77,9 +79,10 @@ func TestAuthorization(t *testing.T) {
 					modelFormatterMock.EXPECT().AccessTokenFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessTokenInsertable),
 					oauthAccessTokenModel.EXPECT().Create(ctx, oauthAccessTokenInsertable).Return(oauthAccessToken.ID, nil),
 					oauthAccessTokenModel.EXPECT().One(ctx, oauthAccessToken.ID).Return(oauthAccessToken, nil),
+					oauthFormatterMock.EXPECT().AccessToken(authorizationRequest, oauthAccessToken).Return(oauthAccessTokenJSON),
 				)
 
-				authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, modelFormatterMock, oauthValidator, oauthFormatter)
+				authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
 				_, err := authorizationService.Grantor(ctx, authorizationRequest)
 				assert.Nil(t, err)
 			})
