@@ -3,7 +3,9 @@ package model_test
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/codefluence-x/altair/entity"
@@ -90,6 +92,123 @@ func TestOauthAccessGrant(t *testing.T) {
 				assert.Equal(t, sql.ErrNoRows, err)
 				assert.Nil(t, mockdb.ExpectationsWereMet())
 				assert.Equal(t, entity.OauthAccessGrant{}, dataFromDB)
+			})
+		})
+	})
+
+	t.Run("Create", func(t *testing.T) {
+		t.Run("Given context and access grant insertable", func(t *testing.T) {
+			t.Run("Return last inserted id", func(t *testing.T) {
+				db, mockdb, err := sqlmock.New()
+				if err != nil {
+					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+				}
+
+				insertable := entity.OauthAccessGrantInsertable{
+					OauthApplicationID: 1,
+					ResourceOwnerID:    1,
+					Code:               "token",
+					Scopes:             "public users stores",
+					RedirectURI:        "https://github.com",
+					ExpiresIn:          time.Now().Add(time.Hour * 24),
+				}
+
+				mockdb.ExpectExec(`insert into oauth_access_grants \(oauth_application_id, resource_owner_id, scopes, code, redirect_uri, expires_in, created_at, revoked_at\) values\(\?, \?, \?, \?, \?, \?, now\(\), null\)`).
+					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Scopes, insertable.Code, insertable.RedirectURI, insertable.ExpiresIn).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				oauthAccessGrantModel := model.OauthAccessGrant(db)
+				lastInsertedID, err := oauthAccessGrantModel.Create(context.Background(), insertable)
+
+				assert.Nil(t, mockdb.ExpectationsWereMet())
+				assert.Nil(t, err)
+				assert.Equal(t, 1, lastInsertedID)
+			})
+
+			t.Run("Unexpected error", func(t *testing.T) {
+				db, mockdb, err := sqlmock.New()
+				if err != nil {
+					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+				}
+
+				insertable := entity.OauthAccessGrantInsertable{
+					OauthApplicationID: 1,
+					ResourceOwnerID:    1,
+					Code:               "token",
+					Scopes:             "public users stores",
+					RedirectURI:        "https://github.com",
+					ExpiresIn:          time.Now().Add(time.Hour * 24),
+				}
+
+				mockdb.ExpectExec(`insert into oauth_access_grants \(oauth_application_id, resource_owner_id, scopes, code, redirect_uri, expires_in, created_at, revoked_at\) values\(\?, \?, \?, \?, \?, \?, now\(\), null\)`).
+					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Scopes, insertable.Code, insertable.RedirectURI, insertable.ExpiresIn).
+					WillReturnError(errors.New("unexpected error"))
+
+				oauthAccessGrantModel := model.OauthAccessGrant(db)
+				lastInsertedID, err := oauthAccessGrantModel.Create(context.Background(), insertable)
+
+				assert.Nil(t, mockdb.ExpectationsWereMet())
+				assert.NotNil(t, err)
+				assert.Equal(t, 0, lastInsertedID)
+			})
+
+			t.Run("Get last inserted id error", func(t *testing.T) {
+				db, mockdb, err := sqlmock.New()
+				if err != nil {
+					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+				}
+
+				insertable := entity.OauthAccessGrantInsertable{
+					OauthApplicationID: 1,
+					ResourceOwnerID:    1,
+					Code:               "token",
+					Scopes:             "public users stores",
+					RedirectURI:        "https://github.com",
+					ExpiresIn:          time.Now().Add(time.Hour * 24),
+				}
+
+				mockdb.ExpectExec(`insert into oauth_access_grants \(oauth_application_id, resource_owner_id, scopes, code, redirect_uri, expires_in, created_at, revoked_at\) values\(\?, \?, \?, \?, \?, \?, now\(\), null\)`).
+					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Scopes, insertable.Code, insertable.RedirectURI, insertable.ExpiresIn).
+					WillReturnResult(sqlmock.NewErrorResult(errors.New("unexpected error")))
+
+				oauthAccessGrantModel := model.OauthAccessGrant(db)
+				lastInsertedID, err := oauthAccessGrantModel.Create(context.Background(), insertable)
+
+				assert.Nil(t, mockdb.ExpectationsWereMet())
+				assert.NotNil(t, err)
+				assert.Equal(t, 0, lastInsertedID)
+			})
+		})
+
+		t.Run("Given context, access token insertable and database transaction", func(t *testing.T) {
+			t.Run("Return last inserted id", func(t *testing.T) {
+				db, mockdb, err := sqlmock.New()
+				if err != nil {
+					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+				}
+
+				insertable := entity.OauthAccessGrantInsertable{
+					OauthApplicationID: 1,
+					ResourceOwnerID:    1,
+					Code:               "token",
+					Scopes:             "public users stores",
+					RedirectURI:        "https://github.com",
+					ExpiresIn:          time.Now().Add(time.Hour * 24),
+				}
+
+				mockdb.ExpectBegin()
+				tx, _ := db.Begin()
+
+				mockdb.ExpectExec(`insert into oauth_access_grants \(oauth_application_id, resource_owner_id, scopes, code, redirect_uri, expires_in, created_at, revoked_at\) values\(\?, \?, \?, \?, \?, \?, now\(\), null\)`).
+					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Scopes, insertable.Code, insertable.RedirectURI, insertable.ExpiresIn).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				oauthAccessGrantModel := model.OauthAccessGrant(db)
+				lastInsertedID, err := oauthAccessGrantModel.Create(context.Background(), insertable, tx)
+
+				assert.Nil(t, mockdb.ExpectationsWereMet())
+				assert.Nil(t, err)
+				assert.Equal(t, 1, lastInsertedID)
 			})
 		})
 	})

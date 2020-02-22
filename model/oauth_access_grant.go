@@ -47,3 +47,27 @@ func (oag *oauthAccessGrant) One(ctx context.Context, ID int) (entity.OauthAcces
 
 	return oauthAccessGrant, err
 }
+
+func (oag *oauthAccessGrant) Create(ctx context.Context, data entity.OauthAccessGrantInsertable, txs ...*sql.Tx) (int, error) {
+	var lastInsertedId int
+	var dbExecutable core.DBExecutable
+
+	dbExecutable = oag.db
+	if len(txs) > 0 {
+		dbExecutable = txs[0]
+	}
+
+	err := monitor(ctx, oag.Name(), query.InsertOauthAccessGrant, func() error {
+		result, err := dbExecutable.Exec(query.InsertOauthAccessGrant, data.OauthApplicationID, data.ResourceOwnerID, data.Scopes, data.Code, data.RedirectURI, data.ExpiresIn)
+		if err != nil {
+			return err
+		}
+
+		id, err := result.LastInsertId()
+		lastInsertedId = int(id)
+
+		return err
+	})
+
+	return lastInsertedId, err
+}

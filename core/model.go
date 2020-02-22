@@ -33,4 +33,5 @@ type OauthAccessTokenModel interface {
 type OauthAccessGrantModel interface {
 	HasName
 	One(ctx context.Context, ID int) (entity.OauthAccessGrant, error)
+	Create(ctx context.Context, data entity.OauthAccessGrantInsertable, txs ...*sql.Tx) (int, error)
 }
