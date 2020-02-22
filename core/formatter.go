@@ -12,7 +12,7 @@ type OauthApplicationFormater interface {
 }
 
 type OauthFormatter interface {
-	AccessGrant(r entity.AuthorizationRequestJSON, e entity.OauthAccessGrant) entity.OauthAccessGrantJSON
+	AccessGrant(e entity.OauthAccessGrant) entity.OauthAccessGrantJSON
 	AccessToken(r entity.AuthorizationRequestJSON, e entity.OauthAccessToken) entity.OauthAccessTokenJSON
 }
 

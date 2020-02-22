@@ -14,6 +14,77 @@ import (
 
 func TestOauthFormatter(t *testing.T) {
 
+	t.Run("AccessGrant", func(t *testing.T) {
+		t.Run("Given authorization request and oauth access grant data", func(t *testing.T) {
+			t.Run("Code not revoked", func(t *testing.T) {
+				oauthAccessGrant := entity.OauthAccessGrant{
+					ID:                 1,
+					OauthApplicationID: 1,
+					ResourceOwnerID:    1,
+					Code:               util.SHA1(),
+					RedirectURI:        "https://github.com",
+					RevokedAT: mysql.NullTime{
+						Time:  time.Time{},
+						Valid: false,
+					},
+					Scopes:    "public users stores",
+					ExpiresIn: time.Now().Add(time.Hour),
+					CreatedAt: time.Now(),
+				}
+
+				output := formatter.Oauth().AccessGrant(oauthAccessGrant)
+
+				assert.Equal(t, &oauthAccessGrant.ID, output.ID)
+				assert.Equal(t, &oauthAccessGrant.OauthApplicationID, output.OauthApplicationID)
+				assert.Equal(t, &oauthAccessGrant.ResourceOwnerID, output.ResourceOwnerID)
+				assert.Equal(t, &oauthAccessGrant.Code, output.Code)
+				assert.Equal(t, &oauthAccessGrant.RedirectURI, output.RedirectURI)
+				assert.Equal(t, &oauthAccessGrant.CreatedAt, output.CreatedAt)
+				assert.LessOrEqual(t, *output.ExpiresIn, int(oauthAccessGrant.ExpiresIn.Sub(time.Now()).Seconds()))
+				assert.Greater(t, *output.ExpiresIn, 3500)
+				assert.Nil(t, output.RevokedAT)
+
+				assert.Equal(t, &oauthAccessGrant.RedirectURI, output.RedirectURI)
+				assert.Equal(t, &oauthAccessGrant.Scopes, output.Scopes)
+
+				assert.Equal(t, &oauthAccessGrant.ID, output.ID)
+			})
+
+			t.Run("Code already revoked", func(t *testing.T) {
+				oauthAccessGrant := entity.OauthAccessGrant{
+					ID:                 1,
+					OauthApplicationID: 1,
+					ResourceOwnerID:    1,
+					Code:               util.SHA1(),
+					RedirectURI:        "https://github.com",
+					Scopes:             "public users stores",
+					ExpiresIn:          time.Now().Add(-time.Hour),
+					CreatedAt:          time.Now().Add(-time.Hour * 2),
+					RevokedAT: mysql.NullTime{
+						Valid: true,
+						Time:  time.Now(),
+					},
+				}
+
+				output := formatter.Oauth().AccessGrant(oauthAccessGrant)
+
+				assert.Equal(t, &oauthAccessGrant.ID, output.ID)
+				assert.Equal(t, &oauthAccessGrant.OauthApplicationID, output.OauthApplicationID)
+				assert.Equal(t, &oauthAccessGrant.ResourceOwnerID, output.ResourceOwnerID)
+				assert.Equal(t, &oauthAccessGrant.Code, output.Code)
+				assert.Equal(t, &oauthAccessGrant.RedirectURI, output.RedirectURI)
+				assert.Equal(t, &oauthAccessGrant.CreatedAt, output.CreatedAt)
+				assert.Equal(t, 0, *output.ExpiresIn)
+				assert.Equal(t, &oauthAccessGrant.RevokedAT.Time, output.RevokedAT)
+
+				assert.Equal(t, &oauthAccessGrant.RedirectURI, output.RedirectURI)
+				assert.Equal(t, &oauthAccessGrant.Scopes, output.Scopes)
+
+				assert.Equal(t, &oauthAccessGrant.ID, output.ID)
+			})
+		})
+	})
+
 	t.Run("AccessToken", func(t *testing.T) {
 		t.Run("Given authorization request and oauth access token data", func(t *testing.T) {
 			t.Run("Token not revoked", func(t *testing.T) {
@@ -44,12 +115,12 @@ func TestOauthFormatter(t *testing.T) {
 					assert.Equal(t, &oauthAccessToken.ResourceOwnerID, output.ResourceOwnerID)
 					assert.Equal(t, &oauthAccessToken.Token, output.Token)
 					assert.Equal(t, &oauthAccessToken.CreatedAt, output.CreatedAt)
+					assert.Equal(t, &oauthAccessToken.Scopes, output.Scopes)
 					assert.LessOrEqual(t, *output.ExpiresIn, int(oauthAccessToken.ExpiresIn.Sub(time.Now()).Seconds()))
 					assert.Greater(t, *output.ExpiresIn, 3500)
 					assert.Nil(t, output.RevokedAT)
 
 					assert.Equal(t, authorizationReq.RedirectURI, output.RedirectURI)
-					assert.Equal(t, authorizationReq.Scopes, output.Scopes)
 
 					assert.Equal(t, &oauthAccessToken.ID, output.ID)
 				})
@@ -86,11 +157,11 @@ func TestOauthFormatter(t *testing.T) {
 				assert.Equal(t, &oauthAccessToken.ResourceOwnerID, output.ResourceOwnerID)
 				assert.Equal(t, &oauthAccessToken.Token, output.Token)
 				assert.Equal(t, &oauthAccessToken.CreatedAt, output.CreatedAt)
+				assert.Equal(t, &oauthAccessToken.Scopes, output.Scopes)
 				assert.Equal(t, 0, *output.ExpiresIn)
 				assert.Equal(t, oauthAccessToken.RevokedAT.Time, *output.RevokedAT)
 
 				assert.Equal(t, authorizationReq.RedirectURI, output.RedirectURI)
-				assert.Equal(t, authorizationReq.Scopes, output.Scopes)
 
 				assert.Equal(t, &oauthAccessToken.ID, output.ID)
 			})

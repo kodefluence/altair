@@ -14,8 +14,27 @@ func Oauth() core.OauthFormatter {
 	return &oauthFormatter{}
 }
 
-func (*oauthFormatter) AccessGrant(r entity.AuthorizationRequestJSON, e entity.OauthAccessGrant) entity.OauthAccessGrantJSON {
+func (*oauthFormatter) AccessGrant(e entity.OauthAccessGrant) entity.OauthAccessGrantJSON {
 	var data entity.OauthAccessGrantJSON
+
+	data.ID = &e.ID
+	data.OauthApplicationID = &e.OauthApplicationID
+	data.ResourceOwnerID = &e.ResourceOwnerID
+	data.Code = &e.Code
+	data.RedirectURI = &e.RedirectURI
+	data.Scopes = &e.Scopes
+
+	if time.Now().Before(e.ExpiresIn) {
+		data.ExpiresIn = util.IntToPointer(int(e.ExpiresIn.Sub(time.Now()).Seconds()))
+	} else {
+		data.ExpiresIn = util.IntToPointer(0)
+	}
+
+	data.CreatedAt = &e.CreatedAt
+
+	if e.RevokedAT.Valid {
+		data.RevokedAT = &e.RevokedAT.Time
+	}
 
 	return data
 }
@@ -27,7 +46,7 @@ func (*oauthFormatter) AccessToken(r entity.AuthorizationRequestJSON, e entity.O
 	data.OauthApplicationID = &e.OauthApplicationID
 	data.ResourceOwnerID = &e.ResourceOwnerID
 	data.Token = &e.Token
-	data.Scopes = r.Scopes
+	data.Scopes = &e.Scopes
 	data.RedirectURI = r.RedirectURI
 	data.CreatedAt = &e.CreatedAt
 
