@@ -13,13 +13,15 @@ import (
 
 type applicationManager struct {
 	formatter             core.OauthApplicationFormater
+	modelFormatter        core.ModelFormater
 	oauthApplicationModel core.OauthApplicationModel
 	applicationValidator  core.OauthValidator
 }
 
-func ApplicationManager(formatter core.OauthApplicationFormater, oauthApplicationModel core.OauthApplicationModel, applicationValidator core.OauthValidator) core.ApplicationManager {
+func ApplicationManager(formatter core.OauthApplicationFormater, modelFormatter core.ModelFormater, oauthApplicationModel core.OauthApplicationModel, applicationValidator core.OauthValidator) core.ApplicationManager {
 	return &applicationManager{
 		formatter:             formatter,
+		modelFormatter:        modelFormatter,
 		oauthApplicationModel: oauthApplicationModel,
 		applicationValidator:  applicationValidator,
 	}
@@ -68,7 +70,7 @@ func (am *applicationManager) Create(ctx context.Context, e entity.OauthApplicat
 		return entity.OauthApplicationJSON{}, err
 	}
 
-	id, err := am.oauthApplicationModel.Create(ctx, e)
+	id, err := am.oauthApplicationModel.Create(ctx, am.modelFormatter.OauthApplication(e))
 	if err != nil {
 		journal.Error("Error when creating oauth application data", err).
 			AddField("data", e).

@@ -21,7 +21,7 @@ type OauthApplicationModel interface {
 	One(ctx context.Context, ID int) (entity.OauthApplication, error)
 	OneByUIDandSecret(ctx context.Context, clientUID, clientSecret string) (entity.OauthApplication, error)
 	Count(ctx context.Context) (int, error)
-	Create(ctx context.Context, data entity.OauthApplicationJSON, txs ...*sql.Tx) (int, error)
+	Create(ctx context.Context, data entity.OauthApplicationInsertable, txs ...*sql.Tx) (int, error)
 }
 
 type OauthAccessTokenModel interface {

@@ -5,12 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"testing"
-	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/model"
-	"github.com/codefluence-x/altair/util"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -163,20 +161,17 @@ func TestOauthApplication(t *testing.T) {
 					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 				}
 
-				oauthApplication := entity.OauthApplicationJSON{
-					OwnerID:      util.IntToPointer(1),
-					OwnerType:    util.StringToPointer("confidential"),
-					Description:  util.StringToPointer("This is description"),
-					Scopes:       util.StringToPointer("This is scopes"),
-					ClientUID:    util.StringToPointer("This is client uid"),
-					ClientSecret: util.StringToPointer("This is client secret"),
-					RevokedAt:    nil,
-					CreatedAt:    util.TimeToPointer(time.Now()),
-					UpdatedAt:    util.TimeToPointer(time.Now()),
+				oauthApplication := entity.OauthApplicationInsertable{
+					OwnerID:      nil,
+					OwnerType:    "confidential",
+					Description:  "This is description",
+					Scopes:       "This is scopes",
+					ClientUID:    "This is client uid",
+					ClientSecret: "This is client secret",
 				}
 
 				mockdb.ExpectExec(`insert into oauth_applications \(owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at\) values\(\?, \?, \?, \?, \?, \?, null, now\(\), now\(\)\)`).
-					WithArgs(*oauthApplication.OwnerID, *oauthApplication.OwnerType, *oauthApplication.Description, *oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
+					WithArgs(oauthApplication.OwnerID, oauthApplication.OwnerType, oauthApplication.Description, oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				oauthApplicationModel := model.OauthApplication(db)
@@ -194,23 +189,20 @@ func TestOauthApplication(t *testing.T) {
 						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 					}
 
-					oauthApplication := entity.OauthApplicationJSON{
-						OwnerID:      util.IntToPointer(1),
-						OwnerType:    util.StringToPointer("confidential"),
-						Description:  util.StringToPointer("This is description"),
-						Scopes:       util.StringToPointer("This is scopes"),
-						ClientUID:    util.StringToPointer("This is client uid"),
-						ClientSecret: util.StringToPointer("This is client secret"),
-						RevokedAt:    nil,
-						CreatedAt:    util.TimeToPointer(time.Now()),
-						UpdatedAt:    util.TimeToPointer(time.Now()),
+					oauthApplication := entity.OauthApplicationInsertable{
+						OwnerID:      nil,
+						OwnerType:    "confidential",
+						Description:  "This is description",
+						Scopes:       "This is scopes",
+						ClientUID:    "This is client uid",
+						ClientSecret: "This is client secret",
 					}
 
 					mockdb.ExpectBegin()
 					tx, _ := db.Begin()
 
 					mockdb.ExpectExec(`insert into oauth_applications \(owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at\) values\(\?, \?, \?, \?, \?, \?, null, now\(\), now\(\)\)`).
-						WithArgs(*oauthApplication.OwnerID, *oauthApplication.OwnerType, *oauthApplication.Description, *oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
+						WithArgs(oauthApplication.OwnerID, oauthApplication.OwnerType, oauthApplication.Description, oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
 						WillReturnResult(sqlmock.NewResult(1, 1))
 
 					oauthApplicationModel := model.OauthApplication(db)
@@ -229,20 +221,17 @@ func TestOauthApplication(t *testing.T) {
 						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 					}
 
-					oauthApplication := entity.OauthApplicationJSON{
-						OwnerID:      util.IntToPointer(1),
-						OwnerType:    util.StringToPointer("confidential"),
-						Description:  util.StringToPointer("This is description"),
-						Scopes:       util.StringToPointer("This is scopes"),
-						ClientUID:    util.StringToPointer("This is client uid"),
-						ClientSecret: util.StringToPointer("This is client secret"),
-						RevokedAt:    nil,
-						CreatedAt:    util.TimeToPointer(time.Now()),
-						UpdatedAt:    util.TimeToPointer(time.Now()),
+					oauthApplication := entity.OauthApplicationInsertable{
+						OwnerID:      nil,
+						OwnerType:    "confidential",
+						Description:  "This is description",
+						Scopes:       "This is scopes",
+						ClientUID:    "This is client uid",
+						ClientSecret: "This is client secret",
 					}
 
 					mockdb.ExpectExec(`insert into oauth_applications \(owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at\) values\(\?, \?, \?, \?, \?, \?, null, now\(\), now\(\)\)`).
-						WithArgs(*oauthApplication.OwnerID, *oauthApplication.OwnerType, *oauthApplication.Description, *oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
+						WithArgs(oauthApplication.OwnerID, oauthApplication.OwnerType, oauthApplication.Description, oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
 						WillReturnError(errors.New("unexpected error"))
 
 					oauthApplicationModel := model.OauthApplication(db)
@@ -259,20 +248,17 @@ func TestOauthApplication(t *testing.T) {
 						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 					}
 
-					oauthApplication := entity.OauthApplicationJSON{
-						OwnerID:      util.IntToPointer(1),
-						OwnerType:    util.StringToPointer("confidential"),
-						Description:  util.StringToPointer("This is description"),
-						Scopes:       util.StringToPointer("This is scopes"),
-						ClientUID:    util.StringToPointer("This is client uid"),
-						ClientSecret: util.StringToPointer("This is client secret"),
-						RevokedAt:    nil,
-						CreatedAt:    util.TimeToPointer(time.Now()),
-						UpdatedAt:    util.TimeToPointer(time.Now()),
+					oauthApplication := entity.OauthApplicationInsertable{
+						OwnerID:      nil,
+						OwnerType:    "confidential",
+						Description:  "This is description",
+						Scopes:       "This is scopes",
+						ClientUID:    "This is client uid",
+						ClientSecret: "This is client secret",
 					}
 
 					mockdb.ExpectExec(`insert into oauth_applications \(owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at\) values\(\?, \?, \?, \?, \?, \?, null, now\(\), now\(\)\)`).
-						WithArgs(*oauthApplication.OwnerID, *oauthApplication.OwnerType, *oauthApplication.Description, *oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
+						WithArgs(oauthApplication.OwnerID, oauthApplication.OwnerType, oauthApplication.Description, oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
 						WillReturnResult(sqlmock.NewErrorResult(errors.New("unexpected error")))
 
 					oauthApplicationModel := model.OauthApplication(db)

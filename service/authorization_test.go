@@ -446,6 +446,51 @@ func TestAuthorization(t *testing.T) {
 				assert.Equal(t, oauthAccessGrantJSON, results)
 			})
 
+			t.Run("Oauth application model return error", func(t *testing.T) {
+
+				t.Run("Not found error", func(t *testing.T) {
+					t.Run("Return error 404", func(t *testing.T) {
+						oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+						oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+						oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+						modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
+						oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
+
+						ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+
+						authorizationRequest := entity.AuthorizationRequestJSON{
+							ResponseType:    util.StringToPointer("code"),
+							ResourceOwnerID: util.IntToPointer(1),
+							ClientUID:       util.StringToPointer(aurelia.Hash("x", "y")),
+							ClientSecret:    util.StringToPointer(aurelia.Hash("z", "a")),
+							RedirectURI:     util.StringToPointer("http://github.com"),
+							Scopes:          util.StringToPointer("public users"),
+						}
+
+						expectedError := &entity.Error{
+							HttpStatus: http.StatusNotFound,
+							Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "client_uid & client_secret")),
+						}
+
+						gomock.InOrder(
+							oauthApplicationModel.EXPECT().OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).Return(entity.OauthApplication{}, sql.ErrNoRows),
+							oauthValidator.EXPECT().ValidateAuthorizationGrant(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+							modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(gomock.Any(), gomock.Any()).Times(0),
+							oauthAccessGrantModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
+							oauthAccessGrantModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
+							oauthFormatterMock.EXPECT().AccessGrant(gomock.Any()).Times(0),
+						)
+
+						authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+						results, err := authorizationService.Grantor(ctx, authorizationRequest)
+						assert.NotNil(t, err)
+						assert.Equal(t, expectedError, err)
+						assert.Equal(t, entity.OauthAccessGrantJSON{}, results)
+					})
+				})
+			})
+
 			t.Run("Create oauth access grants failed", func(t *testing.T) {
 				t.Run("Return error 500", func(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
