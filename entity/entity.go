@@ -80,6 +80,15 @@ type OauthApplicationJSON struct {
 	UpdatedAt    *time.Time `json:"updated_at"`
 }
 
+type OauthApplicationInsertable struct {
+	OwnerID      interface{}
+	OwnerType    string
+	Description  interface{}
+	Scopes       interface{}
+	ClientUID    string
+	ClientSecret string
+}
+
 type AuthorizationRequestJSON struct {
 	ResponseType *string `json:"response_type"`
 
