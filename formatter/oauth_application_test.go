@@ -24,8 +24,14 @@ func TestOauthApplication(t *testing.T) {
 							Int64: 1,
 							Valid: true,
 						},
-						Description:  "Application 01",
-						Scopes:       "public user",
+						Description: sql.NullString{
+							String: "Application 01",
+							Valid:  true,
+						},
+						Scopes: sql.NullString{
+							String: "public users",
+							Valid:  true,
+						},
 						ClientUID:    "clientuid01",
 						ClientSecret: "clientsecret01",
 						RevokedAt: mysql.NullTime{
@@ -41,8 +47,14 @@ func TestOauthApplication(t *testing.T) {
 							Int64: 2,
 							Valid: true,
 						},
-						Description:  "Application 02",
-						Scopes:       "public user",
+						Description: sql.NullString{
+							String: "Application 02",
+							Valid:  true,
+						},
+						Scopes: sql.NullString{
+							String: "public users",
+							Valid:  true,
+						},
 						ClientUID:    "clientuid02",
 						ClientSecret: "clientsecret02",
 						RevokedAt: mysql.NullTime{

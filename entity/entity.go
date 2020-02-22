@@ -11,8 +11,8 @@ type OauthApplication struct {
 	ID           int
 	OwnerID      sql.NullInt64
 	OwnerType    string
-	Description  string
-	Scopes       string
+	Description  sql.NullString
+	Scopes       sql.NullString
 	ClientUID    string
 	ClientSecret string
 	RevokedAt    mysql.NullTime

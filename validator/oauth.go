@@ -58,7 +58,7 @@ func (a *application) ValidateAuthorizationGrant(ctx context.Context, r entity.A
 	}
 
 	requestScopes := strings.Fields(*r.Scopes)
-	applicationScopes := strings.Fields(application.Scopes)
+	applicationScopes := strings.Fields(application.Scopes.String)
 
 	var invalidScope []string
 

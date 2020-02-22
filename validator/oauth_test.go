@@ -2,6 +2,7 @@ package validator_test
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"testing"
@@ -89,7 +90,10 @@ func TestApplication(t *testing.T) {
 				}
 
 				oauthApplication := entity.OauthApplication{
-					Scopes: "public users stores",
+					Scopes: sql.NullString{
+						String: "public users",
+						Valid:  true,
+					},
 				}
 
 				applicationValidator := validator.Oauth()
@@ -106,7 +110,10 @@ func TestApplication(t *testing.T) {
 				}
 
 				oauthApplication := entity.OauthApplication{
-					Scopes: "public users",
+					Scopes: sql.NullString{
+						String: "public users",
+						Valid:  true,
+					},
 				}
 
 				applicationValidator := validator.Oauth()
@@ -132,7 +139,10 @@ func TestApplication(t *testing.T) {
 				}
 
 				oauthApplication := entity.OauthApplication{
-					Scopes: "public users stores",
+					Scopes: sql.NullString{
+						String: "public users",
+						Valid:  true,
+					},
 				}
 
 				applicationValidator := validator.Oauth()
@@ -148,7 +158,10 @@ func TestApplication(t *testing.T) {
 				}
 
 				oauthApplication := entity.OauthApplication{
-					Scopes: "public users stores",
+					Scopes: sql.NullString{
+						String: "public users",
+						Valid:  true,
+					},
 				}
 
 				expectedErr := &entity.Error{
@@ -179,7 +192,10 @@ func TestApplication(t *testing.T) {
 				}
 
 				oauthApplication := entity.OauthApplication{
-					Scopes: "public users stores",
+					Scopes: sql.NullString{
+						String: "public users",
+						Valid:  true,
+					},
 				}
 
 				ctx := context.Background()

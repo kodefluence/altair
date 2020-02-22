@@ -28,8 +28,6 @@ func (oa oauthApplication) Application(ctx context.Context, application entity.O
 	oauthApplicationJSON := entity.OauthApplicationJSON{
 		ID:           &application.ID,
 		OwnerType:    &application.OwnerType,
-		Description:  &application.Description,
-		Scopes:       &application.Scopes,
 		ClientUID:    &application.ClientUID,
 		ClientSecret: &application.ClientSecret,
 		CreatedAt:    &application.CreatedAt,
@@ -42,6 +40,14 @@ func (oa oauthApplication) Application(ctx context.Context, application entity.O
 
 	if application.RevokedAt.Valid {
 		oauthApplicationJSON.RevokedAt = &application.RevokedAt.Time
+	}
+
+	if application.Description.Valid {
+		oauthApplicationJSON.Description = &application.Description.String
+	}
+
+	if application.Scopes.Valid {
+		oauthApplicationJSON.Scopes = &application.Scopes.String
 	}
 
 	return oauthApplicationJSON
