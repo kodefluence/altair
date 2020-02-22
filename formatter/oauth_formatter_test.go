@@ -1,6 +1,7 @@
 package formatter_test
 
 import (
+	"database/sql"
 	"testing"
 	"time"
 
@@ -22,12 +23,18 @@ func TestOauthFormatter(t *testing.T) {
 					OauthApplicationID: 1,
 					ResourceOwnerID:    1,
 					Code:               util.SHA1(),
-					RedirectURI:        "https://github.com",
 					RevokedAT: mysql.NullTime{
 						Time:  time.Time{},
 						Valid: false,
 					},
-					Scopes:    "public users stores",
+					RedirectURI: sql.NullString{
+						String: "https://github.com",
+						Valid:  true,
+					},
+					Scopes: sql.NullString{
+						String: "public users stores",
+						Valid:  true,
+					},
 					ExpiresIn: time.Now().Add(time.Hour),
 					CreatedAt: time.Now(),
 				}
@@ -38,14 +45,14 @@ func TestOauthFormatter(t *testing.T) {
 				assert.Equal(t, &oauthAccessGrant.OauthApplicationID, output.OauthApplicationID)
 				assert.Equal(t, &oauthAccessGrant.ResourceOwnerID, output.ResourceOwnerID)
 				assert.Equal(t, &oauthAccessGrant.Code, output.Code)
-				assert.Equal(t, &oauthAccessGrant.RedirectURI, output.RedirectURI)
+				assert.Equal(t, &oauthAccessGrant.RedirectURI.String, output.RedirectURI)
 				assert.Equal(t, &oauthAccessGrant.CreatedAt, output.CreatedAt)
 				assert.LessOrEqual(t, *output.ExpiresIn, int(oauthAccessGrant.ExpiresIn.Sub(time.Now()).Seconds()))
 				assert.Greater(t, *output.ExpiresIn, 3500)
 				assert.Nil(t, output.RevokedAT)
 
-				assert.Equal(t, &oauthAccessGrant.RedirectURI, output.RedirectURI)
-				assert.Equal(t, &oauthAccessGrant.Scopes, output.Scopes)
+				assert.Equal(t, &oauthAccessGrant.RedirectURI.String, output.RedirectURI)
+				assert.Equal(t, &oauthAccessGrant.Scopes.String, output.Scopes)
 
 				assert.Equal(t, &oauthAccessGrant.ID, output.ID)
 			})
@@ -56,10 +63,16 @@ func TestOauthFormatter(t *testing.T) {
 					OauthApplicationID: 1,
 					ResourceOwnerID:    1,
 					Code:               util.SHA1(),
-					RedirectURI:        "https://github.com",
-					Scopes:             "public users stores",
-					ExpiresIn:          time.Now().Add(-time.Hour),
-					CreatedAt:          time.Now().Add(-time.Hour * 2),
+					RedirectURI: sql.NullString{
+						String: "https://github.com",
+						Valid:  true,
+					},
+					Scopes: sql.NullString{
+						String: "public users stores",
+						Valid:  true,
+					},
+					ExpiresIn: time.Now().Add(-time.Hour),
+					CreatedAt: time.Now().Add(-time.Hour * 2),
 					RevokedAT: mysql.NullTime{
 						Valid: true,
 						Time:  time.Now(),
@@ -72,13 +85,13 @@ func TestOauthFormatter(t *testing.T) {
 				assert.Equal(t, &oauthAccessGrant.OauthApplicationID, output.OauthApplicationID)
 				assert.Equal(t, &oauthAccessGrant.ResourceOwnerID, output.ResourceOwnerID)
 				assert.Equal(t, &oauthAccessGrant.Code, output.Code)
-				assert.Equal(t, &oauthAccessGrant.RedirectURI, output.RedirectURI)
+				assert.Equal(t, &oauthAccessGrant.RedirectURI.String, output.RedirectURI)
 				assert.Equal(t, &oauthAccessGrant.CreatedAt, output.CreatedAt)
 				assert.Equal(t, 0, *output.ExpiresIn)
 				assert.Equal(t, &oauthAccessGrant.RevokedAT.Time, output.RevokedAT)
 
-				assert.Equal(t, &oauthAccessGrant.RedirectURI, output.RedirectURI)
-				assert.Equal(t, &oauthAccessGrant.Scopes, output.Scopes)
+				assert.Equal(t, &oauthAccessGrant.RedirectURI.String, output.RedirectURI)
+				assert.Equal(t, &oauthAccessGrant.Scopes.String, output.Scopes)
 
 				assert.Equal(t, &oauthAccessGrant.ID, output.ID)
 			})
@@ -103,9 +116,12 @@ func TestOauthFormatter(t *testing.T) {
 						OauthApplicationID: 1,
 						ResourceOwnerID:    1,
 						Token:              aurelia.Hash("", ""),
-						Scopes:             "public users stores",
-						ExpiresIn:          time.Now().Add(time.Hour),
-						CreatedAt:          time.Now(),
+						Scopes: sql.NullString{
+							String: "public users stores",
+							Valid:  true,
+						},
+						ExpiresIn: time.Now().Add(time.Hour),
+						CreatedAt: time.Now(),
 					}
 
 					output := formatter.Oauth().AccessToken(authorizationReq, oauthAccessToken)
@@ -115,7 +131,7 @@ func TestOauthFormatter(t *testing.T) {
 					assert.Equal(t, &oauthAccessToken.ResourceOwnerID, output.ResourceOwnerID)
 					assert.Equal(t, &oauthAccessToken.Token, output.Token)
 					assert.Equal(t, &oauthAccessToken.CreatedAt, output.CreatedAt)
-					assert.Equal(t, &oauthAccessToken.Scopes, output.Scopes)
+					assert.Equal(t, &oauthAccessToken.Scopes.String, output.Scopes)
 					assert.LessOrEqual(t, *output.ExpiresIn, int(oauthAccessToken.ExpiresIn.Sub(time.Now()).Seconds()))
 					assert.Greater(t, *output.ExpiresIn, 3500)
 					assert.Nil(t, output.RevokedAT)
@@ -141,9 +157,12 @@ func TestOauthFormatter(t *testing.T) {
 					OauthApplicationID: 1,
 					ResourceOwnerID:    1,
 					Token:              aurelia.Hash("", ""),
-					Scopes:             "public users stores",
-					ExpiresIn:          time.Now().Add(-time.Hour),
-					CreatedAt:          time.Now().Add(-time.Hour * 2),
+					Scopes: sql.NullString{
+						String: "public users stores",
+						Valid:  true,
+					},
+					ExpiresIn: time.Now().Add(-time.Hour),
+					CreatedAt: time.Now().Add(-time.Hour * 2),
 					RevokedAT: mysql.NullTime{
 						Valid: true,
 						Time:  time.Now(),
@@ -157,7 +176,7 @@ func TestOauthFormatter(t *testing.T) {
 				assert.Equal(t, &oauthAccessToken.ResourceOwnerID, output.ResourceOwnerID)
 				assert.Equal(t, &oauthAccessToken.Token, output.Token)
 				assert.Equal(t, &oauthAccessToken.CreatedAt, output.CreatedAt)
-				assert.Equal(t, &oauthAccessToken.Scopes, output.Scopes)
+				assert.Equal(t, &oauthAccessToken.Scopes.String, output.Scopes)
 				assert.Equal(t, 0, *output.ExpiresIn)
 				assert.Equal(t, oauthAccessToken.RevokedAT.Time, *output.RevokedAT)
 

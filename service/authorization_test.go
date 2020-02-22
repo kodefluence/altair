@@ -74,9 +74,12 @@ func TestAuthorization(t *testing.T) {
 					OauthApplicationID: oauthApplication.ID,
 					ResourceOwnerID:    *authorizationRequest.ResourceOwnerID,
 					Token:              aurelia.Hash("x", "y"),
-					Scopes:             *authorizationRequest.Scopes,
-					ExpiresIn:          time.Now().Add(time.Hour * 4),
-					CreatedAt:          time.Now(),
+					Scopes: sql.NullString{
+						String: *authorizationRequest.Scopes,
+						Valid:  true,
+					},
+					ExpiresIn: time.Now().Add(time.Hour * 4),
+					CreatedAt: time.Now(),
 				}
 
 				oauthAccessTokenInsertable := modelFormatter.AccessTokenFromAuthorizationRequest(authorizationRequest, oauthApplication)
@@ -366,9 +369,12 @@ func TestAuthorization(t *testing.T) {
 						OauthApplicationID: oauthApplication.ID,
 						ResourceOwnerID:    *authorizationRequest.ResourceOwnerID,
 						Token:              aurelia.Hash("x", "y"),
-						Scopes:             *authorizationRequest.Scopes,
-						ExpiresIn:          time.Now().Add(time.Hour * 4),
-						CreatedAt:          time.Now(),
+						Scopes: sql.NullString{
+							String: *authorizationRequest.Scopes,
+							Valid:  true,
+						},
+						ExpiresIn: time.Now().Add(time.Hour * 4),
+						CreatedAt: time.Now(),
 					}
 
 					oauthAccessTokenInsertable := modelFormatter.AccessTokenFromAuthorizationRequest(authorizationRequest, oauthApplication)
@@ -446,10 +452,16 @@ func TestAuthorization(t *testing.T) {
 					OauthApplicationID: oauthApplication.ID,
 					ResourceOwnerID:    *authorizationRequest.ResourceOwnerID,
 					Code:               util.SHA1(),
-					Scopes:             *authorizationRequest.Scopes,
 					ExpiresIn:          time.Now().Add(time.Hour * 4),
 					CreatedAt:          time.Now(),
-					RedirectURI:        *authorizationRequest.RedirectURI,
+					RedirectURI: sql.NullString{
+						String: *authorizationRequest.RedirectURI,
+						Valid:  true,
+					},
+					Scopes: sql.NullString{
+						String: *authorizationRequest.Scopes,
+						Valid:  true,
+					},
 					RevokedAT: mysql.NullTime{
 						Time:  time.Now(),
 						Valid: false,
@@ -636,10 +648,16 @@ func TestAuthorization(t *testing.T) {
 						OauthApplicationID: oauthApplication.ID,
 						ResourceOwnerID:    *authorizationRequest.ResourceOwnerID,
 						Code:               util.SHA1(),
-						Scopes:             *authorizationRequest.Scopes,
-						ExpiresIn:          time.Now().Add(time.Hour * 4),
 						CreatedAt:          time.Now(),
-						RedirectURI:        *authorizationRequest.RedirectURI,
+						ExpiresIn:          time.Now().Add(time.Hour * 4),
+						RedirectURI: sql.NullString{
+							String: *authorizationRequest.RedirectURI,
+							Valid:  true,
+						},
+						Scopes: sql.NullString{
+							String: *authorizationRequest.Scopes,
+							Valid:  true,
+						},
 						RevokedAT: mysql.NullTime{
 							Time:  time.Now(),
 							Valid: false,

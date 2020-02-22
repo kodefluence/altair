@@ -25,8 +25,8 @@ type OauthAccessGrant struct {
 	OauthApplicationID int
 	ResourceOwnerID    int
 	Code               string
-	RedirectURI        string
-	Scopes             string
+	RedirectURI        sql.NullString
+	Scopes             sql.NullString
 	ExpiresIn          time.Time
 	CreatedAt          time.Time
 	RevokedAT          mysql.NullTime
@@ -49,7 +49,7 @@ type OauthAccessToken struct {
 	OauthApplicationID int
 	ResourceOwnerID    int
 	Token              string
-	Scopes             string
+	Scopes             sql.NullString
 	ExpiresIn          time.Time
 	CreatedAt          time.Time
 	RevokedAT          mysql.NullTime

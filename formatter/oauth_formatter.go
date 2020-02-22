@@ -21,8 +21,8 @@ func (*oauthFormatter) AccessGrant(e entity.OauthAccessGrant) entity.OauthAccess
 	data.OauthApplicationID = &e.OauthApplicationID
 	data.ResourceOwnerID = &e.ResourceOwnerID
 	data.Code = &e.Code
-	data.RedirectURI = &e.RedirectURI
-	data.Scopes = &e.Scopes
+	data.RedirectURI = &e.RedirectURI.String
+	data.Scopes = &e.Scopes.String
 
 	if time.Now().Before(e.ExpiresIn) {
 		data.ExpiresIn = util.IntToPointer(int(e.ExpiresIn.Sub(time.Now()).Seconds()))
@@ -46,7 +46,7 @@ func (*oauthFormatter) AccessToken(r entity.AuthorizationRequestJSON, e entity.O
 	data.OauthApplicationID = &e.OauthApplicationID
 	data.ResourceOwnerID = &e.ResourceOwnerID
 	data.Token = &e.Token
-	data.Scopes = &e.Scopes
+	data.Scopes = &e.Scopes.String
 	data.RedirectURI = r.RedirectURI
 	data.CreatedAt = &e.CreatedAt
 
