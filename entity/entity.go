@@ -109,3 +109,12 @@ type OauthAccessTokenInsertable struct {
 	Scopes             string
 	ExpiresIn          time.Time
 }
+
+type OauthAccessGrantInsertable struct {
+	OauthApplicationID int
+	ResourceOwnerID    int
+	Scopes             string
+	Code               string
+	RedirectURI        string
+	ExpiresIn          time.Time
+}
