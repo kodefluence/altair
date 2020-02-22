@@ -12,9 +12,9 @@ func IntToPointer(i int) *int {
 	return &i
 }
 
-func PointerToInt(i *int) int {
+func PointerToInt(i *int) interface{} {
 	if i == nil {
-		return 0
+		return nil
 	}
 
 	return *i
@@ -24,9 +24,9 @@ func TimeToPointer(t time.Time) *time.Time {
 	return &t
 }
 
-func PointerToTime(t *time.Time) time.Time {
+func PointerToTime(t *time.Time) interface{} {
 	if t == nil {
-		return time.Time{}
+		return nil
 	}
 
 	return *t
@@ -36,9 +36,9 @@ func StringToPointer(s string) *string {
 	return &s
 }
 
-func PointerToString(s *string) string {
+func PointerToString(s *string) interface{} {
 	if s == nil {
-		return ""
+		return nil
 	}
 
 	return *s
