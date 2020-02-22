@@ -15,6 +15,7 @@ import (
 	"github.com/codefluence-x/altair/service"
 	"github.com/codefluence-x/altair/util"
 	"github.com/codefluence-x/aurelia"
+	"github.com/go-sql-driver/mysql"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -374,7 +375,215 @@ func TestAuthorization(t *testing.T) {
 		})
 
 		t.Run("Given context and authorization request with a response type of code", func(t *testing.T) {
+			t.Run("Return entity.OauthAccessGrantJSON and nil", func(t *testing.T) {
+				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+				modelFormatter := formatter.Model(time.Hour*4, time.Hour*2)
+				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
+				oauthFormatter := formatter.Oauth()
+				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
+				ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+
+				authorizationRequest := entity.AuthorizationRequestJSON{
+					ResponseType:    util.StringToPointer("code"),
+					ResourceOwnerID: util.IntToPointer(1),
+					ClientUID:       util.StringToPointer(aurelia.Hash("x", "y")),
+					ClientSecret:    util.StringToPointer(aurelia.Hash("z", "a")),
+					RedirectURI:     util.StringToPointer("http://github.com"),
+					Scopes:          util.StringToPointer("public users"),
+				}
+
+				oauthApplication := entity.OauthApplication{
+					ID: 1,
+					OwnerID: sql.NullInt64{
+						Int64: 1,
+						Valid: true,
+					},
+					OwnerType:    "public",
+					Description:  "Blablabla",
+					Scopes:       "public users stores",
+					ClientUID:    *authorizationRequest.ClientUID,
+					ClientSecret: *authorizationRequest.ClientSecret,
+					CreatedAt:    time.Now().Add(-time.Hour * 4),
+					UpdatedAt:    time.Now(),
+				}
+
+				oauthAccessGrant := entity.OauthAccessGrant{
+					ID:                 1,
+					OauthApplicationID: oauthApplication.ID,
+					ResourceOwnerID:    *authorizationRequest.ResourceOwnerID,
+					Code:               util.SHA1(),
+					Scopes:             *authorizationRequest.Scopes,
+					ExpiresIn:          time.Now().Add(time.Hour * 4),
+					CreatedAt:          time.Now(),
+					RedirectURI:        *authorizationRequest.RedirectURI,
+					RevokedAT: mysql.NullTime{
+						Time:  time.Now(),
+						Valid: false,
+					},
+				}
+
+				oauthAccessGrantInsertable := modelFormatter.AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication)
+				oauthAccessGrantJSON := oauthFormatter.AccessGrant(oauthAccessGrant)
+
+				gomock.InOrder(
+					oauthApplicationModel.EXPECT().
+						OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+						Return(oauthApplication, nil),
+					oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
+					modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessGrantInsertable),
+					oauthAccessGrantModel.EXPECT().Create(ctx, oauthAccessGrantInsertable).Return(oauthAccessGrant.ID, nil),
+					oauthAccessGrantModel.EXPECT().One(ctx, oauthAccessGrant.ID).Return(oauthAccessGrant, nil),
+					oauthFormatterMock.EXPECT().AccessGrant(oauthAccessGrant).Return(oauthAccessGrantJSON),
+				)
+
+				authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+				results, err := authorizationService.Grantor(ctx, authorizationRequest)
+				assert.Nil(t, err)
+				assert.Equal(t, oauthAccessGrantJSON, results)
+			})
+
+			t.Run("Create oauth access grants failed", func(t *testing.T) {
+				t.Run("Return error 500", func(t *testing.T) {
+					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+					modelFormatter := formatter.Model(time.Hour*4, time.Hour*2)
+					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
+					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
+
+					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+
+					authorizationRequest := entity.AuthorizationRequestJSON{
+						ResponseType:    util.StringToPointer("code"),
+						ResourceOwnerID: util.IntToPointer(1),
+						ClientUID:       util.StringToPointer(aurelia.Hash("x", "y")),
+						ClientSecret:    util.StringToPointer(aurelia.Hash("z", "a")),
+						RedirectURI:     util.StringToPointer("http://github.com"),
+						Scopes:          util.StringToPointer("public users"),
+					}
+
+					oauthApplication := entity.OauthApplication{
+						ID: 1,
+						OwnerID: sql.NullInt64{
+							Int64: 1,
+							Valid: true,
+						},
+						OwnerType:    "public",
+						Description:  "Blablabla",
+						Scopes:       "public users stores",
+						ClientUID:    *authorizationRequest.ClientUID,
+						ClientSecret: *authorizationRequest.ClientSecret,
+						CreatedAt:    time.Now().Add(-time.Hour * 4),
+						UpdatedAt:    time.Now(),
+					}
+
+					oauthAccessGrantInsertable := modelFormatter.AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication)
+
+					gomock.InOrder(
+						oauthApplicationModel.EXPECT().
+							OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+							Return(oauthApplication, nil),
+						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
+						modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessGrantInsertable),
+						oauthAccessGrantModel.EXPECT().Create(ctx, oauthAccessGrantInsertable).Return(0, errors.New("unexpected error")),
+						oauthAccessGrantModel.EXPECT().One(ctx, gomock.Any()).Times(0),
+						oauthFormatterMock.EXPECT().AccessGrant(gomock.Any()).Times(0),
+					)
+
+					expectedErr := &entity.Error{
+						HttpStatus: http.StatusInternalServerError,
+						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+					}
+
+					authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+					results, err := authorizationService.Grantor(ctx, authorizationRequest)
+					assert.NotNil(t, err)
+					assert.Equal(t, expectedErr, err)
+					assert.Equal(t, entity.OauthAccessGrantJSON{}, results)
+				})
+			})
+
+			t.Run("Finding newly created oauth access grants failed", func(t *testing.T) {
+				t.Run("Return error 500", func(t *testing.T) {
+					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+					modelFormatter := formatter.Model(time.Hour*4, time.Hour*2)
+					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
+					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
+
+					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+
+					authorizationRequest := entity.AuthorizationRequestJSON{
+						ResponseType:    util.StringToPointer("code"),
+						ResourceOwnerID: util.IntToPointer(1),
+						ClientUID:       util.StringToPointer(aurelia.Hash("x", "y")),
+						ClientSecret:    util.StringToPointer(aurelia.Hash("z", "a")),
+						RedirectURI:     util.StringToPointer("http://github.com"),
+						Scopes:          util.StringToPointer("public users"),
+					}
+
+					oauthApplication := entity.OauthApplication{
+						ID: 1,
+						OwnerID: sql.NullInt64{
+							Int64: 1,
+							Valid: true,
+						},
+						OwnerType:    "public",
+						Description:  "Blablabla",
+						Scopes:       "public users stores",
+						ClientUID:    *authorizationRequest.ClientUID,
+						ClientSecret: *authorizationRequest.ClientSecret,
+						CreatedAt:    time.Now().Add(-time.Hour * 4),
+						UpdatedAt:    time.Now(),
+					}
+
+					oauthAccessGrant := entity.OauthAccessGrant{
+						ID:                 1,
+						OauthApplicationID: oauthApplication.ID,
+						ResourceOwnerID:    *authorizationRequest.ResourceOwnerID,
+						Code:               util.SHA1(),
+						Scopes:             *authorizationRequest.Scopes,
+						ExpiresIn:          time.Now().Add(time.Hour * 4),
+						CreatedAt:          time.Now(),
+						RedirectURI:        *authorizationRequest.RedirectURI,
+						RevokedAT: mysql.NullTime{
+							Time:  time.Now(),
+							Valid: false,
+						},
+					}
+
+					oauthAccessGrantInsertable := modelFormatter.AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication)
+
+					gomock.InOrder(
+						oauthApplicationModel.EXPECT().
+							OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+							Return(oauthApplication, nil),
+						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
+						modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessGrantInsertable),
+						oauthAccessGrantModel.EXPECT().Create(ctx, oauthAccessGrantInsertable).Return(oauthAccessGrant.ID, nil),
+						oauthAccessGrantModel.EXPECT().One(ctx, oauthAccessGrant.ID).Return(entity.OauthAccessGrant{}, errors.New("unexpected error")),
+						oauthFormatterMock.EXPECT().AccessGrant(gomock.Any()).Times(0),
+					)
+
+					expectedErr := &entity.Error{
+						HttpStatus: http.StatusInternalServerError,
+						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+					}
+
+					authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+					results, err := authorizationService.Grantor(ctx, authorizationRequest)
+					assert.NotNil(t, err)
+					assert.Equal(t, expectedErr, err)
+					assert.Equal(t, entity.OauthAccessGrantJSON{}, results)
+				})
+			})
 		})
 
 		t.Run("Given context and authorization request with a response type neither of code or token", func(t *testing.T) {

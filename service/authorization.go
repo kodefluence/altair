@@ -59,16 +59,44 @@ func (a *authorization) Grantor(ctx context.Context, authorizationReq entity.Aut
 	return nil, err
 }
 
-// WIP
 func (a *authorization) Grant(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthAccessGrantJSON, *entity.Error) {
 	var oauthAccessGrantJSON entity.OauthAccessGrantJSON
 
-	_, err := a.findAndValidateApplication(ctx, authorizationReq)
-	if err != nil {
-		return oauthAccessGrantJSON, err
+	oauthApplication, entityErr := a.findAndValidateApplication(ctx, authorizationReq)
+	if entityErr != nil {
+		return oauthAccessGrantJSON, entityErr
 	}
 
-	return oauthAccessGrantJSON, nil
+	id, err := a.oauthAccessGrantModel.Create(ctx, a.modelFormatter.AccessGrantFromAuthorizationRequest(authorizationReq, oauthApplication))
+	if err != nil {
+		journal.Error("Error creating access grant", err).
+			AddField("request", authorizationReq).
+			AddField("application", oauthApplication).
+			SetTags("service", "authorization", "grant").
+			Log()
+
+		return entity.OauthAccessGrantJSON{}, &entity.Error{
+			HttpStatus: http.StatusInternalServerError,
+			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+		}
+	}
+
+	oauthAccessGrant, err := a.oauthAccessGrantModel.One(ctx, id)
+	if err != nil {
+		journal.Error("Error selecting one access grant after creating the data", err).
+			AddField("request", authorizationReq).
+			AddField("last_inserted_id", id).
+			AddField("application", oauthApplication).
+			SetTags("service", "authorization", "grant").
+			Log()
+
+		return entity.OauthAccessGrantJSON{}, &entity.Error{
+			HttpStatus: http.StatusInternalServerError,
+			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+		}
+	}
+
+	return a.oauthFormatter.AccessGrant(oauthAccessGrant), nil
 }
 
 func (a *authorization) GrantToken(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthAccessTokenJSON, *entity.Error) {
@@ -80,7 +108,7 @@ func (a *authorization) GrantToken(ctx context.Context, authorizationReq entity.
 	id, err := a.oauthAccessTokenModel.Create(ctx, a.modelFormatter.AccessTokenFromAuthorizationRequest(authorizationReq, oauthApplication))
 	if err != nil {
 
-		journal.Error("Error creating access token", err).
+		journal.Error("Error creating access token after creating the data", err).
 			AddField("request", authorizationReq).
 			AddField("application", oauthApplication).
 			SetTags("service", "authorization", "grant_token").
