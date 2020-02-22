@@ -29,8 +29,9 @@ func TestAuthorization(t *testing.T) {
 			t.Run("Return entity.OauthAccessTokenJSON and nil", func(t *testing.T) {
 				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
 				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-				modelFormatter := formatter.Model(time.Hour * 4)
+				modelFormatter := formatter.Model(time.Hour*4, time.Hour*2)
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatter := formatter.Oauth()
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -85,7 +86,7 @@ func TestAuthorization(t *testing.T) {
 					oauthFormatterMock.EXPECT().AccessToken(authorizationRequest, oauthAccessToken).Return(oauthAccessTokenJSON),
 				)
 
-				authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+				authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
 				results, err := authorizationService.Grantor(ctx, authorizationRequest)
 				assert.Nil(t, err)
 				assert.Equal(t, oauthAccessTokenJSON, results)
@@ -97,6 +98,7 @@ func TestAuthorization(t *testing.T) {
 					t.Run("Return error 404", func(t *testing.T) {
 						oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+						oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
 						oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 						modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 						oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -126,7 +128,7 @@ func TestAuthorization(t *testing.T) {
 							oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
 						)
 
-						authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+						authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
 						results, err := authorizationService.Grantor(ctx, authorizationRequest)
 						assert.NotNil(t, err)
 						assert.Equal(t, expectedError, err)
@@ -138,6 +140,7 @@ func TestAuthorization(t *testing.T) {
 					t.Run("Return error 500", func(t *testing.T) {
 						oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+						oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
 						oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 						modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 						oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -167,7 +170,7 @@ func TestAuthorization(t *testing.T) {
 							oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
 						)
 
-						authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+						authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
 						results, err := authorizationService.Grantor(ctx, authorizationRequest)
 						assert.NotNil(t, err)
 						assert.Equal(t, expectedError, err)
@@ -180,6 +183,7 @@ func TestAuthorization(t *testing.T) {
 				t.Run("Return entity.Error", func(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -226,7 +230,7 @@ func TestAuthorization(t *testing.T) {
 						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
 					)
 
-					authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+					authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.NotNil(t, err)
 					assert.Equal(t, expectedError, err)
@@ -238,8 +242,9 @@ func TestAuthorization(t *testing.T) {
 				t.Run("Return error 500", func(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-					modelFormatter := formatter.Model(time.Hour * 4)
+					modelFormatter := formatter.Model(time.Hour*4, time.Hour*2)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
@@ -287,7 +292,7 @@ func TestAuthorization(t *testing.T) {
 						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 					}
 
-					authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+					authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.NotNil(t, err)
 					assert.Equal(t, expectedError, err)
@@ -299,8 +304,9 @@ func TestAuthorization(t *testing.T) {
 				t.Run("Return error 500", func(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-					modelFormatter := formatter.Model(time.Hour * 4)
+					modelFormatter := formatter.Model(time.Hour*4, time.Hour*2)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
@@ -358,7 +364,7 @@ func TestAuthorization(t *testing.T) {
 						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 					}
 
-					authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+					authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.NotNil(t, err)
 					assert.Equal(t, expectedError, err)
@@ -375,6 +381,7 @@ func TestAuthorization(t *testing.T) {
 			t.Run("Return error 422", func(t *testing.T) {
 				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
 				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -395,7 +402,7 @@ func TestAuthorization(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("response_type is invalid. Should be either `token` or `code`.")),
 				}
 
-				authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+				authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
 				results, err := authorizationService.Grantor(ctx, authorizationRequest)
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedError, err)

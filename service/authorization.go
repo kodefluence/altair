@@ -14,6 +14,7 @@ import (
 type authorization struct {
 	oauthApplicationModel core.OauthApplicationModel
 	oauthAccessTokenModel core.OauthAccessTokenModel
+	oauthAccessGrantModel core.OauthAccessGrantModel
 	oauthValidator        core.OauthValidator
 
 	modelFormatter core.ModelFormater
@@ -23,6 +24,7 @@ type authorization struct {
 func Authorization(
 	oauthApplicationModel core.OauthApplicationModel,
 	oauthAccessTokenModel core.OauthAccessTokenModel,
+	oauthAccessGrantModel core.OauthAccessGrantModel,
 	modelFormatter core.ModelFormater,
 	oauthValidator core.OauthValidator,
 	oauthFormatter core.OauthFormatter,
@@ -30,6 +32,7 @@ func Authorization(
 	return &authorization{
 		oauthApplicationModel: oauthApplicationModel,
 		oauthAccessTokenModel: oauthAccessTokenModel,
+		oauthAccessGrantModel: oauthAccessGrantModel,
 		modelFormatter:        modelFormatter,
 		oauthValidator:        oauthValidator,
 		oauthFormatter:        oauthFormatter,
