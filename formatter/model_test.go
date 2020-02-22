@@ -63,4 +63,30 @@ func TestModel(t *testing.T) {
 			})
 		})
 	})
+
+	t.Run("OauthApplication", func(t *testing.T) {
+		t.Run("Given authorization request and oauth application", func(t *testing.T) {
+			t.Run("Return oauth access grant insertable", func(t *testing.T) {
+
+				oauthApplicationJSON := entity.OauthApplicationJSON{
+					OwnerID:     util.IntToPointer(1),
+					OwnerType:   util.StringToPointer("confidential"),
+					Description: util.StringToPointer("Application 1"),
+					Scopes:      util.StringToPointer("public user"),
+				}
+
+				modelFormatter := formatter.Model(tokenExpiresIn, codeExpiresIn)
+				insertable := modelFormatter.OauthApplication(oauthApplicationJSON)
+
+				assert.Equal(t, *oauthApplicationJSON.OwnerID, insertable.OwnerID)
+				assert.Equal(t, *oauthApplicationJSON.OwnerType, insertable.OwnerType)
+				assert.Equal(t, *oauthApplicationJSON.Description, insertable.Description)
+				assert.Equal(t, *oauthApplicationJSON.Scopes, insertable.Scopes)
+				assert.NotEqual(t, "", insertable.ClientUID)
+				assert.NotEqual(t, "", insertable.ClientSecret)
+
+				// assert.Equal(t, application.ID, insertable.OauthApplicationID)
+			})
+		})
+	})
 }

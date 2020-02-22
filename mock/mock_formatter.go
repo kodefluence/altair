@@ -163,3 +163,17 @@ func (mr *MockModelFormaterMockRecorder) AccessGrantFromAuthorizationRequest(r, 
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessGrantFromAuthorizationRequest", reflect.TypeOf((*MockModelFormater)(nil).AccessGrantFromAuthorizationRequest), r, application)
 }
+
+// OauthApplication mocks base method
+func (m *MockModelFormater) OauthApplication(r entity.OauthApplicationJSON) entity.OauthApplicationInsertable {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OauthApplication", r)
+	ret0, _ := ret[0].(entity.OauthApplicationInsertable)
+	return ret0
+}
+
+// OauthApplication indicates an expected call of OauthApplication
+func (mr *MockModelFormaterMockRecorder) OauthApplication(r interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OauthApplication", reflect.TypeOf((*MockModelFormater)(nil).OauthApplication), r)
+}

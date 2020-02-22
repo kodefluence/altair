@@ -115,15 +115,15 @@ type OauthAccessTokenInsertable struct {
 	OauthApplicationID int
 	ResourceOwnerID    int
 	Token              string
-	Scopes             string
+	Scopes             interface{}
 	ExpiresIn          time.Time
 }
 
 type OauthAccessGrantInsertable struct {
 	OauthApplicationID int
 	ResourceOwnerID    int
-	Scopes             string
+	Scopes             interface{}
 	Code               string
-	RedirectURI        string
+	RedirectURI        interface{}
 	ExpiresIn          time.Time
 }
