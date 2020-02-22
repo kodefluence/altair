@@ -17,5 +17,6 @@ CREATE TABLE `oauth_access_grants` (
   KEY `id_oauth_application_id` (`id`, `oauth_application_id`),
   KEY `id_oauth_application_id_resource_owner_id` (`id`, `oauth_application_id`, `resource_owner_id`),
   KEY `oauth_application_id_resource_owner_id` (`oauth_application_id`, `resource_owner_id`)
+  KEY 'oauth_application_id_code' (`oauth_application_id`, `code`)
 
 ) ENGINE=InnoDB CHARSET=utf8 COLLATE=utf8_general_ci;
