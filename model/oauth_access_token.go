@@ -57,7 +57,7 @@ func (oat *oauthAccessToken) Create(ctx context.Context, data entity.OauthAccess
 	}
 
 	err := monitor(ctx, oat.Name(), query.InsertOauthAccessToken, func() error {
-		result, err := dbExecutable.Exec(query.InsertOauthAccessToken, data.OauthApplicationID, data.ResourceOwnerID, data.Token, data.ExpiresIn)
+		result, err := dbExecutable.Exec(query.InsertOauthAccessToken, data.OauthApplicationID, data.ResourceOwnerID, data.Token, data.Scopes, data.ExpiresIn)
 		if err != nil {
 			return err
 		}

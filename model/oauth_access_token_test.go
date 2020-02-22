@@ -111,6 +111,7 @@ func TestOauthAccessToken(t *testing.T) {
 				}
 
 				mockdb.ExpectExec(`insert into oauth_access_tokens \(oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at\) values\(\?, \?, \?, \?, \?, now\(\), null\)`).
+					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Token, insertable.Scopes, insertable.ExpiresIn).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				oauthAccessTokenModel := model.OauthAccessToken(db)
@@ -136,6 +137,7 @@ func TestOauthAccessToken(t *testing.T) {
 				}
 
 				mockdb.ExpectExec(`insert into oauth_access_tokens \(oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at\) values\(\?, \?, \?, \?, \?, now\(\), null\)`).
+					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Token, insertable.Scopes, insertable.ExpiresIn).
 					WillReturnError(errors.New("unexpected error"))
 
 				oauthAccessTokenModel := model.OauthAccessToken(db)
@@ -161,6 +163,7 @@ func TestOauthAccessToken(t *testing.T) {
 				}
 
 				mockdb.ExpectExec(`insert into oauth_access_tokens \(oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at\) values\(\?, \?, \?, \?, \?, now\(\), null\)`).
+					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Token, insertable.Scopes, insertable.ExpiresIn).
 					WillReturnResult(sqlmock.NewErrorResult(errors.New("unexpected error")))
 
 				oauthAccessTokenModel := model.OauthAccessToken(db)
@@ -189,6 +192,7 @@ func TestOauthAccessToken(t *testing.T) {
 
 				mockdb.ExpectBegin()
 				mockdb.ExpectExec(`insert into oauth_access_tokens \(oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at\) values\(\?, \?, \?, \?, \?, now\(\), null\)`).
+					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Token, insertable.Scopes, insertable.ExpiresIn).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				tx, _ := db.Begin()
