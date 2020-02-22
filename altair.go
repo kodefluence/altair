@@ -243,7 +243,7 @@ func runAPI() {
 	oauthValidator := validator.Oauth()
 
 	// Service
-	applicationManager := service.ApplicationManager(applicationFormatter, oauthApplicationModel, oauthValidator)
+	applicationManager := service.ApplicationManager(applicationFormatter, modelFormatter, oauthApplicationModel, oauthValidator)
 	authorization := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatter, oauthValidator, oauthFormatter)
 
 	apiEngine = gin.New()
