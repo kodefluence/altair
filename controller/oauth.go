@@ -14,3 +14,7 @@ func Oauth() core.OauthDispatcher {
 func (o oauthDispatcher) Application() core.OauthApplicationDispatcher {
 	return oauth.Application()
 }
+
+func (o oauthDispatcher) Authorization() core.AuthorizationDispatcher {
+	return oauth.Authorization()
+}

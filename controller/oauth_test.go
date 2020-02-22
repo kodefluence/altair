@@ -12,6 +12,7 @@ func TestOauthDispatcher(t *testing.T) {
 	t.Run("Dispatch", func(t *testing.T) {
 		assert.NotPanics(t, func() {
 			controller.Oauth().Application()
+			controller.Oauth().Authorization()
 		})
 	})
 }
