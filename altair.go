@@ -3,7 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -33,11 +36,34 @@ var (
 	migration *migrate.Migrate
 
 	apiEngine *gin.Engine
+
+	accessTokenTimeout time.Duration
+	accessGrantTimeout time.Duration
 )
 
 func main() {
 	_ = gotenv.Load()
+	loadConfig()
 	executeCommand()
+	shutdownFunc()
+}
+
+func shutdownFunc() {
+	closeConnection()
+	closeMigration()
+}
+
+func loadConfig() {
+	var err error
+	accessTokenTimeout, err = time.ParseDuration(os.Getenv("ACCESS_TOKEN_TIMEOUT"))
+	if err != nil {
+		os.Exit(1)
+	}
+
+	accessGrantTimeout, err = time.ParseDuration(os.Getenv("ACCESS_GRANT_TIMEOUT"))
+	if err != nil {
+		os.Exit(1)
+	}
 }
 
 func executeCommand() {
@@ -204,16 +230,21 @@ func runAPI() {
 	gin.SetMode(gin.ReleaseMode)
 
 	// Model
-	oauthModel := model.OauthApplication(mysqlDB)
+	oauthApplicationModel := model.OauthApplication(mysqlDB)
+	oauthAccessTokenModel := model.OauthAccessToken(mysqlDB)
+	oauthAccessGrantModel := model.OauthAccessGrant(mysqlDB)
 
 	// Formatter
 	applicationFormatter := formatter.OauthApplication()
+	modelFormatter := formatter.Model(accessTokenTimeout, accessGrantTimeout)
+	oauthFormatter := formatter.Oauth()
 
 	// Validator
 	oauthValidator := validator.Oauth()
 
 	// Service
-	applicationManager := service.ApplicationManager(applicationFormatter, oauthModel, oauthValidator)
+	applicationManager := service.ApplicationManager(applicationFormatter, oauthApplicationModel, oauthValidator)
+	authorization := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatter, oauthValidator, oauthFormatter)
 
 	apiEngine = gin.New()
 	apiEngine.GET("/health", controller.Health)
@@ -225,10 +256,24 @@ func runAPI() {
 	controller.Compile(internalEngine, controller.Oauth().Application().List(applicationManager))
 	controller.Compile(internalEngine, controller.Oauth().Application().One(applicationManager))
 	controller.Compile(internalEngine, controller.Oauth().Application().Create(applicationManager))
+	controller.Compile(internalEngine, controller.Oauth().Authorization().Grant(authorization))
 
-	if err := apiEngine.Run(":" + os.Getenv("APP_PORT")); err != nil {
-		journal.Error("Error running api engine", err).
-			SetTags("altair", "main").
-			Log()
-	}
+	gracefulSignal := make(chan os.Signal, 1)
+	signal.Notify(gracefulSignal, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		srv := &http.Server{
+			Addr:    ":" + os.Getenv("APP_PORT"),
+			Handler: apiEngine,
+		}
+
+		if err := srv.ListenAndServe(); err != nil {
+			journal.Error("Error running api engine", err).
+				SetTags("altair", "main").
+				Log()
+		}
+	}()
+
+	closeSignal := <-gracefulSignal
+	journal.Info(fmt.Sprintf("Receiving %s signal.... Cleaning up processes.", closeSignal.String())).Log()
 }
