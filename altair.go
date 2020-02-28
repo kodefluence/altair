@@ -249,7 +249,7 @@ func runAPI() {
 	apiEngine = gin.New()
 	apiEngine.GET("/health", controller.Health)
 
-	internalEngine := apiEngine.Group("", gin.BasicAuth(gin.Accounts{
+	internalEngine := apiEngine.Group("/_plugin/", gin.BasicAuth(gin.Accounts{
 		os.Getenv("BASIC_AUTH_USERNAME"): os.Getenv("BASIC_AUTH_PASSWORD"),
 	}))
 
