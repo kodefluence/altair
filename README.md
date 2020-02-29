@@ -19,5 +19,6 @@ Open source API gateway written in Go.
     - [ ] Refresh Token
       - [ ] Access Token Refresh Token Flow
       - [ ] Refresh Token Generation
+  - [ ] Request Validation
 - [ ] Response Caching
 - [ ] JWT
