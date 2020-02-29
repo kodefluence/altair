@@ -40,6 +40,13 @@ func Authorization(
 }
 
 func (a *authorization) Grantor(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (interface{}, *entity.Error) {
+	if authorizationReq.ResponseType == nil {
+		return nil, &entity.Error{
+			HttpStatus: http.StatusUnprocessableEntity,
+			Errors:     eobject.Wrap(eobject.ValidationError("response_type cannot be empty")),
+		}
+	}
+
 	if *authorizationReq.ResponseType == "token" {
 		return a.GrantToken(ctx, authorizationReq)
 	} else if *authorizationReq.ResponseType == "code" {

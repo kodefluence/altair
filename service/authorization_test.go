@@ -723,5 +723,38 @@ func TestAuthorization(t *testing.T) {
 				assert.Equal(t, nil, results)
 			})
 		})
+
+		t.Run("Given context and authorization request with nil response type", func(t *testing.T) {
+			t.Run("Return error 422", func(t *testing.T) {
+				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
+				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
+
+				ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+
+				authorizationRequest := entity.AuthorizationRequestJSON{
+					ResponseType:    nil,
+					ResourceOwnerID: util.IntToPointer(1),
+					ClientUID:       util.StringToPointer(aurelia.Hash("x", "y")),
+					ClientSecret:    util.StringToPointer(aurelia.Hash("z", "a")),
+					RedirectURI:     util.StringToPointer("http://github.com"),
+					Scopes:          util.StringToPointer("public users"),
+				}
+
+				expectedError := &entity.Error{
+					HttpStatus: http.StatusUnprocessableEntity,
+					Errors:     eobject.Wrap(eobject.ValidationError("response_type cannot be empty")),
+				}
+
+				authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+				results, err := authorizationService.Grantor(ctx, authorizationRequest)
+				assert.NotNil(t, err)
+				assert.Equal(t, expectedError, err)
+				assert.Equal(t, nil, results)
+			})
+		})
 	})
 }
