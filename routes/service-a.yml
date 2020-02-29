@@ -1,0 +1,7 @@
+name: users
+auth: oauth
+prefix: /users
+host: {{ .env "EXAMPLE_USERS_HOST" }}
+path:
+  /me: {}
+  /:id: {}
