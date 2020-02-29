@@ -9,6 +9,7 @@ import (
 	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/eobject"
+	"github.com/codefluence-x/altair/util"
 )
 
 type application struct {
@@ -55,6 +56,10 @@ func (a *application) ValidateAuthorizationGrant(ctx context.Context, r entity.A
 	if len(entityErr.Errors) > 0 {
 		entityErr.HttpStatus = http.StatusUnprocessableEntity
 		return entityErr
+	}
+
+	if r.Scopes == nil {
+		r.Scopes = util.StringToPointer("")
 	}
 
 	requestScopes := strings.Fields(*r.Scopes)

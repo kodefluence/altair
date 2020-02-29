@@ -82,23 +82,45 @@ func TestApplication(t *testing.T) {
 	t.Run("ValidateAuthorizationGrant", func(t *testing.T) {
 		t.Run("Given context, authorization request and oauth application", func(t *testing.T) {
 			t.Run("No scopes given", func(t *testing.T) {
-				authorizationRequest := entity.AuthorizationRequestJSON{
-					ResponseType:    util.StringToPointer("code"),
-					ResourceOwnerID: util.IntToPointer(1),
-					RedirectURI:     util.StringToPointer("www.github.com"),
-					Scopes:          util.StringToPointer(""),
-				}
+				t.Run("Scopes is empty string", func(t *testing.T) {
+					authorizationRequest := entity.AuthorizationRequestJSON{
+						ResponseType:    util.StringToPointer("code"),
+						ResourceOwnerID: util.IntToPointer(1),
+						RedirectURI:     util.StringToPointer("www.github.com"),
+						Scopes:          util.StringToPointer(""),
+					}
 
-				oauthApplication := entity.OauthApplication{
-					Scopes: sql.NullString{
-						String: "public users",
-						Valid:  true,
-					},
-				}
+					oauthApplication := entity.OauthApplication{
+						Scopes: sql.NullString{
+							String: "public users",
+							Valid:  true,
+						},
+					}
 
-				applicationValidator := validator.Oauth()
-				err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
-				assert.Nil(t, err)
+					applicationValidator := validator.Oauth()
+					err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
+					assert.Nil(t, err)
+				})
+
+				t.Run("Scopes is nil", func(t *testing.T) {
+					authorizationRequest := entity.AuthorizationRequestJSON{
+						ResponseType:    util.StringToPointer("code"),
+						ResourceOwnerID: util.IntToPointer(1),
+						RedirectURI:     util.StringToPointer("www.github.com"),
+						Scopes:          nil,
+					}
+
+					oauthApplication := entity.OauthApplication{
+						Scopes: sql.NullString{
+							String: "public users",
+							Valid:  true,
+						},
+					}
+
+					applicationValidator := validator.Oauth()
+					err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
+					assert.Nil(t, err)
+				})
 			})
 
 			t.Run("Request scopes is unavailable in oauth application", func(t *testing.T) {
