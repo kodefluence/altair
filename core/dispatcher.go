@@ -17,5 +17,5 @@ type AuthorizationDispatcher interface {
 
 type RouteDispatcher interface {
 	Compiler() RouteCompiler
-	Generator() RouteDispatcher
+	Generator() RouteGenerator
 }
