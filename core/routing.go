@@ -6,7 +6,7 @@ import (
 )
 
 type RouteCompiler interface {
-	Compile(path string) []entity.RouteObject
+	Compile(routesPath string) ([]entity.RouteObject, error)
 }
 
 type RouteGenerator interface {

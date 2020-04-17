@@ -35,17 +35,18 @@ func (m *MockRouteCompiler) EXPECT() *MockRouteCompilerMockRecorder {
 }
 
 // Compile mocks base method
-func (m *MockRouteCompiler) Compile(path string) []entity.RouteObject {
+func (m *MockRouteCompiler) Compile(routesPath string) ([]entity.RouteObject, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Compile", path)
+	ret := m.ctrl.Call(m, "Compile", routesPath)
 	ret0, _ := ret[0].([]entity.RouteObject)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Compile indicates an expected call of Compile
-func (mr *MockRouteCompilerMockRecorder) Compile(path interface{}) *gomock.Call {
+func (mr *MockRouteCompilerMockRecorder) Compile(routesPath interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Compile", reflect.TypeOf((*MockRouteCompiler)(nil).Compile), path)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Compile", reflect.TypeOf((*MockRouteCompiler)(nil).Compile), routesPath)
 }
 
 // MockRouteGenerator is a mock of RouteGenerator interface
