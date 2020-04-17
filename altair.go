@@ -20,6 +20,7 @@ import (
 
 	"github.com/codefluence-x/altair/controller"
 	"github.com/codefluence-x/altair/formatter"
+	"github.com/codefluence-x/altair/forwarder"
 	"github.com/codefluence-x/altair/model"
 	"github.com/codefluence-x/altair/service"
 	"github.com/codefluence-x/altair/validator"
@@ -245,6 +246,16 @@ func runAPI() {
 	// Service
 	applicationManager := service.ApplicationManager(applicationFormatter, modelFormatter, oauthApplicationModel, oauthValidator)
 	authorization := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatter, oauthValidator, oauthFormatter)
+
+	// Route Engine
+	routeCompiler := forwarder.Route().Compiler()
+	_, err := routeCompiler.Compile("./routes")
+	if err != nil {
+		journal.Error("Error compiling routes", err).
+			SetTags("altair", "main").
+			Log()
+		os.Exit(1)
+	}
 
 	apiEngine = gin.New()
 	apiEngine.GET("/health", controller.Health)
