@@ -1,5 +1,5 @@
 test:
-	@go test -cover -coverprofile=cover.out $$(go list ./... | grep -Ev "altair$$|core|mock")
+	@go test -race -cover -coverprofile=cover.out $$(go list ./... | grep -Ev "altair$$|core|mock")
 
 mock_service:
 	mockgen -source core/service.go -destination mock/mock_service.go -package mock
