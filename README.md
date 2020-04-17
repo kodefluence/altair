@@ -5,6 +5,10 @@ Open source API gateway written in Go.
 ## Feature
 
 - [ ] Request Forwarder
+  - [x] Route Compiler
+  - [ ] Route Generator Forwader
+  - [ ] Authorization Checking
+    - [ ] Oauth
 - [ ] Oauth Authorization
   - [ ] CRUD Oauth Application
     - [x] Create
@@ -21,4 +25,6 @@ Open source API gateway written in Go.
       - [ ] Refresh Token Generation
   - [ ] Request Validation
 - [ ] Response Caching
+  - [ ] Route Config
+  - [ ] API for deleting the cache
 - [ ] JWT
