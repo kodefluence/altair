@@ -13,6 +13,9 @@ mock_model:
 mock_validator:
 	mockgen -source core/validator.go -destination mock/mock_validator.go -package mock
 
+mock_routing:
+	mockgen -source core/routing.go -destination mock/mock_routing.go -package mock
+
 mock_all: mock_service mock_formatter mock_model mock_validator
 
 generate_blueprint:

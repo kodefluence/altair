@@ -14,3 +14,8 @@ type OauthApplicationDispatcher interface {
 type AuthorizationDispatcher interface {
 	Grant(authorization Authorization) Controller
 }
+
+type RouteDispatcher interface {
+	Compiler() RouteCompiler
+	Generator() RouteDispatcher
+}
