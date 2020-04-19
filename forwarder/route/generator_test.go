@@ -190,6 +190,57 @@ func TestGenerator(t *testing.T) {
 			})
 		})
 
+		t.Run("Call target services routes with custom headers", func(t *testing.T) {
+			t.Run("Run gracefully", func(t *testing.T) {
+				targetEngine := gin.Default()
+
+				gatewayEngine := gin.New()
+
+				var routeObjects []entity.RouteObject
+				routeObjects = append(
+					routeObjects,
+					entity.RouteObject{
+						Auth:   "none",
+						Host:   "localhost:5005",
+						Name:   "users",
+						Prefix: "/users",
+						Path: map[string]struct{}{
+							"/me":          struct{}{},
+							"/details/:id": struct{}{},
+						},
+					},
+				)
+
+				for _, r := range routeObjects {
+					buildTargetEngine(targetEngine, "GET", r)
+				}
+
+				err := route.Generator().Generate(gatewayEngine, routeObjects)
+				assert.Nil(t, err)
+
+				srvTarget := &http.Server{
+					Addr:    ":5005",
+					Handler: targetEngine,
+				}
+
+				go func() {
+					_ = srvTarget.ListenAndServe()
+				}()
+
+				// Given sleep time so the server can boot first
+				time.Sleep(time.Millisecond * 100)
+
+				assert.NotPanics(t, func() {
+					rec := mock.PerformRequest(gatewayEngine, "GET", "/users/me", nil, func(req *http.Request) {
+						req.Header.Add("foo", "bar")
+					})
+					assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+				})
+
+				_ = srvTarget.Close()
+			})
+		})
+
 		t.Run("Forwarding error", func(t *testing.T) {
 			t.Run("Read request body error", func(t *testing.T) {
 
