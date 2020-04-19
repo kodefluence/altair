@@ -10,7 +10,7 @@
 name: users
 auth: oauth
 prefix: /users
-host: {{ .env "EXAMPLE_USERS_SERVICE_HOST" }}
+host: {{ env "EXAMPLE_USERS_SERVICE_HOST" }}
 path:
   /me: {}
   /profiles/:id: {}
