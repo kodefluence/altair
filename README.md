@@ -2,6 +2,32 @@
 
 Open source API gateway written in Go.
 
+![Altair Architecture Diagram](https://user-images.githubusercontent.com/20650401/79699757-a2337d00-82bb-11ea-8103-25e6917545bd.png)
+
+## Documentation
+
+> TBD
+
+## How to Use
+
+> TBD
+
+## How to Contribute
+
+### Instalation
+
+#### Prerequisites
+
+1. Go version 1.13 or higher
+2. Mysql
+
+#### How To
+
+1. Clone this repo
+2. `go run altair.go migrate`
+3. `go run altair.go run`
+4. Read [CONTRIBUTING.md](https://github.com/insomnius/code-geek/blob/master/CONTRIBUTING.md)
+
 ## Feature
 
 - [ ] Request Forwarder
