@@ -6,7 +6,7 @@ Open source API gateway written in Go.
 
 - [ ] Request Forwarder
   - [x] Route Compiler
-  - [ ] Route Generator Forwader
+  - [x] Route Generator Forwader
   - [ ] Authorization Checking
     - [ ] Oauth
 - [ ] Oauth Authorization
