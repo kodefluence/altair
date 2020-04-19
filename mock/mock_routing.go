@@ -73,13 +73,15 @@ func (m *MockRouteGenerator) EXPECT() *MockRouteGeneratorMockRecorder {
 }
 
 // Generate mocks base method
-func (m *MockRouteGenerator) Generate(c *gin.Engine, routeObjects []entity.RouteObject) {
+func (m *MockRouteGenerator) Generate(engine *gin.Engine, routeObjects []entity.RouteObject) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Generate", c, routeObjects)
+	ret := m.ctrl.Call(m, "Generate", engine, routeObjects)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Generate indicates an expected call of Generate
-func (mr *MockRouteGeneratorMockRecorder) Generate(c, routeObjects interface{}) *gomock.Call {
+func (mr *MockRouteGeneratorMockRecorder) Generate(engine, routeObjects interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Generate", reflect.TypeOf((*MockRouteGenerator)(nil).Generate), c, routeObjects)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Generate", reflect.TypeOf((*MockRouteGenerator)(nil).Generate), engine, routeObjects)
 }

@@ -10,5 +10,5 @@ type RouteCompiler interface {
 }
 
 type RouteGenerator interface {
-	Generate(c *gin.Engine, routeObjects []entity.RouteObject)
+	Generate(engine *gin.Engine, routeObjects []entity.RouteObject) error
 }
