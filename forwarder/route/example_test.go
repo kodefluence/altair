@@ -4,7 +4,7 @@ var ExampleRoutesGracefully = `
 name: users
 auth: oauth
 prefix: /users
-host: {{ .env "EXAMPLE_USERS_SERVICE_HOST" }}
+host: {{ env "EXAMPLE_USERS_SERVICE_HOST" }}
 path:
   /me: {}
   /:id: {}
@@ -14,7 +14,7 @@ var ExampleRoutesYamlError = `
 name: 1
 auth: 2
 prefix: /users
-host: {{ .env "EXAMPLE_USERS_SERVICE_HOST" }}
+host: {{ env "EXAMPLE_USERS_SERVICE_HOST" }}
 this one make error
 path:
   /me: {}
