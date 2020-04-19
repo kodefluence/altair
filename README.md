@@ -33,8 +33,8 @@ Open source API gateway written in Go.
 - [ ] Request Forwarder
   - [x] Route Compiler
   - [x] Route Generator Forwader
-  - [ ] Authorization Checking
-    - [ ] Oauth
+  - [ ] Downstream Plugins
+    - [ ] Oauth Token Checking
 - [ ] Oauth Authorization
   - [ ] CRUD Oauth Application
     - [x] Create
