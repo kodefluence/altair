@@ -135,15 +135,14 @@ func removeAllTemplateTestFiles(routesPath string) {
 }
 
 func compileTemplate(b []byte) ([]byte, error) {
-	tpl, err := template.New(uuid.New().String()).Parse(string(b))
+	tpl, err := template.New(uuid.New().String()).Funcs(map[string]interface{}{
+		"env": os.Getenv,
+	}).Parse(string(b))
 	if err != nil {
 		return nil, err
 	}
 
 	buf := bytes.NewBufferString("")
-	tpl = tpl.Funcs(map[string]interface{}{
-		"env": os.Getenv,
-	})
 	err = tpl.Execute(buf, nil)
 	if err != nil {
 		return nil, err
