@@ -249,7 +249,7 @@ func runAPI() {
 
 	// Route Engine
 	routeCompiler := forwarder.Route().Compiler()
-	_, err := routeCompiler.Compile("./routes")
+	routeObjects, err := routeCompiler.Compile("./routes")
 	if err != nil {
 		journal.Error("Error compiling routes", err).
 			SetTags("altair", "main").
@@ -259,6 +259,14 @@ func runAPI() {
 
 	apiEngine = gin.New()
 	apiEngine.GET("/health", controller.Health)
+
+	err = forwarder.Route().Generator().Generate(apiEngine, routeObjects)
+	if err != nil {
+		journal.Error("Error generating routes", err).
+			SetTags("altair", "main").
+			Log()
+		os.Exit(1)
+	}
 
 	internalEngine := apiEngine.Group("/_plugins/", gin.BasicAuth(gin.Accounts{
 		os.Getenv("BASIC_AUTH_USERNAME"): os.Getenv("BASIC_AUTH_PASSWORD"),
