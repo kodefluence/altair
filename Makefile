@@ -13,10 +13,13 @@ mock_model:
 mock_validator:
 	mockgen -source core/validator.go -destination mock/mock_validator.go -package mock
 
+mock_plugin:
+	mockgen -source core/plugin.go -destination mock/mock_plugin.go -package mock
+
 mock_routing:
 	mockgen -source core/routing.go -destination mock/mock_routing.go -package mock
 
-mock_all: mock_service mock_formatter mock_model mock_validator
+mock_all: mock_service mock_formatter mock_model mock_validator mock_plugin mock_routing
 
 OPENCMD 				:=
 ifeq ($(OS),Windows_NT)
