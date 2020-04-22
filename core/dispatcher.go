@@ -19,3 +19,7 @@ type RouteDispatcher interface {
 	Compiler() RouteCompiler
 	Generator() RouteGenerator
 }
+
+type DownstreamPluginDispatcher interface {
+	Oauth() DownStreamPlugin
+}
