@@ -21,5 +21,5 @@ type RouteDispatcher interface {
 }
 
 type DownstreamPluginDispatcher interface {
-	Oauth() DownStreamPlugin
+	Oauth(oauthAccessTokenModel OauthAccessTokenModel) DownStreamPlugin
 }
