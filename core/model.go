@@ -27,6 +27,7 @@ type OauthApplicationModel interface {
 type OauthAccessTokenModel interface {
 	HasName
 	One(ctx context.Context, ID int) (entity.OauthAccessToken, error)
+	OneByToken(ctx context.Context, token string) (entity.OauthAccessToken, error)
 	Create(ctx context.Context, data entity.OauthAccessTokenInsertable, txs ...*sql.Tx) (int, error)
 }
 

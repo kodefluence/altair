@@ -261,6 +261,21 @@ func (mr *MockOauthAccessTokenModelMockRecorder) One(ctx, ID interface{}) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "One", reflect.TypeOf((*MockOauthAccessTokenModel)(nil).One), ctx, ID)
 }
 
+// OneByToken mocks base method
+func (m *MockOauthAccessTokenModel) OneByToken(ctx context.Context, token string) (entity.OauthAccessToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OneByToken", ctx, token)
+	ret0, _ := ret[0].(entity.OauthAccessToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// OneByToken indicates an expected call of OneByToken
+func (mr *MockOauthAccessTokenModelMockRecorder) OneByToken(ctx, token interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OneByToken", reflect.TypeOf((*MockOauthAccessTokenModel)(nil).OneByToken), ctx, token)
+}
+
 // Create mocks base method
 func (m *MockOauthAccessTokenModel) Create(ctx context.Context, data entity.OauthAccessTokenInsertable, txs ...*sql.Tx) (int, error) {
 	m.ctrl.T.Helper()
