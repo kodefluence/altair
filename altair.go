@@ -19,9 +19,11 @@ import (
 	"github.com/subosito/gotenv"
 
 	"github.com/codefluence-x/altair/controller"
+	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/formatter"
 	"github.com/codefluence-x/altair/forwarder"
 	"github.com/codefluence-x/altair/model"
+	"github.com/codefluence-x/altair/plugin"
 	"github.com/codefluence-x/altair/service"
 	"github.com/codefluence-x/altair/validator"
 	"github.com/codefluence-x/journal"
@@ -260,7 +262,10 @@ func runAPI() {
 	apiEngine = gin.New()
 	apiEngine.GET("/health", controller.Health)
 
-	err = forwarder.Route().Generator().Generate(apiEngine, routeObjects)
+	// DownStream Plugin
+	oauthPlugin := plugin.DownStream().Oauth(oauthAccessTokenModel)
+
+	err = forwarder.Route().Generator().Generate(apiEngine, routeObjects, []core.DownStreamPlugin{oauthPlugin})
 	if err != nil {
 		journal.Error("Error generating routes", err).
 			SetTags("altair", "main").

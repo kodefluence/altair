@@ -5,7 +5,6 @@
 package mock
 
 import (
-	entity "github.com/codefluence-x/altair/entity"
 	gin "github.com/gin-gonic/gin"
 	gomock "github.com/golang/mock/gomock"
 	http "net/http"
@@ -35,11 +34,25 @@ func (m *MockDownStreamPlugin) EXPECT() *MockDownStreamPluginMockRecorder {
 	return m.recorder
 }
 
+// Name mocks base method
+func (m *MockDownStreamPlugin) Name() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Name")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Name indicates an expected call of Name
+func (mr *MockDownStreamPluginMockRecorder) Name() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockDownStreamPlugin)(nil).Name))
+}
+
 // Intervene mocks base method
-func (m *MockDownStreamPlugin) Intervene(c *gin.Context, proxyReq *http.Request) *entity.Error {
+func (m *MockDownStreamPlugin) Intervene(c *gin.Context, proxyReq *http.Request) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Intervene", c, proxyReq)
-	ret0, _ := ret[0].(*entity.Error)
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 

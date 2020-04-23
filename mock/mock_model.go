@@ -12,43 +12,6 @@ import (
 	reflect "reflect"
 )
 
-// MockHasName is a mock of HasName interface
-type MockHasName struct {
-	ctrl     *gomock.Controller
-	recorder *MockHasNameMockRecorder
-}
-
-// MockHasNameMockRecorder is the mock recorder for MockHasName
-type MockHasNameMockRecorder struct {
-	mock *MockHasName
-}
-
-// NewMockHasName creates a new mock instance
-func NewMockHasName(ctrl *gomock.Controller) *MockHasName {
-	mock := &MockHasName{ctrl: ctrl}
-	mock.recorder = &MockHasNameMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockHasName) EXPECT() *MockHasNameMockRecorder {
-	return m.recorder
-}
-
-// Name mocks base method
-func (m *MockHasName) Name() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Name")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// Name indicates an expected call of Name
-func (mr *MockHasNameMockRecorder) Name() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockHasName)(nil).Name))
-}
-
 // MockDBExecutable is a mock of DBExecutable interface
 type MockDBExecutable struct {
 	ctrl     *gomock.Controller
@@ -259,6 +222,21 @@ func (m *MockOauthAccessTokenModel) One(ctx context.Context, ID int) (entity.Oau
 func (mr *MockOauthAccessTokenModelMockRecorder) One(ctx, ID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "One", reflect.TypeOf((*MockOauthAccessTokenModel)(nil).One), ctx, ID)
+}
+
+// OneByToken mocks base method
+func (m *MockOauthAccessTokenModel) OneByToken(ctx context.Context, token string) (entity.OauthAccessToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OneByToken", ctx, token)
+	ret0, _ := ret[0].(entity.OauthAccessToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// OneByToken indicates an expected call of OneByToken
+func (mr *MockOauthAccessTokenModelMockRecorder) OneByToken(ctx, token interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OneByToken", reflect.TypeOf((*MockOauthAccessTokenModel)(nil).OneByToken), ctx, token)
 }
 
 // Create mocks base method

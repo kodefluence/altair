@@ -94,6 +94,63 @@ func TestOauthAccessToken(t *testing.T) {
 		})
 	})
 
+	t.Run("OneByToken", func(t *testing.T) {
+		t.Run("Given oauth access token", func(t *testing.T) {
+			t.Run("Return entity oauth access token", func(t *testing.T) {
+				db, mockdb, err := sqlmock.New()
+				if err != nil {
+					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+				}
+
+				data := entity.OauthAccessToken{
+					ID: 1,
+				}
+
+				rows := sqlmock.NewRows(oauthAccessTokenModelRows).
+					AddRow(
+						data.ID,
+						data.OauthApplicationID,
+						data.ResourceOwnerID,
+						data.Token,
+						data.Scopes,
+						data.ExpiresIn,
+						data.CreatedAt,
+						data.RevokedAT,
+					)
+
+				mockdb.ExpectQuery(`select id, oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at from oauth_access_tokens where token = \? and revoked_at is null limit 1`).
+					WithArgs("token").
+					WillReturnRows(rows)
+
+				oauthAccessTokenModel := model.OauthAccessToken(db)
+				dataFromDB, err := oauthAccessTokenModel.OneByToken(context.Background(), "token")
+
+				assert.Nil(t, err)
+				assert.Nil(t, mockdb.ExpectationsWereMet())
+				assert.Equal(t, data, dataFromDB)
+			})
+
+			t.Run("Row not found in database", func(t *testing.T) {
+				db, mockdb, err := sqlmock.New()
+				if err != nil {
+					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+				}
+
+				mockdb.ExpectQuery(`select id, oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at from oauth_access_tokens where token = \? and revoked_at is null limit 1`).
+					WithArgs("token").
+					WillReturnError(sql.ErrNoRows)
+
+				oauthAccessTokenModel := model.OauthAccessToken(db)
+				dataFromDB, err := oauthAccessTokenModel.OneByToken(context.Background(), "token")
+
+				assert.NotNil(t, err)
+				assert.Equal(t, sql.ErrNoRows, err)
+				assert.Nil(t, mockdb.ExpectationsWereMet())
+				assert.Equal(t, entity.OauthAccessToken{}, dataFromDB)
+			})
+		})
+	})
+
 	t.Run("Create", func(t *testing.T) {
 		t.Run("Given context and access token insertable", func(t *testing.T) {
 			t.Run("Return last inserted id", func(t *testing.T) {

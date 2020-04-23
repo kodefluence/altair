@@ -16,6 +16,7 @@ func TestQuery(t *testing.T) {
 
 	assert.Equal(t, "insert into oauth_access_tokens (oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at) values(?, ?, ?, ?, ?, now(), null)", query.InsertOauthAccessToken)
 	assert.Equal(t, "select * from oauth_access_tokens where id = ? limit 1", query.SelectOneOauthAccessToken)
+	assert.Equal(t, "select id, oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at from oauth_access_tokens where token = ? and revoked_at is null limit 1", query.SelectOneOauthAccessTokenByToken)
 
 	assert.Equal(t, "insert into oauth_access_grants (oauth_application_id, resource_owner_id, scopes, code, redirect_uri, expires_in, created_at, revoked_at) values(?, ?, ?, ?, ?, ?, now(), null)", query.InsertOauthAccessGrant)
 	assert.Equal(t, "select * from oauth_access_grants where id = ? limit 1", query.SelectOneOauthAccessGrant)

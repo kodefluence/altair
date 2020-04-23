@@ -1,20 +1,25 @@
 package route_test
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/forwarder/route"
 	"github.com/codefluence-x/altair/mock"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerator(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
 
 	gin.SetMode(gin.ReleaseMode)
 
@@ -44,11 +49,126 @@ func TestGenerator(t *testing.T) {
 					buildTargetEngine(targetEngine, "GET", r)
 				}
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects)
+				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
+
+				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
 					Addr:    ":5002",
+					Handler: targetEngine,
+				}
+
+				go func() {
+					_ = srvTarget.ListenAndServe()
+				}()
+
+				// Given sleep time so the server can boot first
+				time.Sleep(time.Millisecond * 100)
+
+				assert.NotPanics(t, func() {
+					rec := mock.PerformRequest(gatewayEngine, "GET", "/users/me", nil)
+					assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+				})
+
+				_ = srvTarget.Close()
+			})
+		})
+
+		t.Run("Call target services routes with downstream plugins", func(t *testing.T) {
+			t.Run("Run gracefully", func(t *testing.T) {
+				targetEngine := gin.Default()
+
+				gatewayEngine := gin.New()
+
+				var routeObjects []entity.RouteObject
+				routeObjects = append(
+					routeObjects,
+					entity.RouteObject{
+						Auth:   "none",
+						Host:   "localhost:5011",
+						Name:   "users",
+						Prefix: "/users",
+						Path: map[string]struct{}{
+							"/me":          struct{}{},
+							"/details/:id": struct{}{},
+						},
+					},
+				)
+
+				for _, r := range routeObjects {
+					buildTargetEngine(targetEngine, "GET", r)
+				}
+
+				var downStreamPlugin []core.DownStreamPlugin
+
+				oauthPlugin := mock.NewMockDownStreamPlugin(mockCtrl)
+				oauthPlugin.EXPECT().Intervene(gomock.Any(), gomock.Any()).Return(nil)
+				oauthPlugin.EXPECT().Name().AnyTimes().Return("oauth-plugin")
+
+				downStreamPlugin = append(downStreamPlugin, oauthPlugin)
+
+				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
+				assert.Nil(t, err)
+
+				srvTarget := &http.Server{
+					Addr:    ":5011",
+					Handler: targetEngine,
+				}
+
+				go func() {
+					_ = srvTarget.ListenAndServe()
+				}()
+
+				// Given sleep time so the server can boot first
+				time.Sleep(time.Millisecond * 100)
+
+				assert.NotPanics(t, func() {
+					rec := mock.PerformRequest(gatewayEngine, "GET", "/users/me", nil)
+					assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+				})
+
+				_ = srvTarget.Close()
+			})
+
+			t.Run("Downstream plugins error", func(t *testing.T) {
+				targetEngine := gin.Default()
+
+				gatewayEngine := gin.New()
+
+				var routeObjects []entity.RouteObject
+				routeObjects = append(
+					routeObjects,
+					entity.RouteObject{
+						Auth:   "none",
+						Host:   "localhost:5011",
+						Name:   "users",
+						Prefix: "/users",
+						Path: map[string]struct{}{
+							"/me":          struct{}{},
+							"/details/:id": struct{}{},
+						},
+					},
+				)
+
+				for _, r := range routeObjects {
+					buildTargetEngine(targetEngine, "GET", r)
+				}
+
+				var downStreamPlugin []core.DownStreamPlugin
+
+				oauthPlugin := mock.NewMockDownStreamPlugin(mockCtrl)
+				oauthPlugin.EXPECT().Intervene(gomock.Any(), gomock.Any()).Return(errors.New("unexpected error"))
+				oauthPlugin.EXPECT().Name().AnyTimes().Return("oauth-plugin")
+
+				downStreamPlugin = append(downStreamPlugin, oauthPlugin)
+
+				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
+				assert.Nil(t, err)
+
+				srvTarget := &http.Server{
+					Addr:    ":5011",
 					Handler: targetEngine,
 				}
 
@@ -93,7 +213,10 @@ func TestGenerator(t *testing.T) {
 					buildTargetEngine(targetEngine, "GET", r)
 				}
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects)
+				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
+
+				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -142,7 +265,10 @@ func TestGenerator(t *testing.T) {
 					buildTargetEngine(targetEngine, "POST", r)
 				}
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects)
+				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
+
+				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -185,7 +311,10 @@ func TestGenerator(t *testing.T) {
 					},
 				)
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects)
+				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
+
+				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
 				assert.NotNil(t, err)
 			})
 		})
@@ -215,7 +344,10 @@ func TestGenerator(t *testing.T) {
 					buildTargetEngine(targetEngine, "GET", r)
 				}
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects)
+				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
+
+				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{

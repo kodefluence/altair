@@ -24,6 +24,29 @@ func (oat *oauthAccessToken) Name() string {
 	return "oauth-access-token-model"
 }
 
+func (oat *oauthAccessToken) OneByToken(ctx context.Context, token string) (entity.OauthAccessToken, error) {
+	var oauthAccessToken entity.OauthAccessToken
+
+	err := monitor(ctx, oat.Name(), query.SelectOneOauthAccessTokenByToken, func() error {
+		ctxWithTimeout, cf := context.WithTimeout(ctx, time.Second*10)
+		defer cf()
+
+		row := oat.db.QueryRowContext(ctxWithTimeout, query.SelectOneOauthAccessTokenByToken, token)
+		return row.Scan(
+			&oauthAccessToken.ID,
+			&oauthAccessToken.OauthApplicationID,
+			&oauthAccessToken.ResourceOwnerID,
+			&oauthAccessToken.Token,
+			&oauthAccessToken.Scopes,
+			&oauthAccessToken.ExpiresIn,
+			&oauthAccessToken.CreatedAt,
+			&oauthAccessToken.RevokedAT,
+		)
+	})
+
+	return oauthAccessToken, err
+}
+
 func (oat *oauthAccessToken) One(ctx context.Context, ID int) (entity.OauthAccessToken, error) {
 	var oauthAccessToken entity.OauthAccessToken
 
