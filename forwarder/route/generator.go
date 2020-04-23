@@ -65,7 +65,7 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 							AddField("method", c.Request.Method).
 							AddField("full_path", c.Request.URL.String()).
 							AddField("client_ip", c.ClientIP()).
-							AddField("duration", time.Since(startTime)).
+							AddField("duration_seconds", time.Since(startTime).Seconds()).
 							SetTags("route", "generator", "generate", "read_all_request").
 							Log()
 						return
@@ -82,7 +82,7 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 							AddField("method", c.Request.Method).
 							AddField("full_path", c.Request.URL.String()).
 							AddField("client_ip", c.ClientIP()).
-							AddField("duration", time.Since(startTime)).
+							AddField("duration_seconds", time.Since(startTime).Seconds()).
 							SetTags("route", "generator", "generate", "new_request").
 							Log()
 						return
@@ -101,7 +101,7 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 							AddField("method", c.Request.Method).
 							AddField("full_path", c.Request.URL.String()).
 							AddField("client_ip", c.ClientIP()).
-							AddField("duration", time.Since(startTime)).
+							AddField("duration_seconds", time.Since(startTime).Seconds()).
 							SetTags("route", "generator", "generate", "new_request").
 							Log()
 						return
@@ -120,6 +120,36 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 					}
 				}
 
+				for _, plugin := range downStreamPlugin {
+					startTimePlugin := time.Now()
+
+					if err := plugin.Intervene(c, proxyReq); err != nil {
+						journal.Error("Plugin error", err).
+							SetTrackId(trackID).
+							AddField("plugin_name", plugin.Name()).
+							AddField("plugin_duration_seconds", time.Since(startTimePlugin).Seconds()).
+							AddField("host", routeObject.Host).
+							AddField("plugin_type", "downstream").
+							AddField("prefix", routeObject.Prefix).
+							AddField("name", routeObject.Name).
+							AddField("path", urlPath).
+							AddField("method", c.Request.Method).
+							AddField("full_path", c.Request.URL.String()).
+							AddField("client_ip", c.ClientIP()).
+							AddField("duration_seconds", time.Since(startTime).Seconds()).
+							SetTags("route", "generator", "generate", "plugin", plugin.Name()).
+							Log()
+						return
+					}
+
+					journal.Info("Plugin success").
+						SetTrackId(trackID).
+						AddField("plugin_name", plugin.Name()).
+						AddField("plugin_duration_seconds", time.Since(startTimePlugin).Seconds()).
+						SetTags("route", "generator", "generate", "plugin").
+						Log()
+				}
+
 				client := http.Client{}
 				proxyRes, err := client.Do(proxyReq)
 				if err != nil {
@@ -132,7 +162,7 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 						AddField("method", c.Request.Method).
 						AddField("full_path", c.Request.URL.String()).
 						AddField("client_ip", c.ClientIP()).
-						AddField("duration", time.Since(startTime)).
+						AddField("duration_seconds", time.Since(startTime).Seconds()).
 						SetTags("route", "generator", "generate", "client_do").
 						Log()
 					c.JSON(http.StatusBadGateway, gin.H{
@@ -153,7 +183,7 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 						AddField("method", c.Request.Method).
 						AddField("full_path", c.Request.URL.String()).
 						AddField("client_ip", c.ClientIP()).
-						AddField("duration", time.Since(startTime)).
+						AddField("duration_seconds", time.Since(startTime).Seconds()).
 						SetTags("route", "generator", "generate", "read_all_response").
 						Log()
 					c.JSON(http.StatusBadGateway, gin.H{
@@ -180,7 +210,7 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 						AddField("method", c.Request.Method).
 						AddField("full_path", c.Request.URL.String()).
 						AddField("client_ip", c.ClientIP()).
-						AddField("duration", time.Since(startTime)).
+						AddField("duration_seconds", time.Since(startTime).Seconds()).
 						SetTags("route", "generator", "generate", "read_all_response").
 						Log()
 					journal.Error("Error writing response", err).SetTags("forwader", "core", "writer_write").Log()
@@ -195,7 +225,7 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 					AddField("method", c.Request.Method).
 					AddField("full_path", c.Request.URL.String()).
 					AddField("client_ip", c.ClientIP()).
-					AddField("duration", time.Since(startTime)).
+					AddField("duration_seconds", time.Since(startTime).Seconds()).
 					SetTags("route", "generator", "generate").
 					Log()
 			})

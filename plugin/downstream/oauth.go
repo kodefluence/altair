@@ -22,6 +22,10 @@ func Oauth(oauthAccessTokenModel core.OauthAccessTokenModel) core.DownStreamPlug
 	return &oauth{oauthAccessTokenModel: oauthAccessTokenModel}
 }
 
+func (o *oauth) Name() string {
+	return "oauth-plugin"
+}
+
 func (o *oauth) Intervene(c *gin.Context, proxyReq *http.Request) error {
 	accessToken, err := o.parseToken(c)
 	if err != nil {
