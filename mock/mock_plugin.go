@@ -34,6 +34,20 @@ func (m *MockDownStreamPlugin) EXPECT() *MockDownStreamPluginMockRecorder {
 	return m.recorder
 }
 
+// Name mocks base method
+func (m *MockDownStreamPlugin) Name() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Name")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Name indicates an expected call of Name
+func (mr *MockDownStreamPluginMockRecorder) Name() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockDownStreamPlugin)(nil).Name))
+}
+
 // Intervene mocks base method
 func (m *MockDownStreamPlugin) Intervene(c *gin.Context, proxyReq *http.Request) error {
 	m.ctrl.T.Helper()

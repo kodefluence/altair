@@ -12,43 +12,6 @@ import (
 	reflect "reflect"
 )
 
-// MockHasName is a mock of HasName interface
-type MockHasName struct {
-	ctrl     *gomock.Controller
-	recorder *MockHasNameMockRecorder
-}
-
-// MockHasNameMockRecorder is the mock recorder for MockHasName
-type MockHasNameMockRecorder struct {
-	mock *MockHasName
-}
-
-// NewMockHasName creates a new mock instance
-func NewMockHasName(ctrl *gomock.Controller) *MockHasName {
-	mock := &MockHasName{ctrl: ctrl}
-	mock.recorder = &MockHasNameMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockHasName) EXPECT() *MockHasNameMockRecorder {
-	return m.recorder
-}
-
-// Name mocks base method
-func (m *MockHasName) Name() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Name")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// Name indicates an expected call of Name
-func (mr *MockHasNameMockRecorder) Name() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockHasName)(nil).Name))
-}
-
 // MockDBExecutable is a mock of DBExecutable interface
 type MockDBExecutable struct {
 	ctrl     *gomock.Controller

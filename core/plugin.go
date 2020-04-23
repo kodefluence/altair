@@ -7,5 +7,6 @@ import (
 )
 
 type DownStreamPlugin interface {
+	Name() string
 	Intervene(c *gin.Context, proxyReq *http.Request) error
 }

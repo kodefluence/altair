@@ -7,16 +7,12 @@ import (
 	"github.com/codefluence-x/altair/entity"
 )
 
-type HasName interface {
-	Name() string
-}
-
 type DBExecutable interface {
 	Exec(query string, args ...interface{}) (sql.Result, error)
 }
 
 type OauthApplicationModel interface {
-	HasName
+	Name() string
 	Paginate(ctx context.Context, offset, limit int) ([]entity.OauthApplication, error)
 	One(ctx context.Context, ID int) (entity.OauthApplication, error)
 	OneByUIDandSecret(ctx context.Context, clientUID, clientSecret string) (entity.OauthApplication, error)
@@ -25,14 +21,14 @@ type OauthApplicationModel interface {
 }
 
 type OauthAccessTokenModel interface {
-	HasName
+	Name() string
 	One(ctx context.Context, ID int) (entity.OauthAccessToken, error)
 	OneByToken(ctx context.Context, token string) (entity.OauthAccessToken, error)
 	Create(ctx context.Context, data entity.OauthAccessTokenInsertable, txs ...*sql.Tx) (int, error)
 }
 
 type OauthAccessGrantModel interface {
-	HasName
+	Name() string
 	One(ctx context.Context, ID int) (entity.OauthAccessGrant, error)
 	Create(ctx context.Context, data entity.OauthAccessGrantInsertable, txs ...*sql.Tx) (int, error)
 }
