@@ -5,6 +5,7 @@
 package mock
 
 import (
+	core "github.com/codefluence-x/altair/core"
 	entity "github.com/codefluence-x/altair/entity"
 	gin "github.com/gin-gonic/gin"
 	gomock "github.com/golang/mock/gomock"
@@ -73,15 +74,15 @@ func (m *MockRouteGenerator) EXPECT() *MockRouteGeneratorMockRecorder {
 }
 
 // Generate mocks base method
-func (m *MockRouteGenerator) Generate(engine *gin.Engine, routeObjects []entity.RouteObject) error {
+func (m *MockRouteGenerator) Generate(engine *gin.Engine, routeObjects []entity.RouteObject, downStreamPlugin []core.DownStreamPlugin) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Generate", engine, routeObjects)
+	ret := m.ctrl.Call(m, "Generate", engine, routeObjects, downStreamPlugin)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Generate indicates an expected call of Generate
-func (mr *MockRouteGeneratorMockRecorder) Generate(engine, routeObjects interface{}) *gomock.Call {
+func (mr *MockRouteGeneratorMockRecorder) Generate(engine, routeObjects, downStreamPlugin interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Generate", reflect.TypeOf((*MockRouteGenerator)(nil).Generate), engine, routeObjects)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Generate", reflect.TypeOf((*MockRouteGenerator)(nil).Generate), engine, routeObjects, downStreamPlugin)
 }

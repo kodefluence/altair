@@ -22,7 +22,7 @@ func Generator() core.RouteGenerator {
 	return &generator{}
 }
 
-func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObject) (errVariable error) {
+func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObject, downStreamPlugin []core.DownStreamPlugin) (errVariable error) {
 	defer func() {
 		if r := recover(); r != nil {
 			errVariable = errors.New(fmt.Sprintf("Error generating route because of %v", r))

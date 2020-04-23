@@ -7,14 +7,18 @@ import (
 	"testing"
 	"time"
 
+	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/forwarder/route"
 	"github.com/codefluence-x/altair/mock"
 	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerator(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
 
 	gin.SetMode(gin.ReleaseMode)
 
@@ -44,7 +48,10 @@ func TestGenerator(t *testing.T) {
 					buildTargetEngine(targetEngine, "GET", r)
 				}
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects)
+				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
+
+				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -93,7 +100,10 @@ func TestGenerator(t *testing.T) {
 					buildTargetEngine(targetEngine, "GET", r)
 				}
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects)
+				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
+
+				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -142,7 +152,10 @@ func TestGenerator(t *testing.T) {
 					buildTargetEngine(targetEngine, "POST", r)
 				}
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects)
+				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
+
+				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -185,7 +198,10 @@ func TestGenerator(t *testing.T) {
 					},
 				)
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects)
+				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
+
+				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
 				assert.NotNil(t, err)
 			})
 		})
@@ -215,7 +231,10 @@ func TestGenerator(t *testing.T) {
 					buildTargetEngine(targetEngine, "GET", r)
 				}
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects)
+				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
+
+				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
