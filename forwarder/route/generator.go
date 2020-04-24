@@ -234,3 +234,7 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 
 	return errVariable
 }
+
+func (g *generator) inheritRouterObject() {
+
+}

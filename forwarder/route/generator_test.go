@@ -38,9 +38,9 @@ func TestGenerator(t *testing.T) {
 						Host:   "localhost:5002",
 						Name:   "users",
 						Prefix: "/users",
-						Path: map[string]struct{}{
-							"/me":          struct{}{},
-							"/details/:id": struct{}{},
+						Path: map[string]entity.RouterPath{
+							"/me":          entity.RouterPath{},
+							"/details/:id": entity.RouterPath{},
 						},
 					},
 				)
@@ -90,9 +90,9 @@ func TestGenerator(t *testing.T) {
 						Host:   "localhost:5011",
 						Name:   "users",
 						Prefix: "/users",
-						Path: map[string]struct{}{
-							"/me":          struct{}{},
-							"/details/:id": struct{}{},
+						Path: map[string]entity.RouterPath{
+							"/me":          entity.RouterPath{},
+							"/details/:id": entity.RouterPath{},
 						},
 					},
 				)
@@ -145,9 +145,9 @@ func TestGenerator(t *testing.T) {
 						Host:   "localhost:5011",
 						Name:   "users",
 						Prefix: "/users",
-						Path: map[string]struct{}{
-							"/me":          struct{}{},
-							"/details/:id": struct{}{},
+						Path: map[string]entity.RouterPath{
+							"/me":          entity.RouterPath{},
+							"/details/:id": entity.RouterPath{},
 						},
 					},
 				)
@@ -202,9 +202,9 @@ func TestGenerator(t *testing.T) {
 						Host:   "localhost:5003",
 						Name:   "users",
 						Prefix: "/users",
-						Path: map[string]struct{}{
-							"/me":          struct{}{},
-							"/details/:id": struct{}{},
+						Path: map[string]entity.RouterPath{
+							"/me":          entity.RouterPath{},
+							"/details/:id": entity.RouterPath{},
 						},
 					},
 				)
@@ -254,9 +254,9 @@ func TestGenerator(t *testing.T) {
 						Host:   "localhost:5004",
 						Name:   "users",
 						Prefix: "/users",
-						Path: map[string]struct{}{
-							"/me":          struct{}{},
-							"/details/:id": struct{}{},
+						Path: map[string]entity.RouterPath{
+							"/me":          entity.RouterPath{},
+							"/details/:id": entity.RouterPath{},
 						},
 					},
 				)
@@ -304,9 +304,9 @@ func TestGenerator(t *testing.T) {
 						Host:   "localhost:5002",
 						Name:   "users",
 						Prefix: "/users",
-						Path: map[string]struct{}{
-							"/me":  struct{}{},
-							"/:id": struct{}{},
+						Path: map[string]entity.RouterPath{
+							"/me":  entity.RouterPath{},
+							"/:id": entity.RouterPath{},
 						},
 					},
 				)
@@ -333,9 +333,9 @@ func TestGenerator(t *testing.T) {
 						Host:   "localhost:5005",
 						Name:   "users",
 						Prefix: "/users",
-						Path: map[string]struct{}{
-							"/me":          struct{}{},
-							"/details/:id": struct{}{},
+						Path: map[string]entity.RouterPath{
+							"/me":          entity.RouterPath{},
+							"/details/:id": entity.RouterPath{},
 						},
 					},
 				)
