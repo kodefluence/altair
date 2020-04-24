@@ -33,7 +33,7 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 	}()
 
 	for _, routeObject := range routeObjects {
-		for r := range routeObject.Path {
+		for r, routePath := range routeObject.Path {
 			urlPath := fmt.Sprintf("%s%s", routeObject.Prefix, r)
 
 			journal.Info("Generating routes").
@@ -123,7 +123,7 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 				for _, plugin := range downStreamPlugin {
 					startTimePlugin := time.Now()
 
-					if err := plugin.Intervene(c, proxyReq); err != nil {
+					if err := plugin.Intervene(c, proxyReq, routePath); err != nil {
 						journal.Error("Plugin error", err).
 							SetTrackId(trackID).
 							AddField("plugin_name", plugin.Name()).

@@ -5,6 +5,7 @@
 package mock
 
 import (
+	entity "github.com/codefluence-x/altair/entity"
 	gin "github.com/gin-gonic/gin"
 	gomock "github.com/golang/mock/gomock"
 	http "net/http"
@@ -49,15 +50,15 @@ func (mr *MockDownStreamPluginMockRecorder) Name() *gomock.Call {
 }
 
 // Intervene mocks base method
-func (m *MockDownStreamPlugin) Intervene(c *gin.Context, proxyReq *http.Request) error {
+func (m *MockDownStreamPlugin) Intervene(c *gin.Context, proxyReq *http.Request, r entity.RouterPath) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Intervene", c, proxyReq)
+	ret := m.ctrl.Call(m, "Intervene", c, proxyReq, r)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Intervene indicates an expected call of Intervene
-func (mr *MockDownStreamPluginMockRecorder) Intervene(c, proxyReq interface{}) *gomock.Call {
+func (mr *MockDownStreamPluginMockRecorder) Intervene(c, proxyReq, r interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Intervene", reflect.TypeOf((*MockDownStreamPlugin)(nil).Intervene), c, proxyReq)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Intervene", reflect.TypeOf((*MockDownStreamPlugin)(nil).Intervene), c, proxyReq, r)
 }

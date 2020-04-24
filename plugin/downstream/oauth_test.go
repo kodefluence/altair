@@ -44,6 +44,8 @@ func TestOauth(t *testing.T) {
 
 					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
 
+					routePath := entity.RouterPath{Auth: "oauth"}
+
 					entityAccessToken := entity.OauthAccessToken{
 						ID:                 1,
 						OauthApplicationID: 1,
@@ -62,11 +64,36 @@ func TestOauth(t *testing.T) {
 
 					oauthPlugin := plugin.DownStream().Oauth(oauthAccessTokenModel)
 
-					err := oauthPlugin.Intervene(c, r)
+					err := oauthPlugin.Intervene(c, r, routePath)
 
 					assert.Nil(t, err)
 					assert.Equal(t, strconv.Itoa(entityAccessToken.ResourceOwnerID), r.Header.Get("Resource-Owner-ID"))
 					assert.Equal(t, strconv.Itoa(entityAccessToken.OauthApplicationID), r.Header.Get("Oauth-Application-ID"))
+				})
+			})
+
+			t.Run("Auth is not oauth type", func(t *testing.T) {
+				t.Run("Return nil", func(t *testing.T) {
+					token := "token"
+
+					c := &gin.Context{}
+					c.Request = &http.Request{
+						Header: http.Header{},
+					}
+					c.Request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+
+					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
+
+					routePath := entity.RouterPath{Auth: "none"}
+
+					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+					oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), gomock.Any()).Times(0)
+
+					oauthPlugin := plugin.DownStream().Oauth(oauthAccessTokenModel)
+
+					err := oauthPlugin.Intervene(c, r, routePath)
+
+					assert.Nil(t, err)
 				})
 			})
 
@@ -83,12 +110,14 @@ func TestOauth(t *testing.T) {
 
 						r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
 
+						routePath := entity.RouterPath{Auth: "oauth"}
+
 						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 						oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), gomock.Any()).Times(0)
 
 						oauthPlugin := plugin.DownStream().Oauth(oauthAccessTokenModel)
 
-						err := oauthPlugin.Intervene(c, r)
+						err := oauthPlugin.Intervene(c, r, routePath)
 
 						assert.NotNil(t, err)
 					})
@@ -106,12 +135,14 @@ func TestOauth(t *testing.T) {
 
 						r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
 
+						routePath := entity.RouterPath{Auth: "oauth"}
+
 						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 						oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), gomock.Any()).Times(0)
 
 						oauthPlugin := plugin.DownStream().Oauth(oauthAccessTokenModel)
 
-						err := oauthPlugin.Intervene(c, r)
+						err := oauthPlugin.Intervene(c, r, routePath)
 
 						assert.NotNil(t, err)
 					})
@@ -137,12 +168,14 @@ func TestOauth(t *testing.T) {
 
 					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
 
+					routePath := entity.RouterPath{Auth: "oauth"}
+
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessTokenModel.EXPECT().OneByToken(c, token).Return(entity.OauthAccessToken{}, sql.ErrNoRows)
 
 					oauthPlugin := plugin.DownStream().Oauth(oauthAccessTokenModel)
 
-					err := oauthPlugin.Intervene(c, r)
+					err := oauthPlugin.Intervene(c, r, routePath)
 
 					assert.NotNil(t, err)
 					assert.Equal(t, http.StatusUnauthorized, c.Writer.Status())
@@ -168,12 +201,14 @@ func TestOauth(t *testing.T) {
 
 					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
 
+					routePath := entity.RouterPath{Auth: "oauth"}
+
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessTokenModel.EXPECT().OneByToken(c, token).Return(entity.OauthAccessToken{}, errors.New("unexpected error"))
 
 					oauthPlugin := plugin.DownStream().Oauth(oauthAccessTokenModel)
 
-					err := oauthPlugin.Intervene(c, r)
+					err := oauthPlugin.Intervene(c, r, routePath)
 
 					assert.NotNil(t, err)
 					assert.Equal(t, http.StatusServiceUnavailable, c.Writer.Status())

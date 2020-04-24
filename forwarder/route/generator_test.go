@@ -104,7 +104,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 
 				oauthPlugin := mock.NewMockDownStreamPlugin(mockCtrl)
-				oauthPlugin.EXPECT().Intervene(gomock.Any(), gomock.Any()).Return(nil)
+				oauthPlugin.EXPECT().Intervene(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
 				oauthPlugin.EXPECT().Name().AnyTimes().Return("oauth-plugin")
 
 				downStreamPlugin = append(downStreamPlugin, oauthPlugin)
@@ -159,7 +159,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 
 				oauthPlugin := mock.NewMockDownStreamPlugin(mockCtrl)
-				oauthPlugin.EXPECT().Intervene(gomock.Any(), gomock.Any()).Return(errors.New("unexpected error"))
+				oauthPlugin.EXPECT().Intervene(gomock.Any(), gomock.Any(), gomock.Any()).Return(errors.New("unexpected error"))
 				oauthPlugin.EXPECT().Name().AnyTimes().Return("oauth-plugin")
 
 				downStreamPlugin = append(downStreamPlugin, oauthPlugin)
