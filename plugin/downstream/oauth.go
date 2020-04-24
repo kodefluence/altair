@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/codefluence-x/altair/core"
+	"github.com/codefluence-x/altair/entity"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,7 +27,11 @@ func (o *oauth) Name() string {
 	return "oauth-plugin"
 }
 
-func (o *oauth) Intervene(c *gin.Context, proxyReq *http.Request) error {
+func (o *oauth) Intervene(c *gin.Context, proxyReq *http.Request, r entity.RouterPath) error {
+	if r.Auth != "oauth" {
+		return nil
+	}
+
 	accessToken, err := o.parseToken(c)
 	if err != nil {
 		return err
