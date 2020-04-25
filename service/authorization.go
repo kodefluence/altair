@@ -147,6 +147,20 @@ func (a *authorization) GrantToken(ctx context.Context, authorizationReq entity.
 }
 
 func (a *authorization) findAndValidateApplication(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthApplication, *entity.Error) {
+	if authorizationReq.ClientUID == nil {
+		return entity.OauthApplication{}, &entity.Error{
+			HttpStatus: http.StatusUnprocessableEntity,
+			Errors:     eobject.Wrap(eobject.ValidationError("client_uid cannot be empty")),
+		}
+	}
+
+	if authorizationReq.ClientSecret == nil {
+		return entity.OauthApplication{}, &entity.Error{
+			HttpStatus: http.StatusUnprocessableEntity,
+			Errors:     eobject.Wrap(eobject.ValidationError("client_secret cannot be empty")),
+		}
+	}
+
 	oauthApplication, err := a.oauthApplicationModel.OneByUIDandSecret(ctx, *authorizationReq.ClientUID, *authorizationReq.ClientSecret)
 	if err != nil {
 
