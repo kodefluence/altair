@@ -114,6 +114,8 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 				proxyReq.URL.Host = routeObject.Host
 				proxyReq.URL.Path = c.Request.URL.Path
 				proxyReq.Host = os.Getenv("PROXY_HOST")
+
+				proxyReq.Header.Set("X-Real-Ip-Address", c.ClientIP())
 				proxyReq.Header.Set("X-Forwarded-For", c.Request.RemoteAddr)
 
 				for header, values := range c.Request.Header {
