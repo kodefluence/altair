@@ -22,10 +22,6 @@ mock_routing:
 mock_all: mock_service mock_formatter mock_model mock_validator mock_plugin mock_routing
 
 build:
-	mkdir -p build
-	mkdir -p build/linux/
-	mkdir -p build/windows/
-	mkdir -p build/darwin/
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ./build/linux/altair
 	GOOS=windows GOARCH=386 CGO_ENABLED=0 go build -o ./build/windows/altair
 	GOOS=darwin GOARCH=386 CGO_ENABLED=0 go build -o ./build/darwin/altair
