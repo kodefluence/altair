@@ -16,7 +16,9 @@ import (
 	"github.com/google/uuid"
 )
 
-type generator struct{}
+type generator struct {
+	routerPath map[string]entity.RouterPath
+}
 
 func Generator() core.RouteGenerator {
 	return &generator{}
@@ -32,11 +34,15 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 		}
 	}()
 
+	g.routerPath = map[string]entity.RouterPath{}
+
 	for _, routeObject := range routeObjects {
 		for r, routePath := range routeObject.Path {
 			g.inheritRouterObject(routeObject, &routePath)
 
 			urlPath := fmt.Sprintf("%s%s", routeObject.Prefix, r)
+
+			g.routerPath[urlPath] = routePath
 
 			journal.Info("Generating routes").
 				AddField("host", routeObject.Host).
@@ -128,7 +134,7 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 				for _, plugin := range downStreamPlugin {
 					startTimePlugin := time.Now()
 
-					if err := plugin.Intervene(c, proxyReq, routePath); err != nil {
+					if err := plugin.Intervene(c, proxyReq, g.routerPath[c.Request.URL.Path]); err != nil {
 						journal.Error("Plugin error", err).
 							SetTrackId(trackID).
 							AddField("plugin_name", plugin.Name()).

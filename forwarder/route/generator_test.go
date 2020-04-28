@@ -39,8 +39,8 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":          entity.RouterPath{},
-							"/details/:id": entity.RouterPath{},
+							"/me":          entity.RouterPath{Auth: "none"},
+							"/details/:id": entity.RouterPath{Auth: "none"},
 						},
 					},
 				)
@@ -91,8 +91,8 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":          entity.RouterPath{},
-							"/details/:id": entity.RouterPath{},
+							"/me":          entity.RouterPath{Auth: "none"},
+							"/details/:id": entity.RouterPath{Auth: "none"},
 						},
 					},
 				)
@@ -104,7 +104,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 
 				oauthPlugin := mock.NewMockDownStreamPlugin(mockCtrl)
-				oauthPlugin.EXPECT().Intervene(gomock.Any(), gomock.Any(), gomock.Any()).Return(nil)
+				oauthPlugin.EXPECT().Intervene(gomock.Any(), gomock.Any(), routeObjects[0].Path["/me"]).Return(nil)
 				oauthPlugin.EXPECT().Name().AnyTimes().Return("oauth-plugin")
 
 				downStreamPlugin = append(downStreamPlugin, oauthPlugin)
@@ -132,6 +132,62 @@ func TestGenerator(t *testing.T) {
 				_ = srvTarget.Close()
 			})
 
+			t.Run("Run gracefully with configured route path", func(t *testing.T) {
+				targetEngine := gin.Default()
+
+				gatewayEngine := gin.New()
+
+				var routeObjects []entity.RouteObject
+				routeObjects = append(
+					routeObjects,
+					entity.RouteObject{
+						Auth:   "none",
+						Host:   "localhost:5012",
+						Name:   "users",
+						Prefix: "/users",
+						Path: map[string]entity.RouterPath{
+							"/me":            entity.RouterPath{},
+							"/authorization": entity.RouterPath{Auth: "oauth"},
+							"/details/:id":   entity.RouterPath{},
+						},
+					},
+				)
+
+				for _, r := range routeObjects {
+					buildTargetEngine(targetEngine, "GET", r)
+				}
+
+				var downStreamPlugin []core.DownStreamPlugin
+
+				oauthPlugin := mock.NewMockDownStreamPlugin(mockCtrl)
+				oauthPlugin.EXPECT().Intervene(gomock.Any(), gomock.Any(), routeObjects[0].Path["/authorization"]).Return(nil)
+				oauthPlugin.EXPECT().Name().AnyTimes().Return("oauth-plugin")
+
+				downStreamPlugin = append(downStreamPlugin, oauthPlugin)
+
+				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
+				assert.Nil(t, err)
+
+				srvTarget := &http.Server{
+					Addr:    ":5012",
+					Handler: targetEngine,
+				}
+
+				go func() {
+					_ = srvTarget.ListenAndServe()
+				}()
+
+				// Given sleep time so the server can boot first
+				time.Sleep(time.Millisecond * 100)
+
+				assert.NotPanics(t, func() {
+					rec := mock.PerformRequest(gatewayEngine, "GET", "/users/authorization", nil)
+					assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+				})
+
+				_ = srvTarget.Close()
+			})
+
 			t.Run("Downstream plugins error", func(t *testing.T) {
 				targetEngine := gin.Default()
 
@@ -146,8 +202,8 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":          entity.RouterPath{},
-							"/details/:id": entity.RouterPath{},
+							"/me":          entity.RouterPath{Auth: "none"},
+							"/details/:id": entity.RouterPath{Auth: "none"},
 						},
 					},
 				)
@@ -203,8 +259,8 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":          entity.RouterPath{},
-							"/details/:id": entity.RouterPath{},
+							"/me":          entity.RouterPath{Auth: "none"},
+							"/details/:id": entity.RouterPath{Auth: "none"},
 						},
 					},
 				)
@@ -255,8 +311,8 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":          entity.RouterPath{},
-							"/details/:id": entity.RouterPath{},
+							"/me":          entity.RouterPath{Auth: "none"},
+							"/details/:id": entity.RouterPath{Auth: "none"},
 						},
 					},
 				)
@@ -305,8 +361,8 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":  entity.RouterPath{},
-							"/:id": entity.RouterPath{},
+							"/me":  entity.RouterPath{Auth: "none"},
+							"/:id": entity.RouterPath{Auth: "none"},
 						},
 					},
 				)
@@ -334,8 +390,8 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":          entity.RouterPath{},
-							"/details/:id": entity.RouterPath{},
+							"/me":          entity.RouterPath{Auth: "none"},
+							"/details/:id": entity.RouterPath{Auth: "none"},
 						},
 					},
 				)
