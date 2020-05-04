@@ -210,6 +210,7 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 					}
 				}
 
+				c.Status(proxyRes.StatusCode)
 				_, err = c.Writer.Write(resp)
 				if err != nil {
 					journal.Error("Error writing the response", err).
