@@ -259,6 +259,20 @@ func (mr *MockOauthAccessTokenModelMockRecorder) Create(ctx, data interface{}, t
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOauthAccessTokenModel)(nil).Create), varargs...)
 }
 
+// Revoke mocks base method
+func (m *MockOauthAccessTokenModel) Revoke(ctx context.Context, token string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Revoke", ctx, token)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Revoke indicates an expected call of Revoke
+func (mr *MockOauthAccessTokenModelMockRecorder) Revoke(ctx, token interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Revoke", reflect.TypeOf((*MockOauthAccessTokenModel)(nil).Revoke), ctx, token)
+}
+
 // MockOauthAccessGrantModel is a mock of OauthAccessGrantModel interface
 type MockOauthAccessGrantModel struct {
 	ctrl     *gomock.Controller

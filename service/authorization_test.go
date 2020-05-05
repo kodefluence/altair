@@ -724,6 +724,72 @@ func TestAuthorization(t *testing.T) {
 			})
 		})
 
+		t.Run("Given context and authorization request with a nil client uid", func(t *testing.T) {
+			t.Run("Return error 422", func(t *testing.T) {
+				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
+				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
+
+				ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+
+				authorizationRequest := entity.AuthorizationRequestJSON{
+					ResponseType:    util.StringToPointer("token"),
+					ResourceOwnerID: util.IntToPointer(1),
+					ClientUID:       nil,
+					ClientSecret:    util.StringToPointer(aurelia.Hash("z", "a")),
+					RedirectURI:     util.StringToPointer("http://github.com"),
+					Scopes:          util.StringToPointer("public users"),
+				}
+
+				expectedError := &entity.Error{
+					HttpStatus: http.StatusUnprocessableEntity,
+					Errors:     eobject.Wrap(eobject.ValidationError("client_uid cannot be empty")),
+				}
+
+				authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+				results, err := authorizationService.Grantor(ctx, authorizationRequest)
+				assert.NotNil(t, err)
+				assert.Equal(t, expectedError, err)
+				assert.Equal(t, entity.OauthAccessTokenJSON{}, results)
+			})
+		})
+
+		t.Run("Given context and authorization request with a nil client secret", func(t *testing.T) {
+			t.Run("Return error 422", func(t *testing.T) {
+				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
+				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
+
+				ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+
+				authorizationRequest := entity.AuthorizationRequestJSON{
+					ResponseType:    util.StringToPointer("token"),
+					ResourceOwnerID: util.IntToPointer(1),
+					ClientUID:       util.StringToPointer(aurelia.Hash("z", "a")),
+					ClientSecret:    nil,
+					RedirectURI:     util.StringToPointer("http://github.com"),
+					Scopes:          util.StringToPointer("public users"),
+				}
+
+				expectedError := &entity.Error{
+					HttpStatus: http.StatusUnprocessableEntity,
+					Errors:     eobject.Wrap(eobject.ValidationError("client_secret cannot be empty")),
+				}
+
+				authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+				results, err := authorizationService.Grantor(ctx, authorizationRequest)
+				assert.NotNil(t, err)
+				assert.Equal(t, expectedError, err)
+				assert.Equal(t, entity.OauthAccessTokenJSON{}, results)
+			})
+		})
+
 		t.Run("Given context and authorization request with nil response type", func(t *testing.T) {
 			t.Run("Return error 422", func(t *testing.T) {
 				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
@@ -754,6 +820,119 @@ func TestAuthorization(t *testing.T) {
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedError, err)
 				assert.Equal(t, nil, results)
+			})
+		})
+	})
+
+	t.Run("RevokeToken", func(t *testing.T) {
+		t.Run("Given context and revoke access token request", func(t *testing.T) {
+			t.Run("Run gracefully", func(t *testing.T) {
+				t.Run("Return nil", func(t *testing.T) {
+					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
+					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
+
+					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+
+					revokeRequest := entity.RevokeAccessTokenRequestJSON{
+						Token: util.StringToPointer("some-cool-token"),
+					}
+
+					oauthAccessTokenModel.EXPECT().Revoke(ctx, *revokeRequest.Token).Return(nil)
+
+					authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+					err := authorizationService.RevokeToken(ctx, revokeRequest)
+					assert.Nil(t, err)
+				})
+			})
+
+			t.Run("Revoke error", func(t *testing.T) {
+				t.Run("Token not found", func(t *testing.T) {
+					t.Run("Return 404 error", func(t *testing.T) {
+						oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+						oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+						oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+						modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
+						oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
+
+						ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+
+						revokeRequest := entity.RevokeAccessTokenRequestJSON{
+							Token: util.StringToPointer("some-cool-token"),
+						}
+
+						oauthAccessTokenModel.EXPECT().Revoke(ctx, *revokeRequest.Token).Return(sql.ErrNoRows)
+
+						expectedError := &entity.Error{
+							HttpStatus: http.StatusNotFound,
+							Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "token")),
+						}
+
+						authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+						err := authorizationService.RevokeToken(ctx, revokeRequest)
+						assert.Equal(t, expectedError, err)
+					})
+				})
+
+				t.Run("Other error", func(t *testing.T) {
+					t.Run("Return 500 error", func(t *testing.T) {
+						oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+						oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+						oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+						modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
+						oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
+
+						ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+
+						revokeRequest := entity.RevokeAccessTokenRequestJSON{
+							Token: util.StringToPointer("some-cool-token"),
+						}
+
+						oauthAccessTokenModel.EXPECT().Revoke(ctx, *revokeRequest.Token).Return(errors.New("unexpected error"))
+
+						expectedError := &entity.Error{
+							HttpStatus: http.StatusInternalServerError,
+							Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+						}
+
+						authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+						err := authorizationService.RevokeToken(ctx, revokeRequest)
+						assert.Equal(t, expectedError, err)
+					})
+				})
+			})
+		})
+
+		t.Run("Given context and revoke access token request with nil token", func(t *testing.T) {
+			t.Run("Return 422 error", func(t *testing.T) {
+				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
+				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
+
+				ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+
+				revokeRequest := entity.RevokeAccessTokenRequestJSON{
+					Token: nil,
+				}
+
+				oauthAccessTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0)
+
+				expectedError := &entity.Error{
+					HttpStatus: http.StatusUnprocessableEntity,
+					Errors:     eobject.Wrap(eobject.ValidationError("token is empty")),
+				}
+
+				authorizationService := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+				err := authorizationService.RevokeToken(ctx, revokeRequest)
+				assert.Equal(t, expectedError, err)
 			})
 		})
 	})

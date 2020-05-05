@@ -18,6 +18,7 @@ func TestAuthorization(t *testing.T) {
 	t.Run("Dispatch", func(t *testing.T) {
 		assert.NotPanics(t, func() {
 			oauth.Authorization().Grant(authService)
+			oauth.Authorization().Revoke(authService)
 		})
 	})
 }

@@ -281,6 +281,7 @@ func runAPI() {
 	controller.Compile(internalEngine, controller.Oauth().Application().One(applicationManager))
 	controller.Compile(internalEngine, controller.Oauth().Application().Create(applicationManager))
 	controller.Compile(internalEngine, controller.Oauth().Authorization().Grant(authorization))
+	controller.Compile(internalEngine, controller.Oauth().Authorization().Revoke(authorization))
 
 	gracefulSignal := make(chan os.Signal, 1)
 	signal.Notify(gracefulSignal, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)

@@ -11,6 +11,7 @@ var InsertOauthApplication = "insert into oauth_applications (owner_id, owner_ty
 var InsertOauthAccessToken = "insert into oauth_access_tokens (oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at) values(?, ?, ?, ?, ?, now(), null)"
 var SelectOneOauthAccessToken = "select * from oauth_access_tokens where id = ? limit 1"
 var SelectOneOauthAccessTokenByToken = "select id, oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at from oauth_access_tokens where token = ? and revoked_at is null limit 1"
+var RevokeAccessToken = "update oauth_access_tokens set revoked_at = now() where token = ?"
 
 // oauth_access_grants
 var InsertOauthAccessGrant = "insert into oauth_access_grants (oauth_application_id, resource_owner_id, scopes, code, redirect_uri, expires_in, created_at, revoked_at) values(?, ?, ?, ?, ?, ?, now(), null)"

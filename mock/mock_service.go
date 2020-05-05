@@ -162,3 +162,17 @@ func (mr *MockAuthorizationMockRecorder) Token(ctx, accessTokenReq interface{}) 
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Token", reflect.TypeOf((*MockAuthorization)(nil).Token), ctx, accessTokenReq)
 }
+
+// RevokeToken mocks base method
+func (m *MockAuthorization) RevokeToken(ctx context.Context, revokeAccessTokenReq entity.RevokeAccessTokenRequestJSON) *entity.Error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RevokeToken", ctx, revokeAccessTokenReq)
+	ret0, _ := ret[0].(*entity.Error)
+	return ret0
+}
+
+// RevokeToken indicates an expected call of RevokeToken
+func (mr *MockAuthorizationMockRecorder) RevokeToken(ctx, revokeAccessTokenReq interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RevokeToken", reflect.TypeOf((*MockAuthorization)(nil).RevokeToken), ctx, revokeAccessTokenReq)
+}

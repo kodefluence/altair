@@ -14,3 +14,7 @@ func Authorization() core.AuthorizationDispatcher {
 func (a authorization) Grant(authService core.Authorization) core.Controller {
 	return auth.Grant(authService)
 }
+
+func (a authorization) Revoke(authService core.Authorization) core.Controller {
+	return auth.Revoke(authService)
+}
