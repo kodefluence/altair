@@ -93,3 +93,23 @@ func (oat *oauthAccessToken) Create(ctx context.Context, data entity.OauthAccess
 
 	return lastInsertedId, err
 }
+
+func (oat *oauthAccessToken) Revoke(ctx context.Context, token string) error {
+	return monitor(ctx, oat.Name(), query.RevokeAccessToken, func() error {
+		result, err := oat.db.Exec(query.RevokeAccessToken, token)
+		if err != nil {
+			return err
+		}
+
+		affectedRows, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+
+		if affectedRows == 0 {
+			return sql.ErrNoRows
+		}
+
+		return nil
+	})
+}

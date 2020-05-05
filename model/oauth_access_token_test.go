@@ -263,4 +263,73 @@ func TestOauthAccessToken(t *testing.T) {
 			})
 		})
 	})
+
+	t.Run("Create", func(t *testing.T) {
+		t.Run("Given context and token", func(t *testing.T) {
+			t.Run("Run gracefully", func(t *testing.T) {
+				t.Run("Return nil", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					mockdb.ExpectExec(`update oauth_access_tokens set revoked_at = now\(\) where token = \?`).
+						WithArgs("token").WillReturnResult(sqlmock.NewResult(1, 1))
+
+					oauthAccessTokenModel := model.OauthAccessToken(db)
+					err = oauthAccessTokenModel.Revoke(context.Background(), "token")
+					assert.Nil(t, err)
+				})
+			})
+
+			t.Run("Execution error", func(t *testing.T) {
+				t.Run("Return error", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					mockdb.ExpectExec(`update oauth_access_tokens set revoked_at = now\(\) where token = \?`).
+						WithArgs("token").WillReturnError(errors.New("unexpected error"))
+
+					oauthAccessTokenModel := model.OauthAccessToken(db)
+					err = oauthAccessTokenModel.Revoke(context.Background(), "token")
+					assert.NotNil(t, err)
+				})
+			})
+
+			t.Run("Get rows affected error", func(t *testing.T) {
+				t.Run("Return error", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					mockdb.ExpectExec(`update oauth_access_tokens set revoked_at = now\(\) where token = \?`).
+						WithArgs("token").WillReturnResult(sqlmock.NewErrorResult(errors.New("unexpected error")))
+
+					oauthAccessTokenModel := model.OauthAccessToken(db)
+					err = oauthAccessTokenModel.Revoke(context.Background(), "token")
+					assert.NotNil(t, err)
+				})
+			})
+
+			t.Run("No rows affected", func(t *testing.T) {
+				t.Run("Return sql.ErrNoRows error", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					mockdb.ExpectExec(`update oauth_access_tokens set revoked_at = now\(\) where token = \?`).
+						WithArgs("token").WillReturnResult(sqlmock.NewResult(1, 0))
+
+					oauthAccessTokenModel := model.OauthAccessToken(db)
+					err = oauthAccessTokenModel.Revoke(context.Background(), "token")
+					assert.NotNil(t, err)
+					assert.Equal(t, sql.ErrNoRows, err)
+				})
+			})
+		})
+	})
 }
