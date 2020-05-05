@@ -6,7 +6,9 @@ Open source API gateway written in Go. Created to be lightweight, fast, cross pl
 
 ## Documentation
 
-> TBD
+### Plugin API Documentation
+
+[Plugin API Documentation in Postman](https://documenter.getpostman.com/view/3666028/SzmcZJ79?version=latest#b870ae5a-b305-4016-8155-4899af1f26b1)
 
 ## How to Use
 
