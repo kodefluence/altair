@@ -101,6 +101,10 @@ type AuthorizationRequestJSON struct {
 	Scopes      *string `json:"scopes"`
 }
 
+type RevokeAccessTokenRequestJSON struct {
+	Token *string `json:"token"`
+}
+
 type AccessTokenRequestJSON struct {
 	GrantType *string `json:"grant_type"`
 

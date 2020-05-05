@@ -195,3 +195,28 @@ func (a *authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 
 	return oauthAccessTokenJSON, nil
 }
+
+func (a *authorization) RevokeToken(ctx context.Context, revokeAccessTokenReq entity.RevokeAccessTokenRequestJSON) *entity.Error {
+
+	if revokeAccessTokenReq.Token == nil {
+		return &entity.Error{
+			HttpStatus: http.StatusUnprocessableEntity,
+			Errors:     eobject.Wrap(eobject.ValidationError("token is empty")),
+		}
+	}
+
+	err := a.oauthAccessTokenModel.Revoke(ctx, *revokeAccessTokenReq.Token)
+	if err == sql.ErrNoRows {
+		return &entity.Error{
+			HttpStatus: http.StatusNotFound,
+			Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "token")),
+		}
+	} else if err != nil {
+		return &entity.Error{
+			HttpStatus: http.StatusInternalServerError,
+			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+		}
+	}
+
+	return nil
+}
