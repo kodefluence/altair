@@ -51,7 +51,7 @@ Open source API gateway written in Go. Created to be lightweight, fast, cross pl
       - [ ] Refresh Token
         - [ ] Access Token Refresh Token Flow
         - [ ] Refresh Token Generation
-    - [ ] Request Validation
+      - [x] Revoke Access Token
   - [ ] Response Caching
     - [ ] Route Config
     - [ ] API for deleting the cache
