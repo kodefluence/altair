@@ -238,6 +238,60 @@ func TestGenerator(t *testing.T) {
 				_ = srvTarget.Close()
 			})
 
+			t.Run("Run gracefully with wildcard route path", func(t *testing.T) {
+				targetEngine := gin.Default()
+
+				gatewayEngine := gin.New()
+
+				var routeObjects []entity.RouteObject
+				routeObjects = append(
+					routeObjects,
+					entity.RouteObject{
+						Auth:   "oauth",
+						Host:   "localhost:5013",
+						Name:   "users",
+						Prefix: "/users",
+						Path: map[string]entity.RouterPath{
+							"/details/:id": entity.RouterPath{Auth: "oauth"},
+						},
+					},
+				)
+
+				for _, r := range routeObjects {
+					buildTargetEngine(targetEngine, "GET", r)
+				}
+
+				var downStreamPlugin []core.DownStreamPlugin
+
+				oauthPlugin := mock.NewMockDownStreamPlugin(mockCtrl)
+				oauthPlugin.EXPECT().Intervene(gomock.Any(), gomock.Any(), routeObjects[0].Path["/details/:id"]).Return(nil)
+				oauthPlugin.EXPECT().Name().AnyTimes().Return("oauth-plugin")
+
+				downStreamPlugin = append(downStreamPlugin, oauthPlugin)
+
+				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
+				assert.Nil(t, err)
+
+				srvTarget := &http.Server{
+					Addr:    ":5013",
+					Handler: targetEngine,
+				}
+
+				go func() {
+					_ = srvTarget.ListenAndServe()
+				}()
+
+				// Given sleep time so the server can boot first
+				time.Sleep(time.Millisecond * 100)
+
+				assert.NotPanics(t, func() {
+					rec := mock.PerformRequest(gatewayEngine, "GET", "/users/details/me", nil)
+					assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+				})
+
+				_ = srvTarget.Close()
+			})
+
 			t.Run("Downstream plugins error", func(t *testing.T) {
 				targetEngine := gin.Default()
 
@@ -407,7 +461,7 @@ func TestGenerator(t *testing.T) {
 					routeObjects,
 					entity.RouteObject{
 						Auth:   "none",
-						Host:   "localhost:5002",
+						Host:   "localhost:5019",
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
@@ -506,6 +560,7 @@ func TestGenerator(t *testing.T) {
 func buildTargetEngine(targetEngine *gin.Engine, method string, routeObject entity.RouteObject) {
 	for p := range routeObject.Path {
 		targetEngine.Handle(method, fmt.Sprintf("%s%s", routeObject.Prefix, p), func(c *gin.Context) {
+			fmt.Println("TRACEBUG", "CIHUY")
 			c.JSON(http.StatusOK, gin.H{
 				"status": "ok",
 			})

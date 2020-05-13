@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/codefluence-x/altair/core"
@@ -56,6 +57,11 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 
 				trackID := uuid.New().String()
 				startTime := time.Now()
+
+				generatedPathForPlugin := c.Request.URL.Path
+				for _, p := range c.Params {
+					generatedPathForPlugin = strings.Replace(generatedPathForPlugin, p.Value, ":"+p.Key, 1)
+				}
 
 				if c.Request.Body != nil {
 					body, err := ioutil.ReadAll(c.Request.Body)
@@ -133,8 +139,7 @@ func (g *generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObje
 
 				for _, plugin := range downStreamPlugin {
 					startTimePlugin := time.Now()
-
-					if err := plugin.Intervene(c, proxyReq, g.routerPath[c.Request.URL.Path]); err != nil {
+					if err := plugin.Intervene(c, proxyReq, g.routerPath[generatedPathForPlugin]); err != nil {
 						journal.Error("Plugin error", err).
 							SetTrackId(trackID).
 							AddField("plugin_name", plugin.Name()).
