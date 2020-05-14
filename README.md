@@ -38,6 +38,10 @@ Open source API gateway written in Go. Created to be lightweight, fast, cross pl
   - [x] Downstream Plugins
     - [x] Oauth Token Checking
     - [ ] Response Caching
+- [ ] Metric & Monitoring
+  - [ ] Prometheus
+- [x] Logging
+  - [x] Stdout
 - [ ] Plugins
   - [ ] Oauth Authorization
     - [ ] CRUD Oauth Application
