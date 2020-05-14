@@ -32,7 +32,7 @@ Open source API gateway written in Go. Created to be lightweight, fast, cross pl
 
 ## Feature
 
-- [] Request Forwarder
+- [ ] Request Forwarder
   - [x] Route Compiler
   - [x] Route Generator Forwader
   - [x] Downstream Plugins
