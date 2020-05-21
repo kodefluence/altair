@@ -1,0 +1,13 @@
+# This database file represent any instance of database that can be connected and used in any plugin of Altair
+# This config is environment agnostic, so it can be used in any environment based on it's environment variables.
+
+oauth_database:
+  driver: mysql
+  database: {{ env "DATABASE_NAME" }}
+  username: {{ env "DATABASE_USERNAME" }}
+  password: {{ env "DATABASE_PASSWORD" }}
+  host:     {{ env "DATABASE_HOST" }}
+  port:     {{ env "DATABASE_PORT" }}
+  connection_max_lifetime: 120s
+  max_iddle_connection: 100
+  max_open_connection: 100
