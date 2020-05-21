@@ -34,3 +34,26 @@ other_database:
   connection_max_lifetime: 120s
   max_iddle_connection: 100
   max_open_connection: 100`
+
+var DatabaseConfigMissingDriver = `
+oauth_database:
+  database: some_database
+  username: some_username
+  password: some_password
+  host:     localhost
+  port:     3306
+  connection_max_lifetime: 120s
+  max_iddle_connection: 100
+  max_open_connection: 100`
+
+var DatabaseConfigInvalidDriver = `
+oauth_database:
+  driver: postgre
+  database: some_database
+  username: some_username
+  password: some_password
+  host:     localhost
+  port:     3306
+  connection_max_lifetime: 120s
+  max_iddle_connection: 100
+  max_open_connection: 100`

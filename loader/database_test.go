@@ -196,6 +196,32 @@ func TestDatabase(t *testing.T) {
 
 				removeTempTestFiles(configPath)
 			})
+
+			t.Run("Invalid driver", func(t *testing.T) {
+				configPath := "./db_invalid_driver/"
+				fileName := "database.yml"
+
+				generateTempTestFiles(configPath, DatabaseConfigInvalidDriver, fileName, 0666)
+
+				dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+				assert.NotNil(t, err)
+				assert.Nil(t, dbConfigs)
+
+				removeTempTestFiles(configPath)
+			})
+
+			t.Run("Missing driver", func(t *testing.T) {
+				configPath := "./db_missing_driver/"
+				fileName := "database.yml"
+
+				generateTempTestFiles(configPath, DatabaseConfigMissingDriver, fileName, 0666)
+
+				dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+				assert.NotNil(t, err)
+				assert.Nil(t, dbConfigs)
+
+				removeTempTestFiles(configPath)
+			})
 		})
 	})
 }
