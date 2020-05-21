@@ -560,7 +560,6 @@ func TestGenerator(t *testing.T) {
 func buildTargetEngine(targetEngine *gin.Engine, method string, routeObject entity.RouteObject) {
 	for p := range routeObject.Path {
 		targetEngine.Handle(method, fmt.Sprintf("%s%s", routeObject.Prefix, p), func(c *gin.Context) {
-			fmt.Println("TRACEBUG", "CIHUY")
 			c.JSON(http.StatusOK, gin.H{
 				"status": "ok",
 			})
