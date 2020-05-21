@@ -79,47 +79,47 @@ func (d *database) assignConfig(driverConfigs map[string]map[string]string) (map
 func (d *database) assignMysqlConfig(config map[string]string) (core.DatabaseConfig, error) {
 	var mysqlConfig entity.MYSQLDatabaseConfig
 
-	if database, ok := config["database"]; ok {
+	if database, ok := config["database"]; ok && database != "" {
 		mysqlConfig.Database = database
 	} else {
 		return nil, errors.New("Config `database` cannot be empty for mysql driver")
 	}
 
-	if username, ok := config["username"]; ok {
+	if username, ok := config["username"]; ok && username != "" {
 		mysqlConfig.Username = username
 	} else {
 		return nil, errors.New("Config `username` cannot be empty for mysql driver")
 	}
 
-	if password, ok := config["password"]; ok {
+	if password, ok := config["password"]; ok && password != "" {
 		mysqlConfig.Password = password
 	}
 
-	if host, ok := config["host"]; ok {
+	if host, ok := config["host"]; ok && host != "" {
 		mysqlConfig.Host = host
 	} else {
 		return nil, errors.New("Config `host` cannot be empty for mysql driver")
 	}
 
-	if port, ok := config["port"]; ok {
+	if port, ok := config["port"]; ok && port != "" {
 		mysqlConfig.Port = port
 	} else {
 		mysqlConfig.Port = "3306"
 	}
 
-	if connection_max_lifetime, ok := config["connection_max_lifetime"]; ok {
+	if connection_max_lifetime, ok := config["connection_max_lifetime"]; ok && connection_max_lifetime != "" {
 		mysqlConfig.ConnectionMaxLifetime = connection_max_lifetime
 	} else {
 		mysqlConfig.ConnectionMaxLifetime = "0"
 	}
 
-	if max_iddle_connection, ok := config["max_iddle_connection"]; ok {
+	if max_iddle_connection, ok := config["max_iddle_connection"]; ok && max_iddle_connection != "" {
 		mysqlConfig.MaxIddleConnection = max_iddle_connection
 	} else {
 		mysqlConfig.MaxIddleConnection = "0"
 	}
 
-	if max_open_connection, ok := config["max_open_connection"]; ok {
+	if max_open_connection, ok := config["max_open_connection"]; ok && max_open_connection != "" {
 		mysqlConfig.MaxOpenConnection = max_open_connection
 	} else {
 		mysqlConfig.MaxOpenConnection = "0"

@@ -57,3 +57,83 @@ oauth_database:
   connection_max_lifetime: 120s
   max_iddle_connection: 100
   max_open_connection: 100`
+
+var DatabaseConfigMYSQLEmptyDatabase = `
+oauth_database:
+  driver: mysql
+  database: ""
+  username: some_username
+  password: some_password
+  host:     localhost
+  port:     3306
+  connection_max_lifetime: 120s
+  max_iddle_connection: 100
+  max_open_connection: 100`
+
+var DatabaseConfigMYSQLEmptyUsername = `
+oauth_database:
+  driver: mysql
+  database: some_database
+  username: ""
+  password: some_password
+  host:     localhost
+  port:     3306
+  connection_max_lifetime: 120s
+  max_iddle_connection: 100
+  max_open_connection: 100`
+
+var DatabaseConfigMYSQLEmptyHost = `
+oauth_database:
+  driver: mysql
+  database: some_database
+  username: some_username
+  password: some_password
+  host:     ""
+  port:     3306
+  connection_max_lifetime: 120s
+  max_iddle_connection: 100
+  max_open_connection: 100`
+
+var DatabaseConfigMYSQLEmptyPort = `
+oauth_database:
+  driver: mysql
+  database: some_database
+  username: some_username
+  password: some_password
+  host:     localhost
+  connection_max_lifetime: 120s
+  max_iddle_connection: 100
+  max_open_connection: 100`
+
+var DatabaseConfigMYSQLEmptyConnectionMaxLifetime = `
+oauth_database:
+  driver: mysql
+  database: some_database
+  username: some_username
+  password: some_password
+  host:     localhost
+  port:     3306
+  max_iddle_connection: 100
+  max_open_connection: 100`
+
+var DatabaseConfigMYSQLEmptyMaxIddleConnection = `
+oauth_database:
+  driver: mysql
+  database: some_database
+  username: some_username
+  password: some_password
+  host:     localhost
+  port:     3306
+  connection_max_lifetime: 120s
+  max_open_connection: 100`
+
+var DatabaseConfigMYSQLEmptyMaxOpenConnection = `
+oauth_database:
+  driver: mysql
+  database: some_database
+  username: some_username
+  password: some_password
+  host:     localhost
+  port:     3306
+  connection_max_lifetime: 120s
+  max_iddle_connection: 100`
