@@ -12,6 +12,18 @@ oauth_database:
   max_iddle_connection: 100
   max_open_connection: 100`
 
+var DatabaseConfigWithNotFoundENV = `
+  oauth_database:
+    driver: mysql
+    database: {{ env "DATABASE_NAME_DB_CONFIG_ENV_CONFIG_NOT_FOUND" }}
+    username: {{ env "DATABASE_USERNAME_DB_CONFIG_ENV_CONFIG_NOT_FOUND" }}
+    password: {{ env "DATABASE_PASSWORD_DB_CONFIG_ENV_CONFIG_NOT_FOUND" }}
+    host:     {{ env "DATABASE_HOST_DB_CONFIG_ENV_CONFIG_NOT_FOUND" }}
+    port:     {{ env "DATABASE_PORT_DB_CONFIG_ENV_CONFIG_NOT_FOUND" }}
+    connection_max_lifetime: {{ env "NOT_FOUND_ENV" }}
+    max_iddle_connection: 100
+    max_open_connection: 100`
+
 var DatabaseConfigNormalScenarioWithTwoValue = `
 oauth_database:
   driver: mysql
@@ -137,3 +149,20 @@ oauth_database:
   port:     3306
   connection_max_lifetime: 120s
   max_iddle_connection: 100`
+
+var DatabaseConfigInvalidYaml = `
+asdasd asda
+a  asaa
+-12 -2`
+
+var DatabaseConfigInvalidTemplateFormatting = `
+oauth_database:
+  driver: mysql
+  database: some_database
+  username: some_username
+  password: some_password
+  host:     localhost
+  port:     3306
+  connection_max_lifetime: {}}}{}{{}}A{!@}
+  max_iddle_connection: 100
+  max_open_connection: 100`

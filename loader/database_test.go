@@ -83,6 +83,73 @@ func TestDatabase(t *testing.T) {
 					})
 				})
 
+				t.Run("Some env not found", func(t *testing.T) {
+					t.Run("Run gracefully", func(t *testing.T) {
+						dbName := "db_1"
+						dbUsername := "username_db1"
+						dbPassword := "password_db1"
+						dbHost := "127.0.0.1"
+						dbPort := "3306"
+
+						os.Setenv("DATABASE_NAME_DB_CONFIG_ENV_CONFIG_NOT_FOUND", dbName)
+						os.Setenv("DATABASE_USERNAME_DB_CONFIG_ENV_CONFIG_NOT_FOUND", dbUsername)
+						os.Setenv("DATABASE_PASSWORD_DB_CONFIG_ENV_CONFIG_NOT_FOUND", dbPassword)
+						os.Setenv("DATABASE_HOST_DB_CONFIG_ENV_CONFIG_NOT_FOUND", dbHost)
+						os.Setenv("DATABASE_PORT_DB_CONFIG_ENV_CONFIG_NOT_FOUND", dbPort)
+
+						configPath := "./db_normal_but_some_env_not_found/"
+						fileName := "database.yml"
+
+						expectedMYSQLConfig := entity.MYSQLDatabaseConfig{
+							Database:              dbName,
+							Username:              dbUsername,
+							Password:              dbPassword,
+							Host:                  dbHost,
+							Port:                  dbPort,
+							ConnectionMaxLifetime: "0",
+							MaxIddleConnection:    "100",
+							MaxOpenConnection:     "100",
+						}
+
+						generateTempTestFiles(configPath, DatabaseConfigWithNotFoundENV, fileName, 0666)
+
+						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						assert.Nil(t, err)
+
+						c, ok := dbConfigs["oauth_database"]
+
+						assert.True(t, ok)
+						assert.Equal(t, expectedMYSQLConfig.Driver(), c.Driver())
+						assert.Equal(t, expectedMYSQLConfig.DBHost(), c.DBHost())
+
+						expectedDBPort, _ := expectedMYSQLConfig.DBPort()
+						actualDBPort, err := c.DBPort()
+						assert.Nil(t, err)
+						assert.Equal(t, expectedDBPort, actualDBPort)
+
+						assert.Equal(t, expectedMYSQLConfig.DBUsername(), c.DBUsername())
+						assert.Equal(t, expectedMYSQLConfig.DBPassword(), c.DBPassword())
+						assert.Equal(t, expectedMYSQLConfig.DBDatabase(), c.DBDatabase())
+
+						expectedMaxConnLifetime, _ := expectedMYSQLConfig.DBConnectionMaxLifetime()
+						actualMaxConnLifetime, err := c.DBConnectionMaxLifetime()
+
+						assert.Equal(t, expectedMaxConnLifetime, actualMaxConnLifetime)
+
+						expectedMaxIddleConn, _ := expectedMYSQLConfig.DBMaxIddleConn()
+						actualMaxIddleConn, err := c.DBMaxIddleConn()
+						assert.Nil(t, err)
+						assert.Equal(t, expectedMaxIddleConn, actualMaxIddleConn)
+
+						expectedMaxOpenConn, _ := expectedMYSQLConfig.DBMaxOpenConn()
+						actualMaxOpenConn, err := c.DBMaxOpenConn()
+						assert.Nil(t, err)
+						assert.Equal(t, expectedMaxOpenConn, actualMaxOpenConn)
+
+						removeTempTestFiles(configPath)
+					})
+				})
+
 				t.Run("Normal scenario with 2 config", func(t *testing.T) {
 					t.Run("Run gracefully", func(t *testing.T) {
 						dbName1 := "db_1"
@@ -209,6 +276,51 @@ func TestDatabase(t *testing.T) {
 						fileName := "database.yml"
 
 						generateTempTestFiles(configPath, DatabaseConfigInvalidDriver, fileName, 0666)
+
+						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						assert.NotNil(t, err)
+						assert.Nil(t, dbConfigs)
+
+						removeTempTestFiles(configPath)
+					})
+				})
+
+				t.Run("File not found", func(t *testing.T) {
+					t.Run("Return error", func(t *testing.T) {
+						configPath := "./db_file_not_found/"
+						fileName := "database.yml"
+
+						generateTempTestFiles(configPath, DatabaseConfigInvalidDriver, fileName, 0666)
+
+						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, "xxx.yml"))
+						assert.NotNil(t, err)
+						assert.Nil(t, dbConfigs)
+
+						removeTempTestFiles(configPath)
+					})
+				})
+
+				t.Run("Invalid yaml content", func(t *testing.T) {
+					t.Run("Return error", func(t *testing.T) {
+						configPath := "./db_invalid_yaml/"
+						fileName := "database.yml"
+
+						generateTempTestFiles(configPath, DatabaseConfigInvalidYaml, fileName, 0666)
+
+						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						assert.NotNil(t, err)
+						assert.Nil(t, dbConfigs)
+
+						removeTempTestFiles(configPath)
+					})
+				})
+
+				t.Run("Invalid go text template", func(t *testing.T) {
+					t.Run("Return error", func(t *testing.T) {
+						configPath := "./db_invalid_go_text_template/"
+						fileName := "database.yml"
+
+						generateTempTestFiles(configPath, DatabaseConfigInvalidTemplateFormatting, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
