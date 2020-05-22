@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+type AppLoader interface {
+	Compile(configPath string) (AppConfig, error)
+}
+
 type DatabaseLoader interface {
 	Compile(configPath string) (map[string]DatabaseConfig, error)
 }
@@ -24,4 +28,9 @@ type DatabaseConfig interface {
 
 type DatabaseBearer interface {
 	Database(dbName string) (*sql.DB, error)
+}
+
+type AppConfig interface {
+	PluginExists(pluginName string) bool
+	Plugins() []string
 }

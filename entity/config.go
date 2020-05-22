@@ -2,10 +2,6 @@ package entity
 
 import "time"
 
-type AppConfig struct {
-	Plugins []string `yaml:"plugins"`
-}
-
 type Plugin struct {
 	Plugin string `yaml:"plugin"`
 	Raw    []byte
