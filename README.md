@@ -1,6 +1,6 @@
 # Altair - Light Weight and Robust API Gateway
 
-Open source API gateway written in Go. Created to be lightweight, fast, cross platform and programming language agnostic.
+Open source API gateway written in Go. Created to be lightweight, simple, fast, reliable, cross platform and programming language agnostic.
 
 ![Altair Architecture Diagram](https://user-images.githubusercontent.com/20650401/79699757-a2337d00-82bb-11ea-8103-25e6917545bd.png)
 
