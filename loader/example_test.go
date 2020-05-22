@@ -192,3 +192,24 @@ oauth_database:
   connection_max_lifetime: {}}}{}{{}}A{!@}
   max_iddle_connection: 100
   max_open_connection: 100`
+
+var AppConfigNormal = `
+plugins:
+  - oauth`
+
+var AppConfigUnmarshalError = `
+ASd:
+1231
+AS
+1
+23
+1
+231
+Aplugins:
+- oauth
+  - x`
+
+var AppConfigTemplateError = `
+plugins:
+  - oauth
+  - {{ } }} {}{} {}{`
