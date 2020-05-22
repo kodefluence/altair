@@ -42,6 +42,8 @@ var (
 	dbConfigs map[string]core.DatabaseConfig = map[string]core.DatabaseConfig{}
 	databases map[string]*sql.DB             = map[string]*sql.DB{}
 
+	appConfig core.AppConfig
+
 	apiEngine *gin.Engine
 
 	accessTokenTimeout time.Duration
@@ -72,13 +74,19 @@ func loadConfig() {
 		os.Exit(1)
 	}
 
-	configs, err := loader.Database().Compile("./config/database.yml")
+	loadedDBConfigs, err := loader.Database().Compile("./config/database.yml")
 	if err != nil {
 		journal.Error("Error loading database config", err).Log()
 		os.Exit(1)
 	}
+	dbConfigs = loadedDBConfigs
 
-	dbConfigs = configs
+	loadedAppConfig, err := loader.App().Compile("./config/app.yml")
+	if err != nil {
+		journal.Error("Error loading app config", err).Log()
+		os.Exit(1)
+	}
+	appConfig = loadedAppConfig
 }
 
 func executeCommand() {
@@ -298,22 +306,41 @@ func closeMigration() {
 func runAPI() {
 	gin.SetMode(gin.ReleaseMode)
 
-	// Model
-	oauthApplicationModel := model.OauthApplication(mysqlDB)
-	oauthAccessTokenModel := model.OauthAccessToken(mysqlDB)
-	oauthAccessGrantModel := model.OauthAccessGrant(mysqlDB)
+	apiEngine = gin.New()
+	apiEngine.GET("/health", controller.Health)
 
-	// Formatter
-	applicationFormatter := formatter.OauthApplication()
-	modelFormatter := formatter.Model(accessTokenTimeout, accessGrantTimeout)
-	oauthFormatter := formatter.Oauth()
+	downStreamPlugins := []core.DownStreamPlugin{}
 
-	// Validator
-	oauthValidator := validator.Oauth()
+	internalEngine := apiEngine.Group("/_plugins/", gin.BasicAuth(gin.Accounts{
+		appConfig.BasicAuthUsername(): appConfig.BasicAuthPassword(),
+	}))
 
-	// Service
-	applicationManager := service.ApplicationManager(applicationFormatter, modelFormatter, oauthApplicationModel, oauthValidator)
-	authorization := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatter, oauthValidator, oauthFormatter)
+	if appConfig.PluginExists("oauth") {
+		// Model
+		oauthApplicationModel := model.OauthApplication(mysqlDB)
+		oauthAccessTokenModel := model.OauthAccessToken(mysqlDB)
+		oauthAccessGrantModel := model.OauthAccessGrant(mysqlDB)
+
+		// Formatter
+		applicationFormatter := formatter.OauthApplication()
+		modelFormatter := formatter.Model(accessTokenTimeout, accessGrantTimeout)
+		oauthFormatter := formatter.Oauth()
+
+		// Validator
+		oauthValidator := validator.Oauth()
+
+		// Service
+		applicationManager := service.ApplicationManager(applicationFormatter, modelFormatter, oauthApplicationModel, oauthValidator)
+		authorization := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatter, oauthValidator, oauthFormatter)
+
+		downStreamPlugins = append(downStreamPlugins, plugin.DownStream().Oauth(oauthAccessTokenModel))
+
+		controller.Compile(internalEngine, controller.Oauth().Application().List(applicationManager))
+		controller.Compile(internalEngine, controller.Oauth().Application().One(applicationManager))
+		controller.Compile(internalEngine, controller.Oauth().Application().Create(applicationManager))
+		controller.Compile(internalEngine, controller.Oauth().Authorization().Grant(authorization))
+		controller.Compile(internalEngine, controller.Oauth().Authorization().Revoke(authorization))
+	}
 
 	// Route Engine
 	routeCompiler := forwarder.Route().Compiler()
@@ -325,29 +352,13 @@ func runAPI() {
 		os.Exit(1)
 	}
 
-	apiEngine = gin.New()
-	apiEngine.GET("/health", controller.Health)
-
-	// DownStream Plugin
-	oauthPlugin := plugin.DownStream().Oauth(oauthAccessTokenModel)
-
-	err = forwarder.Route().Generator().Generate(apiEngine, routeObjects, []core.DownStreamPlugin{oauthPlugin})
+	err = forwarder.Route().Generator().Generate(apiEngine, routeObjects, downStreamPlugins)
 	if err != nil {
 		journal.Error("Error generating routes", err).
 			SetTags("altair", "main").
 			Log()
 		os.Exit(1)
 	}
-
-	internalEngine := apiEngine.Group("/_plugins/", gin.BasicAuth(gin.Accounts{
-		os.Getenv("BASIC_AUTH_USERNAME"): os.Getenv("BASIC_AUTH_PASSWORD"),
-	}))
-
-	controller.Compile(internalEngine, controller.Oauth().Application().List(applicationManager))
-	controller.Compile(internalEngine, controller.Oauth().Application().One(applicationManager))
-	controller.Compile(internalEngine, controller.Oauth().Application().Create(applicationManager))
-	controller.Compile(internalEngine, controller.Oauth().Authorization().Grant(authorization))
-	controller.Compile(internalEngine, controller.Oauth().Authorization().Revoke(authorization))
 
 	gracefulSignal := make(chan os.Signal, 1)
 	signal.Notify(gracefulSignal, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
