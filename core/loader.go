@@ -1,6 +1,7 @@
 package core
 
 import (
+	"database/sql"
 	"time"
 )
 
@@ -18,4 +19,8 @@ type DatabaseConfig interface {
 	DBConnectionMaxLifetime() (time.Duration, error)
 	DBMaxIddleConn() (int, error)
 	DBMaxOpenConn() (int, error)
+}
+
+type DatabaseBearer interface {
+	Database(dbName string) (*sql.DB, error)
 }
