@@ -22,6 +22,7 @@ import (
 	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/formatter"
 	"github.com/codefluence-x/altair/forwarder"
+	"github.com/codefluence-x/altair/loader"
 	"github.com/codefluence-x/altair/model"
 	"github.com/codefluence-x/altair/plugin"
 	"github.com/codefluence-x/altair/service"
@@ -37,6 +38,9 @@ var (
 	mysqlMaxOpenConn     int
 
 	migration *migrate.Migrate
+
+	dbConfigs map[string]core.DatabaseConfig = map[string]core.DatabaseConfig{}
+	databases map[string]*sql.DB             = map[string]*sql.DB{}
 
 	apiEngine *gin.Engine
 
@@ -67,6 +71,14 @@ func loadConfig() {
 	if err != nil {
 		os.Exit(1)
 	}
+
+	configs, err := loader.Database().Compile("./config/database.yml")
+	if err != nil {
+		journal.Error("Error loading database config", err).Log()
+		os.Exit(1)
+	}
+
+	dbConfigs = configs
 }
 
 func executeCommand() {
@@ -158,6 +170,27 @@ func executeCommand() {
 	_ = rootCmd.Execute()
 }
 
+func dbConnectionFabricator(dbConfig core.DatabaseConfig) (*sql.DB, error) {
+	port, err := dbConfig.DBPort()
+	if err != nil {
+		return nil, err
+	}
+
+	maxConnLifetime, err := dbConfig.DBConnectionMaxLifetime()
+	if err != nil {
+		return nil, err
+	}
+
+	db, err := sql.Open(dbConfig.Driver(), fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&interpolateParams=true", dbConfig.DBUsername(), dbConfig.DBPassword(), dbConfig.DBHost(), port, dbConfig.DBDatabase()))
+	if err != nil {
+		return nil, err
+	}
+
+	db.SetConnMaxLifetime(maxConnLifetime)
+
+	return db, nil
+}
+
 func fabricateConnection() error {
 	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&interpolateParams=true", os.Getenv("DATABASE_USERNAME"), os.Getenv("DATABASE_PASSWORD"), os.Getenv("DATABASE_HOST"), os.Getenv("DATABASE_PORT"), os.Getenv("DATABASE_NAME")))
 	if err != nil {
@@ -171,6 +204,15 @@ func fabricateConnection() error {
 	mysqlDB = db
 
 	journal.Info(fmt.Sprintf("Complete fabricating mysql writer connection: %s:%s@tcp(%s:%s)/%s?", os.Getenv("DATABASE_USERNAME"), "***********", os.Getenv("DATABASE_HOST"), os.Getenv("DATABASE_PORT"), os.Getenv("DATABASE_NAME"))).SetTags("altair", "main").Log()
+
+	for key, config := range dbConfigs {
+		sqlDB, err := dbConnectionFabricator(config)
+		if err != nil {
+			return err
+		}
+
+		databases[key] = sqlDB
+	}
 
 	return nil
 }
@@ -195,6 +237,28 @@ func closeConnection() {
 		}
 
 		journal.Info("Success closing mysql writer and reader connection.").SetTags("altair", "main").Log()
+	}
+
+	for dbName, db := range databases {
+		var err error
+
+		for i := 0; i < 3; i++ {
+			err = db.Close()
+			if err != nil {
+				journal.Error(fmt.Sprintln("Error closing mysql writer because of:", err), err).SetTags("altair", "main", dbName).Log()
+				continue
+			}
+
+			if err == nil {
+				break
+			}
+		}
+		if err != nil {
+			journal.Info("Failed closing mysql writer and reader connection.").SetTags("altair", "main", dbName).Log()
+			return
+		}
+
+		journal.Info("Success closing mysql writer and reader connection.").SetTags("altair", "main", dbName).Log()
 	}
 }
 
