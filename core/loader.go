@@ -31,6 +31,10 @@ type DatabaseBearer interface {
 }
 
 type AppConfig interface {
+	Port() int
+	BasicAuthUsername() string
+	BasicAuthPassword() string
+	ProxyHost() string
 	PluginExists(pluginName string) bool
 	Plugins() []string
 }

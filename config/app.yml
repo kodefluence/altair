@@ -1,5 +1,15 @@
 # This is the sample of app config
+# port: string | integer      - Exposed port of application, example: 1304. Default: 1304.
+# proxy_host: string          - Proxy host header when forwarding the request. Default: www.local.host
+# authorization: <hash>
+#   username: string          - Basic auth username for managing the application plugins, required.
+#   password: string          - Basic auth password for managing the application plugins, required.
 # plugins: <array[string]>    - List of active plugins. Available plugins: oauth
 
+port: 1304
+proxy_host: {{ env "PROXY_HOST" }}
+authorization:
+  username: altair
+  password: {{ env "BASIC_AUTH_PASSWORD" }}
 plugins:
   - oauth

@@ -194,6 +194,45 @@ oauth_database:
   max_open_connection: 100`
 
 var AppConfigNormal = `
+authorization:
+  username: altair
+  password: secret
+plugins:
+  - oauth`
+
+var AppConfigWithCustomProxyHost = `
+proxy_host: www.altair.id
+authorization:
+  username: altair
+  password: secret
+plugins:
+  - oauth`
+
+var AppConfigWithCustomPort = `
+port: 7001
+authorization:
+  username: altair
+  password: secret
+plugins:
+  - oauth`
+
+var AppConfigAuthUsernameEmpty = `
+authorization:
+  password: secret
+plugins:
+  - oauth`
+
+var AppConfigAuthPasswordEmpty = `
+authorization:
+  username: altair
+plugins:
+  - oauth`
+
+var AppConfigWithInvalidCustomPort = `
+port: asd
+authorization:
+  username: altair
+  password: secret
 plugins:
   - oauth`
 
