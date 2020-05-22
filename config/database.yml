@@ -9,7 +9,7 @@
 #   password: string                          - Database passwords, can be left empty.
 #   host: string                              - Database host location, required.
 #   port: string || integer                   - Database port, if left empty then will be use default value: 3306.
-#   migration_path: string                    - Every database instance need a migration path.
+#   migration_source: string                  - Every database instance need a migration path.
 #   connection_max_lifetime: string           - Set max connection lifetime duration.
 #   max_iddle_connection: string | integer    - Set max iddle connection of the databases, if left empty then will be set unlimited.
 #   max_open_connection: string | integer     - Set max open connection of the databases, if left empty then will be set unlimited.
@@ -21,7 +21,7 @@ main_database:
   password: {{ env "DATABASE_PASSWORD" }}
   host:     {{ env "DATABASE_HOST" }}
   port:     {{ env "DATABASE_PORT" }}
-  migration_path: "file://migration"
+  migration_source: "file://migration"
   connection_max_lifetime: 120s
   max_iddle_connection: 100
   max_open_connection: 100
