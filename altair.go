@@ -188,6 +188,8 @@ func dbConnectionFabricator(dbConfig core.DatabaseConfig) (*sql.DB, error) {
 
 	db.SetConnMaxLifetime(maxConnLifetime)
 
+	journal.Info(fmt.Sprintf("Complete fabricating mysql writer connection: %s:%s@tcp(%s:%d)/%s?", dbConfig.DBUsername(), "***********", dbConfig.DBHost(), port, dbConfig.DBDatabase())).SetTags("altair", "main").Log()
+
 	return db, nil
 }
 
