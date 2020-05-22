@@ -24,6 +24,7 @@ type DatabaseConfig interface {
 	DBConnectionMaxLifetime() (time.Duration, error)
 	DBMaxIddleConn() (int, error)
 	DBMaxOpenConn() (int, error)
+	Dump() string
 }
 
 type DatabaseBearer interface {
@@ -37,4 +38,5 @@ type AppConfig interface {
 	ProxyHost() string
 	PluginExists(pluginName string) bool
 	Plugins() []string
+	Dump() string
 }

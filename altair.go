@@ -111,6 +111,50 @@ func executeCommand() {
 		},
 	}
 
+	configCmd := &cobra.Command{
+		Use:   "config",
+		Short: "See list of configs",
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) < 1 {
+				fmt.Println("Invalid number of arguments, expected 1. Example `altair config app`.")
+				return
+			}
+
+			app := func() {
+				fmt.Printf("app config:\n")
+				fmt.Printf("====================\n")
+				fmt.Printf(appConfig.Dump())
+				fmt.Printf("--------------------\n")
+			}
+
+			database := func() {
+				fmt.Printf("database config:\n")
+				fmt.Printf("====================\n")
+				for key, config := range dbConfigs {
+					fmt.Printf("instance: %s\n", key)
+					fmt.Printf("driver: %s\n", config.Driver())
+					fmt.Printf("--------------------\n")
+					fmt.Printf(config.Dump())
+				}
+				fmt.Printf("--------------------\n")
+			}
+
+			switch args[0] {
+			case "all":
+				app()
+				fmt.Println()
+				database()
+			case "app":
+				app()
+			case "database":
+				database()
+			default:
+				fmt.Println("Invalid argument. Available: [app, database, all]")
+				return
+			}
+		},
+	}
+
 	migrateCmd := &cobra.Command{
 		Use:   "migrate",
 		Short: "Do a migration.",
@@ -174,7 +218,7 @@ func executeCommand() {
 		},
 	}
 
-	rootCmd.AddCommand(runCmd, migrateCmd, migrateDownCmd, migrateRollbackCmd)
+	rootCmd.AddCommand(runCmd, migrateCmd, migrateDownCmd, migrateRollbackCmd, configCmd)
 	_ = rootCmd.Execute()
 }
 

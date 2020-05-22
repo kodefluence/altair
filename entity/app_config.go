@@ -1,13 +1,15 @@
 package entity
 
+import "gopkg.in/yaml.v2"
+
 type AppConfigOption struct {
-	Port          int
-	ProxyHost     string
-	Plugins       []string
+	Port          int      `yaml:"port"`
+	ProxyHost     string   `yaml:"proxy_host"`
+	Plugins       []string `yaml:"plugins"`
 	Authorization struct {
-		Username string
-		Password string
-	}
+		Username string `yaml:"username"`
+		Password string `yaml:"pasword"`
+	} `yaml:"authorization"`
 }
 
 type appConfig struct {
@@ -59,4 +61,18 @@ func (a appConfig) BasicAuthPassword() string {
 
 func (a appConfig) ProxyHost() string {
 	return a.proxyHost
+}
+
+func (a appConfig) Dump() string {
+	appConfigOption := AppConfigOption{
+		Port:      a.port,
+		Plugins:   a.plugins,
+		ProxyHost: a.proxyHost,
+	}
+
+	appConfigOption.Authorization.Username = a.basicAuthUsername
+	appConfigOption.Authorization.Password = a.basicAuthPassword
+
+	encodedContent, _ := yaml.Marshal(appConfigOption)
+	return string(encodedContent)
 }

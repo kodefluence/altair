@@ -5,6 +5,7 @@ import (
 
 	"github.com/codefluence-x/altair/entity"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
 )
 
 func TestAppConfig(t *testing.T) {
@@ -46,6 +47,7 @@ func TestAppConfig(t *testing.T) {
 
 		assert.Equal(t, appOption.ProxyHost, appConfig.ProxyHost())
 	})
+
 	t.Run("PluginExists", func(t *testing.T) {
 		t.Run("Not exists", func(t *testing.T) {
 			appOption := entity.AppConfigOption{
@@ -71,5 +73,13 @@ func TestAppConfig(t *testing.T) {
 				assert.True(t, appConfig.PluginExists("oauth"))
 			})
 		})
+	})
+
+	t.Run("Dump", func(t *testing.T) {
+		appConfig := entity.NewAppConfig(appOption)
+
+		content, _ := yaml.Marshal(appOption)
+
+		assert.Equal(t, string(content), appConfig.Dump())
 	})
 }

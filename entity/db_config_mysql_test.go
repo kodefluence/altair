@@ -6,6 +6,7 @@ import (
 
 	"github.com/codefluence-x/altair/entity"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
 )
 
 func TestMYSQLDatabaseConfig(t *testing.T) {
@@ -53,4 +54,7 @@ func TestMYSQLDatabaseConfig(t *testing.T) {
 	actualMaxOpenConn, err := MYSQLConfig.DBMaxOpenConn()
 	assert.Nil(t, err)
 	assert.Equal(t, expectedMaxOpenConn, actualMaxOpenConn)
+
+	content, _ := yaml.Marshal(MYSQLConfig)
+	assert.Equal(t, string(content), MYSQLConfig.Dump())
 }

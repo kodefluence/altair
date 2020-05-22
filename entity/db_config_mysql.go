@@ -3,18 +3,20 @@ package entity
 import (
 	"strconv"
 	"time"
+
+	"gopkg.in/yaml.v2"
 )
 
 type MYSQLDatabaseConfig struct {
-	Database              string
-	Username              string
-	Password              string
-	Host                  string
-	Port                  string
-	ConnectionMaxLifetime string
-	MaxIddleConnection    string
-	MaxOpenConnection     string
-	MigrationSource       string
+	Database              string `yaml:"database"`
+	Username              string `yaml:"username"`
+	Password              string `yaml:"password"`
+	Host                  string `yaml:"host"`
+	Port                  string `yaml:"port"`
+	ConnectionMaxLifetime string `yaml:"connection_max_lifetime"`
+	MaxIddleConnection    string `yaml:"max_iddle_connection"`
+	MaxOpenConnection     string `yaml:"max_open_connection"`
+	MigrationSource       string `yaml:"migration_source"`
 }
 
 func (m MYSQLDatabaseConfig) Driver() string {
@@ -55,4 +57,9 @@ func (m MYSQLDatabaseConfig) DBMaxIddleConn() (int, error) {
 
 func (m MYSQLDatabaseConfig) DBMaxOpenConn() (int, error) {
 	return strconv.Atoi(m.MaxOpenConnection)
+}
+
+func (m MYSQLDatabaseConfig) Dump() string {
+	encodedContent, _ := yaml.Marshal(m)
+	return string(encodedContent)
 }
