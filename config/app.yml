@@ -1,5 +1,7 @@
 # This is the sample of app config
 # plugins: <array[string]>    - List of active plugins. Available plugins: oauth
+# main_database: string       - This is the database u use for migrating the data and cannot be empty
 
 plugins:
   - oauth
+main_database: main_database

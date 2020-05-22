@@ -2,12 +2,10 @@
 # plugin: string            - Plugins name
 # config: <array[hash]>     - List of configuration
 #   <example>
-#   database: string                    - The database instance declared in database.yml. Only support database with mysql adapter.
 #   access_token_timeout: string        - Expired duration of the access token
 #   authorization_code_timeout: string  - Expired duration of authorization code
 
 plugin: oauth
 config:
-  database: oauth_database
   access_token_timeout: 24h
   authorization_code_timeout: 24h
