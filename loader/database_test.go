@@ -285,6 +285,21 @@ func TestDatabase(t *testing.T) {
 					})
 				})
 
+				t.Run("Migration source empty", func(t *testing.T) {
+					t.Run("Return error", func(t *testing.T) {
+						configPath := "./db_migration_source_empty/"
+						fileName := "database.yml"
+
+						generateTempTestFiles(configPath, DatabaseConfigEmptyMigrationSource, fileName, 0666)
+
+						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						assert.NotNil(t, err)
+						assert.Nil(t, dbConfigs)
+
+						removeTempTestFiles(configPath)
+					})
+				})
+
 				t.Run("File not found", func(t *testing.T) {
 					t.Run("Return error", func(t *testing.T) {
 						configPath := "./db_file_not_found/"

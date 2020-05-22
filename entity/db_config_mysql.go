@@ -14,10 +14,15 @@ type MYSQLDatabaseConfig struct {
 	ConnectionMaxLifetime string
 	MaxIddleConnection    string
 	MaxOpenConnection     string
+	MigrationSource       string
 }
 
 func (m MYSQLDatabaseConfig) Driver() string {
 	return "mysql"
+}
+
+func (m MYSQLDatabaseConfig) DBMigrationSource() string {
+	return m.MigrationSource
 }
 
 func (m MYSQLDatabaseConfig) DBHost() string {

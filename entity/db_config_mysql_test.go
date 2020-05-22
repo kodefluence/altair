@@ -18,6 +18,7 @@ func TestMYSQLDatabaseConfig(t *testing.T) {
 		ConnectionMaxLifetime: "120s",
 		MaxIddleConnection:    "100",
 		MaxOpenConnection:     "100",
+		MigrationSource:       "file://migration",
 	}
 
 	expectedDatabase := "altair_development"
@@ -28,11 +29,13 @@ func TestMYSQLDatabaseConfig(t *testing.T) {
 	expectedConnMaxLifetime := time.Second * 120
 	expectedMaxIddleConn := 100
 	expectedMaxOpenConn := 100
+	expectedMigrationSource := "file://migration"
 
 	assert.Equal(t, "mysql", MYSQLConfig.Driver())
 	assert.Equal(t, expectedDatabase, MYSQLConfig.DBDatabase())
 	assert.Equal(t, expectedUsername, MYSQLConfig.DBUsername())
 	assert.Equal(t, expectedPassword, MYSQLConfig.DBPassword())
+	assert.Equal(t, expectedMigrationSource, MYSQLConfig.DBMigrationSource())
 	assert.Equal(t, expectedHost, MYSQLConfig.DBHost())
 
 	actualPort, err := MYSQLConfig.DBPort()

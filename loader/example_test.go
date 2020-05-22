@@ -6,6 +6,7 @@ oauth_database:
   database: {{ env "DATABASE_NAME_DB_CONFIG_NORMAL_SCENARIO" }}
   username: {{ env "DATABASE_USERNAME_DB_CONFIG_NORMAL_SCENARIO" }}
   password: {{ env "DATABASE_PASSWORD_DB_CONFIG_NORMAL_SCENARIO" }}
+  migration_source: "file://migration"
   host:     {{ env "DATABASE_HOST_DB_CONFIG_NORMAL_SCENARIO" }}
   port:     {{ env "DATABASE_PORT_DB_CONFIG_NORMAL_SCENARIO" }}
   connection_max_lifetime: 120s
@@ -18,6 +19,7 @@ var DatabaseConfigWithNotFoundENV = `
     database: {{ env "DATABASE_NAME_DB_CONFIG_ENV_CONFIG_NOT_FOUND" }}
     username: {{ env "DATABASE_USERNAME_DB_CONFIG_ENV_CONFIG_NOT_FOUND" }}
     password: {{ env "DATABASE_PASSWORD_DB_CONFIG_ENV_CONFIG_NOT_FOUND" }}
+    migration_source: "file://migration"
     host:     {{ env "DATABASE_HOST_DB_CONFIG_ENV_CONFIG_NOT_FOUND" }}
     port:     {{ env "DATABASE_PORT_DB_CONFIG_ENV_CONFIG_NOT_FOUND" }}
     connection_max_lifetime: {{ env "NOT_FOUND_ENV" }}
@@ -30,6 +32,7 @@ oauth_database:
   database: {{ env "DATABASE_NAME_TWO_SCENARIO_1" }}
   username: {{ env "DATABASE_USERNAME_TWO_SCENARIO_1" }}
   password: {{ env "DATABASE_PASSWORD_TWO_SCENARIO_1" }}
+  migration_source: "file://migration"
   host:     {{ env "DATABASE_HOST_TWO_SCENARIO_1" }}
   port:     {{ env "DATABASE_PORT_TWO_SCENARIO_1" }}
   connection_max_lifetime: 120s
@@ -41,6 +44,7 @@ other_database:
   database: {{ env "DATABASE_NAME_TWO_SCENARIO_2" }}
   username: {{ env "DATABASE_USERNAME_TWO_SCENARIO_2" }}
   password: {{ env "DATABASE_PASSWORD_TWO_SCENARIO_2" }}
+  migration_source: "file://migration"
   host:     {{ env "DATABASE_HOST_TWO_SCENARIO_2" }}
   port:     {{ env "DATABASE_PORT_TWO_SCENARIO_2" }}
   connection_max_lifetime: 120s
@@ -52,6 +56,7 @@ oauth_database:
   database: some_database
   username: some_username
   password: some_password
+  migration_source: "file://migration"
   host:     localhost
   port:     3306
   connection_max_lifetime: 120s
@@ -61,6 +66,19 @@ oauth_database:
 var DatabaseConfigInvalidDriver = `
 oauth_database:
   driver: postgre
+  database: some_database
+  username: some_username
+  password: some_password
+  migration_source: "file://migration"
+  host:     localhost
+  port:     3306
+  connection_max_lifetime: 120s
+  max_iddle_connection: 100
+  max_open_connection: 100`
+
+var DatabaseConfigEmptyMigrationSource = `
+oauth_database:
+  driver: mysql
   database: some_database
   username: some_username
   password: some_password
@@ -76,6 +94,7 @@ oauth_database:
   database: ""
   username: some_username
   password: some_password
+  migration_source: "file://migration"
   host:     localhost
   port:     3306
   connection_max_lifetime: 120s
@@ -88,6 +107,7 @@ oauth_database:
   database: some_database
   username: ""
   password: some_password
+  migration_source: "file://migration"
   host:     localhost
   port:     3306
   connection_max_lifetime: 120s
@@ -100,6 +120,7 @@ oauth_database:
   database: some_database
   username: some_username
   password: some_password
+  migration_source: "file://migration"
   host:     ""
   port:     3306
   connection_max_lifetime: 120s
@@ -112,6 +133,7 @@ oauth_database:
   database: some_database
   username: some_username
   password: some_password
+  migration_source: "file://migration"
   host:     localhost
   connection_max_lifetime: 120s
   max_iddle_connection: 100
@@ -123,6 +145,7 @@ oauth_database:
   database: some_database
   username: some_username
   password: some_password
+  migration_source: "file://migration"
   host:     localhost
   port:     3306
   max_iddle_connection: 100
@@ -134,6 +157,7 @@ oauth_database:
   database: some_database
   username: some_username
   password: some_password
+  migration_source: "file://migration"
   host:     localhost
   port:     3306
   connection_max_lifetime: 120s
@@ -145,6 +169,7 @@ oauth_database:
   database: some_database
   username: some_username
   password: some_password
+  migration_source: "file://migration"
   host:     localhost
   port:     3306
   connection_max_lifetime: 120s
@@ -161,6 +186,7 @@ oauth_database:
   database: some_database
   username: some_username
   password: some_password
+  migration_source: "file://migration"
   host:     localhost
   port:     3306
   connection_max_lifetime: {}}}{}{{}}A{!@}
