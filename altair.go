@@ -127,6 +127,10 @@ func executeCommand() {
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
 				fmt.Println("Invalid number of arguments, expected 1. Example `altair config app`.")
+				fmt.Println("Available option:")
+				fmt.Println("- all")
+				fmt.Println("- app")
+				fmt.Println("- database")
 				return
 			}
 
