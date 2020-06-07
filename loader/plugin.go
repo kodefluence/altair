@@ -18,12 +18,12 @@ func Plugin() core.PluginLoader {
 	return &plugin{}
 }
 
-func (p *plugin) Compile(pluginPath string) (map[string]entity.Plugin, error) {
+func (p *plugin) Compile(pluginPath string) (core.PluginBearer, error) {
 	var pluginList = map[string]entity.Plugin{}
 
 	listOfBytes, err := p.walkAllFiles(pluginPath)
 	if err != nil {
-		return pluginList, err
+		return nil, err
 	}
 
 	for _, b := range listOfBytes {
@@ -31,23 +31,23 @@ func (p *plugin) Compile(pluginPath string) (map[string]entity.Plugin, error) {
 
 		compiledBytes, err := compileTemplate(b)
 		if err != nil {
-			return pluginList, err
+			return nil, err
 		}
 
 		err = yaml.Unmarshal(compiledBytes, &plugin)
 		if err != nil {
-			return pluginList, err
+			return nil, err
 		}
 
 		if _, ok := pluginList[plugin.Plugin]; ok {
-			return pluginList, errors.New(fmt.Sprintf("Plugin `%s` already defined", plugin.Plugin))
+			return nil, errors.New(fmt.Sprintf("Plugin `%s` already defined", plugin.Plugin))
 		}
 
 		plugin.Raw = compiledBytes
 		pluginList[plugin.Plugin] = plugin
 	}
 
-	return pluginList, nil
+	return PluginBearer(pluginList), nil
 }
 
 func (p *plugin) walkAllFiles(pluginPath string) ([][]byte, error) {

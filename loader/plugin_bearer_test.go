@@ -32,6 +32,18 @@ func TestPluginBearer(t *testing.T) {
 		})
 	})
 
+	t.Run("Length", func(t *testing.T) {
+		t.Run("Return the length of plugin list", func(t *testing.T) {
+			plugins := map[string]entity.Plugin{
+				"oauth": {Plugin: "oauth"},
+				"cache": {Plugin: "cache"},
+			}
+			pluginBearer := loader.PluginBearer(plugins)
+
+			assert.Equal(t, len(plugins), pluginBearer.Length())
+		})
+	})
+
 	t.Run("CompilePlugin", func(t *testing.T) {
 		t.Run("Given Plugin and Injected Struct", func(t *testing.T) {
 			t.Run("Injected struct has been injected with yaml value", func(t *testing.T) {

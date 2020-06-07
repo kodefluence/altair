@@ -16,6 +16,10 @@ func PluginBearer(plugins map[string]entity.Plugin) core.PluginBearer {
 	return &pluginBearer{plugins: plugins}
 }
 
+func (p *pluginBearer) Length() int {
+	return len(p.plugins)
+}
+
 func (p *pluginBearer) ConfigExists(pluginName string) bool {
 	_, ok := p.plugins[pluginName]
 	return ok

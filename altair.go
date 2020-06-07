@@ -20,7 +20,6 @@ import (
 
 	"github.com/codefluence-x/altair/controller"
 	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/formatter"
 	"github.com/codefluence-x/altair/forwarder"
 	"github.com/codefluence-x/altair/loader"
@@ -45,7 +44,7 @@ var (
 
 	appConfig core.AppConfig
 
-	pluginConfigs map[string]entity.Plugin
+	pluginBearer core.PluginBearer
 
 	apiEngine *gin.Engine
 
@@ -91,12 +90,12 @@ func loadConfig() {
 	}
 	appConfig = loadedAppConfig
 
-	loadedPluginConfigs, err := loader.Plugin().Compile("./config/plugin/")
+	loadedPluginBearer, err := loader.Plugin().Compile("./config/plugin/")
 	if err != nil {
 		journal.Error("Error loading plugin config", err).Log()
 		os.Exit(1)
 	}
-	pluginConfigs = loadedPluginConfigs
+	pluginBearer = loadedPluginBearer
 }
 
 func executeCommand() {

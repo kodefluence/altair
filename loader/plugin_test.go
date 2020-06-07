@@ -18,12 +18,12 @@ func TestPlugin(t *testing.T) {
 					generateTempTestFiles(pluginPath, PluginConfigNormal1, "oauth.yaml", 0666)
 					generateTempTestFiles(pluginPath, PluginConfigNormal2, "cache.yaml", 0666)
 
-					pluginList, err := loader.Plugin().Compile(pluginPath)
+					pluginBearer, err := loader.Plugin().Compile(pluginPath)
 
 					assert.Nil(t, err)
-					assert.Equal(t, 2, len(pluginList))
-					assert.Contains(t, pluginList, "oauth")
-					assert.Contains(t, pluginList, "cache")
+					assert.Equal(t, 2, pluginBearer.Length())
+					assert.True(t, pluginBearer.ConfigExists("oauth"))
+					assert.True(t, pluginBearer.ConfigExists("cache"))
 
 					removeTempTestFiles(pluginPath)
 				})
@@ -36,10 +36,10 @@ func TestPlugin(t *testing.T) {
 					generateTempTestFiles(pluginPath, PluginConfigNormal1, "oauth.yaml", 0666)
 					generateTempTestFiles(pluginPath, PluginConfigNormal1, "oauth_2.yaml", 0666)
 
-					pluginList, err := loader.Plugin().Compile(pluginPath)
+					pluginBearer, err := loader.Plugin().Compile(pluginPath)
 
 					assert.NotNil(t, err)
-					assert.Equal(t, 1, len(pluginList))
+					assert.Nil(t, pluginBearer)
 
 					removeTempTestFiles(pluginPath)
 				})
@@ -51,10 +51,10 @@ func TestPlugin(t *testing.T) {
 
 					generateTempTestFiles(pluginPath, PluginConfigYamlUnmarshalError, "oauth.yaml", 0666)
 
-					pluginList, err := loader.Plugin().Compile(pluginPath)
+					pluginBearer, err := loader.Plugin().Compile(pluginPath)
 
 					assert.NotNil(t, err)
-					assert.Equal(t, 0, len(pluginList))
+					assert.Nil(t, pluginBearer)
 
 					removeTempTestFiles(pluginPath)
 				})
@@ -66,10 +66,10 @@ func TestPlugin(t *testing.T) {
 
 					generateTempTestFiles(pluginPath, PluginConfigTemplateParsingError, "oauth.yaml", 0666)
 
-					pluginList, err := loader.Plugin().Compile(pluginPath)
+					pluginBearer, err := loader.Plugin().Compile(pluginPath)
 
 					assert.NotNil(t, err)
-					assert.Equal(t, 0, len(pluginList))
+					assert.Nil(t, pluginBearer)
 
 					removeTempTestFiles(pluginPath)
 				})
@@ -79,10 +79,10 @@ func TestPlugin(t *testing.T) {
 				t.Run("Return error", func(t *testing.T) {
 					pluginPath := "./plugin_config_dir_not_exists/"
 
-					pluginList, err := loader.Plugin().Compile(pluginPath)
+					pluginBearer, err := loader.Plugin().Compile(pluginPath)
 
 					assert.NotNil(t, err)
-					assert.Equal(t, 0, len(pluginList))
+					assert.Nil(t, pluginBearer)
 				})
 			})
 		})
