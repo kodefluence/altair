@@ -252,3 +252,29 @@ var AppConfigTemplateError = `
 plugins:
   - oauth
   - {{ } }} {}{} {}{`
+
+var PluginConfigNormal1 = `
+plugin: oauth
+config:
+  database: main_database
+  access_token_timeout: 24h
+  authorization_code_timeout: 24h`
+
+var PluginConfigNormal2 = `
+  plugin: cache`
+
+var PluginConfigYamlUnmarshalError = `
+asda
+
+asd
+1
+
+23123;as;d_1231
+`
+
+var PluginConfigTemplateParsingError = `
+plugin: oauth
+config:
+  database: {}}{}{{}{}}{}{}{{{{{}{}{}}}}}
+  access_token_timeout: 24h
+  authorization_code_timeout: 24h`

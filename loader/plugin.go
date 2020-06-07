@@ -1,0 +1,78 @@
+package loader
+
+import (
+	"errors"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"path/filepath"
+
+	"github.com/codefluence-x/altair/core"
+	"github.com/codefluence-x/altair/entity"
+	"gopkg.in/yaml.v2"
+)
+
+type plugin struct{}
+
+func Plugin() core.PluginLoader {
+	return &plugin{}
+}
+
+func (p *plugin) Compile(pluginPath string) (map[string]entity.Plugin, error) {
+	var pluginList = map[string]entity.Plugin{}
+
+	listOfBytes, err := p.walkAllFiles(pluginPath)
+	if err != nil {
+		return pluginList, err
+	}
+
+	for _, b := range listOfBytes {
+		var plugin entity.Plugin
+
+		compiledBytes, err := compileTemplate(b)
+		if err != nil {
+			return pluginList, err
+		}
+
+		err = yaml.Unmarshal(compiledBytes, &plugin)
+		if err != nil {
+			return pluginList, err
+		}
+
+		if _, ok := pluginList[plugin.Plugin]; ok {
+			return pluginList, errors.New(fmt.Sprintf("Plugin `%s` already defined", plugin.Plugin))
+		}
+
+		plugin.Raw = compiledBytes
+		pluginList[plugin.Plugin] = plugin
+	}
+
+	return pluginList, nil
+}
+
+func (p *plugin) walkAllFiles(pluginPath string) ([][]byte, error) {
+	var files []string
+	var routeFiles [][]byte
+
+	err := filepath.Walk(pluginPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() || (filepath.Ext(path) != ".yaml" && filepath.Ext(path) != ".yml") {
+			return nil
+		}
+		files = append(files, path)
+		return nil
+	})
+	if err != nil {
+		return routeFiles, err
+	}
+
+	for _, path := range files {
+		f, _ := ioutil.ReadFile(path)
+		routeFiles = append(routeFiles, f)
+	}
+
+	return routeFiles, nil
+}

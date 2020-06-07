@@ -3,6 +3,8 @@ package core
 import (
 	"database/sql"
 	"time"
+
+	"github.com/codefluence-x/altair/entity"
 )
 
 type AppLoader interface {
@@ -11,6 +13,10 @@ type AppLoader interface {
 
 type DatabaseLoader interface {
 	Compile(configPath string) (map[string]DatabaseConfig, error)
+}
+
+type PluginLoader interface {
+	Compile(pluginPath string) (map[string]entity.Plugin, error)
 }
 
 type DatabaseConfig interface {
