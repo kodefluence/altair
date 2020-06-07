@@ -19,6 +19,12 @@ type PluginLoader interface {
 	Compile(pluginPath string) (map[string]entity.Plugin, error)
 }
 
+type PluginBearer interface {
+	ConfigExists(pluginName string) bool
+	CompilePlugin(pluginName string, injectedStruct interface{}) error
+	ForEach(callbackFunc func(pluginName string) error)
+}
+
 type DatabaseConfig interface {
 	Driver() string
 	DBMigrationSource() string
