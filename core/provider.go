@@ -10,7 +10,7 @@ type PluginProvider interface {
 }
 
 type MigrationProviderDispatcher interface {
-	GoMigrate(db *sql.DB, dbConfig DatabaseConfig) (MigrationProvider, error)
+	GoMigrate(db *sql.DB, dbConfig DatabaseConfig) MigrationProvider
 }
 
 type MigrationProvider interface {
