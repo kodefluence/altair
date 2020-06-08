@@ -24,6 +24,7 @@ import (
 	"github.com/codefluence-x/altair/loader"
 	"github.com/codefluence-x/altair/model"
 	"github.com/codefluence-x/altair/plugin"
+	"github.com/codefluence-x/altair/provider"
 	"github.com/codefluence-x/altair/service"
 	"github.com/codefluence-x/altair/validator"
 	"github.com/codefluence-x/journal"
@@ -175,6 +176,27 @@ func executeCommand() {
 			if err := fabricateConnection(); err != nil {
 				return
 			}
+
+			dbBearer := loader.DatabaseBearer(databases, dbConfigs)
+			db, config, err := dbBearer.Database(args[0])
+			if err != nil {
+				journal.Error(fmt.Sprintf("Error loading database instance of: `%s`", args[0]), err).SetTags("altair", "main").Log()
+				return
+			}
+
+			migrationProvider := provider.Migration().GoMigrate(db, config)
+			migrator, err := migrationProvider.Migrator()
+			if err != nil {
+				journal.Error("Error providing migrator", err).SetTags("altair", "main").Log()
+				return
+			}
+
+			if err := migrator.Up(); err != nil && err.Error() != "no change" {
+				journal.Error("Error doing database migration", err).SetTags("altair", "main").Log()
+				return
+			}
+
+			journal.Info("Successfully migrating databases").SetTags("altair", "main").Log()
 		},
 	}
 
