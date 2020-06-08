@@ -12,8 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 
 	"github.com/subosito/gotenv"
@@ -37,8 +36,6 @@ var (
 	mysqlMaxIdleConn     int
 	mysqlMaxOpenConn     int
 
-	migration *migrate.Migrate
-
 	dbConfigs map[string]core.DatabaseConfig = map[string]core.DatabaseConfig{}
 	databases map[string]*sql.DB             = map[string]*sql.DB{}
 
@@ -56,12 +53,6 @@ func main() {
 	_ = gotenv.Load()
 	loadConfig()
 	executeCommand()
-	shutdownFunc()
-}
-
-func shutdownFunc() {
-	closeConnection()
-	closeMigration()
 }
 
 func loadConfig() {
@@ -111,6 +102,7 @@ func executeCommand() {
 		Use:   "run",
 		Short: "Run API gateway services.",
 		Run: func(cmd *cobra.Command, args []string) {
+			defer closeConnection()
 			if err := fabricateConnection(); err != nil {
 				journal.Error("Error running altair:", err).SetTags("altair", "main").Log()
 				return
@@ -121,15 +113,16 @@ func executeCommand() {
 	}
 
 	configCmd := &cobra.Command{
-		Use:   "config",
-		Short: "See list of configs",
+		Use:     "config",
+		Short:   "See list of configs",
+		Example: "altair config app",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
-				fmt.Println("Invalid number of arguments, expected 1. Example `altair config app`.")
+				fmt.Println("Invalid number of arguments, expected 1. Example `altair config [config_name]`.")
 				fmt.Println("Available option:")
 				fmt.Println("- all")
 				fmt.Println("- app")
-				fmt.Println("- database")
+				fmt.Println("- db")
 				return
 			}
 
@@ -140,8 +133,8 @@ func executeCommand() {
 				fmt.Printf("--------------------\n")
 			}
 
-			database := func() {
-				fmt.Printf("database config:\n")
+			db := func() {
+				fmt.Printf("db config:\n")
 				fmt.Printf("====================\n")
 				for key, config := range dbConfigs {
 					fmt.Printf("instance: %s\n", key)
@@ -156,13 +149,13 @@ func executeCommand() {
 			case "all":
 				app()
 				fmt.Println()
-				database()
+				db()
 			case "app":
 				app()
-			case "database":
-				database()
+			case "db":
+				db()
 			default:
-				fmt.Println("Invalid argument. Available: [app, database, all]")
+				fmt.Println("Invalid argument. Available: [app, db, all]")
 				return
 			}
 		},
@@ -170,68 +163,22 @@ func executeCommand() {
 
 	migrateCmd := &cobra.Command{
 		Use:   "migrate",
-		Short: "Do a migration.",
+		Short: "Do a migration from current version into latest versions.",
 		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) < 1 {
+				fmt.Println("Invalid number of arguments, expected 1. Example `altair migrate [database_instance_name]`.")
+				fmt.Println("To see available database instance, use `altair config db`.")
+				return
+			}
+
+			defer closeConnection()
 			if err := fabricateConnection(); err != nil {
 				return
 			}
-
-			if err := fabricateMigration(); err != nil {
-				return
-			}
-
-			if err := migration.Up(); err != nil && err.Error() != "no change" {
-				journal.Error(fmt.Sprintln("Migration error because of:", err), err).SetTags("altair", "main").Log()
-				return
-			}
-
-			journal.Info("Migration migrate process is complete").SetTags("altair", "main").Log()
 		},
 	}
 
-	migrateDownCmd := &cobra.Command{
-		Use:   "migrate:down",
-		Short: "Down the migration.",
-		Run: func(cmd *cobra.Command, args []string) {
-			if err := fabricateConnection(); err != nil {
-				return
-			}
-
-			if err := fabricateMigration(); err != nil {
-				return
-			}
-
-			if err := migration.Down(); err != nil && err.Error() != "no change" {
-				journal.Error(fmt.Sprintln("Migration error because of:", err), err).SetTags("altair", "main").Log()
-				return
-			}
-
-			journal.Info("Migration down process is complete").SetTags("altair", "main").Log()
-		},
-	}
-
-	migrateRollbackCmd := &cobra.Command{
-		Use:   "migrate:rollback",
-		Short: "Rollback the migration.",
-		Run: func(cmd *cobra.Command, args []string) {
-			if err := fabricateConnection(); err != nil {
-				return
-			}
-
-			if err := fabricateMigration(); err != nil {
-				return
-			}
-
-			if err := migration.Steps(-1); err != nil && err.Error() != "no change" {
-				journal.Error(fmt.Sprintln("Migration error because of:", err), err).SetTags("altair", "main").Log()
-				return
-			}
-
-			journal.Info("Migration rollback one step process is complete").SetTags("altair", "main").Log()
-		},
-	}
-
-	rootCmd.AddCommand(runCmd, migrateCmd, migrateDownCmd, migrateRollbackCmd, configCmd)
+	rootCmd.AddCommand(runCmd, migrateCmd, configCmd)
 	_ = rootCmd.Execute()
 }
 
@@ -329,36 +276,36 @@ func closeConnection() {
 	}
 }
 
-func fabricateMigration() error {
-	driver, err := mysql.WithInstance(mysqlDB, &mysql.Config{
-		MigrationsTable: "db_versions",
-		DatabaseName:    os.Getenv("DATABASE_NAME"),
-	})
-	if err != nil {
-		journal.Error(fmt.Sprintln("Fabricate migration error:", err), err).SetTags("altair", "main").Log()
-		return err
-	}
+// func fabricateMigration() error {
+// 	driver, err := mysql.WithInstance(mysqlDB, &mysql.Config{
+// 		MigrationsTable: "db_versions",
+// 		DatabaseName:    os.Getenv("DATABASE_NAME"),
+// 	})
+// 	if err != nil {
+// 		journal.Error(fmt.Sprintln("Fabricate migration error:", err), err).SetTags("altair", "main").Log()
+// 		return err
+// 	}
 
-	m, err := migrate.NewWithDatabaseInstance("file://migration", "mysql", driver)
-	if err != nil {
-		journal.Error(fmt.Sprintln("Fabricate migration error:", err), err).SetTags("altair", "main").Log()
-		return err
-	}
-	migration = m
+// 	m, err := migrate.NewWithDatabaseInstance("file://migration", "mysql", driver)
+// 	if err != nil {
+// 		journal.Error(fmt.Sprintln("Fabricate migration error:", err), err).SetTags("altair", "main").Log()
+// 		return err
+// 	}
+// 	migration = m
 
-	return nil
-}
+// 	return nil
+// }
 
-func closeMigration() {
-	if migration != nil {
-		s, err := migration.Close()
-		if err != nil {
-			journal.Error(fmt.Sprintln("Close migration error:", err), err).SetTags("altair", "main").Log()
-			journal.Error(fmt.Sprintln("Source:", s), s).SetTags("altair", "main").Log()
-		}
-		journal.Info("Success closing migration.").SetTags("altair", "main").Log()
-	}
-}
+// func closeMigration() {
+// 	if migration != nil {
+// 		s, err := migration.Close()
+// 		if err != nil {
+// 			journal.Error(fmt.Sprintln("Close migration error:", err), err).SetTags("altair", "main").Log()
+// 			journal.Error(fmt.Sprintln("Source:", s), s).SetTags("altair", "main").Log()
+// 		}
+// 		journal.Info("Success closing migration.").SetTags("altair", "main").Log()
+// 	}
+// }
 
 func runAPI() {
 	gin.SetMode(gin.ReleaseMode)
