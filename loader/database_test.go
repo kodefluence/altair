@@ -8,6 +8,7 @@ import (
 
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/loader"
+	"github.com/codefluence-x/altair/mock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -44,7 +45,7 @@ func TestDatabase(t *testing.T) {
 							MaxOpenConnection:     "100",
 						}
 
-						generateTempTestFiles(configPath, DatabaseConfigNormalScenario, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigNormalScenario, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.Nil(t, err)
@@ -79,7 +80,7 @@ func TestDatabase(t *testing.T) {
 						assert.Nil(t, err)
 						assert.Equal(t, expectedMaxOpenConn, actualMaxOpenConn)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 
@@ -111,7 +112,7 @@ func TestDatabase(t *testing.T) {
 							MaxOpenConnection:     "100",
 						}
 
-						generateTempTestFiles(configPath, DatabaseConfigWithNotFoundENV, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigWithNotFoundENV, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.Nil(t, err)
@@ -146,7 +147,7 @@ func TestDatabase(t *testing.T) {
 						assert.Nil(t, err)
 						assert.Equal(t, expectedMaxOpenConn, actualMaxOpenConn)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 
@@ -201,7 +202,7 @@ func TestDatabase(t *testing.T) {
 						configPath := "./db_normal_config_2/"
 						fileName := "database.yml"
 
-						generateTempTestFiles(configPath, DatabaseConfigNormalScenarioWithTwoValue, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigNormalScenarioWithTwoValue, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.Nil(t, err)
@@ -266,7 +267,7 @@ func TestDatabase(t *testing.T) {
 						assert.Nil(t, err)
 						assert.Equal(t, expectedMaxOpenConn2, actualMaxOpenConn2)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 
@@ -275,13 +276,13 @@ func TestDatabase(t *testing.T) {
 						configPath := "./db_invalid_driver/"
 						fileName := "database.yml"
 
-						generateTempTestFiles(configPath, DatabaseConfigInvalidDriver, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigInvalidDriver, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 
@@ -290,13 +291,13 @@ func TestDatabase(t *testing.T) {
 						configPath := "./db_migration_source_empty/"
 						fileName := "database.yml"
 
-						generateTempTestFiles(configPath, DatabaseConfigEmptyMigrationSource, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigEmptyMigrationSource, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 
@@ -305,13 +306,13 @@ func TestDatabase(t *testing.T) {
 						configPath := "./db_file_not_found/"
 						fileName := "database.yml"
 
-						generateTempTestFiles(configPath, DatabaseConfigInvalidDriver, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigInvalidDriver, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, "xxx.yml"))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 
@@ -320,13 +321,13 @@ func TestDatabase(t *testing.T) {
 						configPath := "./db_invalid_yaml/"
 						fileName := "database.yml"
 
-						generateTempTestFiles(configPath, DatabaseConfigInvalidYaml, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigInvalidYaml, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 
@@ -335,13 +336,13 @@ func TestDatabase(t *testing.T) {
 						configPath := "./db_invalid_go_text_template/"
 						fileName := "database.yml"
 
-						generateTempTestFiles(configPath, DatabaseConfigInvalidTemplateFormatting, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigInvalidTemplateFormatting, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 
@@ -350,13 +351,13 @@ func TestDatabase(t *testing.T) {
 						configPath := "./db_missing_driver/"
 						fileName := "database.yml"
 
-						generateTempTestFiles(configPath, DatabaseConfigMissingDriver, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigMissingDriver, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 			})
@@ -367,13 +368,13 @@ func TestDatabase(t *testing.T) {
 						configPath := "./db_mysql_empty_database/"
 						fileName := "database.yml"
 
-						generateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyDatabase, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyDatabase, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 
@@ -382,13 +383,13 @@ func TestDatabase(t *testing.T) {
 						configPath := "./db_mysql_empty_host/"
 						fileName := "database.yml"
 
-						generateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyHost, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyHost, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 
@@ -397,13 +398,13 @@ func TestDatabase(t *testing.T) {
 						configPath := "./db_mysql_empty_username/"
 						fileName := "database.yml"
 
-						generateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyUsername, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyUsername, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 
@@ -412,7 +413,7 @@ func TestDatabase(t *testing.T) {
 						configPath := "./db_mysql_empty_port/"
 						fileName := "database.yml"
 
-						generateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyPort, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyPort, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.Nil(t, err)
@@ -424,7 +425,7 @@ func TestDatabase(t *testing.T) {
 						assert.Nil(t, err)
 						assert.Equal(t, 3306, port)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 
@@ -433,7 +434,7 @@ func TestDatabase(t *testing.T) {
 						configPath := "./db_mysql_empty_conn_max_lifetime/"
 						fileName := "database.yml"
 
-						generateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyConnectionMaxLifetime, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyConnectionMaxLifetime, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.Nil(t, err)
@@ -445,7 +446,7 @@ func TestDatabase(t *testing.T) {
 						assert.Nil(t, err)
 						assert.Equal(t, time.Duration(0), connMaxLifetime)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 
@@ -454,7 +455,7 @@ func TestDatabase(t *testing.T) {
 						configPath := "./db_mysql_empty_max_iddle_conn/"
 						fileName := "database.yml"
 
-						generateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyMaxIddleConnection, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyMaxIddleConnection, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.Nil(t, err)
@@ -466,7 +467,7 @@ func TestDatabase(t *testing.T) {
 						assert.Nil(t, err)
 						assert.Equal(t, 0, connMaxIddleConn)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 
@@ -475,7 +476,7 @@ func TestDatabase(t *testing.T) {
 						configPath := "./db_mysql_empty_max_open_conn/"
 						fileName := "database.yml"
 
-						generateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyMaxOpenConnection, fileName, 0666)
+						mock.GenerateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyMaxOpenConnection, fileName, 0666)
 
 						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.Nil(t, err)
@@ -487,36 +488,10 @@ func TestDatabase(t *testing.T) {
 						assert.Nil(t, err)
 						assert.Equal(t, 0, maxOpenConn)
 
-						removeTempTestFiles(configPath)
+						mock.RemoveTempTestFiles(configPath)
 					})
 				})
 			})
 		})
 	})
-}
-
-func generateTempTestFiles(configPath, content, fileName string, mode os.FileMode) {
-	err := os.Mkdir(configPath, os.ModePerm)
-	if err != nil {
-		if pathError, ok := err.(*os.PathError); ok && pathError.Err.Error() != "file exists" {
-			panic(err)
-		}
-	}
-
-	f, err := os.OpenFile(fmt.Sprintf("%s%s", configPath, fileName), os.O_RDWR|os.O_CREATE|os.O_TRUNC, mode)
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = f.WriteString(content)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func removeTempTestFiles(configPath string) {
-	err := os.RemoveAll(configPath)
-	if err != nil {
-		panic(err)
-	}
 }

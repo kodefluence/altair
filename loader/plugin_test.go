@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/codefluence-x/altair/loader"
+	"github.com/codefluence-x/altair/mock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,8 +16,8 @@ func TestPlugin(t *testing.T) {
 				t.Run("Return map string of entity.Plugin", func(t *testing.T) {
 					pluginPath := "./normal_scenario_plugin_path/"
 
-					generateTempTestFiles(pluginPath, PluginConfigNormal1, "oauth.yaml", 0666)
-					generateTempTestFiles(pluginPath, PluginConfigNormal2, "cache.yaml", 0666)
+					mock.GenerateTempTestFiles(pluginPath, PluginConfigNormal1, "oauth.yaml", 0666)
+					mock.GenerateTempTestFiles(pluginPath, PluginConfigNormal2, "cache.yaml", 0666)
 
 					pluginBearer, err := loader.Plugin().Compile(pluginPath)
 
@@ -25,7 +26,7 @@ func TestPlugin(t *testing.T) {
 					assert.True(t, pluginBearer.ConfigExists("oauth"))
 					assert.True(t, pluginBearer.ConfigExists("cache"))
 
-					removeTempTestFiles(pluginPath)
+					mock.RemoveTempTestFiles(pluginPath)
 				})
 			})
 
@@ -33,15 +34,15 @@ func TestPlugin(t *testing.T) {
 				t.Run("Return error", func(t *testing.T) {
 					pluginPath := "./plugin_already_defined/"
 
-					generateTempTestFiles(pluginPath, PluginConfigNormal1, "oauth.yaml", 0666)
-					generateTempTestFiles(pluginPath, PluginConfigNormal1, "oauth_2.yaml", 0666)
+					mock.GenerateTempTestFiles(pluginPath, PluginConfigNormal1, "oauth.yaml", 0666)
+					mock.GenerateTempTestFiles(pluginPath, PluginConfigNormal1, "oauth_2.yaml", 0666)
 
 					pluginBearer, err := loader.Plugin().Compile(pluginPath)
 
 					assert.NotNil(t, err)
 					assert.Nil(t, pluginBearer)
 
-					removeTempTestFiles(pluginPath)
+					mock.RemoveTempTestFiles(pluginPath)
 				})
 			})
 
@@ -49,14 +50,14 @@ func TestPlugin(t *testing.T) {
 				t.Run("Return error", func(t *testing.T) {
 					pluginPath := "./plugin_config_yaml_unmarshal_error/"
 
-					generateTempTestFiles(pluginPath, PluginConfigYamlUnmarshalError, "oauth.yaml", 0666)
+					mock.GenerateTempTestFiles(pluginPath, PluginConfigYamlUnmarshalError, "oauth.yaml", 0666)
 
 					pluginBearer, err := loader.Plugin().Compile(pluginPath)
 
 					assert.NotNil(t, err)
 					assert.Nil(t, pluginBearer)
 
-					removeTempTestFiles(pluginPath)
+					mock.RemoveTempTestFiles(pluginPath)
 				})
 			})
 
@@ -64,14 +65,14 @@ func TestPlugin(t *testing.T) {
 				t.Run("Return error", func(t *testing.T) {
 					pluginPath := "./plugin_config_template_parsing_error/"
 
-					generateTempTestFiles(pluginPath, PluginConfigTemplateParsingError, "oauth.yaml", 0666)
+					mock.GenerateTempTestFiles(pluginPath, PluginConfigTemplateParsingError, "oauth.yaml", 0666)
 
 					pluginBearer, err := loader.Plugin().Compile(pluginPath)
 
 					assert.NotNil(t, err)
 					assert.Nil(t, pluginBearer)
 
-					removeTempTestFiles(pluginPath)
+					mock.RemoveTempTestFiles(pluginPath)
 				})
 			})
 

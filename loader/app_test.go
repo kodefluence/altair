@@ -6,6 +6,7 @@ import (
 
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/loader"
+	"github.com/codefluence-x/altair/mock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +27,7 @@ func TestApp(t *testing.T) {
 					configPath := "./app_normal/"
 					fileName := "app.yml"
 
-					generateTempTestFiles(configPath, AppConfigNormal, fileName, 0666)
+					mock.GenerateTempTestFiles(configPath, AppConfigNormal, fileName, 0666)
 
 					expectedAppConfig := entity.NewAppConfig(appConfigOption)
 
@@ -39,7 +40,7 @@ func TestApp(t *testing.T) {
 					assert.Equal(t, expectedAppConfig.BasicAuthPassword(), appConfig.BasicAuthPassword())
 					assert.Equal(t, expectedAppConfig.BasicAuthUsername(), appConfig.BasicAuthUsername())
 
-					removeTempTestFiles(configPath)
+					mock.RemoveTempTestFiles(configPath)
 				})
 			})
 
@@ -57,7 +58,7 @@ func TestApp(t *testing.T) {
 					configPath := "./app_with_custom_port/"
 					fileName := "app.yml"
 
-					generateTempTestFiles(configPath, AppConfigWithCustomPort, fileName, 0666)
+					mock.GenerateTempTestFiles(configPath, AppConfigWithCustomPort, fileName, 0666)
 
 					expectedAppConfig := entity.NewAppConfig(appConfigOption)
 
@@ -70,7 +71,7 @@ func TestApp(t *testing.T) {
 					assert.Equal(t, expectedAppConfig.BasicAuthPassword(), appConfig.BasicAuthPassword())
 					assert.Equal(t, expectedAppConfig.BasicAuthUsername(), appConfig.BasicAuthUsername())
 
-					removeTempTestFiles(configPath)
+					mock.RemoveTempTestFiles(configPath)
 				})
 			})
 
@@ -88,7 +89,7 @@ func TestApp(t *testing.T) {
 					configPath := "./app_with_custom_proxy_host/"
 					fileName := "app.yml"
 
-					generateTempTestFiles(configPath, AppConfigWithCustomProxyHost, fileName, 0666)
+					mock.GenerateTempTestFiles(configPath, AppConfigWithCustomProxyHost, fileName, 0666)
 
 					expectedAppConfig := entity.NewAppConfig(appConfigOption)
 
@@ -101,7 +102,7 @@ func TestApp(t *testing.T) {
 					assert.Equal(t, expectedAppConfig.BasicAuthPassword(), appConfig.BasicAuthPassword())
 					assert.Equal(t, expectedAppConfig.BasicAuthUsername(), appConfig.BasicAuthUsername())
 
-					removeTempTestFiles(configPath)
+					mock.RemoveTempTestFiles(configPath)
 				})
 			})
 
@@ -110,13 +111,13 @@ func TestApp(t *testing.T) {
 					configPath := "./app_empty_username/"
 					fileName := "app.yml"
 
-					generateTempTestFiles(configPath, AppConfigAuthUsernameEmpty, fileName, 0666)
+					mock.GenerateTempTestFiles(configPath, AppConfigAuthUsernameEmpty, fileName, 0666)
 
 					appConfig, err := loader.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 					assert.NotNil(t, err)
 					assert.Nil(t, appConfig)
 
-					removeTempTestFiles(configPath)
+					mock.RemoveTempTestFiles(configPath)
 				})
 			})
 
@@ -125,13 +126,13 @@ func TestApp(t *testing.T) {
 					configPath := "./app_empty_password/"
 					fileName := "app.yml"
 
-					generateTempTestFiles(configPath, AppConfigAuthPasswordEmpty, fileName, 0666)
+					mock.GenerateTempTestFiles(configPath, AppConfigAuthPasswordEmpty, fileName, 0666)
 
 					appConfig, err := loader.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 					assert.NotNil(t, err)
 					assert.Nil(t, appConfig)
 
-					removeTempTestFiles(configPath)
+					mock.RemoveTempTestFiles(configPath)
 				})
 			})
 
@@ -140,13 +141,13 @@ func TestApp(t *testing.T) {
 					configPath := "./app_invalid_custom_port/"
 					fileName := "app.yml"
 
-					generateTempTestFiles(configPath, AppConfigWithInvalidCustomPort, fileName, 0666)
+					mock.GenerateTempTestFiles(configPath, AppConfigWithInvalidCustomPort, fileName, 0666)
 
 					appConfig, err := loader.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 					assert.NotNil(t, err)
 					assert.Nil(t, appConfig)
 
-					removeTempTestFiles(configPath)
+					mock.RemoveTempTestFiles(configPath)
 				})
 			})
 
@@ -155,13 +156,13 @@ func TestApp(t *testing.T) {
 					configPath := "./app_not_found/"
 					fileName := "app.yml"
 
-					generateTempTestFiles(configPath, AppConfigNormal, fileName, 0666)
+					mock.GenerateTempTestFiles(configPath, AppConfigNormal, fileName, 0666)
 
 					appConfig, err := loader.App().Compile(fmt.Sprintf("%s%s", configPath, "should_be_not_found_yml"))
 					assert.NotNil(t, err)
 					assert.Nil(t, appConfig)
 
-					removeTempTestFiles(configPath)
+					mock.RemoveTempTestFiles(configPath)
 				})
 			})
 
@@ -170,13 +171,13 @@ func TestApp(t *testing.T) {
 					configPath := "./app_template_error/"
 					fileName := "app.yml"
 
-					generateTempTestFiles(configPath, AppConfigTemplateError, fileName, 0666)
+					mock.GenerateTempTestFiles(configPath, AppConfigTemplateError, fileName, 0666)
 
 					appConfig, err := loader.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 					assert.NotNil(t, err)
 					assert.Nil(t, appConfig)
 
-					removeTempTestFiles(configPath)
+					mock.RemoveTempTestFiles(configPath)
 				})
 			})
 
@@ -185,13 +186,13 @@ func TestApp(t *testing.T) {
 					configPath := "./app_unmarshal_failed/"
 					fileName := "app.yml"
 
-					generateTempTestFiles(configPath, AppConfigUnmarshalError, fileName, 0666)
+					mock.GenerateTempTestFiles(configPath, AppConfigUnmarshalError, fileName, 0666)
 
 					appConfig, err := loader.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 					assert.NotNil(t, err)
 					assert.Nil(t, appConfig)
 
-					removeTempTestFiles(configPath)
+					mock.RemoveTempTestFiles(configPath)
 				})
 			})
 		})
