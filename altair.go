@@ -363,6 +363,10 @@ func closeMigration() {
 func runAPI() {
 	gin.SetMode(gin.ReleaseMode)
 
+	dbBearer := loader.DatabaseBearer(databases, dbConfigs)
+	// TODO: DELETE DEBUG
+	fmt.Println("DB Bearer", dbBearer)
+
 	apiEngine = gin.New()
 	apiEngine.GET("/health", controller.Health)
 
