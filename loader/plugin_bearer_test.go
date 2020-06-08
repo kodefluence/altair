@@ -53,7 +53,7 @@ func TestPluginBearer(t *testing.T) {
 					}
 					pluginBearer := loader.PluginBearer(plugins)
 
-					oauthPlugins := entity.OauthPlugins{}
+					oauthPlugins := entity.OauthPlugin{}
 
 					err := pluginBearer.CompilePlugin("oauth", &oauthPlugins)
 					assert.Nil(t, err)
@@ -68,7 +68,7 @@ func TestPluginBearer(t *testing.T) {
 					plugins := map[string]entity.Plugin{}
 					pluginBearer := loader.PluginBearer(plugins)
 
-					oauthPlugins := entity.OauthPlugins{}
+					oauthPlugins := entity.OauthPlugin{}
 					err := pluginBearer.CompilePlugin("oauth", &oauthPlugins)
 					assert.NotNil(t, err)
 				})
