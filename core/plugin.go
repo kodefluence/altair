@@ -7,15 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type PluginProviderDispatcher interface {
-	Oauth() PluginProvider
-}
-
-type PluginProvider interface {
-	Controllers() []Controller
-	DownStreamPlugins() []DownStreamPlugin
-}
-
 type DownStreamPlugin interface {
 	Name() string
 	Intervene(c *gin.Context, proxyReq *http.Request, r entity.RouterPath) error
