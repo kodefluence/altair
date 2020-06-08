@@ -377,37 +377,6 @@ func closeConnection() {
 	}
 }
 
-// func fabricateMigration() error {
-// 	driver, err := mysql.WithInstance(mysqlDB, &mysql.Config{
-// 		MigrationsTable: "db_versions",
-// 		DatabaseName:    os.Getenv("DATABASE_NAME"),
-// 	})
-// 	if err != nil {
-// 		journal.Error(fmt.Sprintln("Fabricate migration error:", err), err).SetTags("altair", "main").Log()
-// 		return err
-// 	}
-
-// 	m, err := migrate.NewWithDatabaseInstance("file://migration", "mysql", driver)
-// 	if err != nil {
-// 		journal.Error(fmt.Sprintln("Fabricate migration error:", err), err).SetTags("altair", "main").Log()
-// 		return err
-// 	}
-// 	migration = m
-
-// 	return nil
-// }
-
-// func closeMigration() {
-// 	if migration != nil {
-// 		s, err := migration.Close()
-// 		if err != nil {
-// 			journal.Error(fmt.Sprintln("Close migration error:", err), err).SetTags("altair", "main").Log()
-// 			journal.Error(fmt.Sprintln("Source:", s), s).SetTags("altair", "main").Log()
-// 		}
-// 		journal.Info("Success closing migration.").SetTags("altair", "main").Log()
-// 	}
-// }
-
 func runAPI() {
 	gin.SetMode(gin.ReleaseMode)
 
