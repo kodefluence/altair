@@ -39,7 +39,7 @@ type DatabaseConfig interface {
 }
 
 type DatabaseBearer interface {
-	Database(dbName string) (*sql.DB, error)
+	Database(dbName string) (*sql.DB, DatabaseConfig, error)
 }
 
 type AppConfig interface {

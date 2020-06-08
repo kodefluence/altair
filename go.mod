@@ -13,6 +13,7 @@ require (
 	github.com/golang/mock v1.4.3
 	github.com/google/uuid v1.1.1
 	github.com/morikuni/aec v1.0.0 // indirect
+	github.com/pkg/errors v0.8.1
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.4.0
 	github.com/subosito/gotenv v1.2.0
