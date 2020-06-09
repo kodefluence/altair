@@ -1,20 +1,11 @@
 test:
-	@go test -race -cover -coverprofile=cover.out $$(go list ./... | grep -Ev "altair$$|core|mock")
-
-mock_service:
-	mockgen -source core/service.go -destination mock/mock_service.go -package mock
-
-mock_formatter:
-	mockgen -source core/formatter.go -destination mock/mock_formatter.go -package mock
-
-mock_model:
-	mockgen -source core/model.go -destination mock/mock_model.go -package mock
-
-mock_validator:
-	mockgen -source core/validator.go -destination mock/mock_validator.go -package mock
+	@go test -race -cover -coverprofile=cover.out $$(go list ./... | grep -Ev "altair$$|core|mock|interfaces|testhelper")
 
 mock_plugin:
 	mockgen -source core/plugin.go -destination mock/mock_plugin.go -package mock
+
+mock_loader:
+	mockgen -source core/loader.go -destination mock/mock_loader.go -package mock
 
 mock_routing:
 	mockgen -source core/routing.go -destination mock/mock_routing.go -package mock

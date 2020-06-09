@@ -1,0 +1,13 @@
+# This is the sample of oauth plugin config
+# plugin: string            - Plugins name
+# config: <array[hash]>     - List of configuration
+#   <example>
+#   database: string                    - Selected database object defined in database.yml
+#   access_token_timeout: string        - Expired duration of the access token
+#   authorization_code_timeout: string  - Expired duration of authorization code
+
+plugin: oauth
+config:
+  database: main_database
+  access_token_timeout: 24h
+  authorization_code_timeout: 24h
