@@ -63,3 +63,8 @@ type ModelFormater interface {
 	AccessGrantFromAuthorizationRequest(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessGrantInsertable
 	OauthApplication(r entity.OauthApplicationJSON) entity.OauthApplicationInsertable
 }
+
+type OauthValidator interface {
+	ValidateApplication(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error
+	ValidateAuthorizationGrant(ctx context.Context, r entity.AuthorizationRequestJSON, application entity.OauthApplication) *entity.Error
+}

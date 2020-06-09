@@ -6,16 +6,16 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/eobject"
+	"github.com/codefluence-x/altair/provider/plugin/oauth"
 	"github.com/codefluence-x/altair/util"
 )
 
 type application struct {
 }
 
-func Oauth() core.OauthValidator {
+func Oauth() oauth.OauthValidator {
 	return &application{}
 }
 

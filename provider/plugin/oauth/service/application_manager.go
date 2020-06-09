@@ -5,20 +5,20 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/eobject"
+	"github.com/codefluence-x/altair/provider/plugin/oauth"
 	"github.com/codefluence-x/journal"
 )
 
 type applicationManager struct {
-	formatter             core.OauthApplicationFormater
-	modelFormatter        core.ModelFormater
-	oauthApplicationModel core.OauthApplicationModel
-	applicationValidator  core.OauthValidator
+	formatter             oauth.OauthApplicationFormater
+	modelFormatter        oauth.ModelFormater
+	oauthApplicationModel oauth.OauthApplicationModel
+	applicationValidator  oauth.OauthValidator
 }
 
-func ApplicationManager(formatter core.OauthApplicationFormater, modelFormatter core.ModelFormater, oauthApplicationModel core.OauthApplicationModel, applicationValidator core.OauthValidator) core.ApplicationManager {
+func ApplicationManager(formatter oauth.OauthApplicationFormater, modelFormatter oauth.ModelFormater, oauthApplicationModel oauth.OauthApplicationModel, applicationValidator oauth.OauthValidator) oauth.ApplicationManager {
 	return &applicationManager{
 		formatter:             formatter,
 		modelFormatter:        modelFormatter,

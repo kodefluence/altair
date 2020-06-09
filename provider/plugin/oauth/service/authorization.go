@@ -5,30 +5,30 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/eobject"
+	"github.com/codefluence-x/altair/provider/plugin/oauth"
 	"github.com/codefluence-x/journal"
 )
 
 type authorization struct {
-	oauthApplicationModel core.OauthApplicationModel
-	oauthAccessTokenModel core.OauthAccessTokenModel
-	oauthAccessGrantModel core.OauthAccessGrantModel
-	oauthValidator        core.OauthValidator
+	oauthApplicationModel oauth.OauthApplicationModel
+	oauthAccessTokenModel oauth.OauthAccessTokenModel
+	oauthAccessGrantModel oauth.OauthAccessGrantModel
+	oauthValidator        oauth.OauthValidator
 
-	modelFormatter core.ModelFormater
-	oauthFormatter core.OauthFormatter
+	modelFormatter oauth.ModelFormater
+	oauthFormatter oauth.OauthFormatter
 }
 
 func Authorization(
-	oauthApplicationModel core.OauthApplicationModel,
-	oauthAccessTokenModel core.OauthAccessTokenModel,
-	oauthAccessGrantModel core.OauthAccessGrantModel,
-	modelFormatter core.ModelFormater,
-	oauthValidator core.OauthValidator,
-	oauthFormatter core.OauthFormatter,
-) core.Authorization {
+	oauthApplicationModel oauth.OauthApplicationModel,
+	oauthAccessTokenModel oauth.OauthAccessTokenModel,
+	oauthAccessGrantModel oauth.OauthAccessGrantModel,
+	modelFormatter oauth.ModelFormater,
+	oauthValidator oauth.OauthValidator,
+	oauthFormatter oauth.OauthFormatter,
+) oauth.Authorization {
 	return &authorization{
 		oauthApplicationModel: oauthApplicationModel,
 		oauthAccessTokenModel: oauthAccessTokenModel,
