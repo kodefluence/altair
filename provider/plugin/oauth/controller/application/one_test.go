@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/controller"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"
 	"github.com/codefluence-x/altair/testhelper"
 	"github.com/codefluence-x/altair/util"
@@ -82,7 +82,7 @@ func TestOne(t *testing.T) {
 					ctrl := controller.Application().One(applicationManager)
 					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
-					var response testhelper.ErrorResponse
+					var response ErrorResponse
 					w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/1", nil)
 
 					err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -109,7 +109,7 @@ func TestOne(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.BadRequestError("url parameters: id is not integer")),
 				}
 
-				var response testhelper.ErrorResponse
+				var response ErrorResponse
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/x", nil)
 
 				err := json.Unmarshal(w.Body.Bytes(), &response)

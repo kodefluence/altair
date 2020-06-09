@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/controller"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"
 	"github.com/codefluence-x/altair/testhelper"
 	"github.com/codefluence-x/altair/util"
@@ -91,7 +91,7 @@ func TestList(t *testing.T) {
 					ctrl := controller.Application().List(applicationManager)
 					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
-					var response testhelper.ErrorResponse
+					var response ErrorResponse
 					w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), nil)
 
 					err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -118,7 +118,7 @@ func TestList(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.BadRequestError("query parameters: offset")),
 				}
 
-				var response testhelper.ErrorResponse
+				var response ErrorResponse
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path()+"?offset=invalid", nil)
 
 				err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -144,7 +144,7 @@ func TestList(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.BadRequestError("query parameters: limit")),
 				}
 
-				var response testhelper.ErrorResponse
+				var response ErrorResponse
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path()+"?limit=invalid", nil)
 
 				err := json.Unmarshal(w.Body.Bytes(), &response)

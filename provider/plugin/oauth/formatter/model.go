@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/codefluence-x/altair/entity"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/util"
 	"github.com/codefluence-x/aurelia"
 	"github.com/google/uuid"

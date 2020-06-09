@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/eobject"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/testhelper"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/controller"
@@ -121,7 +121,7 @@ func TestGrant(t *testing.T) {
 					ctrl := controller.Authorization().Grant(authorizationService)
 					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
-					var response testhelper.ErrorResponse
+					var response ErrorResponse
 					w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader(encodedBytes))
 
 					err = json.Unmarshal(w.Body.Bytes(), &response)
@@ -148,7 +148,7 @@ func TestGrant(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.BadRequestError("request body")),
 				}
 
-				var response testhelper.ErrorResponse
+				var response ErrorResponse
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), testhelper.MockErrorIoReader{})
 
 				err := json.Unmarshal(w.Body.Bytes(), &response)
@@ -174,7 +174,7 @@ func TestGrant(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.BadRequestError("request body")),
 				}
 
-				var response testhelper.ErrorResponse
+				var response ErrorResponse
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader([]byte(`this is gonna be error`)))
 
 				err := json.Unmarshal(w.Body.Bytes(), &response)

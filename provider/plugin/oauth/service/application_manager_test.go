@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/eobject"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/formatter"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"

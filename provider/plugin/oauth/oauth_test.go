@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/codefluence-x/altair/entity"
+	coreEntity "github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/loader"
 	"github.com/codefluence-x/altair/mock"
 	"github.com/codefluence-x/altair/provider/plugin/oauth"
@@ -19,17 +19,17 @@ func TestOauth(t *testing.T) {
 
 	apiEngine := gin.New()
 
-	appOption := entity.AppConfigOption{
+	appOption := coreEntity.AppConfigOption{
 		Port:      1304,
 		ProxyHost: "www.local.host",
 		Plugins:   []string{"oauth"},
 	}
 
-	appConfig := entity.NewAppConfig(appOption)
+	appConfig := coreEntity.NewAppConfig(appOption)
 
 	oauthDatabase := "main_database"
 
-	plugins := map[string]entity.Plugin{
+	plugins := map[string]coreEntity.Plugin{
 		"oauth": {Plugin: "oauth", Raw: []byte(`
 plugin: oauth
 config:
@@ -39,7 +39,7 @@ config:
 `)},
 	}
 
-	MYSQLConfig := entity.MYSQLDatabaseConfig{
+	MYSQLConfig := coreEntity.MYSQLDatabaseConfig{
 		Database:              "altair_development",
 		Username:              "some_username",
 		Password:              "some_password",
@@ -69,12 +69,12 @@ config:
 		})
 
 		t.Run("Plugin is not exists in config", func(t *testing.T) {
-			appOption := entity.AppConfigOption{
+			appOption := coreEntity.AppConfigOption{
 				Port:      1304,
 				ProxyHost: "www.local.host",
 				Plugins:   []string{},
 			}
-			appConfig := entity.NewAppConfig(appOption)
+			appConfig := coreEntity.NewAppConfig(appOption)
 			appBearer := loader.AppBearer(apiEngine, appConfig)
 
 			pluginBearer := loader.PluginBearer(plugins)
@@ -91,7 +91,7 @@ config:
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(oauthDatabase).Return(db, MYSQLConfig, nil)
 
-			plugins := map[string]entity.Plugin{}
+			plugins := map[string]coreEntity.Plugin{}
 			pluginBearer := loader.PluginBearer(plugins)
 
 			assert.NotNil(t, oauth.Provide(appBearer, dbBearer, pluginBearer))
@@ -114,7 +114,7 @@ config:
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(oauthDatabase).Return(db, MYSQLConfig, nil)
 
-			plugins := map[string]entity.Plugin{
+			plugins := map[string]coreEntity.Plugin{
 				"oauth": {Plugin: "oauth", Raw: []byte(`
 plugin: oauth
 config:
@@ -134,7 +134,7 @@ config:
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(oauthDatabase).Return(db, MYSQLConfig, nil)
 
-			plugins := map[string]entity.Plugin{
+			plugins := map[string]coreEntity.Plugin{
 				"oauth": {Plugin: "oauth", Raw: []byte(`
 plugin: oauth
 config:

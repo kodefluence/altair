@@ -8,7 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/codefluence-x/altair/entity"
+	coreEntity "github.com/codefluence-x/altair/entity"
+
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
 	"github.com/gin-gonic/gin"
 )
@@ -27,7 +28,7 @@ func (o *oauth) Name() string {
 	return "oauth-plugin"
 }
 
-func (o *oauth) Intervene(c *gin.Context, proxyReq *http.Request, r entity.RouterPath) error {
+func (o *oauth) Intervene(c *gin.Context, proxyReq *http.Request, r coreEntity.RouterPath) error {
 	if r.Auth != "oauth" {
 		return nil
 	}

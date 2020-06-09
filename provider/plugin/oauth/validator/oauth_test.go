@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/eobject"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/validator"
 	"github.com/codefluence-x/altair/util"
 	"github.com/stretchr/testify/assert"

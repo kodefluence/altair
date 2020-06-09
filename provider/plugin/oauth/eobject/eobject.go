@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/codefluence-x/altair/entity"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 )
 
 func Wrap(errorObject ...entity.ErrorObject) []entity.ErrorObject {

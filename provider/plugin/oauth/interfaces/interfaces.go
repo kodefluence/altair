@@ -7,7 +7,7 @@ import (
 	"database/sql"
 
 	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/altair/entity"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 )
 
 type OauthApplicationModel interface {

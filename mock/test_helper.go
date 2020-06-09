@@ -7,13 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
-
-	entity "github.com/codefluence-x/altair/entity"
 )
-
-type ErrorResponse struct {
-	Errors []entity.ErrorObject `json:"errors"`
-}
 
 type MockErrorIoReader struct {
 }

@@ -11,6 +11,16 @@ import (
 
 func TestPluginBearer(t *testing.T) {
 
+	// We use oauth plugin as an example of struct that will be compiled by plugin bearer
+	type OauthPlugin struct {
+		Config struct {
+			Database string `yaml:"database"`
+
+			AccessTokenTimeoutRaw       string `yaml:"access_token_timeout"`
+			AuthorizationCodeTimeoutRaw string `yaml:"authorization_code_timeout"`
+		} `yaml:"config"`
+	}
+
 	t.Run("ConfigExists", func(t *testing.T) {
 		t.Run("Given plugin name", func(t *testing.T) {
 			plugins := map[string]entity.Plugin{
@@ -53,7 +63,7 @@ func TestPluginBearer(t *testing.T) {
 					}
 					pluginBearer := loader.PluginBearer(plugins)
 
-					oauthPlugins := entity.OauthPlugin{}
+					oauthPlugins := OauthPlugin{}
 
 					err := pluginBearer.CompilePlugin("oauth", &oauthPlugins)
 					assert.Nil(t, err)
@@ -68,7 +78,7 @@ func TestPluginBearer(t *testing.T) {
 					plugins := map[string]entity.Plugin{}
 					pluginBearer := loader.PluginBearer(plugins)
 
-					oauthPlugins := entity.OauthPlugin{}
+					oauthPlugins := OauthPlugin{}
 					err := pluginBearer.CompilePlugin("oauth", &oauthPlugins)
 					assert.NotNil(t, err)
 				})

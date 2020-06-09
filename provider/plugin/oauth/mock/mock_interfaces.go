@@ -8,7 +8,7 @@ import (
 	context "context"
 	sql "database/sql"
 	core "github.com/codefluence-x/altair/core"
-	entity "github.com/codefluence-x/altair/entity"
+	entity "github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	interfaces "github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
