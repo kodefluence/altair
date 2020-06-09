@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -19,35 +18,19 @@ import (
 
 	"github.com/codefluence-x/altair/controller"
 	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/altair/formatter"
 	"github.com/codefluence-x/altair/forwarder"
 	"github.com/codefluence-x/altair/loader"
-	"github.com/codefluence-x/altair/model"
-	"github.com/codefluence-x/altair/plugin"
 	"github.com/codefluence-x/altair/provider"
-	"github.com/codefluence-x/altair/service"
-	"github.com/codefluence-x/altair/validator"
 	"github.com/codefluence-x/journal"
 	"github.com/spf13/cobra"
 )
 
 var (
-	mysqlDB              *sql.DB
-	mysqlConnMaxLifetime time.Duration
-	mysqlMaxIdleConn     int
-	mysqlMaxOpenConn     int
-
-	dbConfigs map[string]core.DatabaseConfig = map[string]core.DatabaseConfig{}
-	databases map[string]*sql.DB             = map[string]*sql.DB{}
-
-	appConfig core.AppConfig
-
+	dbConfigs    map[string]core.DatabaseConfig = map[string]core.DatabaseConfig{}
+	databases    map[string]*sql.DB             = map[string]*sql.DB{}
+	appConfig    core.AppConfig
 	pluginBearer core.PluginBearer
-
-	apiEngine *gin.Engine
-
-	accessTokenTimeout time.Duration
-	accessGrantTimeout time.Duration
+	apiEngine    *gin.Engine
 )
 
 func main() {
@@ -58,15 +41,6 @@ func main() {
 
 func loadConfig() {
 	var err error
-	accessTokenTimeout, err = time.ParseDuration(os.Getenv("ACCESS_TOKEN_TIMEOUT"))
-	if err != nil {
-		os.Exit(1)
-	}
-
-	accessGrantTimeout, err = time.ParseDuration(os.Getenv("ACCESS_GRANT_TIMEOUT"))
-	if err != nil {
-		os.Exit(1)
-	}
 
 	loadedDBConfigs, err := loader.Database().Compile("./config/database.yml")
 	if err != nil {
@@ -109,7 +83,9 @@ func executeCommand() {
 				return
 			}
 
-			runAPI()
+			if err := runAPI(); err != nil {
+				journal.Error("Error running altair API:", err).SetTags("altair", "main").Log()
+			}
 		},
 	}
 
@@ -307,19 +283,6 @@ func dbConnectionFabricator(dbConfig core.DatabaseConfig) (*sql.DB, error) {
 }
 
 func fabricateConnection() error {
-	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&interpolateParams=true", os.Getenv("DATABASE_USERNAME"), os.Getenv("DATABASE_PASSWORD"), os.Getenv("DATABASE_HOST"), os.Getenv("DATABASE_PORT"), os.Getenv("DATABASE_NAME")))
-	if err != nil {
-		journal.Error(fmt.Sprintln("Fabricate connection error:", err), err).SetTags("altair", "main").Log()
-		return err
-	}
-	db.SetConnMaxLifetime(mysqlConnMaxLifetime)
-	db.SetMaxIdleConns(mysqlMaxIdleConn)
-	db.SetMaxOpenConns(mysqlMaxOpenConn)
-
-	mysqlDB = db
-
-	journal.Info(fmt.Sprintf("Complete fabricating mysql writer connection: %s:%s@tcp(%s:%s)/%s?", os.Getenv("DATABASE_USERNAME"), "***********", os.Getenv("DATABASE_HOST"), os.Getenv("DATABASE_PORT"), os.Getenv("DATABASE_NAME"))).SetTags("altair", "main").Log()
-
 	for key, config := range dbConfigs {
 		sqlDB, err := dbConnectionFabricator(config)
 		if err != nil {
@@ -333,27 +296,6 @@ func fabricateConnection() error {
 }
 
 func closeConnection() {
-	if mysqlDB != nil {
-		var err error
-		for i := 0; i < 3; i++ {
-			err = mysqlDB.Close()
-			if err != nil {
-				journal.Error(fmt.Sprintln("Error closing mysql writer because of:", err), err).SetTags("altair", "main").Log()
-				continue
-			}
-
-			if err == nil {
-				break
-			}
-		}
-		if err != nil {
-			journal.Info("Failed closing mysql writer and reader connection.").SetTags("altair", "main").Log()
-			return
-		}
-
-		journal.Info("Success closing mysql writer and reader connection.").SetTags("altair", "main").Log()
-	}
-
 	for dbName, db := range databases {
 		var err error
 
@@ -377,48 +319,18 @@ func closeConnection() {
 	}
 }
 
-func runAPI() {
+func runAPI() error {
 	gin.SetMode(gin.ReleaseMode)
-
-	dbBearer := loader.DatabaseBearer(databases, dbConfigs)
-	// TODO: DELETE DEBUG
-	fmt.Println("DB Bearer", dbBearer)
 
 	apiEngine = gin.New()
 	apiEngine.GET("/health", controller.Health)
 
-	downStreamPlugins := []core.DownStreamPlugin{}
+	// internalEngine := apiEngine.Group("/_plugins/", gin.BasicAuth(gin.Accounts{
+	// 	appConfig.BasicAuthUsername(): appConfig.BasicAuthPassword(),
+	// }))
 
-	internalEngine := apiEngine.Group("/_plugins/", gin.BasicAuth(gin.Accounts{
-		appConfig.BasicAuthUsername(): appConfig.BasicAuthPassword(),
-	}))
-
-	if appConfig.PluginExists("oauth") {
-		// Model
-		oauthApplicationModel := model.OauthApplication(mysqlDB)
-		oauthAccessTokenModel := model.OauthAccessToken(mysqlDB)
-		oauthAccessGrantModel := model.OauthAccessGrant(mysqlDB)
-
-		// Formatter
-		applicationFormatter := formatter.OauthApplication()
-		modelFormatter := formatter.Model(accessTokenTimeout, accessGrantTimeout)
-		oauthFormatter := formatter.Oauth()
-
-		// Validator
-		oauthValidator := validator.Oauth()
-
-		// Service
-		applicationManager := service.ApplicationManager(applicationFormatter, modelFormatter, oauthApplicationModel, oauthValidator)
-		authorization := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatter, oauthValidator, oauthFormatter)
-
-		downStreamPlugins = append(downStreamPlugins, plugin.DownStream().Oauth(oauthAccessTokenModel))
-
-		controller.Compile(internalEngine, controller.Oauth().Application().List(applicationManager))
-		controller.Compile(internalEngine, controller.Oauth().Application().One(applicationManager))
-		controller.Compile(internalEngine, controller.Oauth().Application().Create(applicationManager))
-		controller.Compile(internalEngine, controller.Oauth().Authorization().Grant(authorization))
-		controller.Compile(internalEngine, controller.Oauth().Authorization().Revoke(authorization))
-	}
+	// appBearer := loader.AppBearer(internalEngine, appConfig)
+	// dbBearer := loader.DatabaseBearer(databases, dbConfigs)
 
 	// Route Engine
 	routeCompiler := forwarder.Route().Compiler()
@@ -427,15 +339,15 @@ func runAPI() {
 		journal.Error("Error compiling routes", err).
 			SetTags("altair", "main").
 			Log()
-		os.Exit(1)
+		return err
 	}
 
-	err = forwarder.Route().Generator().Generate(apiEngine, routeObjects, downStreamPlugins)
+	err = forwarder.Route().Generator().Generate(apiEngine, routeObjects, []core.DownStreamPlugin{})
 	if err != nil {
 		journal.Error("Error generating routes", err).
 			SetTags("altair", "main").
 			Log()
-		os.Exit(1)
+		return err
 	}
 
 	gracefulSignal := make(chan os.Signal, 1)
@@ -456,4 +368,5 @@ func runAPI() {
 
 	closeSignal := <-gracefulSignal
 	journal.Info(fmt.Sprintf("Receiving %s signal.... Cleaning up processes.", closeSignal.String())).Log()
+	return nil
 }
