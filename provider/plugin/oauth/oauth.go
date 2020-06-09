@@ -5,8 +5,8 @@ import (
 
 	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/plugin/downstream"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/controller"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/downstream"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/formatter"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/model"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/service"
