@@ -5,6 +5,7 @@ import (
 
 	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
+	"github.com/codefluence-x/altair/plugin/downstream"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/controller"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/formatter"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/model"
@@ -58,11 +59,16 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 	applicationManager := service.ApplicationManager(oauthApplicationFormatter, oauthModelFormatter, oauthApplicationModel, oauthValidator)
 	authorization := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthModelFormatter, oauthValidator, oauthFormatter)
 
+	// DownStreamPlugin
+	oauthDownStream := downstream.Oauth(oauthAccessTokenModel)
+
 	appBearer.InjectController(controller.Application().List(applicationManager))
 	appBearer.InjectController(controller.Application().One(applicationManager))
 	appBearer.InjectController(controller.Application().Create(applicationManager))
 	appBearer.InjectController(controller.Authorization().Grant(authorization))
 	appBearer.InjectController(controller.Authorization().Revoke(authorization))
+
+	appBearer.InjectDownStreamPlugin(oauthDownStream)
 
 	return nil
 }
