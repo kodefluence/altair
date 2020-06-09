@@ -90,7 +90,7 @@ config:
 			appBearer := loader.AppBearer(apiEngine, appConfig)
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
-			dbBearer.EXPECT().Database(oauthDatabase).Return(db, MYSQLConfig, nil)
+			dbBearer.EXPECT().Database(gomock.Any()).Times(0)
 
 			plugins := map[string]coreEntity.Plugin{}
 			pluginBearer := loader.PluginBearer(plugins)
