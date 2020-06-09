@@ -1,5 +1,7 @@
 package interfaces
 
+//go:generate mockgen -destination ./../mock/mock_interfaces.go -package mock -source ./interfaces.go
+
 import (
 	"context"
 	"database/sql"

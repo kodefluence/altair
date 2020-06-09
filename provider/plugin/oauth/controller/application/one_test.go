@@ -8,8 +8,9 @@ import (
 
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/eobject"
-	"github.com/codefluence-x/altair/mock"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/controller"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"
+	"github.com/codefluence-x/altair/testhelper"
 	"github.com/codefluence-x/altair/util"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -55,7 +56,7 @@ func TestOne(t *testing.T) {
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				var response responseOne
-				w := mock.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/1", nil)
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/1", nil)
 
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.Nil(t, err)
@@ -81,8 +82,8 @@ func TestOne(t *testing.T) {
 					ctrl := controller.Application().One(applicationManager)
 					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
-					var response mock.ErrorResponse
-					w := mock.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/1", nil)
+					var response testhelper.ErrorResponse
+					w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/1", nil)
 
 					err := json.Unmarshal(w.Body.Bytes(), &response)
 					assert.Nil(t, err)
@@ -108,8 +109,8 @@ func TestOne(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.BadRequestError("url parameters: id is not integer")),
 				}
 
-				var response mock.ErrorResponse
-				w := mock.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/x", nil)
+				var response testhelper.ErrorResponse
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/x", nil)
 
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.Nil(t, err)

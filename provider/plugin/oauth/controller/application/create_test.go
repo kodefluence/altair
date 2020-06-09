@@ -9,8 +9,9 @@ import (
 
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/eobject"
-	"github.com/codefluence-x/altair/mock"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/controller"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"
+	"github.com/codefluence-x/altair/testhelper"
 	"github.com/codefluence-x/altair/util"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -53,7 +54,7 @@ func TestCreate(t *testing.T) {
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				var response responseOne
-				w := mock.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader(encodedBytes))
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader(encodedBytes))
 
 				err = json.Unmarshal(w.Body.Bytes(), &response)
 				assert.Nil(t, err)
@@ -86,8 +87,8 @@ func TestCreate(t *testing.T) {
 				ctrl := controller.Application().Create(applicationManager)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
-				var response mock.ErrorResponse
-				w := mock.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader(encodedBytes))
+				var response testhelper.ErrorResponse
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader(encodedBytes))
 
 				err = json.Unmarshal(w.Body.Bytes(), &response)
 				assert.Nil(t, err)
@@ -112,8 +113,8 @@ func TestCreate(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.BadRequestError("request body")),
 				}
 
-				var response mock.ErrorResponse
-				w := mock.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), mock.MockErrorIoReader{})
+				var response testhelper.ErrorResponse
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), testhelper.MockErrorIoReader{})
 
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.Nil(t, err)
@@ -138,8 +139,8 @@ func TestCreate(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.BadRequestError("request body")),
 				}
 
-				var response mock.ErrorResponse
-				w := mock.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader([]byte(`this is gonna be error`)))
+				var response testhelper.ErrorResponse
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader([]byte(`this is gonna be error`)))
 
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.Nil(t, err)

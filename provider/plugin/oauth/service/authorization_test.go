@@ -10,9 +10,9 @@ import (
 
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/eobject"
-	"github.com/codefluence-x/altair/mock"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/formatter"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/service"
 
 	"github.com/codefluence-x/altair/util"

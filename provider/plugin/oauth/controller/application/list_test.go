@@ -8,8 +8,9 @@ import (
 
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/eobject"
-	"github.com/codefluence-x/altair/mock"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/controller"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"
+	"github.com/codefluence-x/altair/testhelper"
 	"github.com/codefluence-x/altair/util"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -67,7 +68,7 @@ func TestList(t *testing.T) {
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				var response responseList
-				w := mock.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), nil)
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), nil)
 
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.Nil(t, err)
@@ -90,8 +91,8 @@ func TestList(t *testing.T) {
 					ctrl := controller.Application().List(applicationManager)
 					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
-					var response mock.ErrorResponse
-					w := mock.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), nil)
+					var response testhelper.ErrorResponse
+					w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), nil)
 
 					err := json.Unmarshal(w.Body.Bytes(), &response)
 					assert.Nil(t, err)
@@ -117,8 +118,8 @@ func TestList(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.BadRequestError("query parameters: offset")),
 				}
 
-				var response mock.ErrorResponse
-				w := mock.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path()+"?offset=invalid", nil)
+				var response testhelper.ErrorResponse
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path()+"?offset=invalid", nil)
 
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.Nil(t, err)
@@ -143,8 +144,8 @@ func TestList(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.BadRequestError("query parameters: limit")),
 				}
 
-				var response mock.ErrorResponse
-				w := mock.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path()+"?limit=invalid", nil)
+				var response testhelper.ErrorResponse
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path()+"?limit=invalid", nil)
 
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.Nil(t, err)
