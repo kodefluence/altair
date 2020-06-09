@@ -3,7 +3,7 @@ package query_test
 import (
 	"testing"
 
-	"github.com/codefluence-x/altair/query"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/query"
 	"gotest.tools/assert"
 )
 

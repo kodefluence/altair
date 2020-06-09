@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/query"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/query"
 )
 
 type oauthApplication struct {
