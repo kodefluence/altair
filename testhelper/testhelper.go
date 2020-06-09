@@ -1,4 +1,4 @@
-package test_helper
+package testhelper
 
 import (
 	"errors"
