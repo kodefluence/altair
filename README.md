@@ -1,6 +1,9 @@
 # Altair - Light Weight and Robust API Gateway
 
-[![GitHub issues](https://img.shields.io/github/issues/codefluence-x/altair)][![GitHub forks](https://img.shields.io/github/forks/codefluence-x/altair)](https://github.com/codefluence-x/altair/network) [![GitHub stars](https://img.shields.io/github/stars/codefluence-x/altair)](https://github.com/codefluence-x/altair/stargazers) [![GitHub license](https://img.shields.io/github/license/codefluence-x/altair)](https://github.com/codefluence-x/altair/blob/master/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/codefluence-x/altair)](https://github.com/codefluence-x/altair/issues)
+[![GitHub forks](https://img.shields.io/github/forks/codefluence-x/altair)](https://github.com/codefluence-x/altair/network)
+[![GitHub stars](https://img.shields.io/github/stars/codefluence-x/altair)](https://github.com/codefluence-x/altair/stargazers)
+[![GitHub license](https://img.shields.io/github/license/codefluence-x/altair)](https://github.com/codefluence-x/altair/blob/master/LICENSE)
 
 Open source API gateway written in Go. Created to be lightweight, simple, fast, reliable, cross platform and programming language agnostic.
 
