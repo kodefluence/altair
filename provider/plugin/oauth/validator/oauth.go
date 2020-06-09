@@ -8,14 +8,13 @@ import (
 
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/eobject"
-	"github.com/codefluence-x/altair/provider/plugin/oauth"
 	"github.com/codefluence-x/altair/util"
 )
 
 type application struct {
 }
 
-func Oauth() oauth.OauthValidator {
+func Oauth() *application {
 	return &application{}
 }
 

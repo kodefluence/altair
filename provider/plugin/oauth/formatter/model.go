@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth"
 	"github.com/codefluence-x/altair/util"
 	"github.com/codefluence-x/aurelia"
 	"github.com/google/uuid"
@@ -16,7 +15,7 @@ type model struct {
 	codeExpiresIn  time.Duration
 }
 
-func Model(tokenExpiresIn time.Duration, codeExpiresIn time.Duration) oauth.ModelFormater {
+func Model(tokenExpiresIn time.Duration, codeExpiresIn time.Duration) *model {
 	return &model{
 		tokenExpiresIn: tokenExpiresIn,
 		codeExpiresIn:  codeExpiresIn,

@@ -4,17 +4,16 @@ import (
 	"context"
 
 	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth"
 	"github.com/codefluence-x/altair/util"
 )
 
 type oauthApplication struct{}
 
-func OauthApplication() oauth.OauthApplicationFormater {
-	return oauthApplication{}
+func OauthApplication() *oauthApplication {
+	return &oauthApplication{}
 }
 
-func (oa oauthApplication) ApplicationList(ctx context.Context, applications []entity.OauthApplication) []entity.OauthApplicationJSON {
+func (oa *oauthApplication) ApplicationList(ctx context.Context, applications []entity.OauthApplication) []entity.OauthApplicationJSON {
 	oauthApplicationJSON := make([]entity.OauthApplicationJSON, len(applications))
 
 	for k, v := range applications {

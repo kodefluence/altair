@@ -1,15 +1,12 @@
-package oauth
+package interfaces
 
 import (
 	"context"
 	"database/sql"
 
+	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
 )
-
-type DBExecutable interface {
-	Exec(query string, args ...interface{}) (sql.Result, error)
-}
 
 type OauthApplicationModel interface {
 	Name() string
@@ -67,4 +64,20 @@ type ModelFormater interface {
 type OauthValidator interface {
 	ValidateApplication(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error
 	ValidateAuthorizationGrant(ctx context.Context, r entity.AuthorizationRequestJSON, application entity.OauthApplication) *entity.Error
+}
+
+type OauthDispatcher interface {
+	Application() OauthApplicationDispatcher
+	Authorization() AuthorizationDispatcher
+}
+
+type OauthApplicationDispatcher interface {
+	List(applicationManager ApplicationManager) core.Controller
+	One(applicationManager ApplicationManager) core.Controller
+	Create(applicationManager ApplicationManager) core.Controller
+}
+
+type AuthorizationDispatcher interface {
+	Grant(authorization Authorization) core.Controller
+	Revoke(authorization Authorization) core.Controller
 }

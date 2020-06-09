@@ -4,13 +4,12 @@ import (
 	"time"
 
 	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth"
 	"github.com/codefluence-x/altair/util"
 )
 
 type oauthFormatter struct{}
 
-func Oauth() oauth.OauthFormatter {
+func Oauth() *oauthFormatter {
 	return &oauthFormatter{}
 }
 

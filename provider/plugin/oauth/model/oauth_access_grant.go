@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth"
 	"github.com/codefluence-x/altair/query"
 )
 
@@ -14,7 +13,7 @@ type oauthAccessGrant struct {
 	db *sql.DB
 }
 
-func OauthAccessGrant(db *sql.DB) oauth.OauthAccessGrantModel {
+func OauthAccessGrant(db *sql.DB) *oauthAccessGrant {
 	return &oauthAccessGrant{
 		db: db,
 	}
@@ -50,7 +49,7 @@ func (oag *oauthAccessGrant) One(ctx context.Context, ID int) (entity.OauthAcces
 
 func (oag *oauthAccessGrant) Create(ctx context.Context, data entity.OauthAccessGrantInsertable, txs ...*sql.Tx) (int, error) {
 	var lastInsertedId int
-	var dbExecutable oauth.DBExecutable
+	var dbExecutable DBExecutable
 
 	dbExecutable = oag.db
 	if len(txs) > 0 {

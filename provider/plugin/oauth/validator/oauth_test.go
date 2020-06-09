@@ -9,8 +9,8 @@ import (
 
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/eobject"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/validator"
 	"github.com/codefluence-x/altair/util"
-	"github.com/codefluence-x/altair/validator"
 	"github.com/stretchr/testify/assert"
 )
 

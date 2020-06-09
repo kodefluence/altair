@@ -7,18 +7,18 @@ import (
 
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/eobject"
-	"github.com/codefluence-x/altair/provider/plugin/oauth"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
 	"github.com/codefluence-x/journal"
 )
 
 type applicationManager struct {
-	formatter             oauth.OauthApplicationFormater
-	modelFormatter        oauth.ModelFormater
-	oauthApplicationModel oauth.OauthApplicationModel
-	applicationValidator  oauth.OauthValidator
+	formatter             interfaces.OauthApplicationFormater
+	modelFormatter        interfaces.ModelFormater
+	oauthApplicationModel interfaces.OauthApplicationModel
+	applicationValidator  interfaces.OauthValidator
 }
 
-func ApplicationManager(formatter oauth.OauthApplicationFormater, modelFormatter oauth.ModelFormater, oauthApplicationModel oauth.OauthApplicationModel, applicationValidator oauth.OauthValidator) oauth.ApplicationManager {
+func ApplicationManager(formatter interfaces.OauthApplicationFormater, modelFormatter interfaces.ModelFormater, oauthApplicationModel interfaces.OauthApplicationModel, applicationValidator interfaces.OauthValidator) *applicationManager {
 	return &applicationManager{
 		formatter:             formatter,
 		modelFormatter:        modelFormatter,

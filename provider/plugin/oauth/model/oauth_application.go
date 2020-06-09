@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth"
 	"github.com/codefluence-x/altair/query"
 )
 
@@ -14,7 +13,7 @@ type oauthApplication struct {
 	db *sql.DB
 }
 
-func OauthApplication(db *sql.DB) oauth.OauthApplicationModel {
+func OauthApplication(db *sql.DB) *oauthApplication {
 	return &oauthApplication{
 		db: db,
 	}
@@ -114,7 +113,7 @@ func (oa *oauthApplication) OneByUIDandSecret(ctx context.Context, clientUID, cl
 
 func (oa *oauthApplication) Create(ctx context.Context, data entity.OauthApplicationInsertable, txs ...*sql.Tx) (int, error) {
 	var lastInsertedId int
-	var dbExecutable oauth.DBExecutable
+	var dbExecutable DBExecutable
 
 	dbExecutable = oa.db
 	if len(txs) > 0 {
