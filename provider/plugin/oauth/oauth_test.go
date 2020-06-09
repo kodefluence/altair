@@ -16,6 +16,7 @@ import (
 
 func TestOauth(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
 
 	apiEngine := gin.New()
 
