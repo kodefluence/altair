@@ -51,3 +51,10 @@ type AppConfig interface {
 	Plugins() []string
 	Dump() string
 }
+
+type AppBearer interface {
+	Config() AppConfig
+	DownStreamPlugins() []DownStreamPlugin
+	InjectDownStreamPlugin(InjectedDownStreamPlugin DownStreamPlugin)
+	InjectController(injectedController Controller)
+}
