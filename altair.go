@@ -355,9 +355,11 @@ func runAPI() error {
 
 	go func() {
 		srv := &http.Server{
-			Addr:    ":" + os.Getenv("APP_PORT"),
+			Addr:    fmt.Sprintf(":%d", appConfig.Port()),
 			Handler: apiEngine,
 		}
+
+		journal.Info(fmt.Sprintf("Running Altair in: %d", appConfig.Port())).Log()
 
 		if err := srv.ListenAndServe(); err != nil {
 			journal.Error("Error running api engine", err).
