@@ -9,7 +9,8 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/model"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/model"
+
 	"github.com/stretchr/testify/assert"
 )
 

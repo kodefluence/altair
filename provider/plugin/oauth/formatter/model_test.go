@@ -5,7 +5,8 @@ import (
 	"time"
 
 	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/formatter"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/formatter"
+
 	"github.com/codefluence-x/altair/util"
 	"github.com/stretchr/testify/assert"
 )
