@@ -3,16 +3,15 @@ package loader
 import (
 	"github.com/codefluence-x/altair/controller"
 	"github.com/codefluence-x/altair/core"
-	"github.com/gin-gonic/gin"
 )
 
 type appBearer struct {
 	config            core.AppConfig
 	downStreamPlugins []core.DownStreamPlugin
-	appEngine         *gin.Engine
+	appEngine         core.APIEngine
 }
 
-func AppBearer(appEngine *gin.Engine, config core.AppConfig) core.AppBearer {
+func AppBearer(appEngine core.APIEngine, config core.AppConfig) core.AppBearer {
 	return &appBearer{
 		appEngine:         appEngine,
 		config:            config,
