@@ -5,8 +5,8 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
+	"github.com/codefluence-x/altair/provider/plugin/oauth"
 	"github.com/codefluence-x/altair/query"
 )
 
@@ -14,7 +14,7 @@ type oauthAccessToken struct {
 	db *sql.DB
 }
 
-func OauthAccessToken(db *sql.DB) core.OauthAccessTokenModel {
+func OauthAccessToken(db *sql.DB) oauth.OauthAccessTokenModel {
 	return &oauthAccessToken{
 		db: db,
 	}
@@ -72,7 +72,7 @@ func (oat *oauthAccessToken) One(ctx context.Context, ID int) (entity.OauthAcces
 
 func (oat *oauthAccessToken) Create(ctx context.Context, data entity.OauthAccessTokenInsertable, txs ...*sql.Tx) (int, error) {
 	var lastInsertedId int
-	var dbExecutable core.DBExecutable
+	var dbExecutable oauth.DBExecutable
 
 	dbExecutable = oat.db
 	if len(txs) > 0 {
