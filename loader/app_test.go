@@ -19,6 +19,7 @@ func TestApp(t *testing.T) {
 
 	appConfigOption.Authorization.Username = "altair"
 	appConfigOption.Authorization.Password = "secret"
+	appConfigOption.Metric.Interface = "prometheus"
 
 	t.Run("Compile", func(t *testing.T) {
 		t.Run("Given config path", func(t *testing.T) {
@@ -39,6 +40,7 @@ func TestApp(t *testing.T) {
 					assert.Equal(t, expectedAppConfig.ProxyHost(), appConfig.ProxyHost())
 					assert.Equal(t, expectedAppConfig.BasicAuthPassword(), appConfig.BasicAuthPassword())
 					assert.Equal(t, expectedAppConfig.BasicAuthUsername(), appConfig.BasicAuthUsername())
+					assert.Equal(t, expectedAppConfig.Metric().Interface(), appConfig.Metric().Interface())
 
 					mock.RemoveTempTestFiles(configPath)
 				})
