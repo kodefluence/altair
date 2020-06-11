@@ -669,3 +669,30 @@ func (mr *MockAppBearerMockRecorder) InjectController(injectedController interfa
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InjectController", reflect.TypeOf((*MockAppBearer)(nil).InjectController), injectedController)
 }
+
+// SetMetricProvider mocks base method
+func (m *MockAppBearer) SetMetricProvider(metricProvider core.Metric) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetMetricProvider", metricProvider)
+}
+
+// SetMetricProvider indicates an expected call of SetMetricProvider
+func (mr *MockAppBearerMockRecorder) SetMetricProvider(metricProvider interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetMetricProvider", reflect.TypeOf((*MockAppBearer)(nil).SetMetricProvider), metricProvider)
+}
+
+// MetricProvider mocks base method
+func (m *MockAppBearer) MetricProvider() (core.Metric, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MetricProvider")
+	ret0, _ := ret[0].(core.Metric)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// MetricProvider indicates an expected call of MetricProvider
+func (mr *MockAppBearerMockRecorder) MetricProvider() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MetricProvider", reflect.TypeOf((*MockAppBearer)(nil).MetricProvider))
+}
