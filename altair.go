@@ -325,11 +325,11 @@ func runAPI() error {
 	apiEngine = gin.New()
 	apiEngine.GET("/health", controller.Health)
 
-	internalEngine := apiEngine.Group("/_plugins/", gin.BasicAuth(gin.Accounts{
+	pluginEngine := apiEngine.Group("/_plugins/", gin.BasicAuth(gin.Accounts{
 		appConfig.BasicAuthUsername(): appConfig.BasicAuthPassword(),
 	}))
 
-	appBearer := loader.AppBearer(internalEngine, appConfig)
+	appBearer := loader.AppBearer(pluginEngine, appConfig)
 	dbBearer := loader.DatabaseBearer(databases, dbConfigs)
 
 	provider.Plugin(appBearer, dbBearer, pluginBearer)
