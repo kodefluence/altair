@@ -1,69 +1,82 @@
 package entity
 
-import "gopkg.in/yaml.v2"
+import (
+	"gopkg.in/yaml.v2"
+)
 
 type AppConfigOption struct {
-	Port          int      `yaml:"port"`
-	ProxyHost     string   `yaml:"proxy_host"`
-	Plugins       []string `yaml:"plugins"`
+	Port          int
+	ProxyHost     string
+	Plugins       []string
 	Authorization struct {
-		Username string `yaml:"username"`
-		Password string `yaml:"pasword"`
-	} `yaml:"authorization"`
+		Username string
+		Password string
+	}
+	Metric struct {
+		Interface string
+	}
 }
 
-type appConfig struct {
+type AppConfig struct {
 	plugins           []string
 	pluginMap         map[string]bool
 	port              int
 	proxyHost         string
 	basicAuthUsername string
 	basicAuthPassword string
+	metricConfig      *MetricConfig
 }
 
-func NewAppConfig(option AppConfigOption) appConfig {
+type MetricConfig struct {
+	metricInterface string
+}
+
+func NewAppConfig(option AppConfigOption) AppConfig {
 	pluginMap := map[string]bool{}
 
 	for _, p := range option.Plugins {
 		pluginMap[p] = true
 	}
 
-	return appConfig{
+	return AppConfig{
 		plugins:           option.Plugins,
 		pluginMap:         pluginMap,
 		port:              option.Port,
 		proxyHost:         option.ProxyHost,
 		basicAuthPassword: option.Authorization.Password,
 		basicAuthUsername: option.Authorization.Username,
+		metricConfig: &MetricConfig{
+			metricInterface: option.Metric.Interface,
+		},
 	}
 }
 
-func (a appConfig) PluginExists(pluginName string) bool {
+func (a AppConfig) PluginExists(pluginName string) bool {
 	_, ok := a.pluginMap[pluginName]
 	return ok
 }
 
-func (a appConfig) Plugins() []string {
+func (a AppConfig) Plugins() []string {
 	return a.plugins
 }
 
-func (a appConfig) Port() int {
+func (a AppConfig) Port() int {
 	return a.port
 }
 
-func (a appConfig) BasicAuthUsername() string {
+func (a AppConfig) BasicAuthUsername() string {
 	return a.basicAuthUsername
 }
 
-func (a appConfig) BasicAuthPassword() string {
+func (a AppConfig) BasicAuthPassword() string {
 	return a.basicAuthPassword
 }
 
-func (a appConfig) ProxyHost() string {
+func (a AppConfig) ProxyHost() string {
 	return a.proxyHost
 }
 
-func (a appConfig) Dump() string {
+func (a AppConfig) Dump() string {
 	appConfigOption := AppConfigOption{
 		Port:      a.port,
 		Plugins:   a.plugins,
@@ -72,7 +85,16 @@ func (a appConfig) Dump() string {
 
 	appConfigOption.Authorization.Username = a.basicAuthUsername
 	appConfigOption.Authorization.Password = a.basicAuthPassword
+	appConfigOption.Metric.Interface = a.metricConfig.metricInterface
 
 	encodedContent, _ := yaml.Marshal(appConfigOption)
 	return string(encodedContent)
+}
+
+func (a AppConfig) Metric() *MetricConfig {
+	return a.metricConfig
+}
+
+func (m *MetricConfig) Interface() string {
+	return m.metricInterface
 }

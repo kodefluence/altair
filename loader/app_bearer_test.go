@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/codefluence-x/altair/adapter"
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/loader"
 	"github.com/gin-gonic/gin"
@@ -47,11 +48,11 @@ func TestAppBearer(t *testing.T) {
 	appConfig := entity.NewAppConfig(appOption)
 	appEngine := gin.Default()
 
-	appBearer := loader.AppBearer(appEngine, appConfig)
+	appBearer := loader.AppBearer(appEngine, adapter.AppConfig(appConfig))
 
 	t.Run("Config", func(t *testing.T) {
 		t.Run("Return AppConfig", func(t *testing.T) {
-			assert.Equal(t, appConfig, appBearer.Config())
+			assert.Equal(t, adapter.AppConfig(appConfig), appBearer.Config())
 		})
 	})
 
@@ -81,7 +82,7 @@ func TestAppBearer(t *testing.T) {
 			appConfig := entity.NewAppConfig(appOption)
 			appEngine := gin.Default()
 
-			appBearer := loader.AppBearer(appEngine, appConfig)
+			appBearer := loader.AppBearer(appEngine, adapter.AppConfig(appConfig))
 
 			appBearer.InjectDownStreamPlugin(fakeDownStreamPlugin{})
 			appBearer.InjectDownStreamPlugin(fakeDownStreamPlugin{})

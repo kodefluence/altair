@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/codefluence-x/altair/adapter"
 	coreEntity "github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/loader"
 	"github.com/codefluence-x/altair/mock"
@@ -59,7 +60,7 @@ config:
 
 	t.Run("Provide", func(t *testing.T) {
 		t.Run("Run gracefully", func(t *testing.T) {
-			appBearer := loader.AppBearer(apiEngine, appConfig)
+			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(oauthDatabase).Return(db, MYSQLConfig, nil)
@@ -76,7 +77,7 @@ config:
 				Plugins:   []string{},
 			}
 			appConfig := coreEntity.NewAppConfig(appOption)
-			appBearer := loader.AppBearer(apiEngine, appConfig)
+			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
 
 			pluginBearer := loader.PluginBearer(plugins)
 
@@ -87,7 +88,7 @@ config:
 		})
 
 		t.Run("Compile plugin failed", func(t *testing.T) {
-			appBearer := loader.AppBearer(apiEngine, appConfig)
+			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(gomock.Any()).Times(0)
@@ -99,7 +100,7 @@ config:
 		})
 
 		t.Run("Database instance is not exists", func(t *testing.T) {
-			appBearer := loader.AppBearer(apiEngine, appConfig)
+			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(oauthDatabase).Return(nil, nil, errors.New("Database is not exists"))
@@ -110,7 +111,7 @@ config:
 		})
 
 		t.Run("Access token timeout wrong format", func(t *testing.T) {
-			appBearer := loader.AppBearer(apiEngine, appConfig)
+			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(oauthDatabase).Return(db, MYSQLConfig, nil)
@@ -130,7 +131,7 @@ config:
 		})
 
 		t.Run("Authorization code timeout wrong format", func(t *testing.T) {
-			appBearer := loader.AppBearer(apiEngine, appConfig)
+			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(oauthDatabase).Return(db, MYSQLConfig, nil)

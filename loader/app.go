@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"strconv"
 
+	"github.com/codefluence-x/altair/adapter"
 	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
 	"gopkg.in/yaml.v2"
@@ -48,7 +49,7 @@ func (a *app) Compile(configPath string) (core.AppConfig, error) {
 		return nil, err
 	}
 
-	return entity.NewAppConfig(appConfigOption), nil
+	return adapter.AppConfig(entity.NewAppConfig(appConfigOption)), nil
 }
 
 func (a *app) assignConfigOption(config appConfig) (entity.AppConfigOption, error) {
