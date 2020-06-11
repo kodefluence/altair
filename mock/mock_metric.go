@@ -33,27 +33,37 @@ func (m *MockMetric) EXPECT() *MockMetricMockRecorder {
 }
 
 // InjectCounter mocks base method
-func (m *MockMetric) InjectCounter(metricName string, labels []string) {
+func (m *MockMetric) InjectCounter(metricName string, labels ...string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "InjectCounter", metricName, labels)
+	varargs := []interface{}{metricName}
+	for _, a := range labels {
+		varargs = append(varargs, a)
+	}
+	m.ctrl.Call(m, "InjectCounter", varargs...)
 }
 
 // InjectCounter indicates an expected call of InjectCounter
-func (mr *MockMetricMockRecorder) InjectCounter(metricName, labels interface{}) *gomock.Call {
+func (mr *MockMetricMockRecorder) InjectCounter(metricName interface{}, labels ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InjectCounter", reflect.TypeOf((*MockMetric)(nil).InjectCounter), metricName, labels)
+	varargs := append([]interface{}{metricName}, labels...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InjectCounter", reflect.TypeOf((*MockMetric)(nil).InjectCounter), varargs...)
 }
 
 // InjectHistogram mocks base method
-func (m *MockMetric) InjectHistogram(metricName string, labels []string) {
+func (m *MockMetric) InjectHistogram(metricName string, labels ...string) {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "InjectHistogram", metricName, labels)
+	varargs := []interface{}{metricName}
+	for _, a := range labels {
+		varargs = append(varargs, a)
+	}
+	m.ctrl.Call(m, "InjectHistogram", varargs...)
 }
 
 // InjectHistogram indicates an expected call of InjectHistogram
-func (mr *MockMetricMockRecorder) InjectHistogram(metricName, labels interface{}) *gomock.Call {
+func (mr *MockMetricMockRecorder) InjectHistogram(metricName interface{}, labels ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InjectHistogram", reflect.TypeOf((*MockMetric)(nil).InjectHistogram), metricName, labels)
+	varargs := append([]interface{}{metricName}, labels...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InjectHistogram", reflect.TypeOf((*MockMetric)(nil).InjectHistogram), varargs...)
 }
 
 // Inc mocks base method
