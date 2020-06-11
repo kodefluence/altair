@@ -62,4 +62,7 @@ type AppBearer interface {
 	DownStreamPlugins() []DownStreamPlugin
 	InjectDownStreamPlugin(InjectedDownStreamPlugin DownStreamPlugin)
 	InjectController(injectedController Controller)
+
+	SetMetricProvider(metricProvider Metric)
+	MetricProvider() (Metric, error)
 }
