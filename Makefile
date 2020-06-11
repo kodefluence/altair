@@ -1,6 +1,9 @@
 test:
 	@go test -race -cover -coverprofile=cover.out $$(go list ./... | grep -Ev "altair$$|core|mock|interfaces|testhelper")
 
+mock_metric:
+	mockgen -source core/metric.go -destination mock/mock_metric.go -package mock
+
 mock_plugin:
 	mockgen -source core/plugin.go -destination mock/mock_plugin.go -package mock
 

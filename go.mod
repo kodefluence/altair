@@ -4,6 +4,7 @@ go 1.13
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.3.3
+	github.com/bukalapak/apinizer v7.0.0+incompatible
 	github.com/codefluence-x/aurelia v0.0.0-20190914065210-ba6f9a4a12fe
 	github.com/codefluence-x/journal v0.0.0-20191009131414-f647d3e9f350
 	github.com/gin-gonic/gin v1.5.0
@@ -13,7 +14,7 @@ require (
 	github.com/golang/mock v1.4.3
 	github.com/google/uuid v1.1.1
 	github.com/pkg/errors v0.8.1
-	github.com/prometheus/client_golang v1.6.0 // indirect
+	github.com/prometheus/client_golang v1.6.0
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.4.0
 	github.com/subosito/gotenv v1.2.0
