@@ -35,7 +35,7 @@ func (p *prometheusMetric) InjectCounter(metricName string, labels ...string) {
 	counterMetric := prometheus.NewCounterVec(prometheus.CounterOpts{
 		Name: metricName,
 	}, labels)
-	prometheus.MustRegister(counterMetric)
+	_ = prometheus.Register(counterMetric)
 	p.counterMetrics[metricName] = counterMetric
 	p.counterMetricLock.Unlock()
 }
@@ -49,7 +49,7 @@ func (p *prometheusMetric) InjectHistogram(metricName string, labels ...string) 
 	histogramMetric := prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name: metricName,
 	}, labels)
-	prometheus.MustRegister(histogramMetric)
+	_ = prometheus.Register(histogramMetric)
 	p.histogramMetrics[metricName] = histogramMetric
 	p.histogramMetricLock.Unlock()
 }

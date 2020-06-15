@@ -38,7 +38,7 @@ func (a *appBearer) InjectDownStreamPlugin(InjectedDownStreamPlugin core.DownStr
 }
 
 func (a *appBearer) InjectController(injectedController core.Controller) {
-	controller.Compile(a.appEngine, injectedController)
+	controller.Compile(a.appEngine, a.metricProvider, injectedController)
 }
 
 func (a *appBearer) SetMetricProvider(metricProvider core.Metric) {
