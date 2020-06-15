@@ -332,8 +332,8 @@ func runAPI() error {
 	appBearer := loader.AppBearer(pluginEngine, appConfig)
 	dbBearer := loader.DatabaseBearer(databases, dbConfigs)
 
-	provider.Plugin(appBearer, dbBearer, pluginBearer)
 	provider.Metric(appBearer)
+	provider.Plugin(appBearer, dbBearer, pluginBearer)
 
 	// Route Engine
 	routeCompiler := forwarder.Route().Compiler()
