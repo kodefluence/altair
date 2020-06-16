@@ -297,8 +297,7 @@ func (g *generator) downStreamPluginMetric(c *gin.Context, routeName, pluginName
 		"status_code_group": strconv.Itoa(((c.Writer.Status() / 100) * 100)),
 	}
 
-	g.metric.Inc("routes_downstream_hits", labels)
-	g.metric.Observe("routes_downstream_latency_in_ms", float64(time.Since(startTime).Milliseconds()), labels)
+	g.metric.Observe("routes_downstream_plugin_latency_in_ms", float64(time.Since(startTime).Milliseconds()), labels)
 }
 
 func (g *generator) downStreamMetric(c *gin.Context, routeName, path string, startTime time.Time) {
