@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"strconv"
 
+	"github.com/codefluence-x/altair/adapter"
 	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
 	"gopkg.in/yaml.v2"
@@ -20,6 +21,9 @@ type appConfig struct {
 		Username string `yaml:"username"`
 		Password string `yaml:"password"`
 	} `yaml:"authorization"`
+	Metric struct {
+		Interface string `yaml:"interface"`
+	} `yaml:"metric"`
 }
 
 func App() core.AppLoader {
@@ -48,7 +52,7 @@ func (a *app) Compile(configPath string) (core.AppConfig, error) {
 		return nil, err
 	}
 
-	return entity.NewAppConfig(appConfigOption), nil
+	return adapter.AppConfig(entity.NewAppConfig(appConfigOption)), nil
 }
 
 func (a *app) assignConfigOption(config appConfig) (entity.AppConfigOption, error) {
@@ -82,6 +86,7 @@ func (a *app) assignConfigOption(config appConfig) (entity.AppConfigOption, erro
 	appConfigOption.Plugins = config.Plugins
 	appConfigOption.Authorization.Username = config.Authorization.Username
 	appConfigOption.Authorization.Password = config.Authorization.Password
+	appConfigOption.Metric.Interface = config.Metric.Interface
 
 	return appConfigOption, nil
 }

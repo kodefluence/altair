@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"runtime/debug"
+	"strconv"
 	"time"
 
 	"github.com/codefluence-x/altair/core"
@@ -15,7 +16,9 @@ import (
 	"github.com/google/uuid"
 )
 
-func Compile(engine core.APIEngine, ctrl core.Controller) {
+func Compile(engine core.APIEngine, metric core.Metric, ctrl core.Controller) {
+	metric.InjectCounter("controller_hits", "method", "path", "status_code", "status_code_group")
+	metric.InjectHistogram("controller_elapsed_time_in_ms", "method", "path", "status_code", "status_code_group")
 
 	journal.Info("Registering controller").
 		AddField("path", ctrl.Path()).
@@ -39,7 +42,7 @@ func Compile(engine core.APIEngine, ctrl core.Controller) {
 			}
 		}
 
-		defer recoverFunc(trackID, c, ctrl, startTime, params)
+		defer recoverFunc(trackID, c, ctrl, metric, startTime, params)
 
 		ctrl.Control(c)
 
@@ -48,10 +51,31 @@ func Compile(engine core.APIEngine, ctrl core.Controller) {
 		} else {
 			logRequestInfo(trackID, c, ctrl, time.Since(startTime).Milliseconds(), params)
 		}
+
+		trackRequest(ctrl, metric, time.Since(startTime).Milliseconds(), c.Writer)
 	})
 }
 
-func recoverFunc(trackID uuid.UUID, c *gin.Context, ctrl core.Controller, startTime time.Time, params string) {
+func trackRequest(ctrl core.Controller, metric core.Metric, elapsedTime int64, writer gin.ResponseWriter) {
+	statusCode := strconv.Itoa(writer.Status())
+	statusCodGroup := strconv.Itoa(((writer.Status() / 100) * 100))
+
+	metric.Inc("controller_hits", map[string]string{
+		"method":            ctrl.Method(),
+		"path":              ctrl.Path(),
+		"status_code":       statusCode,
+		"status_code_group": statusCodGroup,
+	})
+
+	metric.Observe("controller_elapsed_time_in_ms", float64(elapsedTime), map[string]string{
+		"method":            ctrl.Method(),
+		"path":              ctrl.Path(),
+		"status_code":       statusCode,
+		"status_code_group": statusCodGroup,
+	})
+}
+
+func recoverFunc(trackID uuid.UUID, c *gin.Context, ctrl core.Controller, metric core.Metric, startTime time.Time, params string) {
 	if err := recover(); err != nil {
 		internalServerErrorResponse(trackID, c)
 
@@ -73,6 +97,7 @@ func recoverFunc(trackID uuid.UUID, c *gin.Context, ctrl core.Controller, startT
 			Log()
 
 		logRequestError(trackID, c, ctrl, time.Since(startTime).Milliseconds(), params)
+		trackRequest(ctrl, metric, time.Since(startTime).Milliseconds(), c.Writer)
 		return
 	}
 }

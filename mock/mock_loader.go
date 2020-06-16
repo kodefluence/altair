@@ -544,6 +544,57 @@ func (mr *MockAppConfigMockRecorder) Dump() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Dump", reflect.TypeOf((*MockAppConfig)(nil).Dump))
 }
 
+// Metric mocks base method
+func (m *MockAppConfig) Metric() core.MetricConfig {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Metric")
+	ret0, _ := ret[0].(core.MetricConfig)
+	return ret0
+}
+
+// Metric indicates an expected call of Metric
+func (mr *MockAppConfigMockRecorder) Metric() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Metric", reflect.TypeOf((*MockAppConfig)(nil).Metric))
+}
+
+// MockMetricConfig is a mock of MetricConfig interface
+type MockMetricConfig struct {
+	ctrl     *gomock.Controller
+	recorder *MockMetricConfigMockRecorder
+}
+
+// MockMetricConfigMockRecorder is the mock recorder for MockMetricConfig
+type MockMetricConfigMockRecorder struct {
+	mock *MockMetricConfig
+}
+
+// NewMockMetricConfig creates a new mock instance
+func NewMockMetricConfig(ctrl *gomock.Controller) *MockMetricConfig {
+	mock := &MockMetricConfig{ctrl: ctrl}
+	mock.recorder = &MockMetricConfigMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockMetricConfig) EXPECT() *MockMetricConfigMockRecorder {
+	return m.recorder
+}
+
+// Interface mocks base method
+func (m *MockMetricConfig) Interface() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Interface")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Interface indicates an expected call of Interface
+func (mr *MockMetricConfigMockRecorder) Interface() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Interface", reflect.TypeOf((*MockMetricConfig)(nil).Interface))
+}
+
 // MockAppBearer is a mock of AppBearer interface
 type MockAppBearer struct {
 	ctrl     *gomock.Controller
@@ -617,4 +668,31 @@ func (m *MockAppBearer) InjectController(injectedController core.Controller) {
 func (mr *MockAppBearerMockRecorder) InjectController(injectedController interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InjectController", reflect.TypeOf((*MockAppBearer)(nil).InjectController), injectedController)
+}
+
+// SetMetricProvider mocks base method
+func (m *MockAppBearer) SetMetricProvider(metricProvider core.Metric) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "SetMetricProvider", metricProvider)
+}
+
+// SetMetricProvider indicates an expected call of SetMetricProvider
+func (mr *MockAppBearerMockRecorder) SetMetricProvider(metricProvider interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetMetricProvider", reflect.TypeOf((*MockAppBearer)(nil).SetMetricProvider), metricProvider)
+}
+
+// MetricProvider mocks base method
+func (m *MockAppBearer) MetricProvider() (core.Metric, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "MetricProvider")
+	ret0, _ := ret[0].(core.Metric)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// MetricProvider indicates an expected call of MetricProvider
+func (mr *MockAppBearerMockRecorder) MetricProvider() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MetricProvider", reflect.TypeOf((*MockAppBearer)(nil).MetricProvider))
 }

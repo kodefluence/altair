@@ -50,6 +50,11 @@ type AppConfig interface {
 	PluginExists(pluginName string) bool
 	Plugins() []string
 	Dump() string
+	Metric() MetricConfig
+}
+
+type MetricConfig interface {
+	Interface() string
 }
 
 type AppBearer interface {
@@ -57,4 +62,7 @@ type AppBearer interface {
 	DownStreamPlugins() []DownStreamPlugin
 	InjectDownStreamPlugin(InjectedDownStreamPlugin DownStreamPlugin)
 	InjectController(injectedController Controller)
+
+	SetMetricProvider(metricProvider Metric)
+	MetricProvider() (Metric, error)
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/forwarder/route"
 	"github.com/codefluence-x/altair/mock"
+	"github.com/codefluence-x/altair/provider/metric"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -52,7 +53,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 				downStreamPlugin = append(downStreamPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -102,7 +103,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 				downStreamPlugin = append(downStreamPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -159,7 +160,7 @@ func TestGenerator(t *testing.T) {
 
 				downStreamPlugin = append(downStreamPlugin, oauthPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -215,7 +216,7 @@ func TestGenerator(t *testing.T) {
 
 				downStreamPlugin = append(downStreamPlugin, oauthPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -269,7 +270,7 @@ func TestGenerator(t *testing.T) {
 
 				downStreamPlugin = append(downStreamPlugin, oauthPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -324,7 +325,7 @@ func TestGenerator(t *testing.T) {
 
 				downStreamPlugin = append(downStreamPlugin, oauthPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -376,7 +377,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 				downStreamPlugin = append(downStreamPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -428,7 +429,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 				downStreamPlugin = append(downStreamPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -474,7 +475,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 				downStreamPlugin = append(downStreamPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.NotNil(t, err)
 			})
 		})
@@ -507,7 +508,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 				downStreamPlugin = append(downStreamPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -534,15 +535,15 @@ func TestGenerator(t *testing.T) {
 		})
 
 		t.Run("Forwarding error", func(t *testing.T) {
+			t.Run("Do the request error", func(t *testing.T) {
+
+			})
+
 			t.Run("Read request body error", func(t *testing.T) {
 
 			})
 
 			t.Run("Create new request error", func(t *testing.T) {
-
-			})
-
-			t.Run("Do the request error", func(t *testing.T) {
 
 			})
 

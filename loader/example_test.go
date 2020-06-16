@@ -198,7 +198,9 @@ authorization:
   username: altair
   password: secret
 plugins:
-  - oauth`
+  - oauth
+metric:
+  interface: prometheus`
 
 var AppConfigWithCustomProxyHost = `
 proxy_host: www.altair.id
