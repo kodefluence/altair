@@ -87,7 +87,13 @@ func TestGrant(t *testing.T) {
 				assert.Nil(t, err)
 
 				assert.Equal(t, http.StatusCreated, w.Code)
-				assert.Equal(t, oauthAccessTokenJSON, response.Data)
+				assert.Equal(t, *oauthAccessTokenJSON.ID, *response.Data.ID)
+				assert.Equal(t, *oauthAccessTokenJSON.OauthApplicationID, *response.Data.OauthApplicationID)
+				assert.Equal(t, *oauthAccessTokenJSON.ResourceOwnerID, *response.Data.ResourceOwnerID)
+				assert.Equal(t, *oauthAccessTokenJSON.Token, *response.Data.Token)
+				assert.Equal(t, *oauthAccessTokenJSON.Scopes, *response.Data.Scopes)
+				assert.Equal(t, *oauthAccessTokenJSON.RedirectURI, *response.Data.RedirectURI)
+				assert.Equal(t, *oauthAccessTokenJSON.CreatedAt, *response.Data.CreatedAt)
 			})
 
 			t.Run("Unexpected error in authorization services", func(t *testing.T) {
