@@ -16,5 +16,8 @@ jobs:
         with:
           go-version: ^1.13
 
+      - name: ls la
+        run: ls -la
+
       - name: Unit Test
         run: make test
