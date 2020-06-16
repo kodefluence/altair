@@ -8,6 +8,7 @@ import (
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/loader"
 	"github.com/codefluence-x/altair/mock"
+	"github.com/codefluence-x/altair/provider/metric"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -54,6 +55,7 @@ func TestAppBearer(t *testing.T) {
 	appEngine := gin.Default()
 
 	appBearer := loader.AppBearer(appEngine, adapter.AppConfig(appConfig))
+	appBearer.SetMetricProvider(metric.NewPrometheusMetric())
 
 	t.Run("Config", func(t *testing.T) {
 		t.Run("Return AppConfig", func(t *testing.T) {

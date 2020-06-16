@@ -9,6 +9,7 @@ import (
 	coreEntity "github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/loader"
 	"github.com/codefluence-x/altair/mock"
+	"github.com/codefluence-x/altair/provider/metric"
 	"github.com/codefluence-x/altair/provider/plugin/oauth"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -61,6 +62,7 @@ config:
 	t.Run("Provide", func(t *testing.T) {
 		t.Run("Run gracefully", func(t *testing.T) {
 			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
+			appBearer.SetMetricProvider(metric.NewPrometheusMetric())
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(oauthDatabase).Return(db, MYSQLConfig, nil)
