@@ -345,7 +345,8 @@ func runAPI() error {
 		return err
 	}
 
-	err = forwarder.Route().Generator().Generate(apiEngine, routeObjects, []core.DownStreamPlugin{})
+	metricProvider, _ := appBearer.MetricProvider()
+	err = forwarder.Route().Generator().Generate(apiEngine, metricProvider, routeObjects, []core.DownStreamPlugin{})
 	if err != nil {
 		journal.Error("Error generating routes", err).
 			SetTags("altair", "main").

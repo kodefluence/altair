@@ -10,5 +10,5 @@ type RouteCompiler interface {
 }
 
 type RouteGenerator interface {
-	Generate(engine *gin.Engine, routeObjects []entity.RouteObject, downStreamPlugin []DownStreamPlugin) error
+	Generate(engine *gin.Engine, metric Metric, routeObjects []entity.RouteObject, downStreamPlugin []DownStreamPlugin) error
 }
