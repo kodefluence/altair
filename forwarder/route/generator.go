@@ -33,6 +33,7 @@ func (g *generator) Generate(engine *gin.Engine, metric core.Metric, routeObject
 	g.metric = metric
 	g.metric.InjectCounter("routes_downstream_hits", "route_name", "method", "path", "status_code", "status_code_group")
 	g.metric.InjectHistogram("routes_downstream_latency_in_ms", "route_name", "method", "path", "status_code", "status_code_group")
+	g.metric.InjectHistogram("routes_downstream_plugin_latency_in_ms", "route_name", "plugin_name", "method", "path", "status_code", "status_code_group")
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -199,6 +200,7 @@ func (g *generator) downStreamPluginCallback(c *gin.Context, proxyReq *http.Requ
 				AddField("client_ip", c.ClientIP()).
 				SetTags("route", "generator", "generate", "plugin", plugin.Name()).
 				Log()
+			g.downStreamPluginMetric(c, routeObject.Name, plugin.Name(), urlPath, startTimePlugin)
 			return err
 		}
 
@@ -208,6 +210,7 @@ func (g *generator) downStreamPluginCallback(c *gin.Context, proxyReq *http.Requ
 			AddField("plugin_duration_seconds", time.Since(startTimePlugin).Seconds()).
 			SetTags("route", "generator", "generate", "plugin").
 			Log()
+		g.downStreamPluginMetric(c, routeObject.Name, plugin.Name(), urlPath, startTimePlugin)
 	}
 
 	return nil
@@ -282,6 +285,20 @@ func (g *generator) callDownStreamService(c *gin.Context, proxyReq *http.Request
 	}
 
 	return nil
+}
+
+func (g *generator) downStreamPluginMetric(c *gin.Context, routeName, pluginName, path string, startTime time.Time) {
+	labels := map[string]string{
+		"route_name":        routeName,
+		"plugin_name":       pluginName,
+		"method":            c.Request.Method,
+		"path":              path,
+		"status_code":       strconv.Itoa(c.Writer.Status()),
+		"status_code_group": strconv.Itoa(((c.Writer.Status() / 100) * 100)),
+	}
+
+	g.metric.Inc("routes_downstream_hits", labels)
+	g.metric.Observe("routes_downstream_latency_in_ms", float64(time.Since(startTime).Milliseconds()), labels)
 }
 
 func (g *generator) downStreamMetric(c *gin.Context, routeName, path string, startTime time.Time) {
