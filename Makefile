@@ -1,8 +1,5 @@
 test:
-	go test -cover -covermode=count -coverprofile=cover.out $$(go list ./... | grep -Ev "altair$$|core|mock|interfaces|testhelper")
-
-test_race:
-	go test -race $$(go list ./... | grep -Ev "altair$$|core|mock|interfaces|testhelper")
+	go test -race -cover -coverprofile=cover.out $$(go list ./... | grep -Ev "altair$$|core|mock|interfaces|testhelper")
 
 mock_metric:
 	mockgen -source core/metric.go -destination mock/mock_metric.go -package mock

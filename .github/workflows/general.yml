@@ -24,9 +24,6 @@ jobs:
       - name: Unit Test
         run: make test
 
-      - name: Unit Test With Race
-        run: make test_race
-
       - name: Get goverall
         run: go get github.com/mattn/goveralls
 
