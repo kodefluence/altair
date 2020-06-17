@@ -179,7 +179,7 @@ func executeCommand() {
 
 	migrateDownCmd := &cobra.Command{
 		Use:   "migrate:down",
-		Short: "Down the migration from current version into earlies versions.",
+		Short: "Down the migration from current version into earliest versions.",
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) < 1 {
 				fmt.Println("Invalid number of arguments, expected 1. Example `altair migrate:down [database_instance_name]`.")
