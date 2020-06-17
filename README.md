@@ -45,6 +45,7 @@ Open source API gateway written in Go. Created to be lightweight, simple, fast, 
   - [x] Downstream Plugins
     - [x] Oauth Token Checking
     - [ ] Response Caching
+  - [ ] Persistent HTTP client implementation
 - [x] Metric & Monitoring
   - [x] Prometheus
 - [x] Logging
