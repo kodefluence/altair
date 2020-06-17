@@ -22,7 +22,7 @@ Open source API gateway written in Go. Created to be lightweight, simple, fast, 
 
 ## How to Contribute
 
-### Instalation
+### Installation
 
 #### Prerequisites
 
