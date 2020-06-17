@@ -21,6 +21,9 @@ jobs:
       - name: Unit Test
         run: make test
 
+      - name: Unit Test With Race
+        run: make test_race
+
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
