@@ -1,0 +1,33 @@
+name: General workflows
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    name: Test Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.13
+
+      - uses: actions/checkout@v2
+
+      - name: Go mod vendor
+        run: go mod vendor
+
+      - name: Unit Test
+        run: make test
+
+      - name: Get goverall
+        run: go get github.com/mattn/goveralls
+
+      - name: Upload coverage
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: goveralls -coverprofile=cover.out -service=github
