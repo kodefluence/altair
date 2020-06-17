@@ -1,5 +1,6 @@
 # Altair - Light Weight and Robust API Gateway
 
+[![Coverage Status](https://coveralls.io/repos/github/codefluence-x/altair/badge.svg?branch=master)](https://coveralls.io/github/codefluence-x/altair?branch=master)
 [![Go Report Card](https://goreportcard.com/badge/github.com/codefluence-x/altair)](https://goreportcard.com/report/github.com/codefluence-x/altair)
 [![GitHub issues](https://img.shields.io/github/issues/codefluence-x/altair)](https://github.com/codefluence-x/altair/issues)
 [![GitHub forks](https://img.shields.io/github/forks/codefluence-x/altair)](https://github.com/codefluence-x/altair/network)
