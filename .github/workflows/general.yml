@@ -28,4 +28,4 @@ jobs:
         run: go get github.com/mattn/goveralls
 
       - name: Upload coverage
-        run: goveralls -coverprofile=cover.out -service=travis-ci -repotoken ${{ secrets.GITHUB_TOKEN }}
+        run: goveralls -coverprofile=cover.out -service=travis-ci -repotoken ${{ secrets.GITHUB_TOKEN }} -endpoint=https://coveralls.io/api/v1/jobs
