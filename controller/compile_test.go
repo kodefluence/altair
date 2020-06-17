@@ -21,7 +21,7 @@ func TestCompile(t *testing.T) {
 
 	t.Run("Run gracefully", func(t *testing.T) {
 		t.Run("Perform GET request", func(t *testing.T) {
-			gracefullController := NewFakeController("/gracefull", "GET", func(c *gin.Context) {
+			gracefullController := NewFakeController("/graceful", "GET", func(c *gin.Context) {
 				c.String(http.StatusOK, "%s", "OK")
 			})
 
@@ -34,7 +34,7 @@ func TestCompile(t *testing.T) {
 
 		t.Run("Perform POST request", func(t *testing.T) {
 			t.Run("Get body is not error", func(t *testing.T) {
-				gracefullPostController := NewFakeController("/gracefull_post", "POST", func(c *gin.Context) {
+				gracefullPostController := NewFakeController("/graceful_post", "POST", func(c *gin.Context) {
 					c.String(http.StatusOK, "%s", "OK")
 				})
 
@@ -46,7 +46,7 @@ func TestCompile(t *testing.T) {
 			})
 
 			t.Run("Get body error", func(t *testing.T) {
-				gracefullPostBodyErrorController := NewFakeController("/gracefull_post_body_error", "POST", func(c *gin.Context) {
+				gracefullPostBodyErrorController := NewFakeController("/graceful_post_body_error", "POST", func(c *gin.Context) {
 					c.String(http.StatusOK, "%s", "OK")
 				})
 
@@ -61,7 +61,7 @@ func TestCompile(t *testing.T) {
 
 	t.Run("Run not gracefully", func(t *testing.T) {
 		t.Run("Controller return status >= 400", func(t *testing.T) {
-			notGracefullController := NewFakeController("/not_gracefull", "GET", func(c *gin.Context) {
+			notGracefullController := NewFakeController("/not_graceful", "GET", func(c *gin.Context) {
 				c.String(http.StatusInternalServerError, "%s", "Are you kidding me? The server is just crash!")
 			})
 
