@@ -18,8 +18,8 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Misspell check
-        run: misspell
+      - name: Go mod vendor
+        run: go mod vendor
 
       - name: Unit Test
         run: make test
