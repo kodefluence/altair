@@ -1,13 +1,23 @@
-# Altair - Light Weight and Robust API Gateway
+![Altair - Lightweight and Robust API Gateway](https://user-images.githubusercontent.com/1132660/85085782-0bc00100-b203-11ea-8e89-bbeb7d03a418.png)
 
-[![Coverage Status](https://coveralls.io/repos/github/codefluence-x/altair/badge.svg?branch=master)](https://coveralls.io/github/codefluence-x/altair?branch=master)
-[![Go Report Card](https://goreportcard.com/badge/github.com/codefluence-x/altair)](https://goreportcard.com/report/github.com/codefluence-x/altair)
-[![GitHub issues](https://img.shields.io/github/issues/codefluence-x/altair)](https://github.com/codefluence-x/altair/issues)
-[![GitHub forks](https://img.shields.io/github/forks/codefluence-x/altair)](https://github.com/codefluence-x/altair/network)
-[![GitHub stars](https://img.shields.io/github/stars/codefluence-x/altair)](https://github.com/codefluence-x/altair/stargazers)
-[![GitHub license](https://img.shields.io/github/license/codefluence-x/altair)](https://github.com/codefluence-x/altair/blob/master/LICENSE)
+<p align="center">
+  <a href="https://coveralls.io/github/codefluence-x/altair?branch=master"><img src="https://coveralls.io/repos/github/codefluence-x/altair/badge.svg?branch=master" alt="Coverage Status"></a>
+  <a href="https://goreportcard.com/report/github.com/codefluence-x/altair"><img src="https://goreportcard.com/badge/github.com/codefluence-x/altair" alt="Go Report Card"></a>
+  <a href="https://github.com/codefluence-x/altair/issues"><img src="https://img.shields.io/github/issues/codefluence-x/altair" alt="GitHub Issues"></a>
+  <a href="https://github.com/codefluence-x/altair/network"><img src="https://img.shields.io/github/forks/codefluence-x/altair" alt="GitHub Forks"></a>
+  <a href="https://github.com/codefluence-x/altair/stargazers"><img src="https://img.shields.io/github/stars/codefluence-x/altair" alt="GitHub Stars"></a>
+  <a href="https://github.com/codefluence-x/altair/blob/master/LICENSE"><img src="https://img.shields.io/github/license/codefluence-x/altair" alt="GitHub License"></a>
+</p>
 
-Open source API gateway written in Go. Created to be lightweight, simple, fast, reliable, cross platform and programming language agnostic.
+<br><br>
+
+## Introduction
+
+Open source API gateway written in Go. Created to be lightweight, simple, fast, reliable, cross platform, and programming language agnostic.
+
+## Architecture Diagram
+
+<br>
 
 ![Altair Architecture Diagram](https://user-images.githubusercontent.com/20650401/79699757-a2337d00-82bb-11ea-8103-25e6917545bd.png)
 
@@ -27,8 +37,8 @@ Open source API gateway written in Go. Created to be lightweight, simple, fast, 
 
 #### Prerequisites
 
-1. Go version 1.13 or higher
-2. Mysql
+1. Go >= 1.13
+2. MySQL
 
 #### How To
 
