@@ -239,6 +239,7 @@ func (g *generator) callDownStreamService(c *gin.Context, proxyReq *http.Request
 		})
 		return err
 	}
+	defer proxyRes.Body.Close()
 
 	resp, err := ioutil.ReadAll(proxyRes.Body)
 	if err != nil {
