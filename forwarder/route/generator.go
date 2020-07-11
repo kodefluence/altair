@@ -32,8 +32,8 @@ func (g *generator) Generate(engine *gin.Engine, metric core.Metric, routeObject
 
 	g.metric = metric
 	g.metric.InjectCounter("routes_downstream_hits", "route_name", "method", "path", "status_code", "status_code_group")
-	g.metric.InjectHistogram("routes_downstream_latency_in_ms", "route_name", "method", "path", "status_code", "status_code_group")
-	g.metric.InjectHistogram("routes_downstream_plugin_latency_in_ms", "route_name", "plugin_name", "method", "path", "status_code", "status_code_group")
+	g.metric.InjectHistogram("routes_downstream_latency_seconds", "route_name", "method", "path", "status_code", "status_code_group")
+	g.metric.InjectHistogram("routes_downstream_plugin_latency_seconds", "route_name", "plugin_name", "method", "path", "status_code", "status_code_group")
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -298,7 +298,7 @@ func (g *generator) downStreamPluginMetric(c *gin.Context, routeName, pluginName
 		"status_code_group": strconv.Itoa(((c.Writer.Status() / 100) * 100)),
 	}
 
-	g.metric.Observe("routes_downstream_plugin_latency_in_ms", float64(time.Since(startTime).Milliseconds()), labels)
+	g.metric.Observe("routes_downstream_plugin_latency_seconds", float64(time.Since(startTime).Milliseconds()), labels)
 }
 
 func (g *generator) downStreamMetric(c *gin.Context, routeName, path string, startTime time.Time) {
@@ -311,7 +311,7 @@ func (g *generator) downStreamMetric(c *gin.Context, routeName, path string, sta
 	}
 
 	g.metric.Inc("routes_downstream_hits", labels)
-	g.metric.Observe("routes_downstream_latency_in_ms", float64(time.Since(startTime).Milliseconds()), labels)
+	g.metric.Observe("routes_downstream_latency_seconds", float64(time.Since(startTime).Milliseconds()), labels)
 }
 
 func (g *generator) inheritRouterObject(routeObject entity.RouteObject, routePath *entity.RouterPath) {
