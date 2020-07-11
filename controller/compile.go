@@ -18,7 +18,7 @@ import (
 
 func Compile(engine core.APIEngine, metric core.Metric, ctrl core.Controller) {
 	metric.InjectCounter("controller_hits", "method", "path", "status_code", "status_code_group")
-	metric.InjectHistogram("controller_elapsed_time_in_ms", "method", "path", "status_code", "status_code_group")
+	metric.InjectHistogram("controller_elapsed_time_seconds", "method", "path", "status_code", "status_code_group")
 
 	journal.Info("Registering controller").
 		AddField("path", ctrl.Path()).
@@ -67,7 +67,7 @@ func trackRequest(ctrl core.Controller, metric core.Metric, elapsedTime int64, w
 		"status_code_group": statusCodGroup,
 	})
 
-	metric.Observe("controller_elapsed_time_in_ms", float64(elapsedTime), map[string]string{
+	metric.Observe("controller_elapsed_time_seconds", float64(elapsedTime), map[string]string{
 		"method":            ctrl.Method(),
 		"path":              ctrl.Path(),
 		"status_code":       statusCode,
