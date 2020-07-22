@@ -29,7 +29,7 @@ func TestOauth(t *testing.T) {
 	t.Run("Name", func(t *testing.T) {
 		t.Run("Return oauth-plugin", func(t *testing.T) {
 			oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
-			oauthPlugin := downstream.Oauth(oauthAccessTokenModel)
+			oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
 			assert.Equal(t, "oauth-plugin", oauthPlugin.Name())
 		})
 	})
@@ -66,7 +66,7 @@ func TestOauth(t *testing.T) {
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessTokenModel.EXPECT().OneByToken(c, token).Return(entityAccessToken, nil)
 
-					oauthPlugin := downstream.Oauth(oauthAccessTokenModel)
+					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
 
 					err := oauthPlugin.Intervene(c, r, routePath)
 
@@ -93,7 +93,7 @@ func TestOauth(t *testing.T) {
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), gomock.Any()).Times(0)
 
-					oauthPlugin := downstream.Oauth(oauthAccessTokenModel)
+					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
 
 					err := oauthPlugin.Intervene(c, r, routePath)
 
@@ -119,7 +119,7 @@ func TestOauth(t *testing.T) {
 						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 						oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), gomock.Any()).Times(0)
 
-						oauthPlugin := downstream.Oauth(oauthAccessTokenModel)
+						oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
 
 						err := oauthPlugin.Intervene(c, r, routePath)
 
@@ -144,7 +144,7 @@ func TestOauth(t *testing.T) {
 						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 						oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), gomock.Any()).Times(0)
 
-						oauthPlugin := downstream.Oauth(oauthAccessTokenModel)
+						oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
 
 						err := oauthPlugin.Intervene(c, r, routePath)
 
@@ -177,7 +177,7 @@ func TestOauth(t *testing.T) {
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessTokenModel.EXPECT().OneByToken(c, token).Return(entity.OauthAccessToken{}, sql.ErrNoRows)
 
-					oauthPlugin := downstream.Oauth(oauthAccessTokenModel)
+					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
 
 					err := oauthPlugin.Intervene(c, r, routePath)
 
@@ -210,7 +210,7 @@ func TestOauth(t *testing.T) {
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessTokenModel.EXPECT().OneByToken(c, token).Return(entity.OauthAccessToken{}, errors.New("unexpected error"))
 
-					oauthPlugin := downstream.Oauth(oauthAccessTokenModel)
+					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
 
 					err := oauthPlugin.Intervene(c, r, routePath)
 
