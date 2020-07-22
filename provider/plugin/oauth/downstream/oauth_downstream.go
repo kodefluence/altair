@@ -14,21 +14,26 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var InvalidBearerFormatErr = errors.New("Invalid bearer token format")
+// ErrInvalidBearerFormat returned when the header of bearer token is invalid
+var ErrInvalidBearerFormat = errors.New("Invalid bearer token format")
 
-type oauth struct {
+// Oauth implement downstream plugin interface
+type Oauth struct {
 	oauthAccessTokenModel interfaces.OauthAccessTokenModel
 }
 
-func Oauth(oauthAccessTokenModel interfaces.OauthAccessTokenModel) *oauth {
-	return &oauth{oauthAccessTokenModel: oauthAccessTokenModel}
+// NewOauth create new downstream plugin to check the validity of access token given by the users
+func NewOauth(oauthAccessTokenModel interfaces.OauthAccessTokenModel) *Oauth {
+	return &Oauth{oauthAccessTokenModel: oauthAccessTokenModel}
 }
 
-func (o *oauth) Name() string {
+// Name get the name of downstream plugin
+func (o *Oauth) Name() string {
 	return "oauth-plugin"
 }
 
-func (o *oauth) Intervene(c *gin.Context, proxyReq *http.Request, r coreEntity.RouterPath) error {
+// Intervene current request to check the bearer token validity
+func (o *Oauth) Intervene(c *gin.Context, proxyReq *http.Request, r coreEntity.RouterPath) error {
 	if r.Auth != "oauth" {
 		return nil
 	}
@@ -46,7 +51,7 @@ func (o *oauth) Intervene(c *gin.Context, proxyReq *http.Request, r coreEntity.R
 		}
 
 		c.AbortWithStatus(http.StatusServiceUnavailable)
-		return errors.New(fmt.Sprintf("Error connecting to model: %v", err))
+		return fmt.Errorf("Error connecting to model: %v", err)
 	}
 
 	proxyReq.Header.Add("Resource-Owner-ID", strconv.Itoa(token.ResourceOwnerID))
@@ -54,16 +59,16 @@ func (o *oauth) Intervene(c *gin.Context, proxyReq *http.Request, r coreEntity.R
 	return nil
 }
 
-func (o *oauth) parseToken(c *gin.Context) (string, error) {
+func (o *Oauth) parseToken(c *gin.Context) (string, error) {
 	authorizationHeader := c.Request.Header.Get("Authorization")
 	splittedToken := strings.Split(authorizationHeader, " ")
 
 	if len(splittedToken) < 2 {
-		return "", InvalidBearerFormatErr
+		return "", ErrInvalidBearerFormat
 	}
 
 	if splittedToken[0] != "Bearer" {
-		return "", InvalidBearerFormatErr
+		return "", ErrInvalidBearerFormat
 	}
 
 	return splittedToken[1], nil

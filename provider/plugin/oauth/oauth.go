@@ -13,6 +13,7 @@ import (
 	"github.com/codefluence-x/altair/provider/plugin/oauth/validator"
 )
 
+// Provide create new oauth plugin provider
 func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer) error {
 	if appBearer.Config().PluginExists("oauth") == false {
 		return nil
@@ -60,7 +61,7 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 	authorization := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthModelFormatter, oauthValidator, oauthFormatter)
 
 	// DownStreamPlugin
-	oauthDownStream := downstream.Oauth(oauthAccessTokenModel)
+	oauthDownStream := downstream.NewOauth(oauthAccessTokenModel)
 
 	appBearer.InjectController(controller.Application().List(applicationManager))
 	appBearer.InjectController(controller.Application().One(applicationManager))
