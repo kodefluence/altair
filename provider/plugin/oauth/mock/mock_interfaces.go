@@ -574,17 +574,17 @@ func (mr *MockOauthFormatterMockRecorder) AccessGrant(e interface{}) *gomock.Cal
 }
 
 // AccessToken mocks base method
-func (m *MockOauthFormatter) AccessToken(r entity.AuthorizationRequestJSON, e entity.OauthAccessToken) entity.OauthAccessTokenJSON {
+func (m *MockOauthFormatter) AccessToken(e entity.OauthAccessToken, redirectURI string) entity.OauthAccessTokenJSON {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AccessToken", r, e)
+	ret := m.ctrl.Call(m, "AccessToken", e, redirectURI)
 	ret0, _ := ret[0].(entity.OauthAccessTokenJSON)
 	return ret0
 }
 
 // AccessToken indicates an expected call of AccessToken
-func (mr *MockOauthFormatterMockRecorder) AccessToken(r, e interface{}) *gomock.Call {
+func (mr *MockOauthFormatterMockRecorder) AccessToken(e, redirectURI interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessToken", reflect.TypeOf((*MockOauthFormatter)(nil).AccessToken), r, e)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessToken", reflect.TypeOf((*MockOauthFormatter)(nil).AccessToken), e, redirectURI)
 }
 
 // MockModelFormater is a mock of ModelFormater interface

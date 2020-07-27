@@ -85,7 +85,7 @@ func TestAuthorization(t *testing.T) {
 				}
 
 				oauthAccessTokenInsertable := modelFormatter.AccessTokenFromAuthorizationRequest(authorizationRequest, oauthApplication)
-				oauthAccessTokenJSON := oauthFormatter.AccessToken(authorizationRequest, oauthAccessToken)
+				oauthAccessTokenJSON := oauthFormatter.AccessToken(oauthAccessToken, *authorizationRequest.RedirectURI)
 
 				gomock.InOrder(
 					oauthApplicationModel.EXPECT().
