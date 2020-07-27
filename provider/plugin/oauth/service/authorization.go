@@ -63,7 +63,7 @@ func (a *Authorization) Grantor(ctx context.Context, authorizationReq entity.Aut
 
 	journal.Error("invalid response type sent by client", err).
 		AddField("request", authorizationReq).
-		SetTags("service", "Authorization", "grantor").
+		SetTags("service", "authorization", "grantor").
 		Log()
 
 	return nil, err
@@ -87,7 +87,7 @@ func (a *Authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 		journal.Error("Error creating access grant", err).
 			AddField("request", authorizationReq).
 			AddField("application", oauthApplication).
-			SetTags("service", "Authorization", "grant").
+			SetTags("service", "authorization", "grant").
 			Log()
 
 		return entity.OauthAccessGrantJSON{}, &entity.Error{
@@ -102,7 +102,7 @@ func (a *Authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 			AddField("request", authorizationReq).
 			AddField("last_inserted_id", id).
 			AddField("application", oauthApplication).
-			SetTags("service", "Authorization", "grant").
+			SetTags("service", "authorization", "grant").
 			Log()
 
 		return entity.OauthAccessGrantJSON{}, &entity.Error{
@@ -131,7 +131,7 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 		journal.Error("Error creating access token after creating the data", err).
 			AddField("request", authorizationReq).
 			AddField("application", oauthApplication).
-			SetTags("service", "Authorization", "grant_token").
+			SetTags("service", "authorization", "grant_token").
 			Log()
 
 		return entity.OauthAccessTokenJSON{}, &entity.Error{
@@ -147,7 +147,7 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 			AddField("request", authorizationReq).
 			AddField("last_inserted_id", id).
 			AddField("application", oauthApplication).
-			SetTags("service", "Authorization", "grant_token").
+			SetTags("service", "authorization", "grant_token").
 			Log()
 
 		return entity.OauthAccessTokenJSON{}, &entity.Error{
@@ -156,7 +156,7 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 		}
 	}
 
-	return a.oauthFormatter.AccessToken(authorizationReq, oauthAccessToken), nil
+	return a.oauthFormatter.AccessToken(oauthAccessToken, *authorizationReq.RedirectURI), nil
 }
 
 func (a *Authorization) findAndValidateApplication(ctx context.Context, clientUID, clientSecret *string) (entity.OauthApplication, *entity.Error) {
@@ -179,7 +179,7 @@ func (a *Authorization) findAndValidateApplication(ctx context.Context, clientUI
 
 		journal.Error("application cannot be found because there was an error", err).
 			AddField("client_uid", clientUID).
-			SetTags("service", "Authorization", "find_secret").
+			SetTags("service", "authorization", "find_secret").
 			Log()
 
 		if err == sql.ErrNoRows {
@@ -200,9 +200,71 @@ func (a *Authorization) findAndValidateApplication(ctx context.Context, clientUI
 
 // Token will grant a token from authorization code
 func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON) (entity.OauthAccessTokenJSON, *entity.Error) {
-	var oauthAccessTokenJSON entity.OauthAccessTokenJSON
+	oauthApplication, entityErr := a.findAndValidateApplication(ctx, accessTokenReq.ClientUID, accessTokenReq.ClientSecret)
+	if entityErr != nil {
+		return entity.OauthAccessTokenJSON{}, entityErr
+	}
 
-	return oauthAccessTokenJSON, nil
+	if entityErr := a.oauthValidator.ValidateTokenGrant(ctx, accessTokenReq); entityErr != nil {
+		return entity.OauthAccessTokenJSON{}, entityErr
+	}
+
+	oauthAccessGrant, err := a.oauthAccessGrantModel.OneByCode(ctx, *accessTokenReq.Code)
+	if err != nil {
+		journal.Error("authorization code cannot be found because there was an error", err).
+			AddField("authorization_code", *accessTokenReq.Code).
+			SetTags("service", "authorization", "one_by_code").
+			Log()
+
+		if err == sql.ErrNoRows {
+			return entity.OauthAccessTokenJSON{}, &entity.Error{
+				HttpStatus: http.StatusNotFound,
+				Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "authorization_code")),
+			}
+		}
+
+		return entity.OauthAccessTokenJSON{}, &entity.Error{
+			HttpStatus: http.StatusInternalServerError,
+			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+		}
+	}
+
+	if oauthAccessGrant.RedirectURI.String != *accessTokenReq.RedirectURI {
+		return entity.OauthAccessTokenJSON{}, &entity.Error{
+			HttpStatus: http.StatusForbidden,
+			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "redirect_uri", "redirect uri is different from one that generated before")),
+		}
+	}
+
+	id, err := a.oauthAccessTokenModel.Create(ctx, a.modelFormatter.AccessTokenFromOauthAccessGrant(oauthAccessGrant, oauthApplication))
+	if err != nil {
+
+		journal.Error("Error creating access token after creating the data", err).
+			SetTags("service", "authorization", "grant_token").
+			Log()
+
+		return entity.OauthAccessTokenJSON{}, &entity.Error{
+			HttpStatus: http.StatusInternalServerError,
+			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+		}
+	}
+
+	oauthAccessToken, err := a.oauthAccessTokenModel.One(ctx, id)
+	if err != nil {
+
+		journal.Error("Error selecting one access token", err).
+			AddField("last_inserted_id", id).
+			AddField("application", oauthApplication).
+			SetTags("service", "authorization", "grant_token").
+			Log()
+
+		return entity.OauthAccessTokenJSON{}, &entity.Error{
+			HttpStatus: http.StatusInternalServerError,
+			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+		}
+	}
+
+	return a.oauthFormatter.AccessToken(oauthAccessToken, oauthAccessGrant.RedirectURI.String), nil
 }
 
 // RevokeToken revoke given access token request
