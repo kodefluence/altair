@@ -29,8 +29,8 @@ func TestApplicationManager(t *testing.T) {
 			t.Run("Return a formatted result", func(t *testing.T) {
 
 				oauthApplications := []entity.OauthApplication{
-					entity.OauthApplication{ID: 1},
-					entity.OauthApplication{ID: 2},
+					{ID: 1},
+					{ID: 2},
 				}
 
 				applicationFormatter := formatter.OauthApplication()
@@ -86,8 +86,8 @@ func TestApplicationManager(t *testing.T) {
 
 			t.Run("Error oauth application count return internal server error", func(t *testing.T) {
 				oauthApplications := []entity.OauthApplication{
-					entity.OauthApplication{ID: 1},
-					entity.OauthApplication{ID: 2},
+					{ID: 1},
+					{ID: 2},
 				}
 
 				ctx := context.Background()

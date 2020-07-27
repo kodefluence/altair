@@ -11,7 +11,8 @@ import (
 	"github.com/codefluence-x/journal"
 )
 
-type authorization struct {
+// Authorization struct handle all of things related to oauth2 authorization
+type Authorization struct {
 	oauthApplicationModel interfaces.OauthApplicationModel
 	oauthAccessTokenModel interfaces.OauthAccessTokenModel
 	oauthAccessGrantModel interfaces.OauthAccessGrantModel
@@ -21,15 +22,16 @@ type authorization struct {
 	oauthFormatter interfaces.OauthFormatter
 }
 
-func Authorization(
+// NewAuthorization create new service to handler authorize related flow
+func NewAuthorization(
 	oauthApplicationModel interfaces.OauthApplicationModel,
 	oauthAccessTokenModel interfaces.OauthAccessTokenModel,
 	oauthAccessGrantModel interfaces.OauthAccessGrantModel,
 	modelFormatter interfaces.ModelFormater,
 	oauthValidator interfaces.OauthValidator,
 	oauthFormatter interfaces.OauthFormatter,
-) *authorization {
-	return &authorization{
+) *Authorization {
+	return &Authorization{
 		oauthApplicationModel: oauthApplicationModel,
 		oauthAccessTokenModel: oauthAccessTokenModel,
 		oauthAccessGrantModel: oauthAccessGrantModel,
@@ -39,7 +41,8 @@ func Authorization(
 	}
 }
 
-func (a *authorization) Grantor(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (interface{}, *entity.Error) {
+// Grantor provide granting logic for authorization request
+func (a *Authorization) Grantor(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (interface{}, *entity.Error) {
 	if authorizationReq.ResponseType == nil {
 		return nil, &entity.Error{
 			HttpStatus: http.StatusUnprocessableEntity,
@@ -60,13 +63,14 @@ func (a *authorization) Grantor(ctx context.Context, authorizationReq entity.Aut
 
 	journal.Error("invalid response type sent by client", err).
 		AddField("request", authorizationReq).
-		SetTags("service", "authorization", "grantor").
+		SetTags("service", "Authorization", "grantor").
 		Log()
 
 	return nil, err
 }
 
-func (a *authorization) Grant(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthAccessGrantJSON, *entity.Error) {
+// Grant authorization an access code
+func (a *Authorization) Grant(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthAccessGrantJSON, *entity.Error) {
 	var oauthAccessGrantJSON entity.OauthAccessGrantJSON
 
 	oauthApplication, entityErr := a.findAndValidateApplication(ctx, authorizationReq)
@@ -79,7 +83,7 @@ func (a *authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 		journal.Error("Error creating access grant", err).
 			AddField("request", authorizationReq).
 			AddField("application", oauthApplication).
-			SetTags("service", "authorization", "grant").
+			SetTags("service", "Authorization", "grant").
 			Log()
 
 		return entity.OauthAccessGrantJSON{}, &entity.Error{
@@ -94,7 +98,7 @@ func (a *authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 			AddField("request", authorizationReq).
 			AddField("last_inserted_id", id).
 			AddField("application", oauthApplication).
-			SetTags("service", "authorization", "grant").
+			SetTags("service", "Authorization", "grant").
 			Log()
 
 		return entity.OauthAccessGrantJSON{}, &entity.Error{
@@ -106,7 +110,8 @@ func (a *authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 	return a.oauthFormatter.AccessGrant(oauthAccessGrant), nil
 }
 
-func (a *authorization) GrantToken(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthAccessTokenJSON, *entity.Error) {
+// GrantToken will grant an access token
+func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthAccessTokenJSON, *entity.Error) {
 	oauthApplication, entityErr := a.findAndValidateApplication(ctx, authorizationReq)
 	if entityErr != nil {
 		return entity.OauthAccessTokenJSON{}, entityErr
@@ -118,7 +123,7 @@ func (a *authorization) GrantToken(ctx context.Context, authorizationReq entity.
 		journal.Error("Error creating access token after creating the data", err).
 			AddField("request", authorizationReq).
 			AddField("application", oauthApplication).
-			SetTags("service", "authorization", "grant_token").
+			SetTags("service", "Authorization", "grant_token").
 			Log()
 
 		return entity.OauthAccessTokenJSON{}, &entity.Error{
@@ -134,7 +139,7 @@ func (a *authorization) GrantToken(ctx context.Context, authorizationReq entity.
 			AddField("request", authorizationReq).
 			AddField("last_inserted_id", id).
 			AddField("application", oauthApplication).
-			SetTags("service", "authorization", "grant_token").
+			SetTags("service", "Authorization", "grant_token").
 			Log()
 
 		return entity.OauthAccessTokenJSON{}, &entity.Error{
@@ -146,7 +151,7 @@ func (a *authorization) GrantToken(ctx context.Context, authorizationReq entity.
 	return a.oauthFormatter.AccessToken(authorizationReq, oauthAccessToken), nil
 }
 
-func (a *authorization) findAndValidateApplication(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthApplication, *entity.Error) {
+func (a *Authorization) findAndValidateApplication(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthApplication, *entity.Error) {
 	if authorizationReq.ClientUID == nil {
 		return entity.OauthApplication{}, &entity.Error{
 			HttpStatus: http.StatusUnprocessableEntity,
@@ -166,7 +171,7 @@ func (a *authorization) findAndValidateApplication(ctx context.Context, authoriz
 
 		journal.Error("application cannot be found because there was an error", err).
 			AddField("request", authorizationReq).
-			SetTags("service", "authorization", "find_secret").
+			SetTags("service", "Authorization", "find_secret").
 			Log()
 
 		if err == sql.ErrNoRows {
@@ -189,14 +194,15 @@ func (a *authorization) findAndValidateApplication(ctx context.Context, authoriz
 	return oauthApplication, nil
 }
 
-// WIP
-func (a *authorization) Token(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON) (entity.OauthAccessTokenJSON, *entity.Error) {
+// Token will grant a token from authorization code
+func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON) (entity.OauthAccessTokenJSON, *entity.Error) {
 	var oauthAccessTokenJSON entity.OauthAccessTokenJSON
 
 	return oauthAccessTokenJSON, nil
 }
 
-func (a *authorization) RevokeToken(ctx context.Context, revokeAccessTokenReq entity.RevokeAccessTokenRequestJSON) *entity.Error {
+// RevokeToken revoke given access token request
+func (a *Authorization) RevokeToken(ctx context.Context, revokeAccessTokenReq entity.RevokeAccessTokenRequestJSON) *entity.Error {
 
 	if revokeAccessTokenReq.Token == nil {
 		return &entity.Error{
