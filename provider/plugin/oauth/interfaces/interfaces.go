@@ -31,6 +31,7 @@ type OauthAccessGrantModel interface {
 	Name() string
 	One(ctx context.Context, ID int) (entity.OauthAccessGrant, error)
 	Create(ctx context.Context, data entity.OauthAccessGrantInsertable, txs ...*sql.Tx) (int, error)
+	OneByCode(ctx context.Context, code string) (entity.OauthAccessGrant, error)
 }
 
 type ApplicationManager interface {
@@ -66,6 +67,7 @@ type ModelFormater interface {
 type OauthValidator interface {
 	ValidateApplication(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error
 	ValidateAuthorizationGrant(ctx context.Context, r entity.AuthorizationRequestJSON, application entity.OauthApplication) *entity.Error
+	ValidateTokenGrant(ctx context.Context, r entity.AccessTokenRequestJSON) *entity.Error
 }
 
 type OauthDispatcher interface {

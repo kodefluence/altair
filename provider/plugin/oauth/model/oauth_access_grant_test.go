@@ -35,7 +35,7 @@ func TestOauthAccessGrant(t *testing.T) {
 				t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 			}
 
-			assert.Equal(t, "oauth-access-grant-model", model.OauthAccessGrant(db).Name())
+			assert.Equal(t, "oauth-access-grant-model", model.NewOauthAccessGrant(db).Name())
 		})
 	})
 
@@ -68,7 +68,7 @@ func TestOauthAccessGrant(t *testing.T) {
 					WithArgs(1).
 					WillReturnRows(rows)
 
-				oauthAccessGrant := model.OauthAccessGrant(db)
+				oauthAccessGrant := model.NewOauthAccessGrant(db)
 				dataFromDB, err := oauthAccessGrant.One(context.Background(), 1)
 
 				assert.Nil(t, err)
@@ -86,13 +86,75 @@ func TestOauthAccessGrant(t *testing.T) {
 					WithArgs(1).
 					WillReturnError(sql.ErrNoRows)
 
-				oauthAccessGrant := model.OauthAccessGrant(db)
+				oauthAccessGrant := model.NewOauthAccessGrant(db)
 				dataFromDB, err := oauthAccessGrant.One(context.Background(), 1)
 
 				assert.NotNil(t, err)
 				assert.Equal(t, sql.ErrNoRows, err)
 				assert.Nil(t, mockdb.ExpectationsWereMet())
 				assert.Equal(t, entity.OauthAccessGrant{}, dataFromDB)
+			})
+		})
+	})
+
+	t.Run("OneByCode", func(t *testing.T) {
+		t.Run("Given context and oauth access grant ID", func(t *testing.T) {
+			t.Run("When database request success", func(t *testing.T) {
+				t.Run("Then it will return oauth access grant data", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					data := entity.OauthAccessGrant{
+						ID: 1,
+					}
+
+					rows := sqlmock.NewRows(oauthAccessGrantModelRows).
+						AddRow(
+							data.ID,
+							data.OauthApplicationID,
+							data.ResourceOwnerID,
+							data.Scopes,
+							data.Code,
+							data.RedirectURI,
+							data.ExpiresIn,
+							data.CreatedAt,
+							data.RevokedAT,
+						)
+
+					mockdb.ExpectQuery(`select \* from oauth_access_grants where code = \? limit 1`).
+						WithArgs("some_authorization_code").
+						WillReturnRows(rows)
+
+					oauthAccessGrant := model.NewOauthAccessGrant(db)
+					dataFromDB, err := oauthAccessGrant.OneByCode(context.Background(), "some_authorization_code")
+
+					assert.Nil(t, err)
+					assert.Nil(t, mockdb.ExpectationsWereMet())
+					assert.Equal(t, data, dataFromDB)
+				})
+			})
+
+			t.Run("When row is not found in database", func(t *testing.T) {
+				t.Run("Then it will return sql.ErrNoRows", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					mockdb.ExpectQuery(`select \* from oauth_access_grants where code = \? limit 1`).
+						WithArgs("some_authorization_code").
+						WillReturnError(sql.ErrNoRows)
+
+					oauthAccessGrant := model.NewOauthAccessGrant(db)
+					dataFromDB, err := oauthAccessGrant.OneByCode(context.Background(), "some_authorization_code")
+
+					assert.NotNil(t, err)
+					assert.Equal(t, sql.ErrNoRows, err)
+					assert.Nil(t, mockdb.ExpectationsWereMet())
+					assert.Equal(t, entity.OauthAccessGrant{}, dataFromDB)
+				})
 			})
 		})
 	})
@@ -118,7 +180,7 @@ func TestOauthAccessGrant(t *testing.T) {
 					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Scopes, insertable.Code, insertable.RedirectURI, insertable.ExpiresIn).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
-				oauthAccessGrantModel := model.OauthAccessGrant(db)
+				oauthAccessGrantModel := model.NewOauthAccessGrant(db)
 				lastInsertedID, err := oauthAccessGrantModel.Create(context.Background(), insertable)
 
 				assert.Nil(t, mockdb.ExpectationsWereMet())
@@ -145,7 +207,7 @@ func TestOauthAccessGrant(t *testing.T) {
 					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Scopes, insertable.Code, insertable.RedirectURI, insertable.ExpiresIn).
 					WillReturnError(errors.New("unexpected error"))
 
-				oauthAccessGrantModel := model.OauthAccessGrant(db)
+				oauthAccessGrantModel := model.NewOauthAccessGrant(db)
 				lastInsertedID, err := oauthAccessGrantModel.Create(context.Background(), insertable)
 
 				assert.Nil(t, mockdb.ExpectationsWereMet())
@@ -172,7 +234,7 @@ func TestOauthAccessGrant(t *testing.T) {
 					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Scopes, insertable.Code, insertable.RedirectURI, insertable.ExpiresIn).
 					WillReturnResult(sqlmock.NewErrorResult(errors.New("unexpected error")))
 
-				oauthAccessGrantModel := model.OauthAccessGrant(db)
+				oauthAccessGrantModel := model.NewOauthAccessGrant(db)
 				lastInsertedID, err := oauthAccessGrantModel.Create(context.Background(), insertable)
 
 				assert.Nil(t, mockdb.ExpectationsWereMet())
@@ -204,7 +266,7 @@ func TestOauthAccessGrant(t *testing.T) {
 					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Scopes, insertable.Code, insertable.RedirectURI, insertable.ExpiresIn).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
-				oauthAccessGrantModel := model.OauthAccessGrant(db)
+				oauthAccessGrantModel := model.NewOauthAccessGrant(db)
 				lastInsertedID, err := oauthAccessGrantModel.Create(context.Background(), insertable, tx)
 
 				assert.Nil(t, mockdb.ExpectationsWereMet())

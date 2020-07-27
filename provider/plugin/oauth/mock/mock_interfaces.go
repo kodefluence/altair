@@ -304,6 +304,21 @@ func (mr *MockOauthAccessGrantModelMockRecorder) Create(ctx, data interface{}, t
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOauthAccessGrantModel)(nil).Create), varargs...)
 }
 
+// OneByCode mocks base method
+func (m *MockOauthAccessGrantModel) OneByCode(ctx context.Context, code string) (entity.OauthAccessGrant, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OneByCode", ctx, code)
+	ret0, _ := ret[0].(entity.OauthAccessGrant)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// OneByCode indicates an expected call of OneByCode
+func (mr *MockOauthAccessGrantModelMockRecorder) OneByCode(ctx, code interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OneByCode", reflect.TypeOf((*MockOauthAccessGrantModel)(nil).OneByCode), ctx, code)
+}
+
 // MockApplicationManager is a mock of ApplicationManager interface
 type MockApplicationManager struct {
 	ctrl     *gomock.Controller
@@ -686,6 +701,20 @@ func (m *MockOauthValidator) ValidateAuthorizationGrant(ctx context.Context, r e
 func (mr *MockOauthValidatorMockRecorder) ValidateAuthorizationGrant(ctx, r, application interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateAuthorizationGrant", reflect.TypeOf((*MockOauthValidator)(nil).ValidateAuthorizationGrant), ctx, r, application)
+}
+
+// ValidateTokenGrant mocks base method
+func (m *MockOauthValidator) ValidateTokenGrant(ctx context.Context, r entity.AccessTokenRequestJSON) *entity.Error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateTokenGrant", ctx, r)
+	ret0, _ := ret[0].(*entity.Error)
+	return ret0
+}
+
+// ValidateTokenGrant indicates an expected call of ValidateTokenGrant
+func (mr *MockOauthValidatorMockRecorder) ValidateTokenGrant(ctx, r interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateTokenGrant", reflect.TypeOf((*MockOauthValidator)(nil).ValidateTokenGrant), ctx, r)
 }
 
 // MockOauthDispatcher is a mock of OauthDispatcher interface
