@@ -60,6 +60,7 @@ type OauthFormatter interface {
 
 type ModelFormater interface {
 	AccessTokenFromAuthorizationRequest(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessTokenInsertable
+	AccessTokenFromOauthAccessGrant(oauthAccessGrant entity.OauthAccessGrant, application entity.OauthApplication) entity.OauthAccessTokenInsertable
 	AccessGrantFromAuthorizationRequest(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessGrantInsertable
 	OauthApplication(r entity.OauthApplicationJSON) entity.OauthApplicationInsertable
 }

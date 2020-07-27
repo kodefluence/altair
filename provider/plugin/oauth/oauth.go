@@ -50,7 +50,7 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 
 	// Formatter
 	oauthApplicationFormatter := formatter.OauthApplication()
-	oauthModelFormatter := formatter.Model(accessTokenTimeout, authorizationCodeTimeout)
+	oauthModelFormatter := formatter.NewModel(accessTokenTimeout, authorizationCodeTimeout)
 	oauthFormatter := formatter.Oauth()
 
 	// Validator

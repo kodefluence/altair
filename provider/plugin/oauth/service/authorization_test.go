@@ -34,7 +34,7 @@ func TestAuthorization(t *testing.T) {
 				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
 				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-				modelFormatter := formatter.Model(time.Hour*4, time.Hour*2)
+				modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatter := formatter.Oauth()
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -262,7 +262,7 @@ func TestAuthorization(t *testing.T) {
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-					modelFormatter := formatter.Model(time.Hour*4, time.Hour*2)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
@@ -330,7 +330,7 @@ func TestAuthorization(t *testing.T) {
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-					modelFormatter := formatter.Model(time.Hour*4, time.Hour*2)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
@@ -412,7 +412,7 @@ func TestAuthorization(t *testing.T) {
 				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
 				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-				modelFormatter := formatter.Model(time.Hour*4, time.Hour*2)
+				modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatter := formatter.Oauth()
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -541,7 +541,7 @@ func TestAuthorization(t *testing.T) {
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-					modelFormatter := formatter.Model(time.Hour*4, time.Hour*2)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
@@ -609,7 +609,7 @@ func TestAuthorization(t *testing.T) {
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-					modelFormatter := formatter.Model(time.Hour*4, time.Hour*2)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
@@ -823,6 +823,12 @@ func TestAuthorization(t *testing.T) {
 				assert.Equal(t, expectedError, err)
 				assert.Equal(t, nil, results)
 			})
+		})
+	})
+
+	t.Run("Token", func(t *testing.T) {
+		t.Run("Given context and access token request", func(t *testing.T) {
+
 		})
 	})
 

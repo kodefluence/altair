@@ -201,7 +201,7 @@ func TestApplicationManager(t *testing.T) {
 				modelFormatter := mock.NewMockModelFormater(mockCtrl)
 				oauthApplicationValidator := mock.NewMockOauthValidator(mockCtrl)
 
-				oauthApplicationInsertable := formatter.Model(time.Second, time.Second).OauthApplication(expectedOauthApplicationJSON)
+				oauthApplicationInsertable := formatter.NewModel(time.Second, time.Second).OauthApplication(expectedOauthApplicationJSON)
 
 				gomock.InOrder(
 					oauthApplicationValidator.EXPECT().ValidateApplication(ctx, expectedOauthApplicationJSON).Return(nil),
@@ -264,7 +264,7 @@ func TestApplicationManager(t *testing.T) {
 					modelFormatter := mock.NewMockModelFormater(mockCtrl)
 					oauthModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0)
 
-					oauthApplicationInsertable := formatter.Model(time.Second, time.Second).OauthApplication(data)
+					oauthApplicationInsertable := formatter.NewModel(time.Second, time.Second).OauthApplication(data)
 
 					gomock.InOrder(
 						oauthApplicationValidator.EXPECT().ValidateApplication(ctx, data).Return(nil),

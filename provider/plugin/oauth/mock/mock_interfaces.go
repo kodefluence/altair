@@ -624,6 +624,20 @@ func (mr *MockModelFormaterMockRecorder) AccessTokenFromAuthorizationRequest(r, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessTokenFromAuthorizationRequest", reflect.TypeOf((*MockModelFormater)(nil).AccessTokenFromAuthorizationRequest), r, application)
 }
 
+// AccessTokenFromOauthAccessGrant mocks base method
+func (m *MockModelFormater) AccessTokenFromOauthAccessGrant(oauthAccessGrant entity.OauthAccessGrant, application entity.OauthApplication) entity.OauthAccessTokenInsertable {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AccessTokenFromOauthAccessGrant", oauthAccessGrant, application)
+	ret0, _ := ret[0].(entity.OauthAccessTokenInsertable)
+	return ret0
+}
+
+// AccessTokenFromOauthAccessGrant indicates an expected call of AccessTokenFromOauthAccessGrant
+func (mr *MockModelFormaterMockRecorder) AccessTokenFromOauthAccessGrant(oauthAccessGrant, application interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessTokenFromOauthAccessGrant", reflect.TypeOf((*MockModelFormater)(nil).AccessTokenFromOauthAccessGrant), oauthAccessGrant, application)
+}
+
 // AccessGrantFromAuthorizationRequest mocks base method
 func (m *MockModelFormater) AccessGrantFromAuthorizationRequest(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessGrantInsertable {
 	m.ctrl.T.Helper()
