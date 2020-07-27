@@ -73,9 +73,13 @@ func (a *Authorization) Grantor(ctx context.Context, authorizationReq entity.Aut
 func (a *Authorization) Grant(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthAccessGrantJSON, *entity.Error) {
 	var oauthAccessGrantJSON entity.OauthAccessGrantJSON
 
-	oauthApplication, entityErr := a.findAndValidateApplication(ctx, authorizationReq)
+	oauthApplication, entityErr := a.findAndValidateApplication(ctx, authorizationReq.ClientUID, authorizationReq.ClientSecret)
 	if entityErr != nil {
 		return oauthAccessGrantJSON, entityErr
+	}
+
+	if err := a.oauthValidator.ValidateAuthorizationGrant(ctx, authorizationReq, oauthApplication); err != nil {
+		return oauthAccessGrantJSON, err
 	}
 
 	id, err := a.oauthAccessGrantModel.Create(ctx, a.modelFormatter.AccessGrantFromAuthorizationRequest(authorizationReq, oauthApplication))
@@ -112,9 +116,13 @@ func (a *Authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 
 // GrantToken will grant an access token
 func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthAccessTokenJSON, *entity.Error) {
-	oauthApplication, entityErr := a.findAndValidateApplication(ctx, authorizationReq)
+	oauthApplication, entityErr := a.findAndValidateApplication(ctx, authorizationReq.ClientUID, authorizationReq.ClientSecret)
 	if entityErr != nil {
 		return entity.OauthAccessTokenJSON{}, entityErr
+	}
+
+	if err := a.oauthValidator.ValidateAuthorizationGrant(ctx, authorizationReq, oauthApplication); err != nil {
+		return entity.OauthAccessTokenJSON{}, err
 	}
 
 	id, err := a.oauthAccessTokenModel.Create(ctx, a.modelFormatter.AccessTokenFromAuthorizationRequest(authorizationReq, oauthApplication))
@@ -151,26 +159,26 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 	return a.oauthFormatter.AccessToken(authorizationReq, oauthAccessToken), nil
 }
 
-func (a *Authorization) findAndValidateApplication(ctx context.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthApplication, *entity.Error) {
-	if authorizationReq.ClientUID == nil {
+func (a *Authorization) findAndValidateApplication(ctx context.Context, clientUID, clientSecret *string) (entity.OauthApplication, *entity.Error) {
+	if clientUID == nil {
 		return entity.OauthApplication{}, &entity.Error{
 			HttpStatus: http.StatusUnprocessableEntity,
 			Errors:     eobject.Wrap(eobject.ValidationError("client_uid cannot be empty")),
 		}
 	}
 
-	if authorizationReq.ClientSecret == nil {
+	if clientSecret == nil {
 		return entity.OauthApplication{}, &entity.Error{
 			HttpStatus: http.StatusUnprocessableEntity,
 			Errors:     eobject.Wrap(eobject.ValidationError("client_secret cannot be empty")),
 		}
 	}
 
-	oauthApplication, err := a.oauthApplicationModel.OneByUIDandSecret(ctx, *authorizationReq.ClientUID, *authorizationReq.ClientSecret)
+	oauthApplication, err := a.oauthApplicationModel.OneByUIDandSecret(ctx, *clientUID, *clientSecret)
 	if err != nil {
 
 		journal.Error("application cannot be found because there was an error", err).
-			AddField("request", authorizationReq).
+			AddField("client_uid", clientUID).
 			SetTags("service", "Authorization", "find_secret").
 			Log()
 
@@ -185,10 +193,6 @@ func (a *Authorization) findAndValidateApplication(ctx context.Context, authoriz
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 		}
-	}
-
-	if err := a.oauthValidator.ValidateAuthorizationGrant(ctx, authorizationReq, oauthApplication); err != nil {
-		return entity.OauthApplication{}, err
 	}
 
 	return oauthApplication, nil
