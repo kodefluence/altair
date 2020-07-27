@@ -34,4 +34,4 @@ const InsertOauthAccessGrant = "insert into oauth_access_grants (oauth_applicati
 const SelectOneOauthAccessGrant = "select * from oauth_access_grants where id = ? limit 1"
 
 // SelectOneOauthAccessGrantByCode oauth_access_grants table query
-const SelectOneOauthAccessGrantByCode = "select * from oauth_access_grants where code = ?"
+const SelectOneOauthAccessGrantByCode = "select * from oauth_access_grants where code = ? limit 1"
