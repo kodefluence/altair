@@ -71,7 +71,7 @@ Open source API gateway written in Go. Created to be lightweight, simple, fast, 
       - [x] Authorization Code Grant
     - [ ] Access Token
       - [x] Access Token Implicit Request for Confidential Application
-      - [ ] Access Token Code Grant Flow
+      - [x] Access Token Code Grant Flow
       - [ ] Refresh Token
         - [ ] Access Token Refresh Token Flow
         - [ ] Refresh Token Generation
