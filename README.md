@@ -61,6 +61,7 @@ Open source API gateway written in Go. Created to be lightweight, simple, fast, 
 - [x] Logging
   - [x] Stdout
 - [ ] Plugins
+  - [ ] Plugin dynamic database migration
   - [ ] Oauth Authorization
     - [ ] CRUD Oauth Application
       - [x] Create
