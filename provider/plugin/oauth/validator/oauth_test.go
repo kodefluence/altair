@@ -238,4 +238,112 @@ func TestApplication(t *testing.T) {
 			})
 		})
 	})
+
+	t.Run("ValidateTokenGrant", func(t *testing.T) {
+		t.Run("Given context and access token request", func(t *testing.T) {
+			ctx := context.Background()
+			accessTokenRequest := entity.AccessTokenRequestJSON{
+				ClientSecret: util.StringToPointer("client_secret"),
+				ClientUID:    util.StringToPointer("client_uid"),
+				Code:         util.StringToPointer("abcdef_123456"),
+				GrantType:    util.StringToPointer("authorization_code"),
+				RedirectURI:  util.StringToPointer("http://localhost:8000/oauth_redirect"),
+			}
+
+			t.Run("When access token request is valid", func(t *testing.T) {
+				t.Run("Then return nil", func(t *testing.T) {
+					applicationValidator := validator.Oauth()
+					assert.Nil(t, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
+				})
+			})
+
+			t.Run("When grant_type is nil", func(t *testing.T) {
+				t.Run("Then return unprocessable entity", func(t *testing.T) {
+					accessTokenRequest := entity.AccessTokenRequestJSON{
+						ClientSecret: util.StringToPointer("client_secret"),
+						ClientUID:    util.StringToPointer("client_uid"),
+						Code:         util.StringToPointer("abcdef_123456"),
+						// GrantType:    util.StringToPointer("authorization_code"),
+						RedirectURI: util.StringToPointer("http://localhost:8000/oauth_redirect"),
+					}
+
+					expectedErr := &entity.Error{
+						HttpStatus: http.StatusUnprocessableEntity,
+						Errors: eobject.Wrap(
+							eobject.ValidationError(`grant_type can't be empty`),
+						),
+					}
+
+					applicationValidator := validator.Oauth()
+					assert.Equal(t, expectedErr, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
+				})
+			})
+
+			t.Run("When grant_type is not `authorization_code`", func(t *testing.T) {
+				t.Run("Then return unprocessable entity", func(t *testing.T) {
+					accessTokenRequest := entity.AccessTokenRequestJSON{
+						ClientSecret: util.StringToPointer("client_secret"),
+						ClientUID:    util.StringToPointer("client_uid"),
+						Code:         util.StringToPointer("abcdef_123456"),
+						GrantType:    util.StringToPointer("something_that_not_authorization_code"),
+						RedirectURI:  util.StringToPointer("http://localhost:8000/oauth_redirect"),
+					}
+
+					expectedErr := &entity.Error{
+						HttpStatus: http.StatusUnprocessableEntity,
+						Errors: eobject.Wrap(
+							eobject.ValidationError(`grant_type must be set to 'authorization_code'`),
+						),
+					}
+
+					applicationValidator := validator.Oauth()
+					assert.Equal(t, expectedErr, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
+				})
+			})
+
+			t.Run("When code is nil", func(t *testing.T) {
+				t.Run("Then return unprocessable entity", func(t *testing.T) {
+					accessTokenRequest := entity.AccessTokenRequestJSON{
+						ClientSecret: util.StringToPointer("client_secret"),
+						ClientUID:    util.StringToPointer("client_uid"),
+						// Code:         util.StringToPointer("abcdef_123456"),
+						GrantType:   util.StringToPointer("authorization_code"),
+						RedirectURI: util.StringToPointer("http://localhost:8000/oauth_redirect"),
+					}
+
+					expectedErr := &entity.Error{
+						HttpStatus: http.StatusUnprocessableEntity,
+						Errors: eobject.Wrap(
+							eobject.ValidationError(`code can't be empty`),
+						),
+					}
+
+					applicationValidator := validator.Oauth()
+					assert.Equal(t, expectedErr, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
+				})
+			})
+
+			t.Run("When redirect_uri is nil", func(t *testing.T) {
+				t.Run("Then return unprocessable entity", func(t *testing.T) {
+					accessTokenRequest := entity.AccessTokenRequestJSON{
+						ClientSecret: util.StringToPointer("client_secret"),
+						ClientUID:    util.StringToPointer("client_uid"),
+						Code:         util.StringToPointer("abcdef_123456"),
+						GrantType:    util.StringToPointer("authorization_code"),
+						// RedirectURI: util.StringToPointer("http://localhost:8000/oauth_redirect"),
+					}
+
+					expectedErr := &entity.Error{
+						HttpStatus: http.StatusUnprocessableEntity,
+						Errors: eobject.Wrap(
+							eobject.ValidationError(`redirect_uri can't be empty`),
+						),
+					}
+
+					applicationValidator := validator.Oauth()
+					assert.Equal(t, expectedErr, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
+				})
+			})
+		})
+	})
 }
