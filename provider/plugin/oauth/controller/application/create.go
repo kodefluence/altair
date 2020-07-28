@@ -36,6 +36,7 @@ func (cr *createController) Control(c *gin.Context) {
 	if err != nil {
 		journal.Error("Cannot get raw data", err).
 			SetTags("controller", "application", "create", "get_raw_data").
+			SetTrackId(c.Value("track_id")).
 			Log()
 
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -48,6 +49,7 @@ func (cr *createController) Control(c *gin.Context) {
 	if err != nil {
 		journal.Error("Cannot unmarshal json", err).
 			SetTags("controller", "application", "create", "unmarshal").
+			SetTrackId(c.Value("track_id")).
 			Log()
 
 		c.JSON(http.StatusBadRequest, gin.H{

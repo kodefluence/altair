@@ -29,8 +29,8 @@ func TestApplicationManager(t *testing.T) {
 			t.Run("Return a formatted result", func(t *testing.T) {
 
 				oauthApplications := []entity.OauthApplication{
-					entity.OauthApplication{ID: 1},
-					entity.OauthApplication{ID: 2},
+					{ID: 1},
+					{ID: 2},
 				}
 
 				applicationFormatter := formatter.OauthApplication()
@@ -86,8 +86,8 @@ func TestApplicationManager(t *testing.T) {
 
 			t.Run("Error oauth application count return internal server error", func(t *testing.T) {
 				oauthApplications := []entity.OauthApplication{
-					entity.OauthApplication{ID: 1},
-					entity.OauthApplication{ID: 2},
+					{ID: 1},
+					{ID: 2},
 				}
 
 				ctx := context.Background()
@@ -201,7 +201,7 @@ func TestApplicationManager(t *testing.T) {
 				modelFormatter := mock.NewMockModelFormater(mockCtrl)
 				oauthApplicationValidator := mock.NewMockOauthValidator(mockCtrl)
 
-				oauthApplicationInsertable := formatter.Model(time.Second, time.Second).OauthApplication(expectedOauthApplicationJSON)
+				oauthApplicationInsertable := formatter.NewModel(time.Second, time.Second).OauthApplication(expectedOauthApplicationJSON)
 
 				gomock.InOrder(
 					oauthApplicationValidator.EXPECT().ValidateApplication(ctx, expectedOauthApplicationJSON).Return(nil),
@@ -264,7 +264,7 @@ func TestApplicationManager(t *testing.T) {
 					modelFormatter := mock.NewMockModelFormater(mockCtrl)
 					oauthModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0)
 
-					oauthApplicationInsertable := formatter.Model(time.Second, time.Second).OauthApplication(data)
+					oauthApplicationInsertable := formatter.NewModel(time.Second, time.Second).OauthApplication(data)
 
 					gomock.InOrder(
 						oauthApplicationValidator.EXPECT().ValidateApplication(ctx, data).Return(nil),

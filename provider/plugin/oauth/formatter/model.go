@@ -10,19 +10,22 @@ import (
 	"github.com/google/uuid"
 )
 
-type model struct {
+// Model implement converter from other struct into model insertable struct
+type Model struct {
 	tokenExpiresIn time.Duration
 	codeExpiresIn  time.Duration
 }
 
-func Model(tokenExpiresIn time.Duration, codeExpiresIn time.Duration) *model {
-	return &model{
+// NewModel create new model object
+func NewModel(tokenExpiresIn time.Duration, codeExpiresIn time.Duration) *Model {
+	return &Model{
 		tokenExpiresIn: tokenExpiresIn,
 		codeExpiresIn:  codeExpiresIn,
 	}
 }
 
-func (m *model) OauthApplication(r entity.OauthApplicationJSON) entity.OauthApplicationInsertable {
+// OauthApplication format into OauthApplicationInsertable
+func (m *Model) OauthApplication(r entity.OauthApplicationJSON) entity.OauthApplicationInsertable {
 	var oauthApplicationInsertable entity.OauthApplicationInsertable
 
 	oauthApplicationInsertable.OwnerID = util.PointerToInt(r.OwnerID)
@@ -35,7 +38,8 @@ func (m *model) OauthApplication(r entity.OauthApplicationJSON) entity.OauthAppl
 	return oauthApplicationInsertable
 }
 
-func (m *model) AccessGrantFromAuthorizationRequest(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessGrantInsertable {
+// AccessGrantFromAuthorizationRequest _
+func (m *Model) AccessGrantFromAuthorizationRequest(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessGrantInsertable {
 	var accessGrantInsertable entity.OauthAccessGrantInsertable
 
 	accessGrantInsertable.OauthApplicationID = application.ID
@@ -48,13 +52,27 @@ func (m *model) AccessGrantFromAuthorizationRequest(r entity.AuthorizationReques
 	return accessGrantInsertable
 }
 
-func (m *model) AccessTokenFromAuthorizationRequest(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessTokenInsertable {
+// AccessTokenFromAuthorizationRequest _
+func (m *Model) AccessTokenFromAuthorizationRequest(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessTokenInsertable {
 	var accessTokenInsertable entity.OauthAccessTokenInsertable
 
 	accessTokenInsertable.OauthApplicationID = application.ID
 	accessTokenInsertable.ResourceOwnerID = *r.ResourceOwnerID
 	accessTokenInsertable.Token = aurelia.Hash(application.ClientUID, application.ClientSecret+strconv.Itoa(*r.ResourceOwnerID))
 	accessTokenInsertable.Scopes = util.PointerToString(r.Scopes)
+	accessTokenInsertable.ExpiresIn = time.Now().Add(m.tokenExpiresIn)
+
+	return accessTokenInsertable
+}
+
+// AccessTokenFromOauthAccessGrant _
+func (m *Model) AccessTokenFromOauthAccessGrant(oauthAccessGrant entity.OauthAccessGrant, application entity.OauthApplication) entity.OauthAccessTokenInsertable {
+	var accessTokenInsertable entity.OauthAccessTokenInsertable
+
+	accessTokenInsertable.OauthApplicationID = application.ID
+	accessTokenInsertable.ResourceOwnerID = oauthAccessGrant.ResourceOwnerID
+	accessTokenInsertable.Token = aurelia.Hash(application.ClientUID, application.ClientSecret+strconv.Itoa(oauthAccessGrant.ResourceOwnerID))
+	accessTokenInsertable.Scopes = oauthAccessGrant.Scopes.String
 	accessTokenInsertable.ExpiresIn = time.Now().Add(m.tokenExpiresIn)
 
 	return accessTokenInsertable

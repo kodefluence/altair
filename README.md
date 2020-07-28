@@ -15,6 +15,10 @@
 
 Open source API gateway written in Go. Created to be lightweight, simple, fast, reliable, cross platform, and programming language agnostic.
 
+## Notice
+
+This software is still in *alpha version*, which may contain several hidden bugs that can cause data loss or unexpected behaviour.
+
 ## Architecture Diagram
 
 <br>
@@ -61,6 +65,7 @@ Open source API gateway written in Go. Created to be lightweight, simple, fast, 
 - [x] Logging
   - [x] Stdout
 - [ ] Plugins
+  - [ ] Plugin dynamic database migration
   - [ ] Oauth Authorization
     - [ ] CRUD Oauth Application
       - [x] Create
@@ -71,7 +76,7 @@ Open source API gateway written in Go. Created to be lightweight, simple, fast, 
       - [x] Authorization Code Grant
     - [ ] Access Token
       - [x] Access Token Implicit Request for Confidential Application
-      - [ ] Access Token Code Grant Flow
+      - [x] Access Token Code Grant Flow
       - [ ] Refresh Token
         - [ ] Access Token Refresh Token Flow
         - [ ] Refresh Token Generation

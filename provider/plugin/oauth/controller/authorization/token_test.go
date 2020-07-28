@@ -9,16 +9,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/codefluence-x/altair/provider/plugin/oauth/controller"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
-	"github.com/codefluence-x/altair/testhelper"
-
-	"github.com/codefluence-x/altair/provider/plugin/oauth/controller"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/formatter"
-
 	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"
+	"github.com/codefluence-x/altair/testhelper"
 	"github.com/codefluence-x/altair/util"
-
 	"github.com/codefluence-x/aurelia"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
@@ -26,22 +23,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type responseOneToken struct {
-	Data entity.OauthAccessTokenJSON `json:"data"`
-}
-
-func TestGrant(t *testing.T) {
+func TestToken(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
 	t.Run("Method", func(t *testing.T) {
 		authorizationService := mock.NewMockAuthorization(mockCtrl)
-		assert.Equal(t, "POST", controller.Authorization().Grant(authorizationService).Method())
+		assert.Equal(t, "POST", controller.Authorization().Token(authorizationService).Method())
 	})
 
 	t.Run("Path", func(t *testing.T) {
 		authorizationService := mock.NewMockAuthorization(mockCtrl)
-		assert.Equal(t, "/oauth/authorizations", controller.Authorization().Grant(authorizationService).Path())
+		assert.Equal(t, "/oauth/authorizations/token", controller.Authorization().Token(authorizationService).Path())
 	})
 
 	t.Run("Control", func(t *testing.T) {
@@ -49,35 +42,34 @@ func TestGrant(t *testing.T) {
 			t.Run("Return oauth application data with status 202", func(t *testing.T) {
 				apiEngine := gin.Default()
 
-				authorizationRequest := entity.AuthorizationRequestJSON{
-					ResponseType:    nil,
-					ResourceOwnerID: util.IntToPointer(1),
-					ClientUID:       util.StringToPointer(aurelia.Hash("x", "y")),
-					ClientSecret:    util.StringToPointer(aurelia.Hash("z", "a")),
-					RedirectURI:     util.StringToPointer("http://github.com"),
-					Scopes:          util.StringToPointer("public users"),
+				accessTokenRequest := entity.AccessTokenRequestJSON{
+					GrantType:    util.StringToPointer("authorization_code"),
+					ClientUID:    util.StringToPointer(aurelia.Hash("x", "y")),
+					ClientSecret: util.StringToPointer(aurelia.Hash("z", "a")),
+					RedirectURI:  util.StringToPointer("http://github.com"),
+					Code:         util.StringToPointer("authorization_code"),
 				}
-				encodedBytes, err := json.Marshal(authorizationRequest)
+				encodedBytes, err := json.Marshal(accessTokenRequest)
 				assert.Nil(t, err)
 
 				oauthAccessToken := entity.OauthAccessToken{
 					ID:                 1,
 					OauthApplicationID: 1,
-					ResourceOwnerID:    *authorizationRequest.ResourceOwnerID,
+					ResourceOwnerID:    1,
 					Token:              aurelia.Hash("x", "y"),
 					Scopes: sql.NullString{
-						String: *authorizationRequest.Scopes,
+						String: "user",
 						Valid:  true,
 					},
 					ExpiresIn: time.Now().Add(time.Hour * 4),
 					CreatedAt: time.Now().Truncate(time.Second),
 				}
-				oauthAccessTokenJSON := formatter.Oauth().AccessToken(oauthAccessToken, *authorizationRequest.RedirectURI)
+				oauthAccessTokenJSON := formatter.Oauth().AccessToken(oauthAccessToken, *accessTokenRequest.RedirectURI)
 
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
-				authorizationService.EXPECT().Grantor(gomock.Any(), authorizationRequest).Return(oauthAccessTokenJSON, nil)
+				authorizationService.EXPECT().Token(gomock.Any(), accessTokenRequest).Return(oauthAccessTokenJSON, nil)
 
-				ctrl := controller.Authorization().Grant(authorizationService)
+				ctrl := controller.Authorization().Token(authorizationService)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				var response responseOneToken
@@ -100,19 +92,18 @@ func TestGrant(t *testing.T) {
 				t.Run("Return entity error status", func(t *testing.T) {
 					apiEngine := gin.Default()
 
-					authorizationRequest := entity.AuthorizationRequestJSON{
-						ResponseType:    nil,
-						ResourceOwnerID: util.IntToPointer(1),
-						ClientUID:       util.StringToPointer(aurelia.Hash("x", "y")),
-						ClientSecret:    util.StringToPointer(aurelia.Hash("z", "a")),
-						RedirectURI:     util.StringToPointer("http://github.com"),
-						Scopes:          util.StringToPointer("public users"),
+					accessTokenRequest := entity.AccessTokenRequestJSON{
+						GrantType:    util.StringToPointer("authorization_code"),
+						ClientUID:    util.StringToPointer(aurelia.Hash("x", "y")),
+						ClientSecret: util.StringToPointer(aurelia.Hash("z", "a")),
+						RedirectURI:  util.StringToPointer("http://github.com"),
+						Code:         util.StringToPointer("authorization_code"),
 					}
-					encodedBytes, err := json.Marshal(authorizationRequest)
+					encodedBytes, err := json.Marshal(accessTokenRequest)
 					assert.Nil(t, err)
 
 					oauthAccessToken := entity.OauthAccessToken{}
-					oauthAccessTokenJSON := formatter.Oauth().AccessToken(oauthAccessToken, *authorizationRequest.RedirectURI)
+					oauthAccessTokenJSON := formatter.Oauth().AccessToken(oauthAccessToken, *accessTokenRequest.RedirectURI)
 
 					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
 
@@ -122,9 +113,9 @@ func TestGrant(t *testing.T) {
 					}
 
 					authorizationService := mock.NewMockAuthorization(mockCtrl)
-					authorizationService.EXPECT().Grantor(gomock.Any(), authorizationRequest).Return(oauthAccessTokenJSON, expectedError)
+					authorizationService.EXPECT().Token(gomock.Any(), accessTokenRequest).Return(oauthAccessTokenJSON, expectedError)
 
-					ctrl := controller.Authorization().Grant(authorizationService)
+					ctrl := controller.Authorization().Token(authorizationService)
 					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 					var response ErrorResponse
@@ -144,9 +135,9 @@ func TestGrant(t *testing.T) {
 				apiEngine := gin.Default()
 
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
-				authorizationService.EXPECT().Grantor(gomock.Any(), gomock.Any()).Times(0)
+				authorizationService.EXPECT().Token(gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Authorization().Grant(authorizationService)
+				ctrl := controller.Authorization().Token(authorizationService)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{
@@ -170,9 +161,9 @@ func TestGrant(t *testing.T) {
 				apiEngine := gin.Default()
 
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
-				authorizationService.EXPECT().Grantor(gomock.Any(), gomock.Any()).Times(0)
+				authorizationService.EXPECT().Token(gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Authorization().Grant(authorizationService)
+				ctrl := controller.Authorization().Token(authorizationService)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{

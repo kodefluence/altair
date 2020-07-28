@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
@@ -11,31 +12,32 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type revokeController struct {
+type tokenController struct {
 	authService interfaces.Authorization
 }
 
-func Revoke(authService interfaces.Authorization) *revokeController {
-	return &revokeController{
+// Token create new token controller
+func Token(authService interfaces.Authorization) core.Controller {
+	return &tokenController{
 		authService: authService,
 	}
 }
 
-func (o *revokeController) Method() string {
+func (o *tokenController) Method() string {
 	return "POST"
 }
 
-func (o *revokeController) Path() string {
-	return "/oauth/authorizations/revoke"
+func (o *tokenController) Path() string {
+	return "/oauth/authorizations/token"
 }
 
-func (o *revokeController) Control(c *gin.Context) {
-	var req entity.RevokeAccessTokenRequestJSON
+func (o *tokenController) Control(c *gin.Context) {
+	var req entity.AccessTokenRequestJSON
 
 	rawData, err := c.GetRawData()
 	if err != nil {
 		journal.Error("Cannot get raw data", err).
-			SetTags("controller", "authorization", "revoke", "get_raw_data").
+			SetTags("controller", "authorization", "token", "get_raw_data").
 			SetTrackId(c.Value("track_id")).
 			Log()
 
@@ -48,7 +50,7 @@ func (o *revokeController) Control(c *gin.Context) {
 	err = json.Unmarshal(rawData, &req)
 	if err != nil {
 		journal.Error("Cannot unmarshal json", err).
-			SetTags("controller", "authorization", "revoke", "unmarshal").
+			SetTags("controller", "authorization", "token", "unmarshal").
 			SetTrackId(c.Value("track_id")).
 			Log()
 
@@ -58,7 +60,7 @@ func (o *revokeController) Control(c *gin.Context) {
 		return
 	}
 
-	entityErr := o.authService.RevokeToken(c, req)
+	data, entityErr := o.authService.Token(c, req)
 	if entityErr != nil {
 		c.JSON(entityErr.HttpStatus, gin.H{
 			"errors": entityErr.Errors,
@@ -66,7 +68,7 @@ func (o *revokeController) Control(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Access token has been successfully revoked.",
+	c.JSON(http.StatusCreated, gin.H{
+		"data": data,
 	})
 }

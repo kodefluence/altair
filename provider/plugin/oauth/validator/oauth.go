@@ -98,3 +98,28 @@ func (a *application) ValidateAuthorizationGrant(ctx context.Context, r entity.A
 
 	return nil
 }
+
+func (a *application) ValidateTokenGrant(ctx context.Context, r entity.AccessTokenRequestJSON) *entity.Error {
+	var entityErr = &entity.Error{}
+
+	if r.GrantType == nil {
+		entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`grant_type can't be empty`))
+	} else if *r.GrantType != "authorization_code" {
+		entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`grant_type must be set to 'authorization_code'`))
+	}
+
+	if r.Code == nil {
+		entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`code can't be empty`))
+	}
+
+	if r.RedirectURI == nil {
+		entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`redirect_uri can't be empty`))
+	}
+
+	if len(entityErr.Errors) > 0 {
+		entityErr.HttpStatus = http.StatusUnprocessableEntity
+		return entityErr
+	}
+
+	return nil
+}
