@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"net/http"
+	"time"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
@@ -226,6 +227,13 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 		return entity.OauthAccessTokenJSON{}, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+		}
+	}
+
+	if time.Now().After(oauthAccessGrant.ExpiresIn) {
+		return entity.OauthAccessTokenJSON{}, &entity.Error{
+			HttpStatus: http.StatusForbidden,
+			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "authorization code already expired")),
 		}
 	}
 
