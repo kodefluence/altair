@@ -87,7 +87,7 @@ func (a *Authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 	if err != nil {
 		journal.Error("Error creating access grant", err).
 			AddField("request", authorizationReq).
-			AddField("application", oauthApplication).
+			AddField("application_id", oauthApplication.ID).
 			SetTags("service", "authorization", "grant").
 			Log()
 
@@ -102,7 +102,7 @@ func (a *Authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 		journal.Error("Error selecting one access grant after creating the data", err).
 			AddField("request", authorizationReq).
 			AddField("last_inserted_id", id).
-			AddField("application", oauthApplication).
+			AddField("application_id", oauthApplication.ID).
 			SetTags("service", "authorization", "grant").
 			Log()
 
@@ -131,7 +131,7 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 
 		journal.Error("Error creating access token after creating the data", err).
 			AddField("request", authorizationReq).
-			AddField("application", oauthApplication).
+			AddField("application_id", oauthApplication.ID).
 			SetTags("service", "authorization", "grant_token").
 			Log()
 
@@ -147,7 +147,7 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 		journal.Error("Error selecting one access token", err).
 			AddField("request", authorizationReq).
 			AddField("last_inserted_id", id).
-			AddField("application", oauthApplication).
+			AddField("application_id", oauthApplication.ID).
 			SetTags("service", "authorization", "grant_token").
 			Log()
 
@@ -213,7 +213,6 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 	oauthAccessGrant, err := a.oauthAccessGrantModel.OneByCode(ctx, *accessTokenReq.Code)
 	if err != nil {
 		journal.Error("authorization code cannot be found because there was an error", err).
-			AddField("authorization_code", *accessTokenReq.Code).
 			SetTags("service", "authorization", "one_by_code").
 			Log()
 
@@ -262,7 +261,7 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 
 		journal.Error("Error selecting one access token", err).
 			AddField("last_inserted_id", id).
-			AddField("application", oauthApplication).
+			AddField("application_id", oauthApplication.ID).
 			SetTags("service", "authorization", "grant_token").
 			Log()
 
@@ -270,6 +269,14 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 		}
+	}
+
+	err = a.oauthAccessGrantModel.Revoke(ctx, *accessTokenReq.Code)
+	if err != nil {
+		// TODO: Error is intended to be surpressed until database transaction is implemented. After database transaction is implemented, then it will be rollbacked if there is error in revoke oauth access grants proccess
+		journal.Error("Error revoke oauth access grant", err).
+			SetTags("service", "authorization", "grant_token").
+			Log()
 	}
 
 	return a.oauthFormatter.AccessToken(oauthAccessToken, oauthAccessGrant.RedirectURI.String), nil
