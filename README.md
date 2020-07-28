@@ -58,6 +58,7 @@ This software is still in *alpha version*, which may contain several hidden bugs
   - [x] Route Generator Forwader
   - [x] Downstream Plugins
     - [x] Oauth Token Checking
+    - [ ] Oauth Scope Checking
     - [ ] Response Caching
   - [ ] Persistent HTTP client implementation
 - [x] Metric & Monitoring
