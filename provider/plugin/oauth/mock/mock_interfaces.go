@@ -897,3 +897,17 @@ func (mr *MockAuthorizationDispatcherMockRecorder) Revoke(authorization interfac
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Revoke", reflect.TypeOf((*MockAuthorizationDispatcher)(nil).Revoke), authorization)
 }
+
+// Token mocks base method
+func (m *MockAuthorizationDispatcher) Token(authService interfaces.Authorization) core.Controller {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Token", authService)
+	ret0, _ := ret[0].(core.Controller)
+	return ret0
+}
+
+// Token indicates an expected call of Token
+func (mr *MockAuthorizationDispatcherMockRecorder) Token(authService interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Token", reflect.TypeOf((*MockAuthorizationDispatcher)(nil).Token), authService)
+}

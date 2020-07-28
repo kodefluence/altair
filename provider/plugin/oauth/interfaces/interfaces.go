@@ -85,4 +85,5 @@ type OauthApplicationDispatcher interface {
 type AuthorizationDispatcher interface {
 	Grant(authorization Authorization) core.Controller
 	Revoke(authorization Authorization) core.Controller
+	Token(authService Authorization) core.Controller
 }
