@@ -18,6 +18,7 @@ func monitor(ctx context.Context, modelName, query string, f func() error) error
 			AddField("model_name", modelName).
 			AddField("query", query).
 			SetTags("model", "monitor").
+			SetTrackId(ctx.Value("track_id")).
 			Log()
 		return err
 	}
@@ -28,6 +29,7 @@ func monitor(ctx context.Context, modelName, query string, f func() error) error
 		AddField("model_name", modelName).
 		AddField("query", query).
 		SetTags("model", "monitor").
+		SetTrackId(ctx.Value("track_id")).
 		Log()
 	return nil
 }

@@ -38,6 +38,7 @@ func (o *tokenController) Control(c *gin.Context) {
 	if err != nil {
 		journal.Error("Cannot get raw data", err).
 			SetTags("controller", "authorization", "token", "get_raw_data").
+			SetTrackId(c.Value("track_id")).
 			Log()
 
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -50,6 +51,7 @@ func (o *tokenController) Control(c *gin.Context) {
 	if err != nil {
 		journal.Error("Cannot unmarshal json", err).
 			SetTags("controller", "authorization", "token", "unmarshal").
+			SetTrackId(c.Value("track_id")).
 			Log()
 
 		c.JSON(http.StatusBadRequest, gin.H{
