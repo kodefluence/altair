@@ -229,6 +229,13 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 		}
 	}
 
+	if oauthAccessGrant.RevokedAT.Valid {
+		return entity.OauthAccessTokenJSON{}, &entity.Error{
+			HttpStatus: http.StatusForbidden,
+			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "authorization code already used")),
+		}
+	}
+
 	if time.Now().After(oauthAccessGrant.ExpiresIn) {
 		return entity.OauthAccessTokenJSON{}, &entity.Error{
 			HttpStatus: http.StatusForbidden,

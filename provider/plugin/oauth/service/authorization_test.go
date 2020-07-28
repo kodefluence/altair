@@ -1426,6 +1426,94 @@ func TestAuthorization(t *testing.T) {
 				})
 			})
 
+			t.Run("When authorization code is already revoked", func(t *testing.T) {
+				t.Run("Then it will return forbidden error", func(t *testing.T) {
+					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
+					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
+
+					ctx := context.Background()
+
+					accessTokenRequest := entity.AccessTokenRequestJSON{
+						ClientSecret: util.StringToPointer("client_secret"),
+						ClientUID:    util.StringToPointer("client_uid"),
+						Code:         util.StringToPointer("abcdef_123456"),
+						GrantType:    util.StringToPointer("authorization_code"),
+						RedirectURI:  util.StringToPointer("http://localhost:8000/oauth_redirect"),
+					}
+
+					oauthApplication := entity.OauthApplication{
+						ID: 1,
+						OwnerID: sql.NullInt64{
+							Int64: 1,
+							Valid: true,
+						},
+						OwnerType: "confidential",
+						Description: sql.NullString{
+							String: "Application 01",
+							Valid:  true,
+						},
+						Scopes: sql.NullString{
+							String: "public users",
+							Valid:  true,
+						},
+						ClientUID:    *accessTokenRequest.ClientUID,
+						ClientSecret: *accessTokenRequest.ClientSecret,
+						CreatedAt:    time.Now().Add(-time.Hour * 4),
+						UpdatedAt:    time.Now(),
+					}
+
+					oauthAccessGrant := entity.OauthAccessGrant{
+						ID:                 1,
+						Code:               *accessTokenRequest.Code,
+						CreatedAt:          time.Now().Add(-time.Hour),
+						ExpiresIn:          time.Now().Add(time.Hour),
+						OauthApplicationID: oauthApplication.ID,
+						RedirectURI: sql.NullString{
+							String: *accessTokenRequest.RedirectURI,
+							Valid:  true,
+						},
+						ResourceOwnerID: 1,
+						RevokedAT: mysql.NullTime{
+							Time:  time.Now(),
+							Valid: true,
+						},
+						Scopes: sql.NullString{
+							String: "user store",
+							Valid:  true,
+						},
+					}
+
+					expectedError := &entity.Error{
+						HttpStatus: http.StatusForbidden,
+						Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "authorization code already used")),
+					}
+
+					gomock.InOrder(
+						oauthApplicationModel.EXPECT().
+							OneByUIDandSecret(ctx, *accessTokenRequest.ClientUID, *accessTokenRequest.ClientSecret).
+							Return(oauthApplication, nil),
+						oauthValidator.EXPECT().ValidateTokenGrant(ctx, accessTokenRequest).Return(nil),
+						oauthAccessGrantModel.EXPECT().OneByCode(ctx, *accessTokenRequest.Code).Return(oauthAccessGrant, nil),
+						modelFormatterMock.EXPECT().AccessTokenFromOauthAccessGrant(gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessGrantModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
+						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
+					)
+
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock)
+					oauthAccessTokenOutput, err := authorizationService.Token(ctx, accessTokenRequest)
+
+					assert.NotNil(t, err)
+					assert.Equal(t, expectedError, err)
+					assert.Equal(t, entity.OauthAccessTokenJSON{}, oauthAccessTokenOutput)
+				})
+			})
+
 			t.Run("When authorization code already expired", func(t *testing.T) {
 				t.Run("Then it will return forbidden error", func(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
