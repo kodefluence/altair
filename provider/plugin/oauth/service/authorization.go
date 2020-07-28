@@ -280,7 +280,7 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 
 	err = a.oauthAccessGrantModel.Revoke(ctx, *accessTokenReq.Code)
 	if err != nil {
-		// TODO: Error is intended to be surpressed until database transaction is implemented. After database transaction is implemented, then it will be rollbacked if there is error in revoke oauth access grants proccess
+		// TODO: Error is intended to be suppressed until database transaction is implemented. After database transaction is implemented, then it will be rollbacked if there is error in revoke oauth access grants process
 		journal.Error("Error revoke oauth access grant", err).
 			SetTags("service", "authorization", "grant_token").
 			Log()

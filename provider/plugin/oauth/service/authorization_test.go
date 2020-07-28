@@ -992,7 +992,7 @@ func TestAuthorization(t *testing.T) {
 			})
 
 			t.Run("When revoking oauth access grant error", func(t *testing.T) {
-				t.Run("Then it will surpress the error", func(t *testing.T) {
+				t.Run("Then it will suppress the error", func(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
