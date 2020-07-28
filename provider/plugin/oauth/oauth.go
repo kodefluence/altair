@@ -46,11 +46,11 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 	// Model
 	oauthApplicationModel := model.OauthApplication(db)
 	oauthAccessTokenModel := model.OauthAccessToken(db)
-	oauthAccessGrantModel := model.OauthAccessGrant(db)
+	oauthAccessGrantModel := model.NewOauthAccessGrant(db)
 
 	// Formatter
 	oauthApplicationFormatter := formatter.OauthApplication()
-	oauthModelFormatter := formatter.Model(accessTokenTimeout, authorizationCodeTimeout)
+	oauthModelFormatter := formatter.NewModel(accessTokenTimeout, authorizationCodeTimeout)
 	oauthFormatter := formatter.Oauth()
 
 	// Validator
@@ -58,7 +58,7 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 
 	// Service
 	applicationManager := service.ApplicationManager(oauthApplicationFormatter, oauthModelFormatter, oauthApplicationModel, oauthValidator)
-	authorization := service.Authorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthModelFormatter, oauthValidator, oauthFormatter)
+	authorization := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthModelFormatter, oauthValidator, oauthFormatter)
 
 	// DownStreamPlugin
 	oauthDownStream := downstream.NewOauth(oauthAccessTokenModel)
@@ -68,6 +68,7 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 	appBearer.InjectController(controller.Application().Create(applicationManager))
 	appBearer.InjectController(controller.Authorization().Grant(authorization))
 	appBearer.InjectController(controller.Authorization().Revoke(authorization))
+	appBearer.InjectController(controller.Authorization().Token(authorization))
 
 	appBearer.InjectDownStreamPlugin(oauthDownStream)
 

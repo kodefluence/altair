@@ -265,7 +265,7 @@ func TestOauthAccessToken(t *testing.T) {
 		})
 	})
 
-	t.Run("Create", func(t *testing.T) {
+	t.Run("Revoke", func(t *testing.T) {
 		t.Run("Given context and token", func(t *testing.T) {
 			t.Run("Run gracefully", func(t *testing.T) {
 				t.Run("Return nil", func(t *testing.T) {

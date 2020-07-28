@@ -19,3 +19,7 @@ func (a authorization) Grant(authService interfaces.Authorization) core.Controll
 func (a authorization) Revoke(authService interfaces.Authorization) core.Controller {
 	return auth.Revoke(authService)
 }
+
+func (a authorization) Token(authService interfaces.Authorization) core.Controller {
+	return auth.Token(authService)
+}

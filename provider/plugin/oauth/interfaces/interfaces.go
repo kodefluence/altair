@@ -31,6 +31,8 @@ type OauthAccessGrantModel interface {
 	Name() string
 	One(ctx context.Context, ID int) (entity.OauthAccessGrant, error)
 	Create(ctx context.Context, data entity.OauthAccessGrantInsertable, txs ...*sql.Tx) (int, error)
+	OneByCode(ctx context.Context, code string) (entity.OauthAccessGrant, error)
+	Revoke(ctx context.Context, code string, txs ...*sql.Tx) error
 }
 
 type ApplicationManager interface {
@@ -54,11 +56,12 @@ type OauthApplicationFormater interface {
 
 type OauthFormatter interface {
 	AccessGrant(e entity.OauthAccessGrant) entity.OauthAccessGrantJSON
-	AccessToken(r entity.AuthorizationRequestJSON, e entity.OauthAccessToken) entity.OauthAccessTokenJSON
+	AccessToken(e entity.OauthAccessToken, redirectURI string) entity.OauthAccessTokenJSON
 }
 
 type ModelFormater interface {
 	AccessTokenFromAuthorizationRequest(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessTokenInsertable
+	AccessTokenFromOauthAccessGrant(oauthAccessGrant entity.OauthAccessGrant, application entity.OauthApplication) entity.OauthAccessTokenInsertable
 	AccessGrantFromAuthorizationRequest(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessGrantInsertable
 	OauthApplication(r entity.OauthApplicationJSON) entity.OauthApplicationInsertable
 }
@@ -66,6 +69,7 @@ type ModelFormater interface {
 type OauthValidator interface {
 	ValidateApplication(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error
 	ValidateAuthorizationGrant(ctx context.Context, r entity.AuthorizationRequestJSON, application entity.OauthApplication) *entity.Error
+	ValidateTokenGrant(ctx context.Context, r entity.AccessTokenRequestJSON) *entity.Error
 }
 
 type OauthDispatcher interface {
@@ -82,4 +86,5 @@ type OauthApplicationDispatcher interface {
 type AuthorizationDispatcher interface {
 	Grant(authorization Authorization) core.Controller
 	Revoke(authorization Authorization) core.Controller
+	Token(authService Authorization) core.Controller
 }

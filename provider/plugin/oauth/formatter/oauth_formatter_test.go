@@ -125,7 +125,7 @@ func TestOauthFormatter(t *testing.T) {
 						CreatedAt: time.Now(),
 					}
 
-					output := formatter.Oauth().AccessToken(authorizationReq, oauthAccessToken)
+					output := formatter.Oauth().AccessToken(oauthAccessToken, *authorizationReq.RedirectURI)
 
 					assert.Equal(t, &oauthAccessToken.ID, output.ID)
 					assert.Equal(t, &oauthAccessToken.OauthApplicationID, output.OauthApplicationID)
@@ -170,7 +170,7 @@ func TestOauthFormatter(t *testing.T) {
 					},
 				}
 
-				output := formatter.Oauth().AccessToken(authorizationReq, oauthAccessToken)
+				output := formatter.Oauth().AccessToken(oauthAccessToken, *authorizationReq.RedirectURI)
 
 				assert.Equal(t, &oauthAccessToken.ID, output.ID)
 				assert.Equal(t, &oauthAccessToken.OauthApplicationID, output.OauthApplicationID)
