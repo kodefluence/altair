@@ -65,6 +65,7 @@ func (a *Authorization) Grantor(ctx context.Context, authorizationReq entity.Aut
 	journal.Error("invalid response type sent by client", err).
 		AddField("request", authorizationReq).
 		SetTags("service", "authorization", "grantor").
+		SetTrackId(ctx.Value("track_id")).
 		Log()
 
 	return nil, err
@@ -89,6 +90,7 @@ func (a *Authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 			AddField("request", authorizationReq).
 			AddField("application_id", oauthApplication.ID).
 			SetTags("service", "authorization", "grant").
+			SetTrackId(ctx.Value("track_id")).
 			Log()
 
 		return entity.OauthAccessGrantJSON{}, &entity.Error{
@@ -104,6 +106,7 @@ func (a *Authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 			AddField("last_inserted_id", id).
 			AddField("application_id", oauthApplication.ID).
 			SetTags("service", "authorization", "grant").
+			SetTrackId(ctx.Value("track_id")).
 			Log()
 
 		return entity.OauthAccessGrantJSON{}, &entity.Error{
@@ -133,6 +136,7 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 			AddField("request", authorizationReq).
 			AddField("application_id", oauthApplication.ID).
 			SetTags("service", "authorization", "grant_token").
+			SetTrackId(ctx.Value("track_id")).
 			Log()
 
 		return entity.OauthAccessTokenJSON{}, &entity.Error{
@@ -149,6 +153,7 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 			AddField("last_inserted_id", id).
 			AddField("application_id", oauthApplication.ID).
 			SetTags("service", "authorization", "grant_token").
+			SetTrackId(ctx.Value("track_id")).
 			Log()
 
 		return entity.OauthAccessTokenJSON{}, &entity.Error{
@@ -181,6 +186,7 @@ func (a *Authorization) findAndValidateApplication(ctx context.Context, clientUI
 		journal.Error("application cannot be found because there was an error", err).
 			AddField("client_uid", clientUID).
 			SetTags("service", "authorization", "find_secret").
+			SetTrackId(ctx.Value("track_id")).
 			Log()
 
 		if err == sql.ErrNoRows {
@@ -214,6 +220,7 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 	if err != nil {
 		journal.Error("authorization code cannot be found because there was an error", err).
 			SetTags("service", "authorization", "one_by_code").
+			SetTrackId(ctx.Value("track_id")).
 			Log()
 
 		if err == sql.ErrNoRows {
@@ -255,6 +262,7 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 
 		journal.Error("Error creating access token after creating the data", err).
 			SetTags("service", "authorization", "grant_token").
+			SetTrackId(ctx.Value("track_id")).
 			Log()
 
 		return entity.OauthAccessTokenJSON{}, &entity.Error{
@@ -270,6 +278,7 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 			AddField("last_inserted_id", id).
 			AddField("application_id", oauthApplication.ID).
 			SetTags("service", "authorization", "grant_token").
+			SetTrackId(ctx.Value("track_id")).
 			Log()
 
 		return entity.OauthAccessTokenJSON{}, &entity.Error{
@@ -283,6 +292,7 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 		// TODO: Error is intended to be suppressed until database transaction is implemented. After database transaction is implemented, then it will be rollbacked if there is error in revoke oauth access grants process
 		journal.Error("Error revoke oauth access grant", err).
 			SetTags("service", "authorization", "grant_token").
+			SetTrackId(ctx.Value("track_id")).
 			Log()
 	}
 

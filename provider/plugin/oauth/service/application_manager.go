@@ -34,6 +34,7 @@ func (am *applicationManager) List(ctx context.Context, offset, limit int) ([]en
 			AddField("offset", offset).
 			AddField("limit", limit).
 			SetTags("service", "application_manager", "list", "paginate").
+			SetTrackId(ctx.Value("track_id")).
 			Log()
 
 		return []entity.OauthApplicationJSON(nil), 0, &entity.Error{
@@ -48,6 +49,7 @@ func (am *applicationManager) List(ctx context.Context, offset, limit int) ([]en
 			AddField("offset", offset).
 			AddField("limit", limit).
 			SetTags("service", "application_manager", "list", "count").
+			SetTrackId(ctx.Value("track_id")).
 			Log()
 
 		return []entity.OauthApplicationJSON(nil), 0, &entity.Error{
@@ -65,6 +67,7 @@ func (am *applicationManager) Create(ctx context.Context, e entity.OauthApplicat
 		journal.Error("Got validation error from oauth application validator", err).
 			AddField("data", e).
 			SetTags("service", "application_manager", "create", "model_create").
+			SetTrackId(ctx.Value("track_id")).
 			Log()
 
 		return entity.OauthApplicationJSON{}, err
@@ -75,6 +78,7 @@ func (am *applicationManager) Create(ctx context.Context, e entity.OauthApplicat
 		journal.Error("Error when creating oauth application data", err).
 			AddField("data", e).
 			SetTags("service", "application_manager", "create", "model_create").
+			SetTrackId(ctx.Value("track_id")).
 			Log()
 
 		return entity.OauthApplicationJSON{}, &entity.Error{
@@ -99,6 +103,7 @@ func (am *applicationManager) One(ctx context.Context, ID int) (entity.OauthAppl
 		journal.Error("Error when fetching single oauth application", err).
 			AddField("id", ID).
 			SetTags("service", "application_manager", "one", "model_one").
+			SetTrackId(ctx.Value("track_id")).
 			Log()
 
 		return entity.OauthApplicationJSON{}, &entity.Error{

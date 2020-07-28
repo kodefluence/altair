@@ -124,6 +124,7 @@ func (g *generator) decorateProxyRequest(c *gin.Context, urlPath, trackID string
 				AddField("full_path", c.Request.URL.String()).
 				AddField("client_ip", c.ClientIP()).
 				SetTags("route", "generator", "generate", "read_all_request").
+				SetTrackId(trackID).
 				Log()
 			return nil, err
 		}
@@ -140,6 +141,7 @@ func (g *generator) decorateProxyRequest(c *gin.Context, urlPath, trackID string
 				AddField("full_path", c.Request.URL.String()).
 				AddField("client_ip", c.ClientIP()).
 				SetTags("route", "generator", "generate", "new_request").
+				SetTrackId(trackID).
 				Log()
 			return nil, err
 		}
@@ -158,6 +160,7 @@ func (g *generator) decorateProxyRequest(c *gin.Context, urlPath, trackID string
 				AddField("full_path", c.Request.URL.String()).
 				AddField("client_ip", c.ClientIP()).
 				SetTags("route", "generator", "generate", "new_request").
+				SetTrackId(trackID).
 				Log()
 			return nil, err
 		}

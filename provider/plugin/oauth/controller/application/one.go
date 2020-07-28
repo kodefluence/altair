@@ -33,6 +33,7 @@ func (o *oneController) Control(c *gin.Context) {
 	if err != nil {
 		journal.Error("Cannot convert ascii to integer", err).
 			SetTags("controller", "application", "one", "strconv").
+			SetTrackId(c.Value("track_id")).
 			Log()
 
 		c.JSON(http.StatusBadRequest, gin.H{
