@@ -319,6 +319,25 @@ func (mr *MockOauthAccessGrantModelMockRecorder) OneByCode(ctx, code interface{}
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OneByCode", reflect.TypeOf((*MockOauthAccessGrantModel)(nil).OneByCode), ctx, code)
 }
 
+// Revoke mocks base method
+func (m *MockOauthAccessGrantModel) Revoke(ctx context.Context, code string, txs ...*sql.Tx) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, code}
+	for _, a := range txs {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Revoke", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Revoke indicates an expected call of Revoke
+func (mr *MockOauthAccessGrantModelMockRecorder) Revoke(ctx, code interface{}, txs ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, code}, txs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Revoke", reflect.TypeOf((*MockOauthAccessGrantModel)(nil).Revoke), varargs...)
+}
+
 // MockApplicationManager is a mock of ApplicationManager interface
 type MockApplicationManager struct {
 	ctrl     *gomock.Controller

@@ -32,6 +32,7 @@ type OauthAccessGrantModel interface {
 	One(ctx context.Context, ID int) (entity.OauthAccessGrant, error)
 	Create(ctx context.Context, data entity.OauthAccessGrantInsertable, txs ...*sql.Tx) (int, error)
 	OneByCode(ctx context.Context, code string) (entity.OauthAccessGrant, error)
+	Revoke(ctx context.Context, code string, txs ...*sql.Tx) error
 }
 
 type ApplicationManager interface {

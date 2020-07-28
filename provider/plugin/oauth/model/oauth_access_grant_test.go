@@ -275,4 +275,73 @@ func TestOauthAccessGrant(t *testing.T) {
 			})
 		})
 	})
+
+	t.Run("Revoke", func(t *testing.T) {
+		t.Run("Given context and authorization code", func(t *testing.T) {
+			t.Run("When database update request success", func(t *testing.T) {
+				t.Run("Then return nil", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					mockdb.ExpectExec(`update oauth_access_grants set revoked_at = now\(\) where code = \? limit 1`).
+						WithArgs("authorization_code").WillReturnResult(sqlmock.NewResult(1, 1))
+
+					oauthAccessGrantModel := model.NewOauthAccessGrant(db)
+					err = oauthAccessGrantModel.Revoke(context.Background(), "authorization_code")
+					assert.Nil(t, err)
+				})
+			})
+
+			t.Run("When database update request error", func(t *testing.T) {
+				t.Run("Then return error", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					mockdb.ExpectExec(`update oauth_access_grants set revoked_at = now\(\) where code = \? limit 1`).
+						WithArgs("authorization_code").WillReturnError(errors.New("unexpected error"))
+
+					oauthAccessGrantModel := model.NewOauthAccessGrant(db)
+					err = oauthAccessGrantModel.Revoke(context.Background(), "authorization_code")
+					assert.NotNil(t, err)
+				})
+			})
+
+			t.Run("When database get results error", func(t *testing.T) {
+				t.Run("Then return error", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					mockdb.ExpectExec(`update oauth_access_grants set revoked_at = now\(\) where code = \? limit 1`).
+						WithArgs("authorization_code").WillReturnResult(sqlmock.NewErrorResult(errors.New("unexpected error")))
+
+					oauthAccessGrantModel := model.NewOauthAccessGrant(db)
+					err = oauthAccessGrantModel.Revoke(context.Background(), "authorization_code")
+					assert.NotNil(t, err)
+				})
+			})
+
+			t.Run("When there is no rows affected", func(t *testing.T) {
+				t.Run("Then return sql.ErrNoRows error", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					mockdb.ExpectExec(`update oauth_access_grants set revoked_at = now\(\) where code = \? limit 1`).
+						WithArgs("authorization_code").WillReturnResult(sqlmock.NewResult(1, 0))
+
+					oauthAccessGrantModel := model.NewOauthAccessGrant(db)
+					err = oauthAccessGrantModel.Revoke(context.Background(), "authorization_code")
+					assert.NotNil(t, err)
+					assert.Equal(t, sql.ErrNoRows, err)
+				})
+			})
+		})
+	})
 }

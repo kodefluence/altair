@@ -35,3 +35,6 @@ const SelectOneOauthAccessGrant = "select * from oauth_access_grants where id = 
 
 // SelectOneOauthAccessGrantByCode oauth_access_grants table query
 const SelectOneOauthAccessGrantByCode = "select * from oauth_access_grants where code = ? limit 1"
+
+// RevokeAuthorizationCode oauth_access_grants table query
+const RevokeAuthorizationCode = "update oauth_access_grants set revoked_at = now() where code = ? limit 1"

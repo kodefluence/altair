@@ -100,3 +100,24 @@ func (oag *OauthAccessGrant) Create(ctx context.Context, data entity.OauthAccess
 
 	return lastInsertedID, err
 }
+
+// Revoke fill revoked_at of oauth_access_grants row
+func (oag *OauthAccessGrant) Revoke(ctx context.Context, code string, txs ...*sql.Tx) error {
+	return monitor(ctx, oag.Name(), query.RevokeAuthorizationCode, func() error {
+		result, err := oag.db.Exec(query.RevokeAuthorizationCode, code)
+		if err != nil {
+			return err
+		}
+
+		affectedRows, err := result.RowsAffected()
+		if err != nil {
+			return err
+		}
+
+		if affectedRows == 0 {
+			return sql.ErrNoRows
+		}
+
+		return nil
+	})
+}

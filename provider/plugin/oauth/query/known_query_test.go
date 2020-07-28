@@ -22,4 +22,5 @@ func TestQuery(t *testing.T) {
 	assert.Equal(t, "insert into oauth_access_grants (oauth_application_id, resource_owner_id, scopes, code, redirect_uri, expires_in, created_at, revoked_at) values(?, ?, ?, ?, ?, ?, now(), null)", query.InsertOauthAccessGrant)
 	assert.Equal(t, "select * from oauth_access_grants where id = ? limit 1", query.SelectOneOauthAccessGrant)
 	assert.Equal(t, "select * from oauth_access_grants where code = ? limit 1", query.SelectOneOauthAccessGrantByCode)
+	assert.Equal(t, "update oauth_access_grants set revoked_at = now() where code = ? limit 1", query.RevokeAuthorizationCode)
 }
