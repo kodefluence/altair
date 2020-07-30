@@ -10,6 +10,15 @@ path:
   /:id: {}
 `
 
+var ExampleRoutesWithNoAuth = `
+name: users
+prefix: /users
+host: {{ env "EXAMPLE_USERS_SERVICE_HOST" }}
+path:
+  /me: {}
+  /:id: {}
+`
+
 var ExampleRoutesYamlError = `
 name: 1
 auth: 2

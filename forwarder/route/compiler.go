@@ -39,6 +39,10 @@ func (c *compiler) Compile(routesPath string) ([]entity.RouteObject, error) {
 			return routeObjects, err
 		}
 
+		if routeObject.Auth == "" {
+			routeObject.Auth = "none"
+		}
+
 		routeObjects = append(routeObjects, routeObject)
 	}
 
