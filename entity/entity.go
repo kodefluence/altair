@@ -9,5 +9,6 @@ type RouteObject struct {
 }
 
 type RouterPath struct {
-	Auth string `yaml:"auth"`
+	Auth  string `yaml:"auth"`
+	Scope string `yaml:"scope"`
 }

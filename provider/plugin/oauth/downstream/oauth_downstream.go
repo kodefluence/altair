@@ -10,6 +10,7 @@ import (
 
 	coreEntity "github.com/codefluence-x/altair/entity"
 
+	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
 	"github.com/gin-gonic/gin"
 )
@@ -54,9 +55,35 @@ func (o *Oauth) Intervene(c *gin.Context, proxyReq *http.Request, r coreEntity.R
 		return fmt.Errorf("Error connecting to model: %v", err)
 	}
 
+	if o.validTokenScope(token, r) == false {
+		c.AbortWithStatus(http.StatusForbidden)
+		return fmt.Errorf("Invalid token scope: %v", token.Scopes.String)
+	}
+
 	proxyReq.Header.Add("Resource-Owner-ID", strconv.Itoa(token.ResourceOwnerID))
 	proxyReq.Header.Add("Oauth-Application-ID", strconv.Itoa(token.OauthApplicationID))
 	return nil
+}
+
+func (o *Oauth) validTokenScope(token entity.OauthAccessToken, r coreEntity.RouterPath) bool {
+	if r.Scope == "" {
+		return true
+	}
+
+	if token.Scopes.Valid {
+		tokenScopes := strings.Split(token.Scopes.String, " ")
+		routeScopes := strings.Split(r.Scope, " ")
+
+		for _, routeScope := range routeScopes {
+			for _, tokenScope := range tokenScopes {
+				if routeScope == tokenScope {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
 }
 
 func (o *Oauth) parseToken(c *gin.Context) (string, error) {

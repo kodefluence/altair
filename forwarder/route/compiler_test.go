@@ -77,6 +77,23 @@ func TestCompiler(t *testing.T) {
 				mock.RemoveTempTestFiles(routesPath)
 			})
 
+			t.Run("No auth set", func(t *testing.T) {
+				routesPath := "./routes_no_auth_set/"
+
+				generateAllTempTestFiles(routesPath, ExampleRoutesWithNoAuth)
+
+				t.Run("Return nil and auth will set to none", func(t *testing.T) {
+					c := route.Compiler()
+					routeObjects, err := c.Compile(routesPath)
+
+					assert.Nil(t, err)
+					assert.Equal(t, 1, len(routeObjects))
+					assert.Equal(t, "none", routeObjects[0].Auth)
+				})
+
+				mock.RemoveTempTestFiles(routesPath)
+			})
+
 			t.Run("Template parsing error", func(t *testing.T) {
 				routesPath := "./routes_template_parsing_error/"
 
