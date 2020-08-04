@@ -23,3 +23,7 @@ func (a application) One(applicationManager interfaces.ApplicationManager) core.
 func (a application) Create(applicationManager interfaces.ApplicationManager) core.Controller {
 	return app.Create(applicationManager)
 }
+
+func (a application) Update(applicationManager interfaces.ApplicationManager) core.Controller {
+	return app.Update(applicationManager)
+}

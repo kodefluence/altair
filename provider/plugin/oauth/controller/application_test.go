@@ -20,6 +20,7 @@ func TestApplication(t *testing.T) {
 			controller.Application().List(applicationManager)
 			controller.Application().One(applicationManager)
 			controller.Application().Create(applicationManager)
+			controller.Application().Update(applicationManager)
 		})
 	})
 }

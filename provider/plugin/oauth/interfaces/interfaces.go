@@ -83,6 +83,7 @@ type OauthApplicationDispatcher interface {
 	List(applicationManager ApplicationManager) core.Controller
 	One(applicationManager ApplicationManager) core.Controller
 	Create(applicationManager ApplicationManager) core.Controller
+	Update(applicationManager ApplicationManager) core.Controller
 }
 
 type AuthorizationDispatcher interface {
