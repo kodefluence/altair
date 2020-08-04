@@ -13,6 +13,7 @@ func TestQuery(t *testing.T) {
 	assert.Equal(t, "select * from oauth_applications where id = ?", query.SelectOneOauthApplication)
 	assert.Equal(t, "select * from oauth_applications where client_uid = ? and client_secret = ? limit 1", query.SelectOneByUIDandSecret)
 	assert.Equal(t, "insert into oauth_applications (owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at) values(?, ?, ?, ?, ?, ?, null, now(), now())", query.InsertOauthApplication)
+	assert.Equal(t, "update oauth_applications set description = ?, scopes = ?, updated_at = now() where id = ?", query.UpdateOauthApplication)
 
 	assert.Equal(t, "insert into oauth_access_tokens (oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at) values(?, ?, ?, ?, ?, now(), null)", query.InsertOauthAccessToken)
 	assert.Equal(t, "select * from oauth_access_tokens where id = ? limit 1", query.SelectOneOauthAccessToken)
