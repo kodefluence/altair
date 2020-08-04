@@ -287,4 +287,83 @@ func TestApplicationManager(t *testing.T) {
 			})
 		})
 	})
+
+	t.Run("Update", func(t *testing.T) {
+		t.Run("Given context, id and oauth application update json", func(t *testing.T) {
+			t.Run("When update process is success and find one process is success", func(t *testing.T) {
+				t.Run("Then it will return oauth application json", func(t *testing.T) {
+					ctx := context.Background()
+
+					data := entity.OauthApplicationUpdateJSON{
+						Description: util.StringToPointer("New description"),
+						Scopes:      util.StringToPointer("users public"),
+					}
+
+					id := 1
+
+					oauthApplication := entity.OauthApplication{
+						ID:        1,
+						OwnerType: "confidential",
+					}
+
+					expectedOauthApplicationJSON := formatter.OauthApplication().Application(ctx, oauthApplication)
+
+					oauthModel := mock.NewMockOauthApplicationModel(mockCtrl)
+					oauthApplicationValidator := mock.NewMockOauthValidator(mockCtrl)
+					modelFormatter := mock.NewMockModelFormater(mockCtrl)
+
+					gomock.InOrder(
+						oauthModel.EXPECT().Update(ctx, id, entity.OauthApplicationUpdateable{
+							Description: data.Description,
+							Scopes:      data.Scopes,
+						}).Return(nil),
+						oauthModel.EXPECT().One(ctx, 1).Return(oauthApplication, nil),
+					)
+
+					applicationManager := service.ApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
+					formattedResult, err := applicationManager.Update(ctx, id, data)
+
+					assert.Nil(t, err)
+					assert.Equal(t, expectedOauthApplicationJSON, formattedResult)
+				})
+			})
+
+			t.Run("When update process failed", func(t *testing.T) {
+				t.Run("Then it will return error", func(t *testing.T) {
+					ctx := context.Background()
+
+					data := entity.OauthApplicationUpdateJSON{
+						Description: util.StringToPointer("New description"),
+						Scopes:      util.StringToPointer("users public"),
+					}
+
+					id := 1
+
+					oauthModel := mock.NewMockOauthApplicationModel(mockCtrl)
+					oauthApplicationValidator := mock.NewMockOauthValidator(mockCtrl)
+					modelFormatter := mock.NewMockModelFormater(mockCtrl)
+
+					gomock.InOrder(
+						oauthModel.EXPECT().Update(ctx, id, entity.OauthApplicationUpdateable{
+							Description: data.Description,
+							Scopes:      data.Scopes,
+						}).Return(errors.New("unexpected error")),
+						oauthModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
+					)
+
+					applicationManager := service.ApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
+					formattedResult, err := applicationManager.Update(ctx, id, data)
+
+					expectedError := &entity.Error{
+						HttpStatus: http.StatusInternalServerError,
+						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+					}
+
+					assert.NotNil(t, err)
+					assert.Equal(t, expectedError, err)
+					assert.Equal(t, entity.OauthApplicationJSON{}, formattedResult)
+				})
+			})
+		})
+	})
 }

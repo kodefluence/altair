@@ -426,6 +426,21 @@ func (mr *MockApplicationManagerMockRecorder) Create(ctx, e interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockApplicationManager)(nil).Create), ctx, e)
 }
 
+// Update mocks base method
+func (m *MockApplicationManager) Update(ctx context.Context, ID int, e entity.OauthApplicationUpdateJSON) (entity.OauthApplicationJSON, *entity.Error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, ID, e)
+	ret0, _ := ret[0].(entity.OauthApplicationJSON)
+	ret1, _ := ret[1].(*entity.Error)
+	return ret0, ret1
+}
+
+// Update indicates an expected call of Update
+func (mr *MockApplicationManagerMockRecorder) Update(ctx, ID, e interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockApplicationManager)(nil).Update), ctx, ID, e)
+}
+
 // MockAuthorization is a mock of Authorization interface
 type MockAuthorization struct {
 	ctrl     *gomock.Controller
