@@ -68,11 +68,11 @@ This software is still in *alpha version*, which may contain several hidden bugs
 - [ ] Plugins
   - [ ] Plugin dynamic database migration
   - [ ] Oauth Authorization
-    - [ ] CRUD Oauth Application
+    - [x] CRUD Oauth Application
       - [x] Create
       - [x] List
       - [x] One
-      - [ ] Update
+      - [x] Update
     - [x] Authorization
       - [x] Authorization Code Grant
     - [ ] Access Token
