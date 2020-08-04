@@ -90,6 +90,11 @@ type OauthApplicationInsertable struct {
 	ClientSecret string
 }
 
+type OauthApplicationUpdateable struct {
+	Description interface{}
+	Scopes      interface{}
+}
+
 type AuthorizationRequestJSON struct {
 	ResponseType *string `json:"response_type"`
 

@@ -131,6 +131,25 @@ func (mr *MockOauthApplicationModelMockRecorder) Create(ctx, data interface{}, t
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOauthApplicationModel)(nil).Create), varargs...)
 }
 
+// Update mocks base method
+func (m *MockOauthApplicationModel) Update(ctx context.Context, ID int, data entity.OauthApplicationUpdateable, txs ...*sql.Tx) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, ID, data}
+	for _, a := range txs {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Update", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update
+func (mr *MockOauthApplicationModelMockRecorder) Update(ctx, ID, data interface{}, txs ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, ID, data}, txs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockOauthApplicationModel)(nil).Update), varargs...)
+}
+
 // MockOauthAccessTokenModel is a mock of OauthAccessTokenModel interface
 type MockOauthAccessTokenModel struct {
 	ctrl     *gomock.Controller

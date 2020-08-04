@@ -112,7 +112,7 @@ func (oa *oauthApplication) OneByUIDandSecret(ctx context.Context, clientUID, cl
 }
 
 func (oa *oauthApplication) Create(ctx context.Context, data entity.OauthApplicationInsertable, txs ...*sql.Tx) (int, error) {
-	var lastInsertedId int
+	var lastInsertedID int
 	var dbExecutable DBExecutable
 
 	dbExecutable = oa.db
@@ -132,9 +132,37 @@ func (oa *oauthApplication) Create(ctx context.Context, data entity.OauthApplica
 			return err
 		}
 
-		lastInsertedId = int(id)
+		lastInsertedID = int(id)
 		return nil
 	})
 
-	return lastInsertedId, err
+	return lastInsertedID, err
+}
+
+func (oa *oauthApplication) Update(ctx context.Context, ID int, data entity.OauthApplicationUpdateable, txs ...*sql.Tx) error {
+	var dbExecutable DBExecutable
+
+	dbExecutable = oa.db
+	if len(txs) > 0 {
+		dbExecutable = txs[0]
+	}
+
+	err := monitor(ctx, oa.Name(), query.UpdateOauthApplication, func() error {
+
+		res, err := dbExecutable.Exec(query.UpdateOauthApplication, data.Description, data.Scopes, ID)
+		if err != nil {
+			return err
+		}
+
+		affectedRows, err := res.RowsAffected()
+		if err != nil {
+			return err
+		} else if affectedRows == 0 {
+			return sql.ErrNoRows
+		}
+
+		return nil
+	})
+
+	return err
 }
