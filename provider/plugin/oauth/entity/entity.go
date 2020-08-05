@@ -81,6 +81,11 @@ type OauthApplicationJSON struct {
 	UpdatedAt    *time.Time `json:"updated_at"`
 }
 
+type OauthApplicationUpdateJSON struct {
+	Description *string `json:"description"`
+	Scopes      *string `json:"scopes"`
+}
+
 type OauthApplicationInsertable struct {
 	OwnerID      interface{}
 	OwnerType    string
@@ -88,6 +93,11 @@ type OauthApplicationInsertable struct {
 	Scopes       interface{}
 	ClientUID    string
 	ClientSecret string
+}
+
+type OauthApplicationUpdateable struct {
+	Description interface{}
+	Scopes      interface{}
 }
 
 type AuthorizationRequestJSON struct {

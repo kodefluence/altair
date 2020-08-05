@@ -51,10 +51,10 @@ func TestOauthApplication(t *testing.T) {
 				}
 
 				expectedOauthApplications := []entity.OauthApplication{
-					entity.OauthApplication{
+					{
 						ID: 1,
 					},
-					entity.OauthApplication{
+					{
 						ID: 2,
 					},
 				}
@@ -102,10 +102,10 @@ func TestOauthApplication(t *testing.T) {
 					}
 
 					expectedOauthApplications := []entity.OauthApplication{
-						entity.OauthApplication{
+						{
 							ID: 1,
 						},
-						entity.OauthApplication{
+						{
 							ID: 2,
 						},
 					}
@@ -374,6 +374,135 @@ func TestOauthApplication(t *testing.T) {
 					assert.NotNil(t, err)
 					assert.Nil(t, mockdb.ExpectationsWereMet())
 					assert.Equal(t, entity.OauthApplication{}, dataFromDB)
+				})
+			})
+		})
+	})
+
+	t.Run("Update", func(t *testing.T) {
+		t.Run("Given context, oauth application id and oauth application updateable", func(t *testing.T) {
+			t.Run("When database request is success", func(t *testing.T) {
+				t.Run("Then it will return nil", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					updateable := entity.OauthApplicationUpdateable{
+						Description: "New description",
+						Scopes:      "users public",
+					}
+
+					ID := 1
+
+					mockdb.ExpectExec(`update oauth_applications set description \= \?, scopes \= \?, updated_at \= now\(\) where id \= \?`).
+						WithArgs(updateable.Description, updateable.Scopes, ID).
+						WillReturnResult(sqlmock.NewResult(1, 1))
+
+					oauthApplicationModel := model.OauthApplication(db)
+					assert.Nil(t, oauthApplicationModel.Update(context.Background(), ID, updateable))
+					assert.Nil(t, mockdb.ExpectationsWereMet())
+				})
+			})
+
+			t.Run("When database request is success but the updated value is 0", func(t *testing.T) {
+				t.Run("Then it will return sql.ErrNoRows", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					updateable := entity.OauthApplicationUpdateable{
+						Description: "New description",
+						Scopes:      "users public",
+					}
+
+					ID := 1
+
+					mockdb.ExpectExec(`update oauth_applications set description \= \?, scopes \= \?, updated_at \= now\(\) where id \= \?`).
+						WithArgs(updateable.Description, updateable.Scopes, ID).
+						WillReturnResult(sqlmock.NewResult(1, 0))
+
+					oauthApplicationModel := model.OauthApplication(db)
+					assert.Equal(t, sql.ErrNoRows, oauthApplicationModel.Update(context.Background(), ID, updateable))
+					assert.Nil(t, mockdb.ExpectationsWereMet())
+				})
+			})
+
+			t.Run("When database request is failed", func(t *testing.T) {
+				t.Run("Then it will return error", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					updateable := entity.OauthApplicationUpdateable{
+						Description: "New description",
+						Scopes:      "users public",
+					}
+
+					ID := 1
+
+					mockdb.ExpectExec(`update oauth_applications set description \= \?, scopes \= \?, updated_at \= now\(\) where id \= \?`).
+						WithArgs(updateable.Description, updateable.Scopes, ID).
+						WillReturnError(errors.New("unexpected error"))
+
+					oauthApplicationModel := model.OauthApplication(db)
+					assert.NotNil(t, oauthApplicationModel.Update(context.Background(), ID, updateable))
+					assert.Nil(t, mockdb.ExpectationsWereMet())
+				})
+			})
+
+			t.Run("When database request is success but get results failed", func(t *testing.T) {
+				t.Run("Then it will return error", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					updateable := entity.OauthApplicationUpdateable{
+						Description: "New description",
+						Scopes:      "users public",
+					}
+
+					ID := 1
+
+					mockdb.ExpectExec(`update oauth_applications set description \= \?, scopes \= \?, updated_at \= now\(\) where id \= \?`).
+						WithArgs(updateable.Description, updateable.Scopes, ID).
+						WillReturnResult(sqlmock.NewErrorResult(errors.New("unexpected error")))
+
+					oauthApplicationModel := model.OauthApplication(db)
+					assert.NotNil(t, oauthApplicationModel.Update(context.Background(), ID, updateable))
+					assert.Nil(t, mockdb.ExpectationsWereMet())
+				})
+			})
+		})
+
+		t.Run("Given context, oauth application id, oauth application updateable and database transactions", func(t *testing.T) {
+			t.Run("When database request is success", func(t *testing.T) {
+				t.Run("Then it will return nil", func(t *testing.T) {
+					db, mockdb, err := sqlmock.New()
+					if err != nil {
+						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+					}
+
+					mockdb.ExpectBegin()
+					tx, _ := db.Begin()
+
+					updateable := entity.OauthApplicationUpdateable{
+						Description: "New description",
+						Scopes:      "users public",
+					}
+
+					ID := 1
+
+					mockdb.ExpectExec(`update oauth_applications set description \= \?, scopes \= \?, updated_at \= now\(\) where id \= \?`).
+						WithArgs(updateable.Description, updateable.Scopes, ID).
+						WillReturnResult(sqlmock.NewResult(1, 1))
+
+					oauthApplicationModel := model.OauthApplication(db)
+					assert.Nil(t, oauthApplicationModel.Update(context.Background(), ID, updateable, tx))
+					assert.Nil(t, mockdb.ExpectationsWereMet())
 				})
 			})
 		})

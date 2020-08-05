@@ -15,6 +15,9 @@ const SelectOneByUIDandSecret = "select * from oauth_applications where client_u
 // InsertOauthApplication oauth_applications table query
 const InsertOauthApplication = "insert into oauth_applications (owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at) values(?, ?, ?, ?, ?, ?, null, now(), now())"
 
+// UpdateOauthApplication oauth_applications table query
+const UpdateOauthApplication = "update oauth_applications set description = ?, scopes = ?, updated_at = now() where id = ?"
+
 // InsertOauthAccessToken oauth_access_tokens table query
 const InsertOauthAccessToken = "insert into oauth_access_tokens (oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at) values(?, ?, ?, ?, ?, now(), null)"
 

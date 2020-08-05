@@ -90,6 +90,28 @@ func (am *applicationManager) Create(ctx context.Context, e entity.OauthApplicat
 	return am.One(ctx, id)
 }
 
+func (am *applicationManager) Update(ctx context.Context, ID int, e entity.OauthApplicationUpdateJSON) (entity.OauthApplicationJSON, *entity.Error) {
+
+	err := am.oauthApplicationModel.Update(ctx, ID, entity.OauthApplicationUpdateable{
+		Description: e.Description,
+		Scopes:      e.Scopes,
+	})
+	if err != nil {
+		journal.Error("Error when updating oauth application data", err).
+			AddField("data", e).
+			SetTags("service", "application_manager", "update", "model_update").
+			SetTrackId(ctx.Value("track_id")).
+			Log()
+
+		return entity.OauthApplicationJSON{}, &entity.Error{
+			HttpStatus: http.StatusInternalServerError,
+			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+		}
+	}
+
+	return am.One(ctx, ID)
+}
+
 func (am *applicationManager) One(ctx context.Context, ID int) (entity.OauthApplicationJSON, *entity.Error) {
 	oauthApplication, err := am.oauthApplicationModel.One(ctx, ID)
 	if err != nil {

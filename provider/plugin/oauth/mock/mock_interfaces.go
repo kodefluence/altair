@@ -131,6 +131,25 @@ func (mr *MockOauthApplicationModelMockRecorder) Create(ctx, data interface{}, t
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOauthApplicationModel)(nil).Create), varargs...)
 }
 
+// Update mocks base method
+func (m *MockOauthApplicationModel) Update(ctx context.Context, ID int, data entity.OauthApplicationUpdateable, txs ...*sql.Tx) error {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, ID, data}
+	for _, a := range txs {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Update", varargs...)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update
+func (mr *MockOauthApplicationModelMockRecorder) Update(ctx, ID, data interface{}, txs ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, ID, data}, txs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockOauthApplicationModel)(nil).Update), varargs...)
+}
+
 // MockOauthAccessTokenModel is a mock of OauthAccessTokenModel interface
 type MockOauthAccessTokenModel struct {
 	ctrl     *gomock.Controller
@@ -405,6 +424,21 @@ func (m *MockApplicationManager) Create(ctx context.Context, e entity.OauthAppli
 func (mr *MockApplicationManagerMockRecorder) Create(ctx, e interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockApplicationManager)(nil).Create), ctx, e)
+}
+
+// Update mocks base method
+func (m *MockApplicationManager) Update(ctx context.Context, ID int, e entity.OauthApplicationUpdateJSON) (entity.OauthApplicationJSON, *entity.Error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, ID, e)
+	ret0, _ := ret[0].(entity.OauthApplicationJSON)
+	ret1, _ := ret[1].(*entity.Error)
+	return ret0, ret1
+}
+
+// Update indicates an expected call of Update
+func (mr *MockApplicationManagerMockRecorder) Update(ctx, ID, e interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockApplicationManager)(nil).Update), ctx, ID, e)
 }
 
 // MockAuthorization is a mock of Authorization interface

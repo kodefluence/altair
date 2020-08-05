@@ -17,6 +17,7 @@ type OauthApplicationModel interface {
 	OneByUIDandSecret(ctx context.Context, clientUID, clientSecret string) (entity.OauthApplication, error)
 	Count(ctx context.Context) (int, error)
 	Create(ctx context.Context, data entity.OauthApplicationInsertable, txs ...*sql.Tx) (int, error)
+	Update(ctx context.Context, ID int, data entity.OauthApplicationUpdateable, txs ...*sql.Tx) error
 }
 
 type OauthAccessTokenModel interface {
@@ -39,6 +40,7 @@ type ApplicationManager interface {
 	List(ctx context.Context, offset, limit int) ([]entity.OauthApplicationJSON, int, *entity.Error)
 	One(ctx context.Context, ID int) (entity.OauthApplicationJSON, *entity.Error)
 	Create(ctx context.Context, e entity.OauthApplicationJSON) (entity.OauthApplicationJSON, *entity.Error)
+	Update(ctx context.Context, ID int, e entity.OauthApplicationUpdateJSON) (entity.OauthApplicationJSON, *entity.Error)
 }
 
 type Authorization interface {
@@ -81,6 +83,7 @@ type OauthApplicationDispatcher interface {
 	List(applicationManager ApplicationManager) core.Controller
 	One(applicationManager ApplicationManager) core.Controller
 	Create(applicationManager ApplicationManager) core.Controller
+	Update(applicationManager ApplicationManager) core.Controller
 }
 
 type AuthorizationDispatcher interface {
