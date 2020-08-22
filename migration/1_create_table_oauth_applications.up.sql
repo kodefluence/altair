@@ -4,9 +4,8 @@ CREATE TABLE `oauth_applications` (
   `owner_id` int(11) unsigned DEFAULT NUll,
   `owner_type` varchar(12) NOT NULL,
 
-  `description`,
-
-  `scopes`,
+  `description` text,
+  `scopes` text,
 
   `client_uid` varchar(255) NOT NULL,
   `client_secret` varchar(255) NOT NULL,
