@@ -5,7 +5,7 @@ CREATE TABLE `oauth_access_tokens` (
   `resource_owner_id` int(11) unsigned NOT NULL,
 
   `token` varchar(255) NOT NULL,
-  `scopes` text DEFAULT '',
+  `scopes`,
 
   `expires_in` DATETIME NOT NULL,
   `created_at` DATETIME NOT NULL,

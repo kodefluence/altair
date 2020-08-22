@@ -3,10 +3,10 @@ CREATE TABLE `oauth_access_grants` (
 
   `oauth_application_id` int(11) unsigned NOT NULL,
   `resource_owner_id` int(11) unsigned NOT NULL,
-  `scopes` text DEFAULT '',
+  `scopes`,
 
   `code` varchar(255) NOT NULL,
-  `redirect_uri` text DEFAULT '',
+  `redirect_uri`,
 
   `expires_in` DATETIME NOT NULL,
   `created_at` DATETIME NOT NULL,
