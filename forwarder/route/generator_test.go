@@ -51,6 +51,7 @@ func TestGenerator(t *testing.T) {
 				}
 
 				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
 
 				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
@@ -100,6 +101,7 @@ func TestGenerator(t *testing.T) {
 				})
 
 				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
 
 				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
@@ -373,6 +375,7 @@ func TestGenerator(t *testing.T) {
 				}
 
 				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
 
 				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
@@ -424,6 +427,7 @@ func TestGenerator(t *testing.T) {
 				}
 
 				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
 
 				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
@@ -469,6 +473,7 @@ func TestGenerator(t *testing.T) {
 				)
 
 				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
 
 				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.NotNil(t, err)
@@ -501,6 +506,7 @@ func TestGenerator(t *testing.T) {
 				}
 
 				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
 
 				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
