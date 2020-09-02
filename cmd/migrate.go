@@ -3,10 +3,11 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/codefluence-x/altair/loader"
 	"github.com/codefluence-x/altair/provider"
 	"github.com/codefluence-x/journal"
-	"github.com/spf13/cobra"
 )
 
 var migrateCmd = &cobra.Command{

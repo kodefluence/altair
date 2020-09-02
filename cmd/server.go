@@ -7,13 +7,14 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/cobra"
+
 	"github.com/codefluence-x/altair/controller"
 	"github.com/codefluence-x/altair/forwarder"
 	"github.com/codefluence-x/altair/loader"
 	"github.com/codefluence-x/altair/provider"
 	"github.com/codefluence-x/journal"
-	"github.com/gin-gonic/gin"
-	"github.com/spf13/cobra"
 )
 
 var serverCmd = &cobra.Command{

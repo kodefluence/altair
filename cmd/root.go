@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/altair/loader"
-	"github.com/codefluence-x/journal"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"github.com/subosito/gotenv"
+
+	"github.com/codefluence-x/altair/core"
+	"github.com/codefluence-x/altair/loader"
+	"github.com/codefluence-x/journal"
 )
 
 var (
