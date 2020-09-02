@@ -19,7 +19,7 @@ func TestOauthApplication(t *testing.T) {
 		t.Run("Given context and array of entity.OauthApplication", func(t *testing.T) {
 			t.Run("Return array of entity.OauthApplicationJSON", func(t *testing.T) {
 				oauthApplications := []entity.OauthApplication{
-					entity.OauthApplication{
+					{
 						ID: 1,
 						OwnerID: sql.NullInt64{
 							Int64: 1,
@@ -42,7 +42,7 @@ func TestOauthApplication(t *testing.T) {
 						CreatedAt: time.Now(),
 						UpdatedAt: time.Now(),
 					},
-					entity.OauthApplication{
+					{
 						ID: 2,
 						OwnerID: sql.NullInt64{
 							Int64: 2,

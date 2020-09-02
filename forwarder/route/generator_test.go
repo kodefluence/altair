@@ -40,8 +40,8 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":          entity.RouterPath{Auth: "none"},
-							"/details/:id": entity.RouterPath{Auth: "none"},
+							"/me":          {Auth: "none"},
+							"/details/:id": {Auth: "none"},
 						},
 					},
 				)
@@ -51,7 +51,6 @@ func TestGenerator(t *testing.T) {
 				}
 
 				var downStreamPlugin []core.DownStreamPlugin
-				downStreamPlugin = append(downStreamPlugin)
 
 				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
@@ -90,8 +89,8 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":          entity.RouterPath{Auth: "none"},
-							"/details/:id": entity.RouterPath{Auth: "none"},
+							"/me":          {Auth: "none"},
+							"/details/:id": {Auth: "none"},
 						},
 					},
 				)
@@ -101,7 +100,6 @@ func TestGenerator(t *testing.T) {
 				})
 
 				var downStreamPlugin []core.DownStreamPlugin
-				downStreamPlugin = append(downStreamPlugin)
 
 				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
@@ -142,8 +140,8 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":          entity.RouterPath{Auth: "none"},
-							"/details/:id": entity.RouterPath{Auth: "none"},
+							"/me":          {Auth: "none"},
+							"/details/:id": {Auth: "none"},
 						},
 					},
 				)
@@ -197,9 +195,9 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":            entity.RouterPath{},
-							"/authorization": entity.RouterPath{Auth: "oauth"},
-							"/details/:id":   entity.RouterPath{},
+							"/me":            {},
+							"/authorization": {Auth: "oauth"},
+							"/details/:id":   {},
 						},
 					},
 				)
@@ -253,7 +251,7 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/details/:id": entity.RouterPath{Auth: "oauth"},
+							"/details/:id": {Auth: "oauth"},
 						},
 					},
 				)
@@ -307,8 +305,8 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":          entity.RouterPath{Auth: "none"},
-							"/details/:id": entity.RouterPath{Auth: "none"},
+							"/me":          {Auth: "none"},
+							"/details/:id": {Auth: "none"},
 						},
 					},
 				)
@@ -364,8 +362,8 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":          entity.RouterPath{Auth: "none"},
-							"/details/:id": entity.RouterPath{Auth: "none"},
+							"/me":          {Auth: "none"},
+							"/details/:id": {Auth: "none"},
 						},
 					},
 				)
@@ -375,7 +373,6 @@ func TestGenerator(t *testing.T) {
 				}
 
 				var downStreamPlugin []core.DownStreamPlugin
-				downStreamPlugin = append(downStreamPlugin)
 
 				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
@@ -416,8 +413,8 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":          entity.RouterPath{Auth: "none"},
-							"/details/:id": entity.RouterPath{Auth: "none"},
+							"/me":          {Auth: "none"},
+							"/details/:id": {Auth: "none"},
 						},
 					},
 				)
@@ -427,7 +424,6 @@ func TestGenerator(t *testing.T) {
 				}
 
 				var downStreamPlugin []core.DownStreamPlugin
-				downStreamPlugin = append(downStreamPlugin)
 
 				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
@@ -466,14 +462,13 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":  entity.RouterPath{Auth: "none"},
-							"/:id": entity.RouterPath{Auth: "none"},
+							"/me":  {Auth: "none"},
+							"/:id": {Auth: "none"},
 						},
 					},
 				)
 
 				var downStreamPlugin []core.DownStreamPlugin
-				downStreamPlugin = append(downStreamPlugin)
 
 				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.NotNil(t, err)
@@ -495,8 +490,8 @@ func TestGenerator(t *testing.T) {
 						Name:   "users",
 						Prefix: "/users",
 						Path: map[string]entity.RouterPath{
-							"/me":          entity.RouterPath{Auth: "none"},
-							"/details/:id": entity.RouterPath{Auth: "none"},
+							"/me":          {Auth: "none"},
+							"/details/:id": {Auth: "none"},
 						},
 					},
 				)
@@ -506,7 +501,6 @@ func TestGenerator(t *testing.T) {
 				}
 
 				var downStreamPlugin []core.DownStreamPlugin
-				downStreamPlugin = append(downStreamPlugin)
 
 				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)

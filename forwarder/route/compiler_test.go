@@ -2,7 +2,6 @@ package route_test
 
 import (
 	"bytes"
-	"fmt"
 	"os"
 	"testing"
 	"text/template"
@@ -131,18 +130,6 @@ func generateAllTempTestFiles(routesPath, content string) {
 	}
 
 	mock.GenerateTempTestFiles(routesPath, content, "app.yml", 0666)
-}
-
-func generateFiles(routesPath, content, fileName string, mode os.FileMode) {
-	f, err := os.OpenFile(fmt.Sprintf("%s%s", routesPath, fileName), os.O_RDWR|os.O_CREATE|os.O_TRUNC, mode)
-	if err != nil {
-		panic(err)
-	}
-
-	_, err = f.WriteString(content)
-	if err != nil {
-		panic(err)
-	}
 }
 
 func compileTemplate(b []byte) ([]byte, error) {

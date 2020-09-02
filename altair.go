@@ -106,7 +106,7 @@ func executeCommand() {
 			app := func() {
 				fmt.Printf("app config:\n")
 				fmt.Printf("====================\n")
-				fmt.Printf(appConfig.Dump())
+				fmt.Printf("%v", appConfig.Dump())
 				fmt.Printf("--------------------\n")
 			}
 
@@ -117,7 +117,7 @@ func executeCommand() {
 					fmt.Printf("instance: %s\n", key)
 					fmt.Printf("driver: %s\n", config.Driver())
 					fmt.Printf("--------------------\n")
-					fmt.Printf(config.Dump())
+					fmt.Printf("%v", config.Dump())
 				}
 				fmt.Printf("--------------------\n")
 			}
@@ -333,7 +333,7 @@ func runAPI() error {
 	dbBearer := loader.DatabaseBearer(databases, dbConfigs)
 
 	provider.Metric(appBearer)
-	provider.Plugin(appBearer, dbBearer, pluginBearer)
+	_ = provider.Plugin(appBearer, dbBearer, pluginBearer)
 
 	// Route Engine
 	routeCompiler := forwarder.Route().Compiler()

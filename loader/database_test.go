@@ -10,6 +10,7 @@ import (
 	"github.com/codefluence-x/altair/loader"
 	"github.com/codefluence-x/altair/mock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDatabase(t *testing.T) {
@@ -67,6 +68,7 @@ func TestDatabase(t *testing.T) {
 
 						expectedMaxConnLifetime, _ := expectedMYSQLConfig.DBConnectionMaxLifetime()
 						actualMaxConnLifetime, err := c.DBConnectionMaxLifetime()
+						require.NoError(t, err)
 
 						assert.Equal(t, expectedMaxConnLifetime, actualMaxConnLifetime)
 
@@ -134,6 +136,7 @@ func TestDatabase(t *testing.T) {
 
 						expectedMaxConnLifetime, _ := expectedMYSQLConfig.DBConnectionMaxLifetime()
 						actualMaxConnLifetime, err := c.DBConnectionMaxLifetime()
+						require.NoError(t, err)
 
 						assert.Equal(t, expectedMaxConnLifetime, actualMaxConnLifetime)
 
@@ -224,6 +227,7 @@ func TestDatabase(t *testing.T) {
 
 						expectedMaxConnLifetime1, _ := expectedMYSQLConfig1.DBConnectionMaxLifetime()
 						actualMaxConnLifetime1, err := c1.DBConnectionMaxLifetime()
+						require.NoError(t, err)
 
 						assert.Equal(t, expectedMaxConnLifetime1, actualMaxConnLifetime1)
 
@@ -254,6 +258,7 @@ func TestDatabase(t *testing.T) {
 
 						expectedMaxConnLifetime2, _ := expectedMYSQLConfig2.DBConnectionMaxLifetime()
 						actualMaxConnLifetime2, err := c2.DBConnectionMaxLifetime()
+						require.NoError(t, err)
 
 						assert.Equal(t, expectedMaxConnLifetime2, actualMaxConnLifetime2)
 

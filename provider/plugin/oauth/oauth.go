@@ -15,7 +15,7 @@ import (
 
 // Provide create new oauth plugin provider
 func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer) error {
-	if appBearer.Config().PluginExists("oauth") == false {
+	if !appBearer.Config().PluginExists("oauth") {
 		return nil
 	}
 

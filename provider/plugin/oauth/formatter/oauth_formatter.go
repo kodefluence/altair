@@ -23,10 +23,9 @@ func (*oauthFormatter) AccessGrant(e entity.OauthAccessGrant) entity.OauthAccess
 	data.RedirectURI = &e.RedirectURI.String
 	data.Scopes = &e.Scopes.String
 
+	data.ExpiresIn = util.IntToPointer(0)
 	if time.Now().Before(e.ExpiresIn) {
-		data.ExpiresIn = util.IntToPointer(int(e.ExpiresIn.Sub(time.Now()).Seconds()))
-	} else {
-		data.ExpiresIn = util.IntToPointer(0)
+		data.ExpiresIn = util.IntToPointer(int(time.Until(e.ExpiresIn).Seconds()))
 	}
 
 	data.CreatedAt = &e.CreatedAt
@@ -49,10 +48,9 @@ func (*oauthFormatter) AccessToken(e entity.OauthAccessToken, redirectURI string
 	data.RedirectURI = &redirectURI
 	data.CreatedAt = &e.CreatedAt
 
+	data.ExpiresIn = util.IntToPointer(0)
 	if time.Now().Before(e.ExpiresIn) {
-		data.ExpiresIn = util.IntToPointer(int(e.ExpiresIn.Sub(time.Now()).Seconds()))
-	} else {
-		data.ExpiresIn = util.IntToPointer(0)
+		data.ExpiresIn = util.IntToPointer(int(time.Until(e.ExpiresIn).Seconds()))
 	}
 
 	if e.RevokedAT.Valid {

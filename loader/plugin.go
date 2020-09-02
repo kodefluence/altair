@@ -1,7 +1,6 @@
 package loader
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -40,7 +39,7 @@ func (p *plugin) Compile(pluginPath string) (core.PluginBearer, error) {
 		}
 
 		if _, ok := pluginList[plugin.Plugin]; ok {
-			return nil, errors.New(fmt.Sprintf("Plugin `%s` already defined", plugin.Plugin))
+			return nil, fmt.Errorf("Plugin `%s` already defined", plugin.Plugin)
 		}
 
 		plugin.Raw = compiledBytes

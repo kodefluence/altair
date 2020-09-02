@@ -7,6 +7,7 @@ import (
 	"github.com/codefluence-x/altair/provider/plugin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPlugin(t *testing.T) {
@@ -23,7 +24,8 @@ func TestPlugin(t *testing.T) {
 		appConfig.EXPECT().PluginExists("oauth").Return(false)
 
 		assert.NotPanics(t, func() {
-			plugin.Oauth(appBearer, dbBearer, pluginBearer)
+			err := plugin.Oauth(appBearer, dbBearer, pluginBearer)
+			require.NoError(t, err)
 		})
 	})
 }

@@ -57,7 +57,7 @@ func (d *database) assignConfig(driverConfigs map[string]map[string]string) (map
 
 	for key, config := range driverConfigs {
 		driver, ok := config["driver"]
-		if ok == false {
+		if !ok {
 			return nil, errors.New("database driver is not specified")
 		}
 
@@ -69,7 +69,7 @@ func (d *database) assignConfig(driverConfigs map[string]map[string]string) (map
 			}
 			databaseConfigs[key] = c
 		default:
-			return nil, errors.New(fmt.Sprintf("database driver:  `%s` is not supported", driver))
+			return nil, fmt.Errorf(fmt.Sprintf("database driver:  `%s` is not supported", driver))
 		}
 	}
 

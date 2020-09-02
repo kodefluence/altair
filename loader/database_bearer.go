@@ -20,7 +20,7 @@ func DatabaseBearer(databases map[string]*sql.DB, configs map[string]core.Databa
 
 func (d *databaseBearer) Database(dbName string) (*sql.DB, core.DatabaseConfig, error) {
 	db, ok := d.databases[dbName]
-	if ok == false {
+	if !ok {
 		return nil, nil, DatabasesIsNotExistsError
 	}
 

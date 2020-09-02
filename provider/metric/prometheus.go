@@ -1,7 +1,6 @@
 package metric
 
 import (
-	"errors"
 	"fmt"
 	"sync"
 
@@ -57,7 +56,7 @@ func (p *prometheusMetric) InjectHistogram(metricName string, labels ...string) 
 func (p *prometheusMetric) Inc(metricName string, labels map[string]string) error {
 	counterMetric, ok := p.counterMetrics[metricName]
 	if !ok {
-		return errors.New(fmt.Sprintf("Metric `%s` is not exists", metricName))
+		return fmt.Errorf("Metric `%s` is not exists", metricName)
 	}
 
 	counter, err := counterMetric.GetMetricWith(labels)
@@ -73,7 +72,7 @@ func (p *prometheusMetric) Inc(metricName string, labels map[string]string) erro
 func (p *prometheusMetric) Observe(metricName string, value float64, labels map[string]string) error {
 	histogramMetric, ok := p.histogramMetrics[metricName]
 	if !ok {
-		return errors.New(fmt.Sprintf("Metric `%s` is not exists", metricName))
+		return fmt.Errorf("Metric `%s` is not exists", metricName)
 	}
 
 	observer, err := histogramMetric.GetMetricWith(labels)

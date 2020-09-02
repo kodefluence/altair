@@ -46,6 +46,6 @@ func PointerToString(s *string) interface{} {
 
 func SHA1() string {
 	hasher := sha1.New()
-	hasher.Write([]byte(uuid.New().String()))
+	_, _ = hasher.Write([]byte(uuid.New().String()))
 	return fmt.Sprintf("%x", hasher.Sum(nil))
 }

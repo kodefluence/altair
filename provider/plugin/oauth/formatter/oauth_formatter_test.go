@@ -48,7 +48,7 @@ func TestOauthFormatter(t *testing.T) {
 				assert.Equal(t, &oauthAccessGrant.Code, output.Code)
 				assert.Equal(t, &oauthAccessGrant.RedirectURI.String, output.RedirectURI)
 				assert.Equal(t, &oauthAccessGrant.CreatedAt, output.CreatedAt)
-				assert.LessOrEqual(t, *output.ExpiresIn, int(oauthAccessGrant.ExpiresIn.Sub(time.Now()).Seconds()))
+				assert.LessOrEqual(t, *output.ExpiresIn, int(time.Until(oauthAccessGrant.ExpiresIn).Seconds()))
 				assert.Greater(t, *output.ExpiresIn, 3500)
 				assert.Nil(t, output.RevokedAT)
 
@@ -133,7 +133,7 @@ func TestOauthFormatter(t *testing.T) {
 					assert.Equal(t, &oauthAccessToken.Token, output.Token)
 					assert.Equal(t, &oauthAccessToken.CreatedAt, output.CreatedAt)
 					assert.Equal(t, &oauthAccessToken.Scopes.String, output.Scopes)
-					assert.LessOrEqual(t, *output.ExpiresIn, int(oauthAccessToken.ExpiresIn.Sub(time.Now()).Seconds()))
+					assert.LessOrEqual(t, *output.ExpiresIn, int(time.Until(oauthAccessToken.ExpiresIn).Seconds()))
 					assert.Greater(t, *output.ExpiresIn, 3500)
 					assert.Nil(t, output.RevokedAT)
 

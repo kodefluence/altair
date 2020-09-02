@@ -2,7 +2,6 @@ package route
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -37,7 +36,7 @@ func (g *generator) Generate(engine *gin.Engine, metric core.Metric, routeObject
 
 	defer func() {
 		if r := recover(); r != nil {
-			errVariable = errors.New(fmt.Sprintf("Error generating route because of %v", r))
+			errVariable = fmt.Errorf("Error generating route because of %v", r)
 			journal.Error("Panic error when generating routes", errVariable).
 				SetTags("route", "generator", "defer", "panic").
 				Log()
@@ -301,7 +300,7 @@ func (g *generator) downStreamPluginMetric(c *gin.Context, routeName, pluginName
 		"status_code_group": strconv.Itoa(((c.Writer.Status() / 100) * 100)),
 	}
 
-	g.metric.Observe("routes_downstream_plugin_latency_seconds", float64(time.Since(startTime).Milliseconds()), labels)
+	_ = g.metric.Observe("routes_downstream_plugin_latency_seconds", float64(time.Since(startTime).Milliseconds()), labels)
 }
 
 func (g *generator) downStreamMetric(c *gin.Context, routeName, path string, startTime time.Time) {
@@ -313,8 +312,8 @@ func (g *generator) downStreamMetric(c *gin.Context, routeName, path string, sta
 		"status_code_group": strconv.Itoa(((c.Writer.Status() / 100) * 100)),
 	}
 
-	g.metric.Inc("routes_downstream_hits", labels)
-	g.metric.Observe("routes_downstream_latency_seconds", float64(time.Since(startTime).Milliseconds()), labels)
+	_ = g.metric.Inc("routes_downstream_hits", labels)
+	_ = g.metric.Observe("routes_downstream_latency_seconds", float64(time.Since(startTime).Milliseconds()), labels)
 }
 
 func (g *generator) inheritRouterObject(routeObject entity.RouteObject, routePath *entity.RouterPath) {

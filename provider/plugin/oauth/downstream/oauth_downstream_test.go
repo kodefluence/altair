@@ -150,7 +150,7 @@ func TestOauth(t *testing.T) {
 						c.Request = &http.Request{
 							Header: http.Header{},
 						}
-						c.Request.Header.Add("Authorization", fmt.Sprintf("%s", token))
+						c.Request.Header.Add("Authorization", token)
 
 						r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
 

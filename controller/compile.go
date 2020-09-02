@@ -60,14 +60,14 @@ func trackRequest(ctrl core.Controller, metric core.Metric, elapsedTime int64, w
 	statusCode := strconv.Itoa(writer.Status())
 	statusCodGroup := strconv.Itoa(((writer.Status() / 100) * 100))
 
-	metric.Inc("controller_hits", map[string]string{
+	_ = metric.Inc("controller_hits", map[string]string{
 		"method":            ctrl.Method(),
 		"path":              ctrl.Path(),
 		"status_code":       statusCode,
 		"status_code_group": statusCodGroup,
 	})
 
-	metric.Observe("controller_elapsed_time_seconds", float64(elapsedTime), map[string]string{
+	_ = metric.Observe("controller_elapsed_time_seconds", float64(elapsedTime), map[string]string{
 		"method":            ctrl.Method(),
 		"path":              ctrl.Path(),
 		"status_code":       statusCode,
@@ -81,11 +81,9 @@ func recoverFunc(trackID uuid.UUID, c *gin.Context, ctrl core.Controller, metric
 
 		var j journal.Journal
 
-		switch err.(type) {
+		switch err := err.(type) {
 		case error:
 			j = journal.Error(fmt.Sprintf("panic received by server. Because of %v", err), err.(error))
-		case string:
-			j = journal.Error(fmt.Sprintf("panic received by server. Because of %v", err), errors.New(err.(string)))
 		default:
 			j = journal.Error(fmt.Sprintf("panic received by server. Because of %v", err), errors.New("altair panic with undefined error"))
 		}
@@ -103,9 +101,7 @@ func recoverFunc(trackID uuid.UUID, c *gin.Context, ctrl core.Controller, metric
 }
 
 func logRequestError(trackID uuid.UUID, c *gin.Context, ctrl core.Controller, elapsedTime int64, params string) {
-	var j journal.Journal
-
-	j = journal.Error("Altair endpoint error", errors.New(fmt.Sprintf("altair endpoint error: %d", c.Writer.Status())))
+	j := journal.Error("Altair endpoint error", fmt.Errorf("altair endpoint error: %d", c.Writer.Status()))
 
 	instrumentingLog(c, j, params)
 

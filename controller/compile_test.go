@@ -82,7 +82,7 @@ func TestCompile(t *testing.T) {
 				w := mock.PerformRequest(engine, panicStringController.Method(), panicStringController.Path(), nil)
 
 				var response responseExample
-				err := json.Unmarshal([]byte(w.Body.String()), &response)
+				err := json.Unmarshal(w.Body.Bytes(), &response)
 
 				assert.Equal(t, http.StatusInternalServerError, w.Code)
 				assert.Nil(t, err, "error should be nil")
@@ -98,7 +98,7 @@ func TestCompile(t *testing.T) {
 				w := mock.PerformRequest(engine, panicErrorController.Method(), panicErrorController.Path(), nil)
 
 				var response responseExample
-				err := json.Unmarshal([]byte(w.Body.String()), &response)
+				err := json.Unmarshal(w.Body.Bytes(), &response)
 
 				assert.Equal(t, http.StatusInternalServerError, w.Code)
 				assert.Nil(t, err, "error should be nil")
@@ -113,7 +113,7 @@ func TestCompile(t *testing.T) {
 				w := mock.PerformRequest(engine, panicOtherController.Method(), panicOtherController.Path(), nil)
 
 				var response responseExample
-				err := json.Unmarshal([]byte(w.Body.String()), &response)
+				err := json.Unmarshal(w.Body.Bytes(), &response)
 
 				assert.Equal(t, http.StatusInternalServerError, w.Code)
 				assert.Nil(t, err, "error should be nil")
