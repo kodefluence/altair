@@ -47,8 +47,8 @@ This software is still in *alpha version*, which may contain several hidden bugs
 #### How To
 
 1. Clone this repo
-2. `go run altair.go migrate main_database`
-3. `go run altair.go run`
+2. `go run cmd/altair/main.go migrate main_database`
+3. `go run cmd/altair/main.go server`
 4. Read [CONTRIBUTING.md](https://github.com/insomnius/code-geek/blob/master/CONTRIBUTING.md)
 
 ## Feature
