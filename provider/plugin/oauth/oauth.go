@@ -62,6 +62,7 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 
 	// DownStreamPlugin
 	oauthDownStream := downstream.NewOauth(oauthAccessTokenModel)
+	applicationValidationDownStream := downstream.NewApplicationValidation(oauthApplicationModel)
 
 	appBearer.InjectController(controller.Application().List(applicationManager))
 	appBearer.InjectController(controller.Application().One(applicationManager))
@@ -72,6 +73,7 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 	appBearer.InjectController(controller.Authorization().Token(authorization))
 
 	appBearer.InjectDownStreamPlugin(oauthDownStream)
+	appBearer.InjectDownStreamPlugin(applicationValidationDownStream)
 
 	return nil
 }
