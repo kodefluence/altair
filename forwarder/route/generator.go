@@ -171,6 +171,7 @@ func (g *generator) decorateProxyRequest(c *gin.Context, urlPath, trackID string
 	proxyReq.URL.Path = c.Request.URL.Path
 	proxyReq.Host = os.Getenv("PROXY_HOST")
 	proxyReq.Header.Add("X-Track-ID", trackID)
+	proxyReq.Header.Add("X-Request-ID", trackID)
 	proxyReq.Header.Set("X-Real-Ip-Address", c.ClientIP())
 	proxyReq.Header.Set("X-Forwarded-For", c.Request.RemoteAddr)
 
