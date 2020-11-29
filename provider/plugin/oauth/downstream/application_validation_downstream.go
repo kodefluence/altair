@@ -1,10 +1,8 @@
 package downstream
 
 import (
-	"bytes"
 	"database/sql"
 	"encoding/json"
-	"io"
 	"net/http"
 
 	coreEntity "github.com/codefluence-x/altair/entity"
@@ -41,15 +39,14 @@ func (o *ApplicationValidation) Intervene(c *gin.Context, proxyReq *http.Request
 		return ErrInvalidRequest
 	}
 
-	bufferString := bytes.NewBuffer(nil)
-	_, err := io.CopyBuffer(bufferString, proxyReq.Body, nil)
+	body, err := proxyReq.GetBody()
 	if err != nil {
 		c.AbortWithStatus(http.StatusServiceUnavailable)
 		return ErrUnavailable
 	}
 
 	applicationJSON := entity.OauthApplicationJSON{}
-	err = json.Unmarshal(bufferString.Bytes(), &applicationJSON)
+	err = json.NewDecoder(body).Decode(&applicationJSON)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return ErrBadRequest
