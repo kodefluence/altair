@@ -17,20 +17,22 @@ import (
 	"github.com/codefluence-x/journal"
 )
 
-var serverCmd = &cobra.Command{
-	Use:   "server",
-	Short: "Run API gateway services.",
-	Run: func(cmd *cobra.Command, args []string) {
-		defer closeConnection()
-		if err := fabricateConnection(); err != nil {
-			journal.Error("Error running altair:", err).SetTags("altair", "main").Log()
-			return
-		}
+func ServerCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "server",
+		Short: "Run API gateway services.",
+		Run: func(cmd *cobra.Command, args []string) {
+			defer closeConnection()
+			if err := fabricateConnection(); err != nil {
+				journal.Error("Error running altair:", err).SetTags("altair", "main").Log()
+				return
+			}
 
-		if err := runAPI(); err != nil {
-			journal.Error("Error running altair API:", err).SetTags("altair", "main").Log()
-		}
-	},
+			if err := runAPI(); err != nil {
+				journal.Error("Error running altair API:", err).SetTags("altair", "main").Log()
+			}
+		},
+	}
 }
 
 func runAPI() error {

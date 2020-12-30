@@ -30,7 +30,7 @@ func init() {
 	RootCmd().AddCommand(MigrateCmd())
 	RootCmd().AddCommand(MigrateDownCmd())
 	RootCmd().AddCommand(MigrateRollbackCmd())
-	RootCmd().AddCommand(serverCmd)
+	RootCmd().AddCommand(ServerCmd())
 }
 
 func RootCmd() *cobra.Command {
