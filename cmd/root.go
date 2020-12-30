@@ -15,14 +15,6 @@ import (
 )
 
 var (
-	RootCmd = &cobra.Command{
-		Use:   "altair",
-		Short: "Light Weight and Robust API Gateway.",
-		Run: func(cmd *cobra.Command, args []string) {
-			_ = cmd.Help()
-		},
-	}
-
 	dbConfigs    map[string]core.DatabaseConfig = map[string]core.DatabaseConfig{}
 	databases    map[string]*sql.DB             = map[string]*sql.DB{}
 	appConfig    core.AppConfig
@@ -35,10 +27,20 @@ func init() {
 
 	cobra.OnInitialize(loadConfig)
 
-	RootCmd.AddCommand(migrateCmd)
-	RootCmd.AddCommand(migrateDownCmd)
-	RootCmd.AddCommand(migrateRollbackCmd)
-	RootCmd.AddCommand(serverCmd)
+	RootCmd().AddCommand(MigrateCmd())
+	RootCmd().AddCommand(MigrateDownCmd())
+	RootCmd().AddCommand(MigrateRollbackCmd())
+	RootCmd().AddCommand(serverCmd)
+}
+
+func RootCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "altair",
+		Short: "Light Weight and Robust API Gateway.",
+		Run: func(cmd *cobra.Command, args []string) {
+			_ = cmd.Help()
+		},
+	}
 }
 
 func loadConfig() {
