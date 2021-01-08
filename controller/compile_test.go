@@ -9,8 +9,8 @@ import (
 
 	"github.com/codefluence-x/altair/controller"
 	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/altair/mock"
 	"github.com/codefluence-x/altair/provider/metric"
+	"github.com/codefluence-x/altair/testhelper"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 )
@@ -26,7 +26,7 @@ func TestCompile(t *testing.T) {
 			})
 
 			controller.Compile(engine, metric.NewPrometheusMetric(), gracefullController)
-			w := mock.PerformRequest(engine, gracefullController.Method(), gracefullController.Path(), nil)
+			w := testhelper.PerformRequest(engine, gracefullController.Method(), gracefullController.Path(), nil)
 
 			assert.Equal(t, http.StatusOK, w.Code)
 			assert.Equal(t, "OK", w.Body.String())
@@ -39,7 +39,7 @@ func TestCompile(t *testing.T) {
 				})
 
 				controller.Compile(engine, metric.NewPrometheusMetric(), gracefullPostController)
-				w := mock.PerformRequest(engine, gracefullPostController.Method(), gracefullPostController.Path(), strings.NewReader(`{"object":"testing"}`))
+				w := testhelper.PerformRequest(engine, gracefullPostController.Method(), gracefullPostController.Path(), strings.NewReader(`{"object":"testing"}`))
 
 				assert.Equal(t, http.StatusOK, w.Code)
 				assert.Equal(t, "OK", w.Body.String())
@@ -51,7 +51,7 @@ func TestCompile(t *testing.T) {
 				})
 
 				controller.Compile(engine, metric.NewPrometheusMetric(), gracefullPostBodyErrorController)
-				w := mock.PerformRequest(engine, gracefullPostBodyErrorController.Method(), gracefullPostBodyErrorController.Path(), errRequestReader{})
+				w := testhelper.PerformRequest(engine, gracefullPostBodyErrorController.Method(), gracefullPostBodyErrorController.Path(), errRequestReader{})
 
 				assert.Equal(t, http.StatusOK, w.Code)
 				assert.Equal(t, "OK", w.Body.String())
@@ -66,7 +66,7 @@ func TestCompile(t *testing.T) {
 			})
 
 			controller.Compile(engine, metric.NewPrometheusMetric(), notGracefullController)
-			w := mock.PerformRequest(engine, notGracefullController.Method(), notGracefullController.Path(), nil)
+			w := testhelper.PerformRequest(engine, notGracefullController.Method(), notGracefullController.Path(), nil)
 
 			assert.Equal(t, http.StatusInternalServerError, w.Code)
 			assert.Equal(t, "Are you kidding me? The server is just crash!", w.Body.String())
@@ -79,7 +79,7 @@ func TestCompile(t *testing.T) {
 				})
 
 				controller.Compile(engine, metric.NewPrometheusMetric(), panicStringController)
-				w := mock.PerformRequest(engine, panicStringController.Method(), panicStringController.Path(), nil)
+				w := testhelper.PerformRequest(engine, panicStringController.Method(), panicStringController.Path(), nil)
 
 				var response responseExample
 				err := json.Unmarshal([]byte(w.Body.String()), &response)
@@ -95,7 +95,7 @@ func TestCompile(t *testing.T) {
 				})
 
 				controller.Compile(engine, metric.NewPrometheusMetric(), panicErrorController)
-				w := mock.PerformRequest(engine, panicErrorController.Method(), panicErrorController.Path(), nil)
+				w := testhelper.PerformRequest(engine, panicErrorController.Method(), panicErrorController.Path(), nil)
 
 				var response responseExample
 				err := json.Unmarshal([]byte(w.Body.String()), &response)
@@ -110,7 +110,7 @@ func TestCompile(t *testing.T) {
 				})
 
 				controller.Compile(engine, metric.NewPrometheusMetric(), panicOtherController)
-				w := mock.PerformRequest(engine, panicOtherController.Method(), panicOtherController.Path(), nil)
+				w := testhelper.PerformRequest(engine, panicOtherController.Method(), panicOtherController.Path(), nil)
 
 				var response responseExample
 				err := json.Unmarshal([]byte(w.Body.String()), &response)

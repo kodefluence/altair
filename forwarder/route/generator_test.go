@@ -13,6 +13,7 @@ import (
 	"github.com/codefluence-x/altair/forwarder/route"
 	"github.com/codefluence-x/altair/mock"
 	"github.com/codefluence-x/altair/provider/metric"
+	"github.com/codefluence-x/altair/testhelper"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -69,7 +70,7 @@ func TestGenerator(t *testing.T) {
 				time.Sleep(time.Millisecond * 100)
 
 				assert.NotPanics(t, func() {
-					rec := mock.PerformRequest(gatewayEngine, "GET", "/users/me", nil)
+					rec := testhelper.PerformRequest(gatewayEngine, "GET", "/users/me", nil)
 					assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
 				})
 
@@ -119,7 +120,7 @@ func TestGenerator(t *testing.T) {
 				time.Sleep(time.Millisecond * 100)
 
 				assert.NotPanics(t, func() {
-					rec := mock.PerformRequest(gatewayEngine, "GET", "/users/me", nil)
+					rec := testhelper.PerformRequest(gatewayEngine, "GET", "/users/me", nil)
 					assert.Equal(t, http.StatusInternalServerError, rec.Result().StatusCode)
 				})
 
@@ -176,7 +177,7 @@ func TestGenerator(t *testing.T) {
 				time.Sleep(time.Millisecond * 100)
 
 				assert.NotPanics(t, func() {
-					rec := mock.PerformRequest(gatewayEngine, "GET", "/users/me", nil)
+					rec := testhelper.PerformRequest(gatewayEngine, "GET", "/users/me", nil)
 					assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
 				})
 
@@ -232,7 +233,7 @@ func TestGenerator(t *testing.T) {
 				time.Sleep(time.Millisecond * 100)
 
 				assert.NotPanics(t, func() {
-					rec := mock.PerformRequest(gatewayEngine, "GET", "/users/authorization", nil)
+					rec := testhelper.PerformRequest(gatewayEngine, "GET", "/users/authorization", nil)
 					assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
 				})
 
@@ -286,7 +287,7 @@ func TestGenerator(t *testing.T) {
 				time.Sleep(time.Millisecond * 100)
 
 				assert.NotPanics(t, func() {
-					rec := mock.PerformRequest(gatewayEngine, "GET", "/users/details/me", nil)
+					rec := testhelper.PerformRequest(gatewayEngine, "GET", "/users/details/me", nil)
 					assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
 				})
 
@@ -341,7 +342,7 @@ func TestGenerator(t *testing.T) {
 				time.Sleep(time.Millisecond * 100)
 
 				assert.NotPanics(t, func() {
-					rec := mock.PerformRequest(gatewayEngine, "GET", "/users/me", nil)
+					rec := testhelper.PerformRequest(gatewayEngine, "GET", "/users/me", nil)
 					assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
 				})
 
@@ -393,7 +394,7 @@ func TestGenerator(t *testing.T) {
 				time.Sleep(time.Millisecond * 100)
 
 				assert.NotPanics(t, func() {
-					rec := mock.PerformRequest(gatewayEngine, "GET", "/users/me/gusta", nil)
+					rec := testhelper.PerformRequest(gatewayEngine, "GET", "/users/me/gusta", nil)
 					assert.Equal(t, http.StatusNotFound, rec.Result().StatusCode)
 				})
 
@@ -445,7 +446,7 @@ func TestGenerator(t *testing.T) {
 				time.Sleep(time.Millisecond * 100)
 
 				assert.NotPanics(t, func() {
-					rec := mock.PerformRequest(gatewayEngine, "POST", "/users/me", strings.NewReader(`{"id": 1, "state": "preparing"}`))
+					rec := testhelper.PerformRequest(gatewayEngine, "POST", "/users/me", strings.NewReader(`{"id": 1, "state": "preparing"}`))
 					assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
 				})
 
@@ -524,7 +525,7 @@ func TestGenerator(t *testing.T) {
 				time.Sleep(time.Millisecond * 100)
 
 				assert.NotPanics(t, func() {
-					rec := mock.PerformRequest(gatewayEngine, "GET", "/users/me", nil, func(req *http.Request) {
+					rec := testhelper.PerformRequest(gatewayEngine, "GET", "/users/me", nil, func(req *http.Request) {
 						req.Header.Add("foo", "bar")
 					})
 					assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
