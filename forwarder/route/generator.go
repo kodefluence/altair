@@ -169,6 +169,8 @@ func (g *generator) decorateProxyRequest(c *gin.Context, urlPath, trackID string
 	proxyReq.URL.Scheme = "http"
 	proxyReq.URL.Host = routeObject.Host
 	proxyReq.URL.Path = c.Request.URL.Path
+	proxyReq.URL.RawQuery = c.Request.URL.RawQuery
+
 	proxyReq.Host = os.Getenv("PROXY_HOST")
 	proxyReq.Header.Add("X-Track-ID", trackID)
 	proxyReq.Header.Add("X-Request-ID", trackID)

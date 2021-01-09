@@ -126,6 +126,58 @@ func TestGenerator(t *testing.T) {
 
 				_ = srvTarget.Close()
 			})
+
+			t.Run("Return original status code from the target server", func(t *testing.T) {
+				targetEngine := gin.Default()
+
+				gatewayEngine := gin.New()
+
+				var routeObjects []entity.RouteObject
+				routeObjects = append(
+					routeObjects,
+					entity.RouteObject{
+						Auth:   "none",
+						Host:   "localhost:9701",
+						Name:   "users",
+						Prefix: "/users",
+						Path: map[string]entity.RouterPath{
+							"/me":          entity.RouterPath{Auth: "none"},
+							"/details/:id": entity.RouterPath{Auth: "none"},
+						},
+					},
+				)
+
+				targetEngine.GET("/users/me", func(c *gin.Context) {
+					assert.Equal(t, "bar", c.Query("foo"))
+					assert.Equal(t, "case", c.Query("cool"))
+					c.Status(http.StatusInternalServerError)
+				})
+
+				var downStreamPlugin []core.DownStreamPlugin
+				downStreamPlugin = append(downStreamPlugin)
+
+				err := route.Generator().Generate(gatewayEngine, metric.NewPrometheusMetric(), routeObjects, downStreamPlugin)
+				assert.Nil(t, err)
+
+				srvTarget := &http.Server{
+					Addr:    ":9701",
+					Handler: targetEngine,
+				}
+
+				go func() {
+					_ = srvTarget.ListenAndServe()
+				}()
+
+				// Given sleep time so the server can boot first
+				time.Sleep(time.Millisecond * 100)
+
+				assert.NotPanics(t, func() {
+					rec := testhelper.PerformRequest(gatewayEngine, "GET", "/users/me?foo=bar&cool=case", nil)
+					assert.Equal(t, http.StatusInternalServerError, rec.Result().StatusCode)
+				})
+
+				_ = srvTarget.Close()
+			})
 		})
 
 		t.Run("Call target services routes with downstream plugins", func(t *testing.T) {
