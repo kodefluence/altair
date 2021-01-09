@@ -23,8 +23,10 @@ build:
 	GOOS=windows GOARCH=386 CGO_ENABLED=0 go build -o ./build/windows/altair
 	GOOS=darwin GOARCH=386 CGO_ENABLED=0 go build -o ./build/darwin/altair
 
-build_docker:
+build_docker: build_docker_latest
 	sudo docker build -t $(IMAGE):$(VERSION) -f ./Dockerfile .
+
+build_docker_latest:
 	sudo docker build -t $(IMAGE):latest -f ./Dockerfile .
 
 push_docker:
