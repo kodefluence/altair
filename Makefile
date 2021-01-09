@@ -29,6 +29,8 @@ build_docker: build_docker_latest
 build_docker_latest:
 	sudo docker build -t $(IMAGE):latest -f ./Dockerfile .
 
-push_docker:
+push_docker: push_docker_latest
 	sudo docker push $(IMAGE):$(VERSION)
+
+push_docker_latest:
 	sudo docker push $(IMAGE):latest
