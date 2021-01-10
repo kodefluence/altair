@@ -33,13 +33,35 @@ This software is still in *alpha version*, which may contain several hidden bugs
 
 ## Docker
 
-[[Here](https://hub.docker.com/r/codefluence/altair)]
+We are on [dockerhub](https://hub.docker.com/r/codefluence/altair)! Common implementation of altair docker is to have directory where you store your config and routes folder inside it.
 
-> TBD
+```
+config/
+routes/
+.env
+docker-compose.yml
+```
+
+The content of docker-compose could be like this:
+
+```yaml
+version: "3.8"
+services:
+  altair:
+    image: codefluence/altair:latest
+    volumes:
+      - ./routes/:/opt/altair/routes/
+      - ./config/:/opt/altair/config/
+      - ./.env:/opt/altair/.env
+    ports:
+      - "1304:1304"
+    network_mode: host
+    env_file: ./.env
+```
 
 ## How to Use
 
-> TBD
+We recommend you to use Altair using docker-compose like above. But if you want to use the binary instead, you could download the binary from release pages.
 
 ## How to Contribute
 
