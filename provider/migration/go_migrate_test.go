@@ -6,8 +6,8 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/mock"
 	"github.com/codefluence-x/altair/provider/migration"
+	"github.com/codefluence-x/altair/testhelper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,7 +21,7 @@ func TestGoMigrate(t *testing.T) {
 					panic(err)
 				}
 
-				mock.GenerateTempTestFiles("./migration/", "some content", "01_migration.up.sql", 0666)
+				testhelper.GenerateTempTestFiles("./migration/", "some content", "01_migration.up.sql", 0666)
 
 				dbConfig := entity.MYSQLDatabaseConfig{
 					MigrationSource: "file://migration",
@@ -44,7 +44,7 @@ func TestGoMigrate(t *testing.T) {
 				assert.Nil(t, err)
 				assert.NotNil(t, migrator)
 
-				mock.RemoveTempTestFiles("./migration/")
+				testhelper.RemoveTempTestFiles("./migration/")
 			})
 		})
 

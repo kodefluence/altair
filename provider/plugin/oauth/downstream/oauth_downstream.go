@@ -2,7 +2,6 @@ package downstream
 
 import (
 	"database/sql"
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -14,9 +13,6 @@ import (
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
 	"github.com/gin-gonic/gin"
 )
-
-// ErrInvalidBearerFormat returned when the header of bearer token is invalid
-var ErrInvalidBearerFormat = errors.New("Invalid bearer token format")
 
 // Oauth implement downstream plugin interface
 type Oauth struct {
