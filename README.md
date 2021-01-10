@@ -55,7 +55,7 @@ This software is still in *alpha version*, which may contain several hidden bugs
 1. Clone this repo
 2. `go run altair.go migrate main_database`
 3. `go run altair.go run`
-4. Read [CONTRIBUTING.md](https://github.com/insomnius/code-geek/blob/master/CONTRIBUTING.md)
+4. Read [CONTRIBUTING.md](https://github.com/codefluence-x/altair/blob/master/CONTRIBUTING.md)
 
 ## Feature
 
