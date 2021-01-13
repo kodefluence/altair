@@ -9,7 +9,7 @@ import (
 
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/forwarder/route"
-	"github.com/codefluence-x/altair/mock"
+	"github.com/codefluence-x/altair/testhelper"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
@@ -36,14 +36,14 @@ func TestCompiler(t *testing.T) {
 					assert.Equal(t, expectedRouteObject, routeObjects[0])
 				})
 
-				mock.RemoveTempTestFiles(routesPath)
+				testhelper.RemoveTempTestFiles(routesPath)
 			})
 
 			t.Run("Include no yaml files", func(t *testing.T) {
 				routesPath := "./routes_gracefully_include_no_yaml_files/"
 
 				generateAllTempTestFiles(routesPath, ExampleRoutesGracefully)
-				mock.GenerateTempTestFiles(routesPath, "", "not_included.txt", 0666)
+				testhelper.GenerateTempTestFiles(routesPath, "", "not_included.txt", 0666)
 
 				t.Run("Return []entity.RouteObject and nil", func(t *testing.T) {
 					c := route.Compiler()
@@ -58,7 +58,7 @@ func TestCompiler(t *testing.T) {
 					assert.Equal(t, expectedRouteObject, routeObjects[0])
 				})
 
-				mock.RemoveTempTestFiles(routesPath)
+				testhelper.RemoveTempTestFiles(routesPath)
 			})
 
 			t.Run("Yaml unmarshal error", func(t *testing.T) {
@@ -74,7 +74,7 @@ func TestCompiler(t *testing.T) {
 					assert.Equal(t, 0, len(routeObjects))
 				})
 
-				mock.RemoveTempTestFiles(routesPath)
+				testhelper.RemoveTempTestFiles(routesPath)
 			})
 
 			t.Run("No auth set", func(t *testing.T) {
@@ -91,7 +91,7 @@ func TestCompiler(t *testing.T) {
 					assert.Equal(t, "none", routeObjects[0].Auth)
 				})
 
-				mock.RemoveTempTestFiles(routesPath)
+				testhelper.RemoveTempTestFiles(routesPath)
 			})
 
 			t.Run("Template parsing error", func(t *testing.T) {
@@ -107,7 +107,7 @@ func TestCompiler(t *testing.T) {
 					assert.Equal(t, 0, len(routeObjects))
 				})
 
-				mock.RemoveTempTestFiles(routesPath)
+				testhelper.RemoveTempTestFiles(routesPath)
 			})
 
 			t.Run("Dir is not exists", func(t *testing.T) {
@@ -130,7 +130,7 @@ func generateAllTempTestFiles(routesPath, content string) {
 		panic(err)
 	}
 
-	mock.GenerateTempTestFiles(routesPath, content, "app.yml", 0666)
+	testhelper.GenerateTempTestFiles(routesPath, content, "app.yml", 0666)
 }
 
 func generateFiles(routesPath, content, fileName string, mode os.FileMode) {

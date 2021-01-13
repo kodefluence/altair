@@ -31,9 +31,37 @@ This software is still in *alpha version*, which may contain several hidden bugs
 
 [Plugin API Documentation in Postman](https://documenter.getpostman.com/view/3666028/SzmcZJ79?version=latest#b870ae5a-b305-4016-8155-4899af1f26b1)
 
+## Docker
+
+We are on [dockerhub](https://hub.docker.com/r/codefluence/altair)! Common implementation of altair docker is to have directory where you store your config and routes folder inside it.
+
+```
+config/
+routes/
+.env
+docker-compose.yml
+```
+
+The content of docker-compose could be like this:
+
+```yaml
+version: "3.8"
+services:
+  altair:
+    image: codefluence/altair:latest
+    volumes:
+      - ./routes/:/opt/altair/routes/
+      - ./config/:/opt/altair/config/
+      - ./.env:/opt/altair/.env
+    ports:
+      - "1304:1304"
+    network_mode: host
+    env_file: ./.env
+```
+
 ## How to Use
 
-> TBD
+We recommend you to use Altair using docker-compose like above. But if you want to use the binary instead, you could download the binary from release pages.
 
 ## How to Contribute
 
@@ -49,7 +77,7 @@ This software is still in *alpha version*, which may contain several hidden bugs
 1. Clone this repo
 2. `go run altair.go migrate main_database`
 3. `go run altair.go run`
-4. Read [CONTRIBUTING.md](https://github.com/insomnius/code-geek/blob/master/CONTRIBUTING.md)
+4. Read [CONTRIBUTING.md](https://github.com/codefluence-x/altair/blob/master/CONTRIBUTING.md)
 
 ## Feature
 

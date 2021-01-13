@@ -2,7 +2,6 @@ package route
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -23,6 +22,7 @@ type generator struct {
 	metric           core.Metric
 }
 
+// Generator create route generator
 func Generator() core.RouteGenerator {
 	return &generator{}
 }
@@ -37,7 +37,7 @@ func (g *generator) Generate(engine *gin.Engine, metric core.Metric, routeObject
 
 	defer func() {
 		if r := recover(); r != nil {
-			errVariable = errors.New(fmt.Sprintf("Error generating route because of %v", r))
+			errVariable = fmt.Errorf("Error generating route because of %v", r)
 			journal.Error("Panic error when generating routes", errVariable).
 				SetTags("route", "generator", "defer", "panic").
 				Log()
@@ -169,8 +169,11 @@ func (g *generator) decorateProxyRequest(c *gin.Context, urlPath, trackID string
 	proxyReq.URL.Scheme = "http"
 	proxyReq.URL.Host = routeObject.Host
 	proxyReq.URL.Path = c.Request.URL.Path
+	proxyReq.URL.RawQuery = c.Request.URL.RawQuery
+
 	proxyReq.Host = os.Getenv("PROXY_HOST")
 	proxyReq.Header.Add("X-Track-ID", trackID)
+	proxyReq.Header.Add("X-Request-ID", trackID)
 	proxyReq.Header.Set("X-Real-Ip-Address", c.ClientIP())
 	proxyReq.Header.Set("X-Forwarded-For", c.Request.RemoteAddr)
 
