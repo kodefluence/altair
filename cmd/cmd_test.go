@@ -6,25 +6,16 @@ import (
 	"testing"
 
 	"github.com/codefluence-x/altair/cmd"
-	"github.com/ory/dockertest/v3"
 	"github.com/stretchr/testify/require"
 )
 
-func initMockMysql(t *testing.T) (*dockertest.Pool, *dockertest.Resource) {
-	pool, err := dockertest.NewPool("")
-	require.NoError(t, err)
-
-	resource, err := pool.Run("mysql", "5.7", []string{"MYSQL_ROOT_PASSWORD=secret"})
-	require.NoError(t, err)
-
+func init() {
 	os.Setenv("DATABASE_NAME", "altair_development")
 	os.Setenv("DATABASE_USERNAME", "root")
-	os.Setenv("DATABASE_PASSWORD", "secret")
+	os.Setenv("DATABASE_PASSWORD", "root")
 	os.Setenv("DATABASE_HOST", "localhost")
-	os.Setenv("DATABASE_PORT", "3306")
+	os.Setenv("DATABASE_PORT", "33060")
 	os.Setenv("BASIC_AUTH_PASSWORD", "1234")
-
-	return pool, resource
 }
 
 func TestRootCmd(t *testing.T) {
@@ -42,53 +33,33 @@ func TestRootCmd(t *testing.T) {
 }
 
 func TestServerCmd(t *testing.T) {
-	pool, resource := initMockMysql(t)
-
 	root := cmd.RootCmd
 	root.SetArgs([]string{"server"})
 
 	_, err := root.ExecuteC()
 	require.NoError(t, err)
-
-	err = pool.Purge(resource)
-	require.NoError(t, err)
 }
 
 func TestMigrateCmd(t *testing.T) {
-	pool, resource := initMockMysql(t)
-
 	root := cmd.RootCmd
-	root.SetArgs([]string{"migrate"})
+	root.SetArgs([]string{"migrate", "altair_development"})
 
 	_, err := root.ExecuteC()
-	require.NoError(t, err)
-
-	err = pool.Purge(resource)
 	require.NoError(t, err)
 }
 
 func TestMigrateDownCmd(t *testing.T) {
-	pool, resource := initMockMysql(t)
-
 	root := cmd.RootCmd
-	root.SetArgs([]string{"migrate:down"})
+	root.SetArgs([]string{"migrate:down", "altair_development"})
 
 	_, err := root.ExecuteC()
-	require.NoError(t, err)
-
-	err = pool.Purge(resource)
 	require.NoError(t, err)
 }
 
 func TestMigrateRollbackCmd(t *testing.T) {
-	pool, resource := initMockMysql(t)
-
 	root := cmd.RootCmd
-	root.SetArgs([]string{"migrate:rollback"})
+	root.SetArgs([]string{"migrate:rollback", "altair_development"})
 
 	_, err := root.ExecuteC()
-	require.NoError(t, err)
-
-	err = pool.Purge(resource)
 	require.NoError(t, err)
 }
