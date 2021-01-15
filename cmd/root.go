@@ -40,21 +40,21 @@ func init() {
 func loadConfig() {
 	var err error
 
-	loadedDBConfigs, err := loader.Database().Compile("../config/database.yml")
+	loadedDBConfigs, err := loader.Database().Compile("./config/database.yml")
 	if err != nil {
 		journal.Error("Error loading database config", err).Log()
 		os.Exit(1)
 	}
 	dbConfigs = loadedDBConfigs
 
-	loadedAppConfig, err := loader.App().Compile("../config/app.yml")
+	loadedAppConfig, err := loader.App().Compile("./config/app.yml")
 	if err != nil {
 		journal.Error("Error loading app config", err).Log()
 		os.Exit(1)
 	}
 	appConfig = loadedAppConfig
 
-	loadedPluginBearer, err := loader.Plugin().Compile("../config/plugin/")
+	loadedPluginBearer, err := loader.Plugin().Compile("./config/plugin/")
 	if err != nil {
 		journal.Error("Error loading plugin config", err).Log()
 		os.Exit(1)
