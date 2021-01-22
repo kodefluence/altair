@@ -4,7 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/codefluence-x/journal"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func monitor(ctx context.Context, modelName, query string, f func() error) error {
@@ -12,24 +13,24 @@ func monitor(ctx context.Context, modelName, query string, f func() error) error
 	err := f()
 	elapsedTime := time.Since(startTime).Milliseconds()
 	if err != nil {
-		journal.Error("Failed executing query", err).
-			SetTrackId(ctx.Value("track_id")).
-			AddField("duration_in_ms", elapsedTime).
-			AddField("model_name", modelName).
-			AddField("query", query).
-			SetTags("model", "monitor").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", ctx.Value("request_id")).
+			Int64("duration_in_ms", elapsedTime).
+			Str("model_name", modelName).
+			Str("query", query).
+			Array("tags", zerolog.Arr().Str("model").Str("monitor")).
+			Msg("Failed executing query")
 		return err
 	}
 
-	journal.Info("Complete executing query").
-		SetTrackId(ctx.Value("track_id")).
-		AddField("duration_in_ms", elapsedTime).
-		AddField("model_name", modelName).
-		AddField("query", query).
-		SetTags("model", "monitor").
-		SetTrackId(ctx.Value("track_id")).
-		Log()
+	log.Info().
+		Interface("request_id", ctx.Value("request_id")).
+		Int64("duration_in_ms", elapsedTime).
+		Str("model_name", modelName).
+		Str("query", query).
+		Array("tags", zerolog.Arr().Str("model").Str("monitor")).
+		Msg("Complete executing query")
 	return nil
 }

@@ -8,7 +8,8 @@ import (
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
-	"github.com/codefluence-x/journal"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 type applicationManager struct {
@@ -18,6 +19,7 @@ type applicationManager struct {
 	applicationValidator  interfaces.OauthValidator
 }
 
+// ApplicationManager manage all oauth application data business logic
 func ApplicationManager(formatter interfaces.OauthApplicationFormater, modelFormatter interfaces.ModelFormater, oauthApplicationModel interfaces.OauthApplicationModel, applicationValidator interfaces.OauthValidator) *applicationManager {
 	return &applicationManager{
 		formatter:             formatter,
@@ -30,12 +32,14 @@ func ApplicationManager(formatter interfaces.OauthApplicationFormater, modelForm
 func (am *applicationManager) List(ctx context.Context, offset, limit int) ([]entity.OauthApplicationJSON, int, *entity.Error) {
 	oauthApplications, err := am.oauthApplicationModel.Paginate(ctx, offset, limit)
 	if err != nil {
-		journal.Error("Error paginating oauth applications", err).
-			AddField("offset", offset).
-			AddField("limit", limit).
-			SetTags("service", "application_manager", "list", "paginate").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", ctx.Value("request_id")).
+			Int("offset", offset).
+			Int("limit", limit).
+			Array("tags", zerolog.Arr().Str("service").Str("application_manager").Str("list").Str("paginate")).
+			Msg("Error paginating oauth applications")
 
 		return []entity.OauthApplicationJSON(nil), 0, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
@@ -45,13 +49,14 @@ func (am *applicationManager) List(ctx context.Context, offset, limit int) ([]en
 
 	total, err := am.oauthApplicationModel.Count(ctx)
 	if err != nil {
-		journal.Error("Error count total of oauth applications", err).
-			AddField("offset", offset).
-			AddField("limit", limit).
-			SetTags("service", "application_manager", "list", "count").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
-
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", ctx.Value("request_id")).
+			Int("offset", offset).
+			Int("limit", limit).
+			Array("tags", zerolog.Arr().Str("service").Str("application_manager").Str("list").Str("count")).
+			Msg("Error count total of oauth applications")
 		return []entity.OauthApplicationJSON(nil), 0, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
@@ -64,22 +69,23 @@ func (am *applicationManager) List(ctx context.Context, offset, limit int) ([]en
 
 func (am *applicationManager) Create(ctx context.Context, e entity.OauthApplicationJSON) (entity.OauthApplicationJSON, *entity.Error) {
 	if err := am.applicationValidator.ValidateApplication(ctx, e); err != nil {
-		journal.Error("Got validation error from oauth application validator", err).
-			AddField("data", e).
-			SetTags("service", "application_manager", "create", "model_create").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
-
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("data", e).
+			Array("tags", zerolog.Arr().Str("service").Str("application_manager").Str("create").Str("validate_application")).
+			Msg("Got validation error from oauth application validator")
 		return entity.OauthApplicationJSON{}, err
 	}
 
 	id, err := am.oauthApplicationModel.Create(ctx, am.modelFormatter.OauthApplication(e))
 	if err != nil {
-		journal.Error("Error when creating oauth application data", err).
-			AddField("data", e).
-			SetTags("service", "application_manager", "create", "model_create").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("data", e).
+			Array("tags", zerolog.Arr().Str("service").Str("application_manager").Str("create").Str("model_create")).
+			Msg("Error when creating oauth application data")
 
 		return entity.OauthApplicationJSON{}, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
@@ -97,12 +103,12 @@ func (am *applicationManager) Update(ctx context.Context, ID int, e entity.Oauth
 		Scopes:      e.Scopes,
 	})
 	if err != nil {
-		journal.Error("Error when updating oauth application data", err).
-			AddField("data", e).
-			SetTags("service", "application_manager", "update", "model_update").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
-
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("data", e).
+			Array("tags", zerolog.Arr().Str("service").Str("application_manager").Str("update").Str("model_update")).
+			Msg("Error when updating oauth application data")
 		return entity.OauthApplicationJSON{}, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
@@ -122,11 +128,12 @@ func (am *applicationManager) One(ctx context.Context, ID int) (entity.OauthAppl
 			}
 		}
 
-		journal.Error("Error when fetching single oauth application", err).
-			AddField("id", ID).
-			SetTags("service", "application_manager", "one", "model_one").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
+		log.Error().
+			Err(err).
+			Stack().
+			Int("id", ID).
+			Array("tags", zerolog.Arr().Str("service").Str("application_manager").Str("one").Str("model_one")).
+			Msg("Error when fetching single oauth application")
 
 		return entity.OauthApplicationJSON{}, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
