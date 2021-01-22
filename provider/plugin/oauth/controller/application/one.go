@@ -6,8 +6,9 @@ import (
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
-	"github.com/codefluence-x/journal"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 type oneController struct {
@@ -31,11 +32,12 @@ func (o *oneController) Path() string {
 func (o *oneController) Control(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		journal.Error("Cannot convert ascii to integer", err).
-			SetTags("controller", "application", "one", "strconv").
-			SetTrackId(c.Value("track_id")).
-			Log()
-
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", c.Value("request_id")).
+			Array("tags", zerolog.Arr().Str("controller").Str("application").Str("one").Str("strconv")).
+			Msg("Cannot convert ascii to integer")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"errors": eobject.Wrap(eobject.BadRequestError("url parameters: id is not integer")),
 		})
