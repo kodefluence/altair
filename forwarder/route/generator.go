@@ -11,9 +11,10 @@ import (
 
 	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/journal"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 type generator struct {
@@ -38,9 +39,10 @@ func (g *generator) Generate(engine *gin.Engine, metric core.Metric, routeObject
 	defer func() {
 		if r := recover(); r != nil {
 			errVariable = fmt.Errorf("Error generating route because of %v", r)
-			journal.Error("Panic error when generating routes", errVariable).
-				SetTags("route", "generator", "defer", "panic").
-				Log()
+			log.Error().
+				Err(fmt.Errorf("Error generating route because of %v", r)).
+				Array("tags", zerolog.Arr().Str("route").Str("generator").Str("defer").Str("panic")).
+				Msg("Panic error when generating routes")
 		}
 	}()
 
@@ -54,31 +56,31 @@ func (g *generator) Generate(engine *gin.Engine, metric core.Metric, routeObject
 
 			g.routerPath[urlPath] = routePath
 
-			journal.Info("Generating routes").
-				AddField("host", routeObject.Host).
-				AddField("name", routeObject.Name).
-				AddField("path", urlPath).
-				SetTags("route", "generator", "generate", "url_path").
-				Log()
+			log.Info().
+				Str("host", routeObject.Host).
+				Str("name", routeObject.Name).
+				Str("path", urlPath).
+				Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("url_path")).
+				Msg("Generating routes")
 
 			engine.Any(urlPath, func(c *gin.Context) {
-				trackID := uuid.New().String()
+				requestID := uuid.New().String()
 				startTime := time.Now()
 
-				g.do(c, urlPath, trackID, routeObject)
+				g.do(c, urlPath, requestID, routeObject)
 
-				journal.Info("Complete forwarding the request").
-					SetTrackId(trackID).
-					AddField("host", routeObject.Host).
-					AddField("prefix", routeObject.Prefix).
-					AddField("name", routeObject.Name).
-					AddField("path", urlPath).
-					AddField("method", c.Request.Method).
-					AddField("full_path", c.Request.URL.String()).
-					AddField("client_ip", c.ClientIP()).
-					AddField("duration_seconds", time.Since(startTime).Seconds()).
-					SetTags("route", "generator", "generate").
-					Log()
+				log.Info().
+					Str("request_id", requestID).
+					Str("host", routeObject.Host).
+					Str("prefix", routeObject.Prefix).
+					Str("name", routeObject.Name).
+					Str("path", urlPath).
+					Str("method", c.Request.Method).
+					Str("full_path", c.Request.URL.String()).
+					Str("client_ip", c.ClientIP()).
+					Float64("duration_seconds", time.Since(startTime).Seconds()).
+					Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate")).
+					Msg("Complete forwarding the request")
 			})
 		}
 	}
@@ -86,25 +88,25 @@ func (g *generator) Generate(engine *gin.Engine, metric core.Metric, routeObject
 	return errVariable
 }
 
-func (g *generator) do(c *gin.Context, urlPath, trackID string, routeObject entity.RouteObject) {
-	proxyReq, err := g.decorateProxyRequest(c, urlPath, trackID, routeObject)
+func (g *generator) do(c *gin.Context, urlPath, requestID string, routeObject entity.RouteObject) {
+	proxyReq, err := g.decorateProxyRequest(c, urlPath, requestID, routeObject)
 	if err != nil {
 		return
 	}
 
-	g.decorateHeader(c, proxyReq)
+	g.decorateHeader(c, requestID, proxyReq)
 
-	if err := g.downStreamPluginCallback(c, proxyReq, urlPath, trackID, routeObject); err != nil {
+	if err := g.downStreamPluginCallback(c, proxyReq, urlPath, requestID, routeObject); err != nil {
 		return
 	}
 
-	if err := g.callDownStreamService(c, proxyReq, urlPath, trackID, routeObject); err != nil {
+	if err := g.callDownStreamService(c, proxyReq, urlPath, requestID, routeObject); err != nil {
 		return
 	}
 
 }
 
-func (g *generator) decorateProxyRequest(c *gin.Context, urlPath, trackID string, routeObject entity.RouteObject) (*http.Request, error) {
+func (g *generator) decorateProxyRequest(c *gin.Context, urlPath, requestID string, routeObject entity.RouteObject) (*http.Request, error) {
 	var proxyReq *http.Request
 
 	if c.Request.Body != nil {
@@ -114,35 +116,38 @@ func (g *generator) decorateProxyRequest(c *gin.Context, urlPath, trackID string
 				"status":  http.StatusBadRequest,
 				"message": "Malformed request body given by the client",
 			})
-			journal.Error("Error reading incoming request body", err).
-				SetTrackId(trackID).
-				AddField("host", routeObject.Host).
-				AddField("prefix", routeObject.Prefix).
-				AddField("name", routeObject.Name).
-				AddField("path", urlPath).
-				AddField("method", c.Request.Method).
-				AddField("full_path", c.Request.URL.String()).
-				AddField("client_ip", c.ClientIP()).
-				SetTags("route", "generator", "generate", "read_all_request").
-				SetTrackId(trackID).
-				Log()
+			log.Error().
+				Err(err).
+				Stack().
+				Str("host", routeObject.Host).
+				Str("request_id", requestID).
+				Str("prefix", routeObject.Prefix).
+				Str("name", routeObject.Name).
+				Str("path", urlPath).
+				Str("method", c.Request.Method).
+				Str("full_path", c.Request.URL.String()).
+				Str("client_ip", c.ClientIP()).
+				Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("read_all_request")).
+				Msg("Error reading incoming request body")
+
 			return nil, err
 		}
 
 		proxyReq, err = http.NewRequest(c.Request.Method, "", bytes.NewReader(body))
 		if err != nil {
-			journal.Error("Error creating proxy request", err).
-				SetTrackId(trackID).
-				AddField("host", routeObject.Host).
-				AddField("prefix", routeObject.Prefix).
-				AddField("name", routeObject.Name).
-				AddField("path", urlPath).
-				AddField("method", c.Request.Method).
-				AddField("full_path", c.Request.URL.String()).
-				AddField("client_ip", c.ClientIP()).
-				SetTags("route", "generator", "generate", "new_request").
-				SetTrackId(trackID).
-				Log()
+			log.Error().
+				Err(err).
+				Stack().
+				Str("host", routeObject.Host).
+				Str("request_id", requestID).
+				Str("prefix", routeObject.Prefix).
+				Str("name", routeObject.Name).
+				Str("path", urlPath).
+				Str("method", c.Request.Method).
+				Str("full_path", c.Request.URL.String()).
+				Str("client_ip", c.ClientIP()).
+				Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("new_request")).
+				Msg("Error creating proxy request")
 			return nil, err
 		}
 	} else {
@@ -150,18 +155,19 @@ func (g *generator) decorateProxyRequest(c *gin.Context, urlPath, trackID string
 
 		proxyReq, err = http.NewRequest(c.Request.Method, "", nil)
 		if err != nil {
-			journal.Error("Error creating proxy request", err).
-				SetTrackId(trackID).
-				AddField("host", routeObject.Host).
-				AddField("prefix", routeObject.Prefix).
-				AddField("name", routeObject.Name).
-				AddField("path", urlPath).
-				AddField("method", c.Request.Method).
-				AddField("full_path", c.Request.URL.String()).
-				AddField("client_ip", c.ClientIP()).
-				SetTags("route", "generator", "generate", "new_request").
-				SetTrackId(trackID).
-				Log()
+			log.Error().
+				Err(err).
+				Stack().
+				Str("host", routeObject.Host).
+				Str("request_id", requestID).
+				Str("prefix", routeObject.Prefix).
+				Str("name", routeObject.Name).
+				Str("path", urlPath).
+				Str("method", c.Request.Method).
+				Str("full_path", c.Request.URL.String()).
+				Str("client_ip", c.ClientIP()).
+				Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("new_request")).
+				Msg("Error creating proxy request")
 			return nil, err
 		}
 	}
@@ -171,74 +177,74 @@ func (g *generator) decorateProxyRequest(c *gin.Context, urlPath, trackID string
 	proxyReq.URL.Path = c.Request.URL.Path
 	proxyReq.URL.RawQuery = c.Request.URL.RawQuery
 
-	proxyReq.Host = os.Getenv("PROXY_HOST")
-	proxyReq.Header.Add("X-Track-ID", trackID)
-	proxyReq.Header.Add("X-Request-ID", trackID)
-	proxyReq.Header.Set("X-Real-Ip-Address", c.ClientIP())
-	proxyReq.Header.Set("X-Forwarded-For", c.Request.RemoteAddr)
-
 	return proxyReq, nil
 }
 
-func (g *generator) decorateHeader(c *gin.Context, proxyReq *http.Request) {
+func (g *generator) decorateHeader(c *gin.Context, requestID string, proxyReq *http.Request) {
 	for header, values := range c.Request.Header {
 		for _, value := range values {
 			proxyReq.Header.Add(header, value)
 		}
 	}
+
+	proxyReq.Host = os.Getenv("PROXY_HOST")
+	proxyReq.Header.Add("X-Request-ID", requestID)
+	proxyReq.Header.Set("X-Real-Ip-Address", c.ClientIP())
+	proxyReq.Header.Set("X-Forwarded-For", c.Request.RemoteAddr)
 }
 
-func (g *generator) downStreamPluginCallback(c *gin.Context, proxyReq *http.Request, urlPath, trackID string, routeObject entity.RouteObject) error {
+func (g *generator) downStreamPluginCallback(c *gin.Context, proxyReq *http.Request, urlPath, requestID string, routeObject entity.RouteObject) error {
 	for _, plugin := range g.downStreamPlugin {
 		startTimePlugin := time.Now()
 		if err := plugin.Intervene(c, proxyReq, g.routerPath[urlPath]); err != nil {
-			journal.Error("Plugin error", err).
-				SetTrackId(trackID).
-				AddField("plugin_name", plugin.Name()).
-				AddField("plugin_duration_seconds", time.Since(startTimePlugin).Seconds()).
-				AddField("host", routeObject.Host).
-				AddField("plugin_type", "downstream").
-				AddField("prefix", routeObject.Prefix).
-				AddField("name", routeObject.Name).
-				AddField("path", urlPath).
-				AddField("method", c.Request.Method).
-				AddField("full_path", c.Request.URL.String()).
-				AddField("client_ip", c.ClientIP()).
-				SetTags("route", "generator", "generate", "plugin", plugin.Name()).
-				Log()
+			log.Error().
+				Err(err).
+				Stack().
+				Str("host", routeObject.Host).
+				Str("request_id", requestID).
+				Str("prefix", routeObject.Prefix).
+				Str("name", routeObject.Name).
+				Str("path", urlPath).
+				Str("method", c.Request.Method).
+				Str("full_path", c.Request.URL.String()).
+				Str("client_ip", c.ClientIP()).
+				Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("plugin").Str(plugin.Name())).
+				Msg("Plugin error")
 			g.downStreamPluginMetric(c, routeObject.Name, plugin.Name(), urlPath, startTimePlugin)
 			return err
 		}
 
-		journal.Info("Plugin success").
-			SetTrackId(trackID).
-			AddField("plugin_name", plugin.Name()).
-			AddField("plugin_duration_seconds", time.Since(startTimePlugin).Seconds()).
-			SetTags("route", "generator", "generate", "plugin").
-			Log()
+		log.Info().
+			Str("plugin_name", plugin.Name()).
+			Float64("plugin_duration_seconds", time.Since(startTimePlugin).Seconds()).
+			Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("plugin")).
+			Msg("Plugin success")
+
 		g.downStreamPluginMetric(c, routeObject.Name, plugin.Name(), urlPath, startTimePlugin)
 	}
 
 	return nil
 }
 
-func (g *generator) callDownStreamService(c *gin.Context, proxyReq *http.Request, urlPath, trackID string, routeObject entity.RouteObject) error {
+func (g *generator) callDownStreamService(c *gin.Context, proxyReq *http.Request, urlPath, requestID string, routeObject entity.RouteObject) error {
 	defer g.downStreamMetric(c, routeObject.Name, urlPath, time.Now())
 
 	client := http.Client{}
 	proxyRes, err := client.Do(proxyReq)
 	if err != nil {
-		journal.Error("Error fowarding the request", err).
-			SetTrackId(trackID).
-			AddField("host", routeObject.Host).
-			AddField("prefix", routeObject.Prefix).
-			AddField("name", routeObject.Name).
-			AddField("path", urlPath).
-			AddField("method", c.Request.Method).
-			AddField("full_path", c.Request.URL.String()).
-			AddField("client_ip", c.ClientIP()).
-			SetTags("route", "generator", "generate", "client_do").
-			Log()
+		log.Error().
+			Err(err).
+			Stack().
+			Str("host", routeObject.Host).
+			Str("request_id", requestID).
+			Str("prefix", routeObject.Prefix).
+			Str("name", routeObject.Name).
+			Str("path", urlPath).
+			Str("method", c.Request.Method).
+			Str("full_path", c.Request.URL.String()).
+			Str("client_ip", c.ClientIP()).
+			Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("client_do")).
+			Msg("Error fowarding the request")
 		c.JSON(http.StatusBadGateway, gin.H{
 			"status":  http.StatusBadGateway,
 			"message": "Bad gateway",
@@ -249,17 +255,19 @@ func (g *generator) callDownStreamService(c *gin.Context, proxyReq *http.Request
 
 	resp, err := ioutil.ReadAll(proxyRes.Body)
 	if err != nil {
-		journal.Error("Error reading the response", err).
-			SetTrackId(trackID).
-			AddField("host", routeObject.Host).
-			AddField("prefix", routeObject.Prefix).
-			AddField("name", routeObject.Name).
-			AddField("path", urlPath).
-			AddField("method", c.Request.Method).
-			AddField("full_path", c.Request.URL.String()).
-			AddField("client_ip", c.ClientIP()).
-			SetTags("route", "generator", "generate", "read_all_response").
-			Log()
+		log.Error().
+			Err(err).
+			Stack().
+			Str("host", routeObject.Host).
+			Str("request_id", requestID).
+			Str("prefix", routeObject.Prefix).
+			Str("name", routeObject.Name).
+			Str("path", urlPath).
+			Str("method", c.Request.Method).
+			Str("full_path", c.Request.URL.String()).
+			Str("client_ip", c.ClientIP()).
+			Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("read_all_response")).
+			Msg("Error reading the response")
 		c.JSON(http.StatusBadGateway, gin.H{
 			"status":  http.StatusBadGateway,
 			"message": "Bad gateway.",
@@ -276,18 +284,19 @@ func (g *generator) callDownStreamService(c *gin.Context, proxyReq *http.Request
 	c.Status(proxyRes.StatusCode)
 	_, err = c.Writer.Write(resp)
 	if err != nil {
-		journal.Error("Error writing the response", err).
-			SetTrackId(trackID).
-			AddField("host", routeObject.Host).
-			AddField("prefix", routeObject.Prefix).
-			AddField("name", routeObject.Name).
-			AddField("path", urlPath).
-			AddField("method", c.Request.Method).
-			AddField("full_path", c.Request.URL.String()).
-			AddField("client_ip", c.ClientIP()).
-			SetTags("route", "generator", "generate", "read_all_response").
-			Log()
-		journal.Error("Error writing response", err).SetTags("forwader", "core", "writer_write").Log()
+		log.Error().
+			Err(err).
+			Stack().
+			Str("host", routeObject.Host).
+			Str("request_id", requestID).
+			Str("prefix", routeObject.Prefix).
+			Str("name", routeObject.Name).
+			Str("path", urlPath).
+			Str("method", c.Request.Method).
+			Str("full_path", c.Request.URL.String()).
+			Str("client_ip", c.ClientIP()).
+			Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("writer_write")).
+			Msg("Error reading the response")
 		return err
 	}
 

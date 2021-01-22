@@ -15,6 +15,7 @@ import (
 
 type compiler struct{}
 
+// Compiler for all routes yaml file
 func Compiler() core.RouteCompiler {
 	return &compiler{}
 }
