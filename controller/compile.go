@@ -6,31 +6,32 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"runtime/debug"
 	"strconv"
 	"time"
 
 	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/journal"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
+// Compile plugin controller
 func Compile(engine core.APIEngine, metric core.Metric, ctrl core.Controller) {
 	metric.InjectCounter("controller_hits", "method", "path", "status_code", "status_code_group")
 	metric.InjectHistogram("controller_elapsed_time_seconds", "method", "path", "status_code", "status_code_group")
 
-	journal.Info("Registering controller").
-		AddField("path", ctrl.Path()).
-		AddField("method", ctrl.Method()).
-		SetTags("altair", "controller").
-		Log()
+	log.Info().
+		Str("path", ctrl.Path()).
+		Str("path", ctrl.Method()).
+		Array("tags", zerolog.Arr().Str("altair").Str("controller")).
+		Msg("Registering controller")
 
 	engine.Handle(ctrl.Method(), ctrl.Path(), func(c *gin.Context) {
 		var params string
 
-		trackID := uuid.New()
-		c.Set("track_id", trackID)
+		requestID := uuid.New()
+		c.Set("request_id", requestID)
 		startTime := time.Now().UTC()
 
 		if requestBody := c.Request.Body; requestBody != nil {
@@ -42,14 +43,14 @@ func Compile(engine core.APIEngine, metric core.Metric, ctrl core.Controller) {
 			}
 		}
 
-		defer recoverFunc(trackID, c, ctrl, metric, startTime, params)
+		defer recoverFunc(requestID, c, ctrl, metric, startTime, params)
 
 		ctrl.Control(c)
 
 		if c.Writer.Status() >= http.StatusBadRequest {
-			logRequestError(trackID, c, ctrl, time.Since(startTime).Milliseconds(), params)
+			logRequestError(requestID, c, ctrl, time.Since(startTime).Milliseconds(), params)
 		} else {
-			logRequestInfo(trackID, c, ctrl, time.Since(startTime).Milliseconds(), params)
+			logRequestInfo(requestID, c, ctrl, time.Since(startTime).Milliseconds(), params)
 		}
 
 		trackRequest(ctrl, metric, time.Since(startTime).Milliseconds(), c.Writer)
@@ -75,75 +76,81 @@ func trackRequest(ctrl core.Controller, metric core.Metric, elapsedTime int64, w
 	})
 }
 
-func recoverFunc(trackID uuid.UUID, c *gin.Context, ctrl core.Controller, metric core.Metric, startTime time.Time, params string) {
+func recoverFunc(requestID uuid.UUID, c *gin.Context, ctrl core.Controller, metric core.Metric, startTime time.Time, params string) {
 	if err := recover(); err != nil {
-		internalServerErrorResponse(trackID, c)
+		internalServerErrorResponse(requestID, c)
 
-		var j journal.Journal
+		var convertedErr error
 
 		switch err.(type) {
 		case error:
-			j = journal.Error(fmt.Sprintf("panic received by server. Because of %v", err), err.(error))
+			convertedErr = err.(error)
 		case string:
-			j = journal.Error(fmt.Sprintf("panic received by server. Because of %v", err), errors.New(err.(string)))
+			convertedErr = errors.New(err.(string))
 		default:
-			j = journal.Error(fmt.Sprintf("panic received by server. Because of %v", err), errors.New("altair panic with undefined error"))
+			convertedErr = fmt.Errorf("undefined error: %v", err)
 		}
 
-		j.AddField("client_ip", c.ClientIP()).
-			AddField("traceback", string(debug.Stack())).
-			SetTags("altair", "controller", "panic").
-			SetTrackId(trackID).
-			Log()
+		log.Error().
+			Err(convertedErr).
+			Stack().
+			Str("request_id", requestID.String()).
+			Str("client_ip", c.ClientIP()).
+			Stack().
+			Array("tags", zerolog.Arr().Str("altair").Str("controller").Str("panic")).
+			Msgf("panic received by server")
 
-		logRequestError(trackID, c, ctrl, time.Since(startTime).Milliseconds(), params)
+		logRequestError(requestID, c, ctrl, time.Since(startTime).Milliseconds(), params)
 		trackRequest(ctrl, metric, time.Since(startTime).Milliseconds(), c.Writer)
 		return
 	}
 }
 
-func logRequestError(trackID uuid.UUID, c *gin.Context, ctrl core.Controller, elapsedTime int64, params string) {
-	var j journal.Journal
+func logRequestError(requestID uuid.UUID, c *gin.Context, ctrl core.Controller, elapsedTime int64, params string) {
+	l := log.Error()
 
-	j = journal.Error("Altair endpoint error", errors.New(fmt.Sprintf("altair endpoint error: %d", c.Writer.Status())))
+	instrumentingLog(c, l, params)
 
-	instrumentingLog(c, j, params)
-
-	j.AddField("relative_path", ctrl.Path()).
-		AddField("elapsed_time", elapsedTime).
-		SetTags("altair", "api", "ward", "endpoint_latency").
-		SetTrackId(trackID).
-		Log()
-}
-
-func instrumentingLog(c *gin.Context, j journal.Journal, params string) {
-	j.AddField("path", c.Request.URL.Path).
-		AddField("raw_path", c.Request.URL.RawPath).
-		AddField("raw_query", c.Request.URL.RawQuery).
-		AddField("user_agent", c.Request.UserAgent()).
-		AddField("host", c.Request.Host).
-		AddField("referer", c.Request.Referer()).
-		AddField("method", c.Request.Method).
-		AddField("status", c.Writer.Status()).
-		AddField("client_ip", c.ClientIP()).
-		AddField("params", params)
-}
-
-func logRequestInfo(trackID uuid.UUID, c *gin.Context, ctrl core.Controller, elapsedTime int64, params string) {
-	j := journal.Info("Altair endpoint latency and log")
-
-	instrumentingLog(c, j, params)
-
-	j.AddField("relative_path", ctrl.Path()).
-		AddField("elapsed_time", elapsedTime).
-		SetTags("altair", "api", "ward", "endpoint_latency").
-		SetTrackId(trackID).
-		Log()
+	l.Str("relative_path", ctrl.Path()).
+		Err(fmt.Errorf("altair endpoint error: %d", c.Writer.Status())).
+		Stack().
+		Int64("elapsed_time", elapsedTime).
+		Str("request_id", requestID.String()).
+		Array("tags", zerolog.Arr().Str("altair").Str("api").Str("ward").Str("endpoint_latency")).
+		Msg("Altair endpoint error")
 
 }
 
-func internalServerErrorResponse(trackID uuid.UUID, c *gin.Context) {
+func instrumentingLog(c *gin.Context, l *zerolog.Event, params string) {
+	l.Str("path", c.Request.URL.Path).
+		Str("raw_path", c.Request.URL.RawPath).
+		Str("raw_query", c.Request.URL.RawQuery).
+		Str("user_agent", c.Request.UserAgent()).
+		Str("host", c.Request.Host).
+		Str("referer", c.Request.Referer()).
+		Str("method", c.Request.Method).
+		Int("status", c.Writer.Status()).
+		Str("client_ip", c.ClientIP()).
+		Str("params", params)
+}
+
+func logRequestInfo(requestID uuid.UUID, c *gin.Context, ctrl core.Controller, elapsedTime int64, params string) {
+	l := log.Info()
+
+	instrumentingLog(c, l, params)
+
+	l.Str("relative_path", ctrl.Path()).
+		Err(fmt.Errorf("altair endpoint error: %d", c.Writer.Status())).
+		Stack().
+		Int64("elapsed_time", elapsedTime).
+		Str("request_id", requestID.String()).
+		Array("tags", zerolog.Arr().Str("altair").Str("api").Str("ward").Str("endpoint_latency")).
+		Msg("Altair endpoint error")
+
+}
+
+func internalServerErrorResponse(requestID uuid.UUID, c *gin.Context) {
 	c.JSON(http.StatusInternalServerError, gin.H{
-		"message": fmt.Sprintf("Something is not right, help us fix this problem. Contribute to https://github.com/codefluence-x/altair. Or help us by give this code '%s' to the admin of this site.", trackID),
+		"message": fmt.Sprintf("Something is not right, help us fix this problem. Contribute to https://github.com/codefluence-x/altair. Or help us by give this code '%s' to the admin of this site.", requestID),
 	})
 }

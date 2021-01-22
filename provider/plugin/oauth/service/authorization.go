@@ -9,7 +9,8 @@ import (
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
-	"github.com/codefluence-x/journal"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 // Authorization struct handle all of things related to oauth2 authorization
@@ -62,12 +63,13 @@ func (a *Authorization) Grantor(ctx context.Context, authorizationReq entity.Aut
 		Errors:     eobject.Wrap(eobject.ValidationError("response_type is invalid. Should be either `token` or `code`.")),
 	}
 
-	journal.Error("invalid response type sent by client", err).
-		AddField("request", authorizationReq).
-		SetTags("service", "authorization", "grantor").
-		SetTrackId(ctx.Value("track_id")).
-		Log()
-
+	log.Error().
+		Err(err).
+		Stack().
+		Interface("request_id", ctx.Value("request_id")).
+		Interface("request", authorizationReq).
+		Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grantor")).
+		Msg("invalid response type sent by client")
 	return nil, err
 }
 
@@ -86,12 +88,14 @@ func (a *Authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 
 	id, err := a.oauthAccessGrantModel.Create(ctx, a.modelFormatter.AccessGrantFromAuthorizationRequest(authorizationReq, oauthApplication))
 	if err != nil {
-		journal.Error("Error creating access grant", err).
-			AddField("request", authorizationReq).
-			AddField("application_id", oauthApplication.ID).
-			SetTags("service", "authorization", "grant").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", ctx.Value("request_id")).
+			Interface("request", authorizationReq).
+			Int("application_id", oauthApplication.ID).
+			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant")).
+			Msg("Error creating access grant")
 
 		return entity.OauthAccessGrantJSON{}, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
@@ -101,14 +105,15 @@ func (a *Authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 
 	oauthAccessGrant, err := a.oauthAccessGrantModel.One(ctx, id)
 	if err != nil {
-		journal.Error("Error selecting one access grant after creating the data", err).
-			AddField("request", authorizationReq).
-			AddField("last_inserted_id", id).
-			AddField("application_id", oauthApplication.ID).
-			SetTags("service", "authorization", "grant").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
-
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", ctx.Value("request_id")).
+			Interface("request", authorizationReq).
+			Int("application_id", oauthApplication.ID).
+			Int("last_inserted_id", id).
+			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant")).
+			Msg("Error selecting one access grant after creating the data")
 		return entity.OauthAccessGrantJSON{}, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
@@ -131,14 +136,14 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 
 	id, err := a.oauthAccessTokenModel.Create(ctx, a.modelFormatter.AccessTokenFromAuthorizationRequest(authorizationReq, oauthApplication))
 	if err != nil {
-
-		journal.Error("Error creating access token after creating the data", err).
-			AddField("request", authorizationReq).
-			AddField("application_id", oauthApplication.ID).
-			SetTags("service", "authorization", "grant_token").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
-
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", ctx.Value("request_id")).
+			Interface("request", authorizationReq).
+			Int("application_id", oauthApplication.ID).
+			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
+			Msg("Error creating access token after creating the data")
 		return entity.OauthAccessTokenJSON{}, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
@@ -147,14 +152,15 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 
 	oauthAccessToken, err := a.oauthAccessTokenModel.One(ctx, id)
 	if err != nil {
-
-		journal.Error("Error selecting one access token", err).
-			AddField("request", authorizationReq).
-			AddField("last_inserted_id", id).
-			AddField("application_id", oauthApplication.ID).
-			SetTags("service", "authorization", "grant_token").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", ctx.Value("request_id")).
+			Interface("request", authorizationReq).
+			Int("application_id", oauthApplication.ID).
+			Int("last_inserted_id", id).
+			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
+			Msg("Error selecting one access token")
 
 		return entity.OauthAccessTokenJSON{}, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
@@ -182,13 +188,13 @@ func (a *Authorization) findAndValidateApplication(ctx context.Context, clientUI
 
 	oauthApplication, err := a.oauthApplicationModel.OneByUIDandSecret(ctx, *clientUID, *clientSecret)
 	if err != nil {
-
-		journal.Error("application cannot be found because there was an error", err).
-			AddField("client_uid", clientUID).
-			SetTags("service", "authorization", "find_secret").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
-
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", ctx.Value("request_id")).
+			Str("client_uid", *clientUID).
+			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("find_secret")).
+			Msg("application cannot be found because there was an error")
 		if err == sql.ErrNoRows {
 			return entity.OauthApplication{}, &entity.Error{
 				HttpStatus: http.StatusNotFound,
@@ -218,11 +224,12 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 
 	oauthAccessGrant, err := a.oauthAccessGrantModel.OneByCode(ctx, *accessTokenReq.Code)
 	if err != nil {
-		journal.Error("authorization code cannot be found because there was an error", err).
-			SetTags("service", "authorization", "one_by_code").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
-
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", ctx.Value("request_id")).
+			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("one_by_code")).
+			Msg("authorization code cannot be found because there was an error")
 		if err == sql.ErrNoRows {
 			return entity.OauthAccessTokenJSON{}, &entity.Error{
 				HttpStatus: http.StatusNotFound,
@@ -260,10 +267,12 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 	id, err := a.oauthAccessTokenModel.Create(ctx, a.modelFormatter.AccessTokenFromOauthAccessGrant(oauthAccessGrant, oauthApplication))
 	if err != nil {
 
-		journal.Error("Error creating access token after creating the data", err).
-			SetTags("service", "authorization", "grant_token").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", ctx.Value("request_id")).
+			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
+			Msg("Error creating access token after creating the data")
 
 		return entity.OauthAccessTokenJSON{}, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
@@ -274,12 +283,12 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 	oauthAccessToken, err := a.oauthAccessTokenModel.One(ctx, id)
 	if err != nil {
 
-		journal.Error("Error selecting one access token", err).
-			AddField("last_inserted_id", id).
-			AddField("application_id", oauthApplication.ID).
-			SetTags("service", "authorization", "grant_token").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", ctx.Value("request_id")).
+			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
+			Msg("Error selecting one access token")
 
 		return entity.OauthAccessTokenJSON{}, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
@@ -290,10 +299,12 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 	err = a.oauthAccessGrantModel.Revoke(ctx, *accessTokenReq.Code)
 	if err != nil {
 		// TODO: Error is intended to be suppressed until database transaction is implemented. After database transaction is implemented, then it will be rollbacked if there is error in revoke oauth access grants process
-		journal.Error("Error revoke oauth access grant", err).
-			SetTags("service", "authorization", "grant_token").
-			SetTrackId(ctx.Value("track_id")).
-			Log()
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", ctx.Value("request_id")).
+			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
+			Msg("Error revoke oauth access grant")
 	}
 
 	return a.oauthFormatter.AccessToken(oauthAccessToken, oauthAccessGrant.RedirectURI.String), nil

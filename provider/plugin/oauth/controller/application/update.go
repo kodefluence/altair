@@ -9,8 +9,9 @@ import (
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
-	"github.com/codefluence-x/journal"
 	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 type updateController struct {
@@ -36,11 +37,12 @@ func (cr *updateController) Control(c *gin.Context) {
 
 	rawData, err := c.GetRawData()
 	if err != nil {
-		journal.Error("Cannot get raw data", err).
-			SetTags("controller", "application", "update", "get_raw_data").
-			SetTrackId(c.Value("track_id")).
-			Log()
-
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", c.Value("request_id")).
+			Array("tags", zerolog.Arr().Str("controller").Str("application").Str("update").Str("get_raw_data")).
+			Msg("Cannot get raw data")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"errors": eobject.Wrap(eobject.BadRequestError("request body")),
 		})
@@ -49,11 +51,12 @@ func (cr *updateController) Control(c *gin.Context) {
 
 	err = json.Unmarshal(rawData, &oauthApplicationUpdateJSON)
 	if err != nil {
-		journal.Error("Cannot unmarshal json", err).
-			SetTags("controller", "application", "update", "unmarshal").
-			SetTrackId(c.Value("track_id")).
-			Log()
-
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", c.Value("request_id")).
+			Array("tags", zerolog.Arr().Str("controller").Str("application").Str("update").Str("unmarshal")).
+			Msg("Cannot unmarshal json")
 		c.JSON(http.StatusBadRequest, gin.H{
 			"errors": eobject.Wrap(eobject.BadRequestError("request body")),
 		})
@@ -62,10 +65,12 @@ func (cr *updateController) Control(c *gin.Context) {
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		journal.Error("Cannot convert ascii to integer", err).
-			SetTags("controller", "application", "update", "strconv").
-			SetTrackId(c.Value("track_id")).
-			Log()
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", c.Value("request_id")).
+			Array("tags", zerolog.Arr().Str("controller").Str("application").Str("update").Str("strconv")).
+			Msg("Cannot convert ascii to integer")
 
 		c.JSON(http.StatusBadRequest, gin.H{
 			"errors": eobject.Wrap(eobject.BadRequestError("url parameters: id is not integer")),

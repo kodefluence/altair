@@ -10,6 +10,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 
 	_ "github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -21,7 +23,6 @@ import (
 	"github.com/codefluence-x/altair/forwarder"
 	"github.com/codefluence-x/altair/loader"
 	"github.com/codefluence-x/altair/provider"
-	"github.com/codefluence-x/journal"
 	"github.com/spf13/cobra"
 )
 
@@ -44,21 +45,21 @@ func loadConfig() {
 
 	loadedDBConfigs, err := loader.Database().Compile("./config/database.yml")
 	if err != nil {
-		journal.Error("Error loading database config", err).Log()
+		log.Error().Err(err).Stack().Msg("Error loading databases config")
 		os.Exit(1)
 	}
 	dbConfigs = loadedDBConfigs
 
 	loadedAppConfig, err := loader.App().Compile("./config/app.yml")
 	if err != nil {
-		journal.Error("Error loading app config", err).Log()
+		log.Error().Err(err).Stack().Msg("Error loading app config")
 		os.Exit(1)
 	}
 	appConfig = loadedAppConfig
 
 	loadedPluginBearer, err := loader.Plugin().Compile("./config/plugin/")
 	if err != nil {
-		journal.Error("Error loading plugin config", err).Log()
+		log.Error().Err(err).Stack().Msg("Error loading plugin config")
 		os.Exit(1)
 	}
 	pluginBearer = loadedPluginBearer
@@ -79,12 +80,20 @@ func executeCommand() {
 		Run: func(cmd *cobra.Command, args []string) {
 			defer closeConnection()
 			if err := fabricateConnection(); err != nil {
-				journal.Error("Error running altair:", err).SetTags("altair", "main").Log()
+				log.Error().
+					Err(err).
+					Stack().
+					Array("tags", zerolog.Arr().Str("altair").Str("main")).
+					Msg("Error running altair")
 				return
 			}
 
 			if err := runAPI(); err != nil {
-				journal.Error("Error running altair API:", err).SetTags("altair", "main").Log()
+				log.Error().
+					Err(err).
+					Stack().
+					Array("tags", zerolog.Arr().Str("altair").Str("main")).
+					Msg("Error running altair API")
 			}
 		},
 	}
@@ -156,24 +165,36 @@ func executeCommand() {
 			dbBearer := loader.DatabaseBearer(databases, dbConfigs)
 			db, config, err := dbBearer.Database(args[0])
 			if err != nil {
-				journal.Error(fmt.Sprintf("Error loading database instance of: `%s`", args[0]), err).SetTags("altair", "main").Log()
+				log.Error().
+					Err(err).
+					Stack().
+					Array("tags", zerolog.Arr().Str("altair").Str("main")).
+					Msgf("Error loading database instance of: `%s`", args[0])
 				return
 			}
 
 			migrationProvider := provider.Migration().GoMigrate(db, config)
 			migrator, err := migrationProvider.Migrator()
 			if err != nil {
-				journal.Error("Error providing migrator", err).SetTags("altair", "main").Log()
+				log.Error().
+					Err(err).
+					Stack().
+					Array("tags", zerolog.Arr().Str("altair").Str("main")).
+					Msg("Error providing migrator")
 				return
 			}
 			defer migrator.Close()
 
 			if err := migrator.Up(); err != nil && err.Error() != "no change" {
-				journal.Error("Error doing database migration", err).SetTags("altair", "main").Log()
+				log.Error().
+					Err(err).
+					Stack().
+					Array("tags", zerolog.Arr().Str("altair").Str("main")).
+					Msg("Error doing database migration")
 				return
 			}
 
-			journal.Info("Successfully migrating databases").SetTags("altair", "main").Log()
+			fmt.Println("Successfully migrating up databases of:", args[0])
 		},
 	}
 
@@ -195,24 +216,36 @@ func executeCommand() {
 			dbBearer := loader.DatabaseBearer(databases, dbConfigs)
 			db, config, err := dbBearer.Database(args[0])
 			if err != nil {
-				journal.Error(fmt.Sprintf("Error loading database instance of: `%s`", args[0]), err).SetTags("altair", "main").Log()
+				log.Error().
+					Err(err).
+					Stack().
+					Array("tags", zerolog.Arr().Str("altair").Str("main")).
+					Msgf("Error loading database instance of: `%s`", args[0])
 				return
 			}
 
 			migrationProvider := provider.Migration().GoMigrate(db, config)
 			migrator, err := migrationProvider.Migrator()
 			if err != nil {
-				journal.Error("Error providing migrator", err).SetTags("altair", "main").Log()
+				log.Error().
+					Err(err).
+					Stack().
+					Array("tags", zerolog.Arr().Str("altair").Str("main")).
+					Msg("Error providing migrator")
 				return
 			}
 			defer migrator.Close()
 
 			if err := migrator.Down(); err != nil && err.Error() != "no change" {
-				journal.Error("Error doing database migration", err).SetTags("altair", "main").Log()
+				log.Error().
+					Err(err).
+					Stack().
+					Array("tags", zerolog.Arr().Str("altair").Str("main")).
+					Msg("Error doing database migration")
 				return
 			}
 
-			journal.Info("Successfully migrating databases").SetTags("altair", "main").Log()
+			fmt.Println("Successfully migrating down databases of:", args[0])
 		},
 	}
 
@@ -234,24 +267,36 @@ func executeCommand() {
 			dbBearer := loader.DatabaseBearer(databases, dbConfigs)
 			db, config, err := dbBearer.Database(args[0])
 			if err != nil {
-				journal.Error(fmt.Sprintf("Error loading database instance of: `%s`", args[0]), err).SetTags("altair", "main").Log()
+				log.Error().
+					Err(err).
+					Stack().
+					Array("tags", zerolog.Arr().Str("altair").Str("main")).
+					Msgf("Error loading database instance of: `%s`", args[0])
 				return
 			}
 
 			migrationProvider := provider.Migration().GoMigrate(db, config)
 			migrator, err := migrationProvider.Migrator()
 			if err != nil {
-				journal.Error("Error providing migrator", err).SetTags("altair", "main").Log()
+				log.Error().
+					Err(err).
+					Stack().
+					Array("tags", zerolog.Arr().Str("altair").Str("main")).
+					Msg("Error providing migrator")
 				return
 			}
 			defer migrator.Close()
 
 			if err := migrator.Steps(-1); err != nil && err.Error() != "no change" {
-				journal.Error("Error doing database migration", err).SetTags("altair", "main").Log()
+				log.Error().
+					Err(err).
+					Stack().
+					Array("tags", zerolog.Arr().Str("altair").Str("main")).
+					Msg("Error doing database migration")
 				return
 			}
 
-			journal.Info("Successfully migrating databases").SetTags("altair", "main").Log()
+			fmt.Println("Successfully rolback database migration of:", args[0])
 		},
 	}
 
@@ -277,8 +322,7 @@ func dbConnectionFabricator(dbConfig core.DatabaseConfig) (*sql.DB, error) {
 
 	db.SetConnMaxLifetime(maxConnLifetime)
 
-	journal.Info(fmt.Sprintf("Complete fabricating mysql writer connection: %s:%s@tcp(%s:%d)/%s?", dbConfig.DBUsername(), "***********", dbConfig.DBHost(), port, dbConfig.DBDatabase())).SetTags("altair", "main").Log()
-
+	log.Info().Msg(fmt.Sprintf("Complete fabricating mysql writer connection: %s:%s@tcp(%s:%d)/%s?", dbConfig.DBUsername(), "***********", dbConfig.DBHost(), port, dbConfig.DBDatabase()))
 	return db, nil
 }
 
@@ -302,7 +346,11 @@ func closeConnection() {
 		for i := 0; i < 3; i++ {
 			err = db.Close()
 			if err != nil {
-				journal.Error(fmt.Sprintln("Error closing mysql writer because of:", err), err).SetTags("altair", "main", dbName).Log()
+				log.Error().
+					Err(err).
+					Stack().
+					Array("tags", zerolog.Arr().Str("altair").Str("main").Str(dbName)).
+					Msg("Error closing mysql writer")
 				continue
 			}
 
@@ -311,11 +359,11 @@ func closeConnection() {
 			}
 		}
 		if err != nil {
-			journal.Info("Failed closing mysql writer and reader connection.").SetTags("altair", "main", dbName).Log()
+			log.Warn().Array("tags", zerolog.Arr().Str("altair").Str("main").Str(dbName)).Msg("Failed closing mysql writer and reader connection.")
 			return
 		}
 
-		journal.Info("Success closing mysql writer and reader connection.").SetTags("altair", "main", dbName).Log()
+		log.Info().Array("tags", zerolog.Arr().Str("altair").Str("main").Str(dbName)).Msg("Success closing mysql writer and reader connection.")
 	}
 }
 
@@ -339,18 +387,22 @@ func runAPI() error {
 	routeCompiler := forwarder.Route().Compiler()
 	routeObjects, err := routeCompiler.Compile("./routes")
 	if err != nil {
-		journal.Error("Error compiling routes", err).
-			SetTags("altair", "main").
-			Log()
+		log.Error().
+			Err(err).
+			Stack().
+			Array("tags", zerolog.Arr().Str("altair").Str("main")).
+			Msg("Error compiling routes")
 		return err
 	}
 
 	metricProvider, _ := appBearer.MetricProvider()
 	err = forwarder.Route().Generator().Generate(apiEngine, metricProvider, routeObjects, appBearer.DownStreamPlugins())
 	if err != nil {
-		journal.Error("Error generating routes", err).
-			SetTags("altair", "main").
-			Log()
+		log.Error().
+			Err(err).
+			Stack().
+			Array("tags", zerolog.Arr().Str("altair").Str("main")).
+			Msg("Error generating routes")
 		return err
 	}
 
@@ -363,16 +415,18 @@ func runAPI() error {
 			Handler: apiEngine,
 		}
 
-		journal.Info(fmt.Sprintf("Running Altair in: %d", appConfig.Port())).Log()
+		log.Info().Msg(fmt.Sprintf("Running Altair in: %d", appConfig.Port()))
 
 		if err := srv.ListenAndServe(); err != nil {
-			journal.Error("Error running api engine", err).
-				SetTags("altair", "main").
-				Log()
+			log.Error().
+				Err(err).
+				Stack().
+				Array("tags", zerolog.Arr().Str("altair").Str("main")).
+				Msg("Error running api engine")
 		}
 	}()
 
 	closeSignal := <-gracefulSignal
-	journal.Info(fmt.Sprintf("Receiving %s signal.... Cleaning up processes.", closeSignal.String())).Log()
+	log.Info().Array("tags", zerolog.Arr().Str("altair").Str("main")).Msg(fmt.Sprintf("Receiving %s signal.... Cleaning up processes.", closeSignal.String()))
 	return nil
 }
