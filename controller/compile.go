@@ -31,7 +31,6 @@ func Compile(engine core.APIEngine, metric core.Metric, ctrl core.Controller) {
 		var params string
 
 		requestID := uuid.New()
-		c.Set("track_id", requestID)
 		c.Set("request_id", requestID)
 		startTime := time.Now().UTC()
 
