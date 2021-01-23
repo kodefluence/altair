@@ -93,10 +93,12 @@ func (o *Oauth) parseToken(c *gin.Context) (string, error) {
 	splittedToken := strings.Split(authorizationHeader, " ")
 
 	if len(splittedToken) < 2 {
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return "", ErrInvalidBearerFormat
 	}
 
 	if splittedToken[0] != "Bearer" {
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return "", ErrInvalidBearerFormat
 	}
 

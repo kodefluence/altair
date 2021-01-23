@@ -152,6 +152,13 @@ func TestOauth(t *testing.T) {
 						}
 						c.Request.Header.Add("Authorization", fmt.Sprintf("%s", token))
 
+						responseWritterMock := coreMock.NewMockResponseWriter(mockCtrl)
+						responseWritterMock.EXPECT().WriteHeaderNow().AnyTimes()
+						responseWritterMock.EXPECT().WriteHeader(gomock.Any()).AnyTimes()
+						responseWritterMock.EXPECT().Status().Return(http.StatusUnauthorized).AnyTimes()
+
+						c.Writer = responseWritterMock
+
 						r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
 
 						routePath := coreEntity.RouterPath{Auth: "oauth"}
@@ -176,6 +183,13 @@ func TestOauth(t *testing.T) {
 							Header: http.Header{},
 						}
 						c.Request.Header.Add("Authorization", fmt.Sprintf("NotBearer %s", token))
+
+						responseWritterMock := coreMock.NewMockResponseWriter(mockCtrl)
+						responseWritterMock.EXPECT().WriteHeaderNow().AnyTimes()
+						responseWritterMock.EXPECT().WriteHeader(gomock.Any()).AnyTimes()
+						responseWritterMock.EXPECT().Status().Return(http.StatusUnauthorized).AnyTimes()
+
+						c.Writer = responseWritterMock
 
 						r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
 
