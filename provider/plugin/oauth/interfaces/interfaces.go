@@ -6,7 +6,6 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 )
 
@@ -72,10 +71,4 @@ type OauthValidator interface {
 	ValidateApplication(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error
 	ValidateAuthorizationGrant(ctx context.Context, r entity.AuthorizationRequestJSON, application entity.OauthApplication) *entity.Error
 	ValidateTokenGrant(ctx context.Context, r entity.AccessTokenRequestJSON) *entity.Error
-}
-
-type AuthorizationDispatcher interface {
-	Grant(authorization Authorization) core.Controller
-	Revoke(authorization Authorization) core.Controller
-	Token(authService Authorization) core.Controller
 }

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
@@ -13,26 +12,30 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type tokenController struct {
+// TokenController control flow of creating access token
+type TokenController struct {
 	authService interfaces.Authorization
 }
 
-// Token create new token controller
-func Token(authService interfaces.Authorization) core.Controller {
-	return &tokenController{
+// NewToken create new token controller
+func NewToken(authService interfaces.Authorization) *TokenController {
+	return &TokenController{
 		authService: authService,
 	}
 }
 
-func (o *tokenController) Method() string {
+// Method POST
+func (o *TokenController) Method() string {
 	return "POST"
 }
 
-func (o *tokenController) Path() string {
+// Path /oauth/authorizations/token
+func (o *TokenController) Path() string {
 	return "/oauth/authorizations/token"
 }
 
-func (o *tokenController) Control(c *gin.Context) {
+// Control creating access token based on access token request
+func (o *TokenController) Control(c *gin.Context) {
 	var req entity.AccessTokenRequestJSON
 
 	rawData, err := c.GetRawData()

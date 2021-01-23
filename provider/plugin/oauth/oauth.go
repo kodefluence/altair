@@ -71,9 +71,11 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 	appBearer.InjectController(applicationControllerDispatcher.Create(applicationManager))
 	appBearer.InjectController(applicationControllerDispatcher.Update(applicationManager))
 
-	appBearer.InjectController(controller.Authorization().Grant(authorization))
-	appBearer.InjectController(controller.Authorization().Revoke(authorization))
-	appBearer.InjectController(controller.Authorization().Token(authorization))
+	// Controller of /oauth/authorizations
+	authorizationControllerDispatcher := controller.NewAuthorization()
+	appBearer.InjectController(authorizationControllerDispatcher.Grant(authorization))
+	appBearer.InjectController(authorizationControllerDispatcher.Revoke(authorization))
+	appBearer.InjectController(authorizationControllerDispatcher.Token(authorization))
 
 	appBearer.InjectDownStreamPlugin(oauthDownStream)
 	appBearer.InjectDownStreamPlugin(applicationValidationDownStream)

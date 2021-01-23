@@ -30,12 +30,12 @@ func TestRevoke(t *testing.T) {
 
 	t.Run("Method", func(t *testing.T) {
 		authorizationService := mock.NewMockAuthorization(mockCtrl)
-		assert.Equal(t, "POST", controller.Authorization().Revoke(authorizationService).Method())
+		assert.Equal(t, "POST", controller.NewAuthorization().Revoke(authorizationService).Method())
 	})
 
 	t.Run("Path", func(t *testing.T) {
 		authorizationService := mock.NewMockAuthorization(mockCtrl)
-		assert.Equal(t, "/oauth/authorizations/revoke", controller.Authorization().Revoke(authorizationService).Path())
+		assert.Equal(t, "/oauth/authorizations/revoke", controller.NewAuthorization().Revoke(authorizationService).Path())
 	})
 
 	t.Run("Control", func(t *testing.T) {
@@ -52,7 +52,7 @@ func TestRevoke(t *testing.T) {
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
 				authorizationService.EXPECT().RevokeToken(gomock.Any(), revokeTokenRequest).Return(nil)
 
-				ctrl := controller.Authorization().Revoke(authorizationService)
+				ctrl := controller.NewAuthorization().Revoke(authorizationService)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				var response gin.H
@@ -86,7 +86,7 @@ func TestRevoke(t *testing.T) {
 					authorizationService := mock.NewMockAuthorization(mockCtrl)
 					authorizationService.EXPECT().RevokeToken(gomock.Any(), revokeTokenRequest).Return(expectedError)
 
-					ctrl := controller.Authorization().Revoke(authorizationService)
+					ctrl := controller.NewAuthorization().Revoke(authorizationService)
 					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 					var response ErrorResponse
@@ -108,7 +108,7 @@ func TestRevoke(t *testing.T) {
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
 				authorizationService.EXPECT().Grantor(gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Authorization().Revoke(authorizationService)
+				ctrl := controller.NewAuthorization().Revoke(authorizationService)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{
@@ -134,7 +134,7 @@ func TestRevoke(t *testing.T) {
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
 				authorizationService.EXPECT().Grantor(gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Authorization().Revoke(authorizationService)
+				ctrl := controller.NewAuthorization().Revoke(authorizationService)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{

@@ -12,25 +12,30 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type grantController struct {
+// GrantController control flow of grant access token / authorization code
+type GrantController struct {
 	authService interfaces.Authorization
 }
 
-func Grant(authService interfaces.Authorization) *grantController {
-	return &grantController{
+// NewGrant return struct ob GrantController
+func NewGrant(authService interfaces.Authorization) *GrantController {
+	return &GrantController{
 		authService: authService,
 	}
 }
 
-func (o *grantController) Method() string {
+// Method Post
+func (o *GrantController) Method() string {
 	return "POST"
 }
 
-func (o *grantController) Path() string {
+// Path /oauth/authorizations
+func (o *GrantController) Path() string {
 	return "/oauth/authorizations"
 }
 
-func (o *grantController) Control(c *gin.Context) {
+// Control granting access token / authorization code
+func (o *GrantController) Control(c *gin.Context) {
 	var req entity.AuthorizationRequestJSON
 
 	rawData, err := c.GetRawData()

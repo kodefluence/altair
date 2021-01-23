@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// OneController controlw flow of showing oauth applications detail
+// OneController control flow of showing oauth applications detail
 type OneController struct {
 	applicationManager interfaces.ApplicationManager
 }

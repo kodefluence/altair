@@ -7,9 +7,7 @@ package mock
 import (
 	context "context"
 	sql "database/sql"
-	core "github.com/codefluence-x/altair/core"
 	entity "github.com/codefluence-x/altair/provider/plugin/oauth/entity"
-	interfaces "github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -782,69 +780,4 @@ func (m *MockOauthValidator) ValidateTokenGrant(ctx context.Context, r entity.Ac
 func (mr *MockOauthValidatorMockRecorder) ValidateTokenGrant(ctx, r interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateTokenGrant", reflect.TypeOf((*MockOauthValidator)(nil).ValidateTokenGrant), ctx, r)
-}
-
-// MockAuthorizationDispatcher is a mock of AuthorizationDispatcher interface
-type MockAuthorizationDispatcher struct {
-	ctrl     *gomock.Controller
-	recorder *MockAuthorizationDispatcherMockRecorder
-}
-
-// MockAuthorizationDispatcherMockRecorder is the mock recorder for MockAuthorizationDispatcher
-type MockAuthorizationDispatcherMockRecorder struct {
-	mock *MockAuthorizationDispatcher
-}
-
-// NewMockAuthorizationDispatcher creates a new mock instance
-func NewMockAuthorizationDispatcher(ctrl *gomock.Controller) *MockAuthorizationDispatcher {
-	mock := &MockAuthorizationDispatcher{ctrl: ctrl}
-	mock.recorder = &MockAuthorizationDispatcherMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use
-func (m *MockAuthorizationDispatcher) EXPECT() *MockAuthorizationDispatcherMockRecorder {
-	return m.recorder
-}
-
-// Grant mocks base method
-func (m *MockAuthorizationDispatcher) Grant(authorization interfaces.Authorization) core.Controller {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Grant", authorization)
-	ret0, _ := ret[0].(core.Controller)
-	return ret0
-}
-
-// Grant indicates an expected call of Grant
-func (mr *MockAuthorizationDispatcherMockRecorder) Grant(authorization interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Grant", reflect.TypeOf((*MockAuthorizationDispatcher)(nil).Grant), authorization)
-}
-
-// Revoke mocks base method
-func (m *MockAuthorizationDispatcher) Revoke(authorization interfaces.Authorization) core.Controller {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Revoke", authorization)
-	ret0, _ := ret[0].(core.Controller)
-	return ret0
-}
-
-// Revoke indicates an expected call of Revoke
-func (mr *MockAuthorizationDispatcherMockRecorder) Revoke(authorization interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Revoke", reflect.TypeOf((*MockAuthorizationDispatcher)(nil).Revoke), authorization)
-}
-
-// Token mocks base method
-func (m *MockAuthorizationDispatcher) Token(authService interfaces.Authorization) core.Controller {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Token", authService)
-	ret0, _ := ret[0].(core.Controller)
-	return ret0
-}
-
-// Token indicates an expected call of Token
-func (mr *MockAuthorizationDispatcherMockRecorder) Token(authService interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Token", reflect.TypeOf((*MockAuthorizationDispatcher)(nil).Token), authService)
 }

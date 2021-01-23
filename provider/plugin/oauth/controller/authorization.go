@@ -1,25 +1,29 @@
 package controller
 
 import (
-	"github.com/codefluence-x/altair/core"
 	auth "github.com/codefluence-x/altair/provider/plugin/oauth/controller/authorization"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
 )
 
-type authorization struct{}
+// Authorization dispatch authorization related controller
+type Authorization struct{}
 
-func Authorization() interfaces.AuthorizationDispatcher {
-	return authorization{}
+// NewAuthorization return struct of Authorization
+func NewAuthorization() *Authorization {
+	return &Authorization{}
 }
 
-func (a authorization) Grant(authService interfaces.Authorization) core.Controller {
-	return auth.Grant(authService)
+// Grant return handler of POST /oauth/authorizations
+func (a *Authorization) Grant(authService interfaces.Authorization) *auth.GrantController {
+	return auth.NewGrant(authService)
 }
 
-func (a authorization) Revoke(authService interfaces.Authorization) core.Controller {
-	return auth.Revoke(authService)
+// Revoke return handler of POST /oauth/authorizations/revoke
+func (a *Authorization) Revoke(authService interfaces.Authorization) *auth.RevokeController {
+	return auth.NewRevoke(authService)
 }
 
-func (a authorization) Token(authService interfaces.Authorization) core.Controller {
-	return auth.Token(authService)
+// Token return handler of POST /oauth/authorizations/token
+func (a *Authorization) Token(authService interfaces.Authorization) *auth.TokenController {
+	return auth.NewToken(authService)
 }

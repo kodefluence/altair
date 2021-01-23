@@ -29,12 +29,12 @@ func TestToken(t *testing.T) {
 
 	t.Run("Method", func(t *testing.T) {
 		authorizationService := mock.NewMockAuthorization(mockCtrl)
-		assert.Equal(t, "POST", controller.Authorization().Token(authorizationService).Method())
+		assert.Equal(t, "POST", controller.NewAuthorization().Token(authorizationService).Method())
 	})
 
 	t.Run("Path", func(t *testing.T) {
 		authorizationService := mock.NewMockAuthorization(mockCtrl)
-		assert.Equal(t, "/oauth/authorizations/token", controller.Authorization().Token(authorizationService).Path())
+		assert.Equal(t, "/oauth/authorizations/token", controller.NewAuthorization().Token(authorizationService).Path())
 	})
 
 	t.Run("Control", func(t *testing.T) {
@@ -69,7 +69,7 @@ func TestToken(t *testing.T) {
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
 				authorizationService.EXPECT().Token(gomock.Any(), accessTokenRequest).Return(oauthAccessTokenJSON, nil)
 
-				ctrl := controller.Authorization().Token(authorizationService)
+				ctrl := controller.NewAuthorization().Token(authorizationService)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				var response responseOneToken
@@ -115,7 +115,7 @@ func TestToken(t *testing.T) {
 					authorizationService := mock.NewMockAuthorization(mockCtrl)
 					authorizationService.EXPECT().Token(gomock.Any(), accessTokenRequest).Return(oauthAccessTokenJSON, expectedError)
 
-					ctrl := controller.Authorization().Token(authorizationService)
+					ctrl := controller.NewAuthorization().Token(authorizationService)
 					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 					var response ErrorResponse
@@ -137,7 +137,7 @@ func TestToken(t *testing.T) {
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
 				authorizationService.EXPECT().Token(gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Authorization().Token(authorizationService)
+				ctrl := controller.NewAuthorization().Token(authorizationService)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{
@@ -163,7 +163,7 @@ func TestToken(t *testing.T) {
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
 				authorizationService.EXPECT().Token(gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Authorization().Token(authorizationService)
+				ctrl := controller.NewAuthorization().Token(authorizationService)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{
