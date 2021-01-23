@@ -39,10 +39,7 @@ func (g *generator) Generate(engine *gin.Engine, metric core.Metric, routeObject
 	defer func() {
 		if r := recover(); r != nil {
 			errVariable = fmt.Errorf("Error generating route because of %v", r)
-			log.Error().
-				Err(fmt.Errorf("Error generating route because of %v", r)).
-				Array("tags", zerolog.Arr().Str("route").Str("generator").Str("defer").Str("panic")).
-				Msg("Panic error when generating routes")
+			log.Error().Err(fmt.Errorf("Error generating route because of %v", r)).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("defer").Str("panic")).Msg("Panic error when generating routes")
 		}
 	}()
 
@@ -56,12 +53,7 @@ func (g *generator) Generate(engine *gin.Engine, metric core.Metric, routeObject
 
 			g.routerPath[urlPath] = routePath
 
-			log.Info().
-				Str("host", routeObject.Host).
-				Str("name", routeObject.Name).
-				Str("path", urlPath).
-				Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("url_path")).
-				Msg("Generating routes")
+			log.Info().Str("host", routeObject.Host).Str("name", routeObject.Name).Str("path", urlPath).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("url_path")).Msg("Generating routes")
 
 			engine.Any(urlPath, func(c *gin.Context) {
 				requestID := uuid.New().String()
@@ -69,18 +61,7 @@ func (g *generator) Generate(engine *gin.Engine, metric core.Metric, routeObject
 
 				g.do(c, urlPath, requestID, routeObject)
 
-				log.Info().
-					Str("request_id", requestID).
-					Str("host", routeObject.Host).
-					Str("prefix", routeObject.Prefix).
-					Str("name", routeObject.Name).
-					Str("path", urlPath).
-					Str("method", c.Request.Method).
-					Str("full_path", c.Request.URL.String()).
-					Str("client_ip", c.ClientIP()).
-					Float64("duration_seconds", time.Since(startTime).Seconds()).
-					Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate")).
-					Msg("Complete forwarding the request")
+				log.Info().Str("request_id", requestID).Str("host", routeObject.Host).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("full_path", c.Request.URL.String()).Str("client_ip", c.ClientIP()).Float64("duration_seconds", time.Since(startTime).Seconds()).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate")).Msg("Complete forwarding the request")
 			})
 		}
 	}
@@ -112,42 +93,21 @@ func (g *generator) decorateProxyRequest(c *gin.Context, urlPath, requestID stri
 	if c.Request.Body != nil {
 		body, err := ioutil.ReadAll(c.Request.Body)
 		if err != nil {
+			log.Error().Err(err).Stack().Str("host", routeObject.Host).Str("request_id", requestID).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("full_path", c.Request.URL.String()).Str("client_ip", c.ClientIP()).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("read_all_request")).Msg("Error reading incoming request body")
 			c.JSON(http.StatusBadRequest, gin.H{
 				"status":  http.StatusBadRequest,
 				"message": "Malformed request body given by the client",
 			})
-			log.Error().
-				Err(err).
-				Stack().
-				Str("host", routeObject.Host).
-				Str("request_id", requestID).
-				Str("prefix", routeObject.Prefix).
-				Str("name", routeObject.Name).
-				Str("path", urlPath).
-				Str("method", c.Request.Method).
-				Str("full_path", c.Request.URL.String()).
-				Str("client_ip", c.ClientIP()).
-				Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("read_all_request")).
-				Msg("Error reading incoming request body")
-
 			return nil, err
 		}
 
 		proxyReq, err = http.NewRequest(c.Request.Method, "", bytes.NewReader(body))
 		if err != nil {
-			log.Error().
-				Err(err).
-				Stack().
-				Str("host", routeObject.Host).
-				Str("request_id", requestID).
-				Str("prefix", routeObject.Prefix).
-				Str("name", routeObject.Name).
-				Str("path", urlPath).
-				Str("method", c.Request.Method).
-				Str("full_path", c.Request.URL.String()).
-				Str("client_ip", c.ClientIP()).
-				Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("new_request")).
-				Msg("Error creating proxy request")
+			log.Error().Err(err).Stack().Str("host", routeObject.Host).Str("request_id", requestID).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("full_path", c.Request.URL.String()).Str("client_ip", c.ClientIP()).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("new_request")).Msg("Error creating proxy request")
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  http.StatusBadRequest,
+				"message": "Malformed request body given by the client",
+			})
 			return nil, err
 		}
 	} else {
@@ -155,19 +115,11 @@ func (g *generator) decorateProxyRequest(c *gin.Context, urlPath, requestID stri
 
 		proxyReq, err = http.NewRequest(c.Request.Method, "", nil)
 		if err != nil {
-			log.Error().
-				Err(err).
-				Stack().
-				Str("host", routeObject.Host).
-				Str("request_id", requestID).
-				Str("prefix", routeObject.Prefix).
-				Str("name", routeObject.Name).
-				Str("path", urlPath).
-				Str("method", c.Request.Method).
-				Str("full_path", c.Request.URL.String()).
-				Str("client_ip", c.ClientIP()).
-				Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("new_request")).
-				Msg("Error creating proxy request")
+			log.Error().Err(err).Stack().Str("host", routeObject.Host).Str("request_id", requestID).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("full_path", c.Request.URL.String()).Str("client_ip", c.ClientIP()).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("new_request")).Msg("Error creating proxy request")
+			c.JSON(http.StatusBadRequest, gin.H{
+				"status":  http.StatusBadRequest,
+				"message": "Malformed request body given by the client",
+			})
 			return nil, err
 		}
 	}
@@ -197,19 +149,7 @@ func (g *generator) downStreamPluginCallback(c *gin.Context, proxyReq *http.Requ
 	for _, plugin := range g.downStreamPlugin {
 		startTimePlugin := time.Now()
 		if err := plugin.Intervene(c, proxyReq, g.routerPath[urlPath]); err != nil {
-			log.Error().
-				Err(err).
-				Stack().
-				Str("host", routeObject.Host).
-				Str("request_id", requestID).
-				Str("prefix", routeObject.Prefix).
-				Str("name", routeObject.Name).
-				Str("path", urlPath).
-				Str("method", c.Request.Method).
-				Str("full_path", c.Request.URL.String()).
-				Str("client_ip", c.ClientIP()).
-				Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("plugin").Str(plugin.Name())).
-				Msg("Plugin error")
+			log.Error().Err(err).Stack().Str("host", routeObject.Host).Str("request_id", requestID).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("full_path", c.Request.URL.String()).Str("client_ip", c.ClientIP()).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("plugin").Str(plugin.Name())).Msg("Plugin error")
 			g.downStreamPluginMetric(c, routeObject.Name, plugin.Name(), urlPath, startTimePlugin)
 			return err
 		}
@@ -232,19 +172,7 @@ func (g *generator) callDownStreamService(c *gin.Context, proxyReq *http.Request
 	client := http.Client{}
 	proxyRes, err := client.Do(proxyReq)
 	if err != nil {
-		log.Error().
-			Err(err).
-			Stack().
-			Str("host", routeObject.Host).
-			Str("request_id", requestID).
-			Str("prefix", routeObject.Prefix).
-			Str("name", routeObject.Name).
-			Str("path", urlPath).
-			Str("method", c.Request.Method).
-			Str("full_path", c.Request.URL.String()).
-			Str("client_ip", c.ClientIP()).
-			Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("client_do")).
-			Msg("Error fowarding the request")
+		log.Error().Err(err).Stack().Str("host", routeObject.Host).Str("request_id", requestID).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("full_path", c.Request.URL.String()).Str("client_ip", c.ClientIP()).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("client_do")).Msg("Error fowarding the request")
 		c.JSON(http.StatusBadGateway, gin.H{
 			"status":  http.StatusBadGateway,
 			"message": "Bad gateway",
@@ -255,19 +183,7 @@ func (g *generator) callDownStreamService(c *gin.Context, proxyReq *http.Request
 
 	resp, err := ioutil.ReadAll(proxyRes.Body)
 	if err != nil {
-		log.Error().
-			Err(err).
-			Stack().
-			Str("host", routeObject.Host).
-			Str("request_id", requestID).
-			Str("prefix", routeObject.Prefix).
-			Str("name", routeObject.Name).
-			Str("path", urlPath).
-			Str("method", c.Request.Method).
-			Str("full_path", c.Request.URL.String()).
-			Str("client_ip", c.ClientIP()).
-			Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("read_all_response")).
-			Msg("Error reading the response")
+		log.Error().Err(err).Stack().Str("host", routeObject.Host).Str("request_id", requestID).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("full_path", c.Request.URL.String()).Str("client_ip", c.ClientIP()).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("read_all_response")).Msg("Error reading the response")
 		c.JSON(http.StatusBadGateway, gin.H{
 			"status":  http.StatusBadGateway,
 			"message": "Bad gateway.",
@@ -284,19 +200,11 @@ func (g *generator) callDownStreamService(c *gin.Context, proxyReq *http.Request
 	c.Status(proxyRes.StatusCode)
 	_, err = c.Writer.Write(resp)
 	if err != nil {
-		log.Error().
-			Err(err).
-			Stack().
-			Str("host", routeObject.Host).
-			Str("request_id", requestID).
-			Str("prefix", routeObject.Prefix).
-			Str("name", routeObject.Name).
-			Str("path", urlPath).
-			Str("method", c.Request.Method).
-			Str("full_path", c.Request.URL.String()).
-			Str("client_ip", c.ClientIP()).
-			Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("writer_write")).
-			Msg("Error reading the response")
+		log.Error().Err(err).Stack().Str("host", routeObject.Host).Str("request_id", requestID).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("full_path", c.Request.URL.String()).Str("client_ip", c.ClientIP()).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("writer_write")).Msg("Error reading the response")
+		c.JSON(http.StatusBadGateway, gin.H{
+			"status":  http.StatusBadGateway,
+			"message": "Bad gateway.",
+		})
 		return err
 	}
 
