@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	coreEntity "github.com/codefluence-x/altair/entity"
 
@@ -49,6 +50,11 @@ func (o *Oauth) Intervene(c *gin.Context, proxyReq *http.Request, r coreEntity.R
 
 		c.AbortWithStatus(http.StatusServiceUnavailable)
 		return fmt.Errorf("Error connecting to model: %v", err)
+	}
+
+	if time.Now().After(token.ExpiresIn) {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return fmt.Errorf("Token already expired: %s", token.ExpiresIn.String())
 	}
 
 	if o.validTokenScope(token, r) == false {

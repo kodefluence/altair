@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -225,7 +226,7 @@ func TestApplicationValidation(t *testing.T) {
 			})
 
 			t.Run("Body is nil", func(t *testing.T) {
-				t.Run("Return nil", func(t *testing.T) {
+				t.Run("Return error", func(t *testing.T) {
 
 					c := &gin.Context{}
 					c.Request = &http.Request{
@@ -240,6 +241,42 @@ func TestApplicationValidation(t *testing.T) {
 					c.Writer = responseWritterMock
 
 					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
+					routePath := coreEntity.RouterPath{Auth: "oauth_application"}
+
+					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+					oauthApplicationModel.EXPECT().OneByUIDandSecret(c, gomock.Any(), gomock.Any()).Times(0)
+
+					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel)
+					err := oauthPlugin.Intervene(c, r, routePath)
+
+					assert.NotNil(t, err)
+				})
+			})
+
+			t.Run("GetBody returning an error", func(t *testing.T) {
+				t.Run("Return error", func(t *testing.T) {
+
+					c := &gin.Context{}
+					c.Request = &http.Request{
+						Header: http.Header{},
+					}
+
+					responseWritterMock := coreMock.NewMockResponseWriter(mockCtrl)
+					responseWritterMock.EXPECT().WriteHeaderNow().AnyTimes()
+					responseWritterMock.EXPECT().WriteHeader(gomock.Any()).AnyTimes()
+					responseWritterMock.EXPECT().Status().Return(http.StatusServiceUnavailable).AnyTimes()
+
+					c.Writer = responseWritterMock
+
+					clientUID := "application_uid"
+					clientSecret := "client_secret"
+
+					reqBody := fmt.Sprintf(`{"client_uid":"%s","client_secret":"%s","username":"altair","password":"handsomeeagle"}`, clientUID, clientSecret)
+					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", strings.NewReader(reqBody))
+					r.GetBody = func() (io.ReadCloser, error) {
+						return nil, errors.New("unexpected error")
+					}
+
 					routePath := coreEntity.RouterPath{Auth: "oauth_application"}
 
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
