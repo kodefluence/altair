@@ -152,6 +152,13 @@ func TestOauth(t *testing.T) {
 						}
 						c.Request.Header.Add("Authorization", fmt.Sprintf("%s", token))
 
+						responseWritterMock := coreMock.NewMockResponseWriter(mockCtrl)
+						responseWritterMock.EXPECT().WriteHeaderNow().AnyTimes()
+						responseWritterMock.EXPECT().WriteHeader(gomock.Any()).AnyTimes()
+						responseWritterMock.EXPECT().Status().Return(http.StatusUnauthorized).AnyTimes()
+
+						c.Writer = responseWritterMock
+
 						r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
 
 						routePath := coreEntity.RouterPath{Auth: "oauth"}
@@ -176,6 +183,13 @@ func TestOauth(t *testing.T) {
 							Header: http.Header{},
 						}
 						c.Request.Header.Add("Authorization", fmt.Sprintf("NotBearer %s", token))
+
+						responseWritterMock := coreMock.NewMockResponseWriter(mockCtrl)
+						responseWritterMock.EXPECT().WriteHeaderNow().AnyTimes()
+						responseWritterMock.EXPECT().WriteHeader(gomock.Any()).AnyTimes()
+						responseWritterMock.EXPECT().Status().Return(http.StatusUnauthorized).AnyTimes()
+
+						c.Writer = responseWritterMock
 
 						r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
 
@@ -302,6 +316,52 @@ func TestOauth(t *testing.T) {
 
 					assert.NotNil(t, err)
 					assert.Equal(t, http.StatusForbidden, c.Writer.Status())
+				})
+			})
+
+			t.Run("Access token is already expired", func(t *testing.T) {
+				t.Run("Return error", func(t *testing.T) {
+					token := "token"
+
+					c := &gin.Context{}
+					c.Request = &http.Request{
+						Header: http.Header{},
+					}
+					c.Request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
+
+					responseWritterMock := coreMock.NewMockResponseWriter(mockCtrl)
+					responseWritterMock.EXPECT().WriteHeaderNow().AnyTimes()
+					responseWritterMock.EXPECT().WriteHeader(gomock.Any()).AnyTimes()
+					responseWritterMock.EXPECT().Status().Return(http.StatusUnauthorized).AnyTimes()
+
+					c.Writer = responseWritterMock
+
+					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
+
+					routePath := coreEntity.RouterPath{Auth: "oauth", Scope: "user"}
+
+					entityAccessToken := entity.OauthAccessToken{
+						ID:                 1,
+						OauthApplicationID: 1,
+						ResourceOwnerID:    1,
+						Token:              aurelia.Hash("x", "y"),
+						Scopes: sql.NullString{
+							String: "user",
+							Valid:  true,
+						},
+						ExpiresIn: time.Now().Add(-time.Hour * 4),
+						CreatedAt: time.Now(),
+					}
+
+					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+					oauthAccessTokenModel.EXPECT().OneByToken(c, token).Return(entityAccessToken, nil)
+
+					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
+
+					err := oauthPlugin.Intervene(c, r, routePath)
+
+					assert.NotNil(t, err)
+					assert.Equal(t, http.StatusUnauthorized, c.Writer.Status())
 				})
 			})
 		})

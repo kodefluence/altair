@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	coreEntity "github.com/codefluence-x/altair/entity"
 
@@ -51,6 +52,11 @@ func (o *Oauth) Intervene(c *gin.Context, proxyReq *http.Request, r coreEntity.R
 		return fmt.Errorf("Error connecting to model: %v", err)
 	}
 
+	if time.Now().After(token.ExpiresIn) {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return fmt.Errorf("Token already expired: %s", token.ExpiresIn.String())
+	}
+
 	if o.validTokenScope(token, r) == false {
 		c.AbortWithStatus(http.StatusForbidden)
 		return fmt.Errorf("Invalid token scope: %v", token.Scopes.String)
@@ -87,10 +93,12 @@ func (o *Oauth) parseToken(c *gin.Context) (string, error) {
 	splittedToken := strings.Split(authorizationHeader, " ")
 
 	if len(splittedToken) < 2 {
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return "", ErrInvalidBearerFormat
 	}
 
 	if splittedToken[0] != "Bearer" {
+		c.AbortWithStatus(http.StatusUnauthorized)
 		return "", ErrInvalidBearerFormat
 	}
 
