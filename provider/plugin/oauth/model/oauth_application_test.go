@@ -68,7 +68,7 @@ func TestOauthApplication(t *testing.T) {
 					)
 				}
 
-				mockdb.ExpectQuery(`select \* from oauth_applications limit \?, \?`).WillReturnRows(rows)
+				mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications limit \?, \?`).WillReturnRows(rows)
 
 				oauthApplicationModel := model.OauthApplication(db)
 				oauthApplications, err := oauthApplicationModel.Paginate(context.Background(), 0, 10)
@@ -85,7 +85,7 @@ func TestOauthApplication(t *testing.T) {
 						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 					}
 
-					mockdb.ExpectQuery(`select \* from oauth_applications limit \?, \?`).WillReturnError(errors.New("Unexpected error"))
+					mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications limit \?, \?`).WillReturnError(errors.New("Unexpected error"))
 
 					oauthApplicationModel := model.OauthApplication(db)
 					oauthApplications, err := oauthApplicationModel.Paginate(context.Background(), 0, 10)
@@ -119,7 +119,7 @@ func TestOauthApplication(t *testing.T) {
 						)
 					}
 
-					mockdb.ExpectQuery(`select \* from oauth_applications limit \?, \?`).WillReturnRows(rows)
+					mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications limit \?, \?`).WillReturnRows(rows)
 
 					oauthApplicationModel := model.OauthApplication(db)
 					oauthApplications, err := oauthApplicationModel.Paginate(context.Background(), 0, 10)
@@ -292,7 +292,7 @@ func TestOauthApplication(t *testing.T) {
 						data.RevokedAt, data.CreatedAt, data.UpdatedAt,
 					)
 
-				mockdb.ExpectQuery(`select \* from oauth_applications where id = \?`).
+				mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications where id = \?`).
 					WithArgs(1).
 					WillReturnRows(rows)
 
@@ -311,7 +311,7 @@ func TestOauthApplication(t *testing.T) {
 						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 					}
 
-					mockdb.ExpectQuery(`select \* from oauth_applications where id = \?`).
+					mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications where id = \?`).
 						WithArgs(1).
 						WillReturnError(sql.ErrNoRows)
 
@@ -345,7 +345,7 @@ func TestOauthApplication(t *testing.T) {
 						data.RevokedAt, data.CreatedAt, data.UpdatedAt,
 					)
 
-				mockdb.ExpectQuery(`select \* from oauth_applications where client_uid = \? and client_secret = \? limit 1`).
+				mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications where client_uid = \? and client_secret = \? limit 1`).
 					WithArgs("sample_client_uid", "sample_client_secret").
 					WillReturnRows(rows)
 
@@ -364,7 +364,7 @@ func TestOauthApplication(t *testing.T) {
 						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 					}
 
-					mockdb.ExpectQuery(`select \* from oauth_applications where client_uid = \? and client_secret = \? limit 1`).
+					mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications where client_uid = \? and client_secret = \? limit 1`).
 						WithArgs("sample_client_uid", "sample_client_secret").
 						WillReturnError(sql.ErrNoRows)
 

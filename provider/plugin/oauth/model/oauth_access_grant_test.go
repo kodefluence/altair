@@ -64,7 +64,7 @@ func TestOauthAccessGrant(t *testing.T) {
 						data.RevokedAT,
 					)
 
-				mockdb.ExpectQuery(`select \* from oauth_access_grants where id = \? limit 1`).
+				mockdb.ExpectQuery(`select id, oauth_application_id, resource_owner_id, scopes, code, redirect_uri, expires_in, created_at, revoked_at from oauth_access_grants where id = \? limit 1`).
 					WithArgs(1).
 					WillReturnRows(rows)
 
@@ -82,7 +82,7 @@ func TestOauthAccessGrant(t *testing.T) {
 					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 				}
 
-				mockdb.ExpectQuery(`select \* from oauth_access_grants where id = \? limit 1`).
+				mockdb.ExpectQuery(`select id, oauth_application_id, resource_owner_id, scopes, code, redirect_uri, expires_in, created_at, revoked_at from oauth_access_grants where id = \? limit 1`).
 					WithArgs(1).
 					WillReturnError(sql.ErrNoRows)
 
@@ -123,7 +123,7 @@ func TestOauthAccessGrant(t *testing.T) {
 							data.RevokedAT,
 						)
 
-					mockdb.ExpectQuery(`select \* from oauth_access_grants where code = \? limit 1`).
+					mockdb.ExpectQuery(`select id, oauth_application_id, resource_owner_id, scopes, code, redirect_uri, expires_in, created_at, revoked_at from oauth_access_grants where code = \? limit 1`).
 						WithArgs("some_authorization_code").
 						WillReturnRows(rows)
 
@@ -143,7 +143,7 @@ func TestOauthAccessGrant(t *testing.T) {
 						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 					}
 
-					mockdb.ExpectQuery(`select \* from oauth_access_grants where code = \? limit 1`).
+					mockdb.ExpectQuery(`select id, oauth_application_id, resource_owner_id, scopes, code, redirect_uri, expires_in, created_at, revoked_at from oauth_access_grants where code = \? limit 1`).
 						WithArgs("some_authorization_code").
 						WillReturnError(sql.ErrNoRows)
 

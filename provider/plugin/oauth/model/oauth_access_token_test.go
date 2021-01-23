@@ -62,7 +62,7 @@ func TestOauthAccessToken(t *testing.T) {
 						data.RevokedAT,
 					)
 
-				mockdb.ExpectQuery(`select \* from oauth_access_tokens where id = \? limit 1`).
+				mockdb.ExpectQuery(`select id, oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at from oauth_access_tokens where id = \? limit 1`).
 					WithArgs(1).
 					WillReturnRows(rows)
 
@@ -80,7 +80,7 @@ func TestOauthAccessToken(t *testing.T) {
 					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 				}
 
-				mockdb.ExpectQuery(`select \* from oauth_access_tokens where id = \? limit 1`).
+				mockdb.ExpectQuery(`select id, oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at from oauth_access_tokens where id = \? limit 1`).
 					WithArgs(1).
 					WillReturnError(sql.ErrNoRows)
 
