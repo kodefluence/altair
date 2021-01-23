@@ -24,12 +24,12 @@ func TestUpdate(t *testing.T) {
 
 	t.Run("Method", func(t *testing.T) {
 		applicationManager := mock.NewMockApplicationManager(mockCtrl)
-		assert.Equal(t, "PUT", controller.Application().Update(applicationManager).Method())
+		assert.Equal(t, "PUT", controller.NewApplication().Update(applicationManager).Method())
 	})
 
 	t.Run("Path", func(t *testing.T) {
 		applicationManager := mock.NewMockApplicationManager(mockCtrl)
-		assert.Equal(t, "/oauth/applications/:id", controller.Application().Update(applicationManager).Path())
+		assert.Equal(t, "/oauth/applications/:id", controller.NewApplication().Update(applicationManager).Path())
 	})
 
 	t.Run("Control", func(t *testing.T) {
@@ -55,7 +55,7 @@ func TestUpdate(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 				applicationManager.EXPECT().Update(gomock.Any(), 1, oauthApplicationUpdateJSON).Return(oauthApplicationJSON, nil)
 
-				ctrl := controller.Application().Update(applicationManager)
+				ctrl := controller.NewApplication().Update(applicationManager)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				var response responseOne
@@ -86,7 +86,7 @@ func TestUpdate(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 				applicationManager.EXPECT().Update(gomock.Any(), 1, oauthApplicationUpdateJSON).Return(entity.OauthApplicationJSON{}, expectedError)
 
-				ctrl := controller.Application().Update(applicationManager)
+				ctrl := controller.NewApplication().Update(applicationManager)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				var response ErrorResponse
@@ -107,7 +107,7 @@ func TestUpdate(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 				applicationManager.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Application().Update(applicationManager)
+				ctrl := controller.NewApplication().Update(applicationManager)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{
@@ -141,7 +141,7 @@ func TestUpdate(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 				applicationManager.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Application().Update(applicationManager)
+				ctrl := controller.NewApplication().Update(applicationManager)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{
@@ -167,7 +167,7 @@ func TestUpdate(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 				applicationManager.EXPECT().Update(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Application().Update(applicationManager)
+				ctrl := controller.NewApplication().Update(applicationManager)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{

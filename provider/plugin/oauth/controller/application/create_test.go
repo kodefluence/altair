@@ -28,12 +28,12 @@ func TestCreate(t *testing.T) {
 
 	t.Run("Method", func(t *testing.T) {
 		applicationManager := mock.NewMockApplicationManager(mockCtrl)
-		assert.Equal(t, "POST", controller.Application().Create(applicationManager).Method())
+		assert.Equal(t, "POST", controller.NewApplication().Create(applicationManager).Method())
 	})
 
 	t.Run("Path", func(t *testing.T) {
 		applicationManager := mock.NewMockApplicationManager(mockCtrl)
-		assert.Equal(t, "/oauth/applications", controller.Application().Create(applicationManager).Path())
+		assert.Equal(t, "/oauth/applications", controller.NewApplication().Create(applicationManager).Path())
 	})
 
 	t.Run("Control", func(t *testing.T) {
@@ -54,7 +54,7 @@ func TestCreate(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 				applicationManager.EXPECT().Create(gomock.Any(), oauthApplicationJSON).Return(oauthApplicationJSON, nil)
 
-				ctrl := controller.Application().Create(applicationManager)
+				ctrl := controller.NewApplication().Create(applicationManager)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				var response responseOne
@@ -88,7 +88,7 @@ func TestCreate(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 				applicationManager.EXPECT().Create(gomock.Any(), oauthApplicationJSON).Return(entity.OauthApplicationJSON{}, expectedError)
 
-				ctrl := controller.Application().Create(applicationManager)
+				ctrl := controller.NewApplication().Create(applicationManager)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				var response ErrorResponse
@@ -109,7 +109,7 @@ func TestCreate(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 				applicationManager.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Application().Create(applicationManager)
+				ctrl := controller.NewApplication().Create(applicationManager)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{
@@ -135,7 +135,7 @@ func TestCreate(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 				applicationManager.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Application().Create(applicationManager)
+				ctrl := controller.NewApplication().Create(applicationManager)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{

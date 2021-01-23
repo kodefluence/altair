@@ -74,18 +74,6 @@ type OauthValidator interface {
 	ValidateTokenGrant(ctx context.Context, r entity.AccessTokenRequestJSON) *entity.Error
 }
 
-type OauthDispatcher interface {
-	Application() OauthApplicationDispatcher
-	Authorization() AuthorizationDispatcher
-}
-
-type OauthApplicationDispatcher interface {
-	List(applicationManager ApplicationManager) core.Controller
-	One(applicationManager ApplicationManager) core.Controller
-	Create(applicationManager ApplicationManager) core.Controller
-	Update(applicationManager ApplicationManager) core.Controller
-}
-
 type AuthorizationDispatcher interface {
 	Grant(authorization Authorization) core.Controller
 	Revoke(authorization Authorization) core.Controller

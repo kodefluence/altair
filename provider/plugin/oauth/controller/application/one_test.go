@@ -27,12 +27,12 @@ func TestOne(t *testing.T) {
 
 	t.Run("Method", func(t *testing.T) {
 		applicationManager := mock.NewMockApplicationManager(mockCtrl)
-		assert.Equal(t, "GET", controller.Application().One(applicationManager).Method())
+		assert.Equal(t, "GET", controller.NewApplication().One(applicationManager).Method())
 	})
 
 	t.Run("Path", func(t *testing.T) {
 		applicationManager := mock.NewMockApplicationManager(mockCtrl)
-		assert.Equal(t, "/oauth/applications/:id", controller.Application().One(applicationManager).Path())
+		assert.Equal(t, "/oauth/applications/:id", controller.NewApplication().One(applicationManager).Path())
 	})
 
 	t.Run("Control", func(t *testing.T) {
@@ -52,7 +52,7 @@ func TestOne(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 				applicationManager.EXPECT().One(gomock.Any(), 1).Return(oauthApplicationJSON, nil)
 
-				ctrl := controller.Application().One(applicationManager)
+				ctrl := controller.NewApplication().One(applicationManager)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				var response responseOne
@@ -79,7 +79,7 @@ func TestOne(t *testing.T) {
 					applicationManager := mock.NewMockApplicationManager(mockCtrl)
 					applicationManager.EXPECT().One(gomock.Any(), 1).Return(oauthApplicationJSON, expectedError)
 
-					ctrl := controller.Application().One(applicationManager)
+					ctrl := controller.NewApplication().One(applicationManager)
 					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 					var response ErrorResponse
@@ -101,7 +101,7 @@ func TestOne(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 				applicationManager.EXPECT().One(gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Application().One(applicationManager)
+				ctrl := controller.NewApplication().One(applicationManager)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{

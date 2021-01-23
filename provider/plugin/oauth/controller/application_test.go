@@ -17,10 +17,10 @@ func TestApplication(t *testing.T) {
 		applicationManager := mock.NewMockApplicationManager(mockCtrl)
 
 		assert.NotPanics(t, func() {
-			controller.Application().List(applicationManager)
-			controller.Application().One(applicationManager)
-			controller.Application().Create(applicationManager)
-			controller.Application().Update(applicationManager)
+			controller.NewApplication().List(applicationManager)
+			controller.NewApplication().One(applicationManager)
+			controller.NewApplication().Create(applicationManager)
+			controller.NewApplication().Update(applicationManager)
 		})
 	})
 }

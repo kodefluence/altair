@@ -29,12 +29,12 @@ func TestList(t *testing.T) {
 
 	t.Run("Method", func(t *testing.T) {
 		applicationManager := mock.NewMockApplicationManager(mockCtrl)
-		assert.Equal(t, "GET", controller.Application().List(applicationManager).Method())
+		assert.Equal(t, "GET", controller.NewApplication().List(applicationManager).Method())
 	})
 
 	t.Run("Path", func(t *testing.T) {
 		applicationManager := mock.NewMockApplicationManager(mockCtrl)
-		assert.Equal(t, "/oauth/applications", controller.Application().List(applicationManager).Path())
+		assert.Equal(t, "/oauth/applications", controller.NewApplication().List(applicationManager).Path())
 	})
 
 	t.Run("Control", func(t *testing.T) {
@@ -64,7 +64,7 @@ func TestList(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 				applicationManager.EXPECT().List(gomock.Any(), 0, 10).Return(oauthApplicationJSONs, 10, nil)
 
-				ctrl := controller.Application().List(applicationManager)
+				ctrl := controller.NewApplication().List(applicationManager)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				var response responseList
@@ -88,7 +88,7 @@ func TestList(t *testing.T) {
 					applicationManager := mock.NewMockApplicationManager(mockCtrl)
 					applicationManager.EXPECT().List(gomock.Any(), 0, 10).Return([]entity.OauthApplicationJSON(nil), 0, expectedError)
 
-					ctrl := controller.Application().List(applicationManager)
+					ctrl := controller.NewApplication().List(applicationManager)
 					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 					var response ErrorResponse
@@ -110,7 +110,7 @@ func TestList(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 				applicationManager.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Application().List(applicationManager)
+				ctrl := controller.NewApplication().List(applicationManager)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{
@@ -136,7 +136,7 @@ func TestList(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 				applicationManager.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Application().List(applicationManager)
+				ctrl := controller.NewApplication().List(applicationManager)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{

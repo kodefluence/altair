@@ -11,25 +11,30 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type oneController struct {
+// OneController controlw flow of showing oauth applications detail
+type OneController struct {
 	applicationManager interfaces.ApplicationManager
 }
 
-func One(applicationManager interfaces.ApplicationManager) *oneController {
-	return &oneController{
+// NewOne return struct of OneController
+func NewOne(applicationManager interfaces.ApplicationManager) *OneController {
+	return &OneController{
 		applicationManager: applicationManager,
 	}
 }
 
-func (o *oneController) Method() string {
+// Method GET
+func (o *OneController) Method() string {
 	return "GET"
 }
 
-func (o *oneController) Path() string {
+// Path /oauth/applications/:id
+func (o *OneController) Path() string {
 	return "/oauth/applications/:id"
 }
 
-func (o *oneController) Control(c *gin.Context) {
+// Control find oauth application
+func (o *OneController) Control(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.Error().
