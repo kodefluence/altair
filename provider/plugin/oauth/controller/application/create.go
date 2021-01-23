@@ -12,25 +12,30 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type createController struct {
+// CreateController control flow of oauth application creation
+type CreateController struct {
 	applicationManager interfaces.ApplicationManager
 }
 
-func Create(applicationManager interfaces.ApplicationManager) *createController {
-	return &createController{
+// NewCreate return struct of CreateController
+func NewCreate(applicationManager interfaces.ApplicationManager) *CreateController {
+	return &CreateController{
 		applicationManager: applicationManager,
 	}
 }
 
-func (cr *createController) Method() string {
+// Method POST
+func (cr *CreateController) Method() string {
 	return "POST"
 }
 
-func (cr *createController) Path() string {
+// Path /oauth/applications
+func (cr *CreateController) Path() string {
 	return "/oauth/applications"
 }
 
-func (cr *createController) Control(c *gin.Context) {
+// Control creation of oauth application
+func (cr *CreateController) Control(c *gin.Context) {
 	var oauthApplicationJSON entity.OauthApplicationJSON
 
 	rawData, err := c.GetRawData()

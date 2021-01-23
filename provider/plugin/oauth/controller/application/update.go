@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
@@ -14,25 +13,30 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type updateController struct {
+// UpdateController control flow of update oauth application
+type UpdateController struct {
 	applicationManager interfaces.ApplicationManager
 }
 
-func Update(applicationManager interfaces.ApplicationManager) core.Controller {
-	return &updateController{
+// NewUpdate create struct of UpdateController
+func NewUpdate(applicationManager interfaces.ApplicationManager) *UpdateController {
+	return &UpdateController{
 		applicationManager: applicationManager,
 	}
 }
 
-func (cr *updateController) Method() string {
+// Method PUT
+func (uc *UpdateController) Method() string {
 	return "PUT"
 }
 
-func (cr *updateController) Path() string {
+// Path /oauth/applications/:id
+func (uc *UpdateController) Path() string {
 	return "/oauth/applications/:id"
 }
 
-func (cr *updateController) Control(c *gin.Context) {
+// Control update oauth applications
+func (uc *UpdateController) Control(c *gin.Context) {
 	var oauthApplicationUpdateJSON entity.OauthApplicationUpdateJSON
 
 	rawData, err := c.GetRawData()
@@ -78,7 +82,7 @@ func (cr *updateController) Control(c *gin.Context) {
 		return
 	}
 
-	result, entityError := cr.applicationManager.Update(c, id, oauthApplicationUpdateJSON)
+	result, entityError := uc.applicationManager.Update(c, id, oauthApplicationUpdateJSON)
 	if entityError != nil {
 		c.JSON(entityError.HttpStatus, gin.H{
 			"errors": entityError.Errors,

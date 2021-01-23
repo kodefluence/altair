@@ -36,12 +36,12 @@ func TestGrant(t *testing.T) {
 
 	t.Run("Method", func(t *testing.T) {
 		authorizationService := mock.NewMockAuthorization(mockCtrl)
-		assert.Equal(t, "POST", controller.Authorization().Grant(authorizationService).Method())
+		assert.Equal(t, "POST", controller.NewAuthorization().Grant(authorizationService).Method())
 	})
 
 	t.Run("Path", func(t *testing.T) {
 		authorizationService := mock.NewMockAuthorization(mockCtrl)
-		assert.Equal(t, "/oauth/authorizations", controller.Authorization().Grant(authorizationService).Path())
+		assert.Equal(t, "/oauth/authorizations", controller.NewAuthorization().Grant(authorizationService).Path())
 	})
 
 	t.Run("Control", func(t *testing.T) {
@@ -77,7 +77,7 @@ func TestGrant(t *testing.T) {
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
 				authorizationService.EXPECT().Grantor(gomock.Any(), authorizationRequest).Return(oauthAccessTokenJSON, nil)
 
-				ctrl := controller.Authorization().Grant(authorizationService)
+				ctrl := controller.NewAuthorization().Grant(authorizationService)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				var response responseOneToken
@@ -124,7 +124,7 @@ func TestGrant(t *testing.T) {
 					authorizationService := mock.NewMockAuthorization(mockCtrl)
 					authorizationService.EXPECT().Grantor(gomock.Any(), authorizationRequest).Return(oauthAccessTokenJSON, expectedError)
 
-					ctrl := controller.Authorization().Grant(authorizationService)
+					ctrl := controller.NewAuthorization().Grant(authorizationService)
 					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 					var response ErrorResponse
@@ -146,7 +146,7 @@ func TestGrant(t *testing.T) {
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
 				authorizationService.EXPECT().Grantor(gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Authorization().Grant(authorizationService)
+				ctrl := controller.NewAuthorization().Grant(authorizationService)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{
@@ -172,7 +172,7 @@ func TestGrant(t *testing.T) {
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
 				authorizationService.EXPECT().Grantor(gomock.Any(), gomock.Any()).Times(0)
 
-				ctrl := controller.Authorization().Grant(authorizationService)
+				ctrl := controller.NewAuthorization().Grant(authorizationService)
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				expectedError := &entity.Error{

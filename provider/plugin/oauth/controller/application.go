@@ -1,29 +1,34 @@
 package controller
 
 import (
-	"github.com/codefluence-x/altair/core"
 	app "github.com/codefluence-x/altair/provider/plugin/oauth/controller/application"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
 )
 
-type application struct{}
+// Application dispatch oauth application related controller
+type Application struct{}
 
-func Application() interfaces.OauthApplicationDispatcher {
-	return application{}
+// NewApplication return struct of Application
+func NewApplication() *Application {
+	return &Application{}
 }
 
-func (a application) List(applicationManager interfaces.ApplicationManager) core.Controller {
-	return app.List(applicationManager)
+// List return handler of GET /oauth/applications
+func (a Application) List(applicationManager interfaces.ApplicationManager) *app.ListController {
+	return app.NewList(applicationManager)
 }
 
-func (a application) One(applicationManager interfaces.ApplicationManager) core.Controller {
-	return app.One(applicationManager)
+// One return handler of GET /oauth/applications/:id
+func (a Application) One(applicationManager interfaces.ApplicationManager) *app.OneController {
+	return app.NewOne(applicationManager)
 }
 
-func (a application) Create(applicationManager interfaces.ApplicationManager) core.Controller {
-	return app.Create(applicationManager)
+// Create return handler of POST /oauth/applications
+func (a Application) Create(applicationManager interfaces.ApplicationManager) *app.CreateController {
+	return app.NewCreate(applicationManager)
 }
 
-func (a application) Update(applicationManager interfaces.ApplicationManager) core.Controller {
-	return app.Update(applicationManager)
+// Update return handler of PUT /oauth/applications
+func (a Application) Update(applicationManager interfaces.ApplicationManager) *app.UpdateController {
+	return app.NewUpdate(applicationManager)
 }

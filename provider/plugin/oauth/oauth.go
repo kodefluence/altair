@@ -64,13 +64,18 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 	oauthDownStream := downstream.NewOauth(oauthAccessTokenModel)
 	applicationValidationDownStream := downstream.NewApplicationValidation(oauthApplicationModel)
 
-	appBearer.InjectController(controller.Application().List(applicationManager))
-	appBearer.InjectController(controller.Application().One(applicationManager))
-	appBearer.InjectController(controller.Application().Create(applicationManager))
-	appBearer.InjectController(controller.Application().Update(applicationManager))
-	appBearer.InjectController(controller.Authorization().Grant(authorization))
-	appBearer.InjectController(controller.Authorization().Revoke(authorization))
-	appBearer.InjectController(controller.Authorization().Token(authorization))
+	// Controller of /oauth/applications
+	applicationControllerDispatcher := controller.NewApplication()
+	appBearer.InjectController(applicationControllerDispatcher.List(applicationManager))
+	appBearer.InjectController(applicationControllerDispatcher.One(applicationManager))
+	appBearer.InjectController(applicationControllerDispatcher.Create(applicationManager))
+	appBearer.InjectController(applicationControllerDispatcher.Update(applicationManager))
+
+	// Controller of /oauth/authorizations
+	authorizationControllerDispatcher := controller.NewAuthorization()
+	appBearer.InjectController(authorizationControllerDispatcher.Grant(authorization))
+	appBearer.InjectController(authorizationControllerDispatcher.Revoke(authorization))
+	appBearer.InjectController(authorizationControllerDispatcher.Token(authorization))
 
 	appBearer.InjectDownStreamPlugin(oauthDownStream)
 	appBearer.InjectDownStreamPlugin(applicationValidationDownStream)

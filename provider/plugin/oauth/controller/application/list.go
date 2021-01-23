@@ -9,25 +9,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type listController struct {
+// ListController show list of oauth applications
+type ListController struct {
 	applicationManager interfaces.ApplicationManager
 }
 
-func List(applicationManager interfaces.ApplicationManager) *listController {
-	return &listController{
+// NewList return struct of ListController
+func NewList(applicationManager interfaces.ApplicationManager) *ListController {
+	return &ListController{
 		applicationManager: applicationManager,
 	}
 }
 
-func (l *listController) Method() string {
+// Method GET
+func (l *ListController) Method() string {
 	return "GET"
 }
 
-func (l *listController) Path() string {
+// Path /oauth/applications
+func (l *ListController) Path() string {
 	return "/oauth/applications"
 }
 
-func (l *listController) Control(c *gin.Context) {
+// Control list of oauth applications
+func (l *ListController) Control(c *gin.Context) {
 	var offset, limit int
 	var err error
 

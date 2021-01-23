@@ -12,25 +12,30 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type revokeController struct {
+// RevokeController control flow of revoking access token
+type RevokeController struct {
 	authService interfaces.Authorization
 }
 
-func Revoke(authService interfaces.Authorization) *revokeController {
-	return &revokeController{
+// NewRevoke create new revoke controller
+func NewRevoke(authService interfaces.Authorization) *RevokeController {
+	return &RevokeController{
 		authService: authService,
 	}
 }
 
-func (o *revokeController) Method() string {
+// Method POST
+func (o *RevokeController) Method() string {
 	return "POST"
 }
 
-func (o *revokeController) Path() string {
+// Path /oauth/authorizations/revoke
+func (o *RevokeController) Path() string {
 	return "/oauth/authorizations/revoke"
 }
 
-func (o *revokeController) Control(c *gin.Context) {
+// Control revoking access token
+func (o *RevokeController) Control(c *gin.Context) {
 	var req entity.RevokeAccessTokenRequestJSON
 
 	rawData, err := c.GetRawData()
