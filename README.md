@@ -75,9 +75,11 @@ We recommend you to use Altair using docker-compose like above. But if you want 
 #### How To
 
 1. Clone this repo
-2. `go run altair.go migrate main_database`
-3. `go run altair.go run`
-4. Read [CONTRIBUTING.md](https://github.com/codefluence-x/altair/blob/master/CONTRIBUTING.md)
+2. Create databases schema based on your .env or/and configuration
+3. Make sure mysql running
+4. `go run altair.go migrate main_database`
+5. `go run altair.go run`
+6. Read [CONTRIBUTING.md](https://github.com/codefluence-x/altair/blob/master/CONTRIBUTING.md)
 
 ## Feature
 
