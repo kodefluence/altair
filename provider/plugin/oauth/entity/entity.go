@@ -173,6 +173,11 @@ type OauthPlugin struct {
 
 		AccessTokenTimeoutRaw       string `yaml:"access_token_timeout"`
 		AuthorizationCodeTimeoutRaw string `yaml:"authorization_code_timeout"`
+
+		RefreshToken struct {
+			Timeout string `yaml:"timeout"`
+			Active  bool   `yaml:"active"`
+		} `yaml:"refresh_token"`
 	} `yaml:"config"`
 }
 
@@ -186,4 +191,8 @@ func (o OauthPlugin) AccessTokenTimeout() (time.Duration, error) {
 
 func (o OauthPlugin) AuthorizationCodeTimeout() (time.Duration, error) {
 	return time.ParseDuration(o.Config.AuthorizationCodeTimeoutRaw)
+}
+
+func (o OauthPlugin) RefreshTokenTimeout() (time.Duration, error) {
+	return time.ParseDuration(o.Config.RefreshToken.Timeout)
 }
