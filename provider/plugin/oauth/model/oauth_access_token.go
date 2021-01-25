@@ -9,22 +9,22 @@ import (
 	"github.com/codefluence-x/altair/provider/plugin/oauth/query"
 )
 
-type oauthAccessToken struct {
+type OauthAccessToken struct {
 	db *sql.DB
 }
 
-func OauthAccessToken(db *sql.DB) *oauthAccessToken {
-	return &oauthAccessToken{
+func NewOauthAccessToken(db *sql.DB) *OauthAccessToken {
+	return &OauthAccessToken{
 		db: db,
 	}
 }
 
-func (oat *oauthAccessToken) Name() string {
+func (oat *OauthAccessToken) Name() string {
 	return "oauth-access-token-model"
 }
 
-func (oat *oauthAccessToken) OneByToken(ctx context.Context, token string) (entity.OauthAccessToken, error) {
-	var oauthAccessToken entity.OauthAccessToken
+func (oat *OauthAccessToken) OneByToken(ctx context.Context, token string) (entity.OauthAccessToken, error) {
+	var OauthAccessToken entity.OauthAccessToken
 
 	err := monitor(ctx, oat.Name(), query.SelectOneOauthAccessTokenByToken, func() error {
 		ctxWithTimeout, cf := context.WithTimeout(ctx, time.Second*10)
@@ -32,22 +32,22 @@ func (oat *oauthAccessToken) OneByToken(ctx context.Context, token string) (enti
 
 		row := oat.db.QueryRowContext(ctxWithTimeout, query.SelectOneOauthAccessTokenByToken, token)
 		return row.Scan(
-			&oauthAccessToken.ID,
-			&oauthAccessToken.OauthApplicationID,
-			&oauthAccessToken.ResourceOwnerID,
-			&oauthAccessToken.Token,
-			&oauthAccessToken.Scopes,
-			&oauthAccessToken.ExpiresIn,
-			&oauthAccessToken.CreatedAt,
-			&oauthAccessToken.RevokedAT,
+			&OauthAccessToken.ID,
+			&OauthAccessToken.OauthApplicationID,
+			&OauthAccessToken.ResourceOwnerID,
+			&OauthAccessToken.Token,
+			&OauthAccessToken.Scopes,
+			&OauthAccessToken.ExpiresIn,
+			&OauthAccessToken.CreatedAt,
+			&OauthAccessToken.RevokedAT,
 		)
 	})
 
-	return oauthAccessToken, err
+	return OauthAccessToken, err
 }
 
-func (oat *oauthAccessToken) One(ctx context.Context, ID int) (entity.OauthAccessToken, error) {
-	var oauthAccessToken entity.OauthAccessToken
+func (oat *OauthAccessToken) One(ctx context.Context, ID int) (entity.OauthAccessToken, error) {
+	var OauthAccessToken entity.OauthAccessToken
 
 	err := monitor(ctx, oat.Name(), query.SelectOneOauthAccessToken, func() error {
 		ctxWithTimeout, cf := context.WithTimeout(ctx, time.Second*10)
@@ -55,21 +55,21 @@ func (oat *oauthAccessToken) One(ctx context.Context, ID int) (entity.OauthAcces
 
 		row := oat.db.QueryRowContext(ctxWithTimeout, query.SelectOneOauthAccessToken, ID)
 		return row.Scan(
-			&oauthAccessToken.ID,
-			&oauthAccessToken.OauthApplicationID,
-			&oauthAccessToken.ResourceOwnerID,
-			&oauthAccessToken.Token,
-			&oauthAccessToken.Scopes,
-			&oauthAccessToken.ExpiresIn,
-			&oauthAccessToken.CreatedAt,
-			&oauthAccessToken.RevokedAT,
+			&OauthAccessToken.ID,
+			&OauthAccessToken.OauthApplicationID,
+			&OauthAccessToken.ResourceOwnerID,
+			&OauthAccessToken.Token,
+			&OauthAccessToken.Scopes,
+			&OauthAccessToken.ExpiresIn,
+			&OauthAccessToken.CreatedAt,
+			&OauthAccessToken.RevokedAT,
 		)
 	})
 
-	return oauthAccessToken, err
+	return OauthAccessToken, err
 }
 
-func (oat *oauthAccessToken) Create(ctx context.Context, data entity.OauthAccessTokenInsertable, txs ...*sql.Tx) (int, error) {
+func (oat *OauthAccessToken) Create(ctx context.Context, data entity.OauthAccessTokenInsertable, txs ...*sql.Tx) (int, error) {
 	var lastInsertedId int
 	var dbExecutable DBExecutable
 
@@ -93,7 +93,7 @@ func (oat *oauthAccessToken) Create(ctx context.Context, data entity.OauthAccess
 	return lastInsertedId, err
 }
 
-func (oat *oauthAccessToken) Revoke(ctx context.Context, token string) error {
+func (oat *OauthAccessToken) Revoke(ctx context.Context, token string) error {
 	return monitor(ctx, oat.Name(), query.RevokeAccessToken, func() error {
 		result, err := oat.db.Exec(query.RevokeAccessToken, token)
 		if err != nil {

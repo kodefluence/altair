@@ -9,22 +9,22 @@ import (
 	"github.com/codefluence-x/altair/provider/plugin/oauth/query"
 )
 
-type oauthApplication struct {
+type OauthApplication struct {
 	db *sql.DB
 }
 
-func OauthApplication(db *sql.DB) *oauthApplication {
-	return &oauthApplication{
+func NewOauthApplication(db *sql.DB) *OauthApplication {
+	return &OauthApplication{
 		db: db,
 	}
 }
 
-func (oa *oauthApplication) Name() string {
+func (oa *OauthApplication) Name() string {
 	return "oauth-application-model"
 }
 
-func (oa *oauthApplication) Paginate(ctx context.Context, offset, limit int) ([]entity.OauthApplication, error) {
-	var oauthApplications []entity.OauthApplication
+func (oa *OauthApplication) Paginate(ctx context.Context, offset, limit int) ([]entity.OauthApplication, error) {
+	var OauthApplications []entity.OauthApplication
 
 	err := monitor(ctx, oa.Name(), query.PaginateOauthApplication, func() error {
 
@@ -38,27 +38,27 @@ func (oa *oauthApplication) Paginate(ctx context.Context, offset, limit int) ([]
 		defer rows.Close()
 
 		for rows.Next() {
-			var oauthApplication entity.OauthApplication
+			var OauthApplication entity.OauthApplication
 
 			err := rows.Scan(
-				&oauthApplication.ID, &oauthApplication.OwnerID, &oauthApplication.OwnerType, &oauthApplication.Description,
-				&oauthApplication.Scopes, &oauthApplication.ClientUID, &oauthApplication.ClientSecret,
-				&oauthApplication.RevokedAt, &oauthApplication.CreatedAt, &oauthApplication.UpdatedAt,
+				&OauthApplication.ID, &OauthApplication.OwnerID, &OauthApplication.OwnerType, &OauthApplication.Description,
+				&OauthApplication.Scopes, &OauthApplication.ClientUID, &OauthApplication.ClientSecret,
+				&OauthApplication.RevokedAt, &OauthApplication.CreatedAt, &OauthApplication.UpdatedAt,
 			)
 			if err != nil {
 				return err
 			}
 
-			oauthApplications = append(oauthApplications, oauthApplication)
+			OauthApplications = append(OauthApplications, OauthApplication)
 		}
 
 		return rows.Err()
 	})
 
-	return oauthApplications, err
+	return OauthApplications, err
 }
 
-func (oa *oauthApplication) Count(ctx context.Context) (int, error) {
+func (oa *OauthApplication) Count(ctx context.Context) (int, error) {
 	var total int
 
 	err := monitor(ctx, oa.Name(), query.CountOauthApplication, func() error {
@@ -73,7 +73,7 @@ func (oa *oauthApplication) Count(ctx context.Context) (int, error) {
 	return total, err
 }
 
-func (oa *oauthApplication) One(ctx context.Context, ID int) (entity.OauthApplication, error) {
+func (oa *OauthApplication) One(ctx context.Context, ID int) (entity.OauthApplication, error) {
 	var data entity.OauthApplication
 
 	err := monitor(ctx, oa.Name(), query.SelectOneOauthApplication, func() error {
@@ -92,7 +92,7 @@ func (oa *oauthApplication) One(ctx context.Context, ID int) (entity.OauthApplic
 	return data, err
 }
 
-func (oa *oauthApplication) OneByUIDandSecret(ctx context.Context, clientUID, clientSecret string) (entity.OauthApplication, error) {
+func (oa *OauthApplication) OneByUIDandSecret(ctx context.Context, clientUID, clientSecret string) (entity.OauthApplication, error) {
 	var data entity.OauthApplication
 
 	err := monitor(ctx, oa.Name(), query.SelectOneByUIDandSecret, func() error {
@@ -111,7 +111,7 @@ func (oa *oauthApplication) OneByUIDandSecret(ctx context.Context, clientUID, cl
 	return data, err
 }
 
-func (oa *oauthApplication) Create(ctx context.Context, data entity.OauthApplicationInsertable, txs ...*sql.Tx) (int, error) {
+func (oa *OauthApplication) Create(ctx context.Context, data entity.OauthApplicationInsertable, txs ...*sql.Tx) (int, error) {
 	var lastInsertedID int
 	var dbExecutable DBExecutable
 
@@ -139,7 +139,7 @@ func (oa *oauthApplication) Create(ctx context.Context, data entity.OauthApplica
 	return lastInsertedID, err
 }
 
-func (oa *oauthApplication) Update(ctx context.Context, ID int, data entity.OauthApplicationUpdateable, txs ...*sql.Tx) error {
+func (oa *OauthApplication) Update(ctx context.Context, ID int, data entity.OauthApplicationUpdateable, txs ...*sql.Tx) error {
 	var dbExecutable DBExecutable
 
 	dbExecutable = oa.db

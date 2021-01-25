@@ -1,5 +1,9 @@
 package query
 
+//
+// oauth_applications
+//
+
 // PaginateOauthApplication oauth_applications table query
 const PaginateOauthApplication = "select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications limit ?, ?"
 
@@ -18,6 +22,10 @@ const InsertOauthApplication = "insert into oauth_applications (owner_id, owner_
 // UpdateOauthApplication oauth_applications table query
 const UpdateOauthApplication = "update oauth_applications set description = ?, scopes = ?, updated_at = now() where id = ?"
 
+//
+// oauth_access_tokens
+//
+
 // InsertOauthAccessToken oauth_access_tokens table query
 const InsertOauthAccessToken = "insert into oauth_access_tokens (oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at) values(?, ?, ?, ?, ?, now(), null)"
 
@@ -30,6 +38,10 @@ const SelectOneOauthAccessTokenByToken = "select id, oauth_application_id, resou
 // RevokeAccessToken oauth_access_tokens table query
 const RevokeAccessToken = "update oauth_access_tokens set revoked_at = now() where token = ?"
 
+//
+// oauth_access_grants
+//
+
 // InsertOauthAccessGrant oauth_access_grants table query
 const InsertOauthAccessGrant = "insert into oauth_access_grants (oauth_application_id, resource_owner_id, scopes, code, redirect_uri, expires_in, created_at, revoked_at) values(?, ?, ?, ?, ?, ?, now(), null)"
 
@@ -41,3 +53,19 @@ const SelectOneOauthAccessGrantByCode = "select id, oauth_application_id, resour
 
 // RevokeAuthorizationCode oauth_access_grants table query
 const RevokeAuthorizationCode = "update oauth_access_grants set revoked_at = now() where code = ? limit 1"
+
+//
+// oauth_access_grants
+//
+
+// InsertOauthRefreshToken oauth_refresh_tokens table query
+const InsertOauthRefreshToken = "insert into oauth_refresh_tokens (oauth_access_token_id, token, expires_in, created_at, revoked_at) values(?, ?, ?, now(), null)"
+
+// RevokeRefreshToken oauth_refresh_tokens table query
+const RevokeRefreshToken = "update oauth_refresh_tokens set revoked_at = now() where token = ?"
+
+// SelectOneOauthRefreshToken oauth_refresh_tokens table query
+const SelectOneOauthRefreshToken = "select id, oauth_access_token_id, token, expires_in, created_at, revoked_at from oauth_refresh_tokens where id = ? limit 1"
+
+// SelectOneOauthRefreshTokenByToken oauth_refresh_tokens table query
+const SelectOneOauthRefreshTokenByToken = "select id, oauth_access_token_id, token, expires_in, created_at, revoked_at from oauth_refresh_tokens where token = ? and revoked_at is null limit 1"

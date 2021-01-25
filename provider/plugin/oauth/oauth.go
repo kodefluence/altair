@@ -44,8 +44,8 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 	}
 
 	// Model
-	oauthApplicationModel := model.OauthApplication(db)
-	oauthAccessTokenModel := model.OauthAccessToken(db)
+	oauthApplicationModel := model.NewOauthApplication(db)
+	oauthAccessTokenModel := model.NewOauthAccessToken(db)
 	oauthAccessGrantModel := model.NewOauthAccessGrant(db)
 
 	// Formatter
