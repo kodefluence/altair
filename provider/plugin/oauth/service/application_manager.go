@@ -12,16 +12,16 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type applicationManager struct {
+type ApplicationManager struct {
 	formatter             interfaces.OauthApplicationFormater
 	modelFormatter        interfaces.ModelFormater
 	oauthApplicationModel interfaces.OauthApplicationModel
 	applicationValidator  interfaces.OauthValidator
 }
 
-// ApplicationManager manage all oauth application data business logic
-func ApplicationManager(formatter interfaces.OauthApplicationFormater, modelFormatter interfaces.ModelFormater, oauthApplicationModel interfaces.OauthApplicationModel, applicationValidator interfaces.OauthValidator) *applicationManager {
-	return &applicationManager{
+// NewApplicationManager manage all oauth application data business logic
+func NewApplicationManager(formatter interfaces.OauthApplicationFormater, modelFormatter interfaces.ModelFormater, oauthApplicationModel interfaces.OauthApplicationModel, applicationValidator interfaces.OauthValidator) *ApplicationManager {
+	return &ApplicationManager{
 		formatter:             formatter,
 		modelFormatter:        modelFormatter,
 		oauthApplicationModel: oauthApplicationModel,
@@ -29,7 +29,7 @@ func ApplicationManager(formatter interfaces.OauthApplicationFormater, modelForm
 	}
 }
 
-func (am *applicationManager) List(ctx context.Context, offset, limit int) ([]entity.OauthApplicationJSON, int, *entity.Error) {
+func (am *ApplicationManager) List(ctx context.Context, offset, limit int) ([]entity.OauthApplicationJSON, int, *entity.Error) {
 	oauthApplications, err := am.oauthApplicationModel.Paginate(ctx, offset, limit)
 	if err != nil {
 		log.Error().
@@ -67,7 +67,7 @@ func (am *applicationManager) List(ctx context.Context, offset, limit int) ([]en
 	return formattedResult, total, nil
 }
 
-func (am *applicationManager) Create(ctx context.Context, e entity.OauthApplicationJSON) (entity.OauthApplicationJSON, *entity.Error) {
+func (am *ApplicationManager) Create(ctx context.Context, e entity.OauthApplicationJSON) (entity.OauthApplicationJSON, *entity.Error) {
 	if err := am.applicationValidator.ValidateApplication(ctx, e); err != nil {
 		log.Error().
 			Err(err).
@@ -96,7 +96,7 @@ func (am *applicationManager) Create(ctx context.Context, e entity.OauthApplicat
 	return am.One(ctx, id)
 }
 
-func (am *applicationManager) Update(ctx context.Context, ID int, e entity.OauthApplicationUpdateJSON) (entity.OauthApplicationJSON, *entity.Error) {
+func (am *ApplicationManager) Update(ctx context.Context, ID int, e entity.OauthApplicationUpdateJSON) (entity.OauthApplicationJSON, *entity.Error) {
 
 	err := am.oauthApplicationModel.Update(ctx, ID, entity.OauthApplicationUpdateable{
 		Description: e.Description,
@@ -118,7 +118,7 @@ func (am *applicationManager) Update(ctx context.Context, ID int, e entity.Oauth
 	return am.One(ctx, ID)
 }
 
-func (am *applicationManager) One(ctx context.Context, ID int) (entity.OauthApplicationJSON, *entity.Error) {
+func (am *ApplicationManager) One(ctx context.Context, ID int) (entity.OauthApplicationJSON, *entity.Error) {
 	oauthApplication, err := am.oauthApplicationModel.One(ctx, ID)
 	if err != nil {
 		if err == sql.ErrNoRows {

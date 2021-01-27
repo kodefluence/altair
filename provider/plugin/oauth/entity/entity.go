@@ -29,18 +29,22 @@ func (e Error) Error() string {
 	return errorString
 }
 
+// OauthPlugin holds all config variables
 type OauthPlugin struct {
-	Config struct {
-		Database string `yaml:"database"`
+	Config PluginConfig `yaml:"config"`
+}
 
-		AccessTokenTimeoutRaw       string `yaml:"access_token_timeout"`
-		AuthorizationCodeTimeoutRaw string `yaml:"authorization_code_timeout"`
+// PluginConfig holds all config variables for oauth plugin
+type PluginConfig struct {
+	Database string `yaml:"database"`
 
-		RefreshToken struct {
-			Timeout string `yaml:"timeout"`
-			Active  bool   `yaml:"active"`
-		} `yaml:"refresh_token"`
-	} `yaml:"config"`
+	AccessTokenTimeoutRaw       string `yaml:"access_token_timeout"`
+	AuthorizationCodeTimeoutRaw string `yaml:"authorization_code_timeout"`
+
+	RefreshToken struct {
+		Timeout string `yaml:"timeout"`
+		Active  bool   `yaml:"active"`
+	} `yaml:"refresh_token"`
 }
 
 func (o OauthPlugin) DatabaseInstance() string {

@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/validator"
 	"github.com/codefluence-x/altair/util"
+	"github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -25,7 +27,7 @@ func TestApplication(t *testing.T) {
 					Description: util.StringToPointer("This is description"),
 					Scopes:      util.StringToPointer("public users"),
 				}
-				applicationValidator := validator.Oauth()
+				applicationValidator := validator.NewOauth()
 				assert.Nil(t, applicationValidator.ValidateApplication(context.Background(), data))
 			})
 		})
@@ -44,7 +46,7 @@ func TestApplication(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("object `owner_type` is nil or not exists")),
 				}
 
-				applicationValidator := validator.Oauth()
+				applicationValidator := validator.NewOauth()
 				err := applicationValidator.ValidateApplication(context.Background(), data)
 
 				assert.NotNil(t, err)
@@ -68,7 +70,7 @@ func TestApplication(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("object `owner_type` must be either of `confidential` or `public`")),
 				}
 
-				applicationValidator := validator.Oauth()
+				applicationValidator := validator.NewOauth()
 				err := applicationValidator.ValidateApplication(context.Background(), data)
 
 				assert.NotNil(t, err)
@@ -97,7 +99,7 @@ func TestApplication(t *testing.T) {
 						},
 					}
 
-					applicationValidator := validator.Oauth()
+					applicationValidator := validator.NewOauth()
 					err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
 					assert.Nil(t, err)
 				})
@@ -117,7 +119,7 @@ func TestApplication(t *testing.T) {
 						},
 					}
 
-					applicationValidator := validator.Oauth()
+					applicationValidator := validator.NewOauth()
 					err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
 					assert.Nil(t, err)
 				})
@@ -138,7 +140,7 @@ func TestApplication(t *testing.T) {
 					},
 				}
 
-				applicationValidator := validator.Oauth()
+				applicationValidator := validator.NewOauth()
 				err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
 
 				expectedErr := &entity.Error{
@@ -167,7 +169,7 @@ func TestApplication(t *testing.T) {
 					},
 				}
 
-				applicationValidator := validator.Oauth()
+				applicationValidator := validator.NewOauth()
 				err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
 				assert.Nil(t, err)
 			})
@@ -195,7 +197,7 @@ func TestApplication(t *testing.T) {
 					),
 				}
 
-				applicationValidator := validator.Oauth()
+				applicationValidator := validator.NewOauth()
 				err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedErr.Error(), err.Error())
@@ -229,7 +231,7 @@ func TestApplication(t *testing.T) {
 					),
 				}
 
-				applicationValidator := validator.Oauth()
+				applicationValidator := validator.NewOauth()
 				err := applicationValidator.ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication)
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedErr.Error(), err.Error())
@@ -252,8 +254,47 @@ func TestApplication(t *testing.T) {
 
 			t.Run("When access token request is valid", func(t *testing.T) {
 				t.Run("Then return nil", func(t *testing.T) {
-					applicationValidator := validator.Oauth()
+					applicationValidator := validator.NewOauth()
 					assert.Nil(t, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
+				})
+			})
+
+			t.Run("When access token request is valid and with `refresh_token` grant type", func(t *testing.T) {
+				t.Run("Then return nil", func(t *testing.T) {
+					accessTokenRequest := entity.AccessTokenRequestJSON{
+						ClientSecret: util.StringToPointer("client_secret"),
+						ClientUID:    util.StringToPointer("client_uid"),
+						Code:         util.StringToPointer("abcdef_123456"),
+						GrantType:    util.StringToPointer("refresh_token"),
+						RefreshToken: util.StringToPointer("some refresh token"),
+						RedirectURI:  util.StringToPointer("http://localhost:8000/oauth_redirect"),
+					}
+
+					applicationValidator := validator.NewOauth()
+					assert.Nil(t, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
+				})
+			})
+
+			t.Run("When `refresh_token` grant type but refresh token is nil", func(t *testing.T) {
+				t.Run("Then return unprocessable entity", func(t *testing.T) {
+					accessTokenRequest := entity.AccessTokenRequestJSON{
+						ClientSecret: util.StringToPointer("client_secret"),
+						ClientUID:    util.StringToPointer("client_uid"),
+						Code:         util.StringToPointer("abcdef_123456"),
+						GrantType:    util.StringToPointer("refresh_token"),
+						RedirectURI:  util.StringToPointer("http://localhost:8000/oauth_redirect"),
+					}
+
+					applicationValidator := validator.NewOauth()
+
+					expectedErr := &entity.Error{
+						HttpStatus: http.StatusUnprocessableEntity,
+						Errors: eobject.Wrap(
+							eobject.ValidationError(`refresh token can't be empty`),
+						),
+					}
+
+					assert.Equal(t, expectedErr, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
 				})
 			})
 
@@ -274,12 +315,12 @@ func TestApplication(t *testing.T) {
 						),
 					}
 
-					applicationValidator := validator.Oauth()
+					applicationValidator := validator.NewOauth()
 					assert.Equal(t, expectedErr, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
 				})
 			})
 
-			t.Run("When grant_type is not `authorization_code`", func(t *testing.T) {
+			t.Run("When grant_type is not `authorization_code` or `refresh_token`", func(t *testing.T) {
 				t.Run("Then return unprocessable entity", func(t *testing.T) {
 					accessTokenRequest := entity.AccessTokenRequestJSON{
 						ClientSecret: util.StringToPointer("client_secret"),
@@ -292,11 +333,11 @@ func TestApplication(t *testing.T) {
 					expectedErr := &entity.Error{
 						HttpStatus: http.StatusUnprocessableEntity,
 						Errors: eobject.Wrap(
-							eobject.ValidationError(`grant_type must be set to 'authorization_code'`),
+							eobject.ValidationError(`grant_type must be set to either 'authorization_code' or 'refresh_token'`),
 						),
 					}
 
-					applicationValidator := validator.Oauth()
+					applicationValidator := validator.NewOauth()
 					assert.Equal(t, expectedErr, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
 				})
 			})
@@ -318,7 +359,7 @@ func TestApplication(t *testing.T) {
 						),
 					}
 
-					applicationValidator := validator.Oauth()
+					applicationValidator := validator.NewOauth()
 					assert.Equal(t, expectedErr, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
 				})
 			})
@@ -340,8 +381,227 @@ func TestApplication(t *testing.T) {
 						),
 					}
 
-					applicationValidator := validator.Oauth()
+					applicationValidator := validator.NewOauth()
 					assert.Equal(t, expectedErr, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
+				})
+			})
+		})
+	})
+
+	t.Run("ValidateTokenAuthorizationCode", func(t *testing.T) {
+		t.Run("Given context and access token request", func(t *testing.T) {
+			ctx := context.Background()
+
+			t.Run("When access token request is valid", func(t *testing.T) {
+				t.Run("Then return nil", func(t *testing.T) {
+					accessTokenRequest := entity.AccessTokenRequestJSON{
+						ClientSecret: util.StringToPointer("client_secret"),
+						ClientUID:    util.StringToPointer("client_uid"),
+						Code:         util.StringToPointer("abcdef_123456"),
+						GrantType:    util.StringToPointer("refresh_token"),
+						RefreshToken: util.StringToPointer("some refresh token"),
+						RedirectURI:  util.StringToPointer("http://localhost:8000/oauth_redirect"),
+					}
+
+					oauthAccessGrant := entity.OauthAccessGrant{
+						ID:                 1,
+						OauthApplicationID: 1,
+						ResourceOwnerID:    99,
+						Code:               util.SHA1(),
+						ExpiresIn:          time.Now().Add(time.Hour * 4),
+						CreatedAt:          time.Now(),
+						RedirectURI: sql.NullString{
+							String: "http://localhost:8000/oauth_redirect",
+							Valid:  true,
+						},
+						Scopes: sql.NullString{
+							String: "public",
+							Valid:  true,
+						},
+						RevokedAT: mysql.NullTime{
+							Time:  time.Now(),
+							Valid: false,
+						},
+					}
+
+					applicationValidator := validator.NewOauth()
+					assert.Nil(t, applicationValidator.ValidateTokenAuthorizationCode(ctx, accessTokenRequest, oauthAccessGrant))
+				})
+			})
+
+			t.Run("When oauth access grant is already revoked", func(t *testing.T) {
+				t.Run("Then it will return http.StatusForbidden", func(t *testing.T) {
+					accessTokenRequest := entity.AccessTokenRequestJSON{
+						ClientSecret: util.StringToPointer("client_secret"),
+						ClientUID:    util.StringToPointer("client_uid"),
+						Code:         util.StringToPointer("abcdef_123456"),
+						GrantType:    util.StringToPointer("refresh_token"),
+						RefreshToken: util.StringToPointer("some refresh token"),
+						RedirectURI:  util.StringToPointer("http://localhost:8000/oauth_redirect"),
+					}
+
+					oauthAccessGrant := entity.OauthAccessGrant{
+						ID:                 1,
+						OauthApplicationID: 1,
+						ResourceOwnerID:    99,
+						Code:               util.SHA1(),
+						ExpiresIn:          time.Now().Add(time.Hour * 4),
+						CreatedAt:          time.Now(),
+						RedirectURI: sql.NullString{
+							String: "http://localhost:8000/oauth_redirect",
+							Valid:  true,
+						},
+						Scopes: sql.NullString{
+							String: "public",
+							Valid:  true,
+						},
+						RevokedAT: mysql.NullTime{
+							Time:  time.Now(),
+							Valid: true,
+						},
+					}
+
+					expectedError := &entity.Error{
+						HttpStatus: http.StatusForbidden,
+						Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "authorization code already used")),
+					}
+
+					applicationValidator := validator.NewOauth()
+					assert.Equal(t, expectedError, applicationValidator.ValidateTokenAuthorizationCode(ctx, accessTokenRequest, oauthAccessGrant))
+				})
+			})
+
+			t.Run("When oauth access grant is already expired", func(t *testing.T) {
+				t.Run("Then it will return http.StatusForbidden", func(t *testing.T) {
+					accessTokenRequest := entity.AccessTokenRequestJSON{
+						ClientSecret: util.StringToPointer("client_secret"),
+						ClientUID:    util.StringToPointer("client_uid"),
+						Code:         util.StringToPointer("abcdef_123456"),
+						GrantType:    util.StringToPointer("refresh_token"),
+						RefreshToken: util.StringToPointer("some refresh token"),
+						RedirectURI:  util.StringToPointer("http://localhost:8000/oauth_redirect"),
+					}
+
+					oauthAccessGrant := entity.OauthAccessGrant{
+						ID:                 1,
+						OauthApplicationID: 1,
+						ResourceOwnerID:    99,
+						Code:               util.SHA1(),
+						ExpiresIn:          time.Now().Add(-time.Hour * 4),
+						CreatedAt:          time.Now(),
+						RedirectURI: sql.NullString{
+							String: "http://localhost:8000/oauth_redirect",
+							Valid:  true,
+						},
+						Scopes: sql.NullString{
+							String: "public",
+							Valid:  true,
+						},
+						RevokedAT: mysql.NullTime{
+							Time:  time.Now(),
+							Valid: false,
+						},
+					}
+
+					expectedError := &entity.Error{
+						HttpStatus: http.StatusForbidden,
+						Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "authorization code already expired")),
+					}
+
+					applicationValidator := validator.NewOauth()
+					assert.Equal(t, expectedError, applicationValidator.ValidateTokenAuthorizationCode(ctx, accessTokenRequest, oauthAccessGrant))
+				})
+			})
+
+			t.Run("When oauth access grant is already expired", func(t *testing.T) {
+				t.Run("Then it will return http.StatusForbidden", func(t *testing.T) {
+					accessTokenRequest := entity.AccessTokenRequestJSON{
+						ClientSecret: util.StringToPointer("client_secret"),
+						ClientUID:    util.StringToPointer("client_uid"),
+						Code:         util.StringToPointer("abcdef_123456"),
+						GrantType:    util.StringToPointer("refresh_token"),
+						RefreshToken: util.StringToPointer("some refresh token"),
+						RedirectURI:  util.StringToPointer("http://localhost:8000/oauth_redirect"),
+					}
+
+					oauthAccessGrant := entity.OauthAccessGrant{
+						ID:                 1,
+						OauthApplicationID: 1,
+						ResourceOwnerID:    99,
+						Code:               util.SHA1(),
+						ExpiresIn:          time.Now().Add(time.Hour * 4),
+						CreatedAt:          time.Now(),
+						RedirectURI: sql.NullString{
+							String: "http://localhost:8000/oauth_redirect_2",
+							Valid:  true,
+						},
+						Scopes: sql.NullString{
+							String: "public",
+							Valid:  true,
+						},
+						RevokedAT: mysql.NullTime{
+							Time:  time.Now(),
+							Valid: false,
+						},
+					}
+
+					expectedError := &entity.Error{
+						HttpStatus: http.StatusForbidden,
+						Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "redirect uri is different from one that generated before")),
+					}
+
+					applicationValidator := validator.NewOauth()
+					assert.Equal(t, expectedError, applicationValidator.ValidateTokenAuthorizationCode(ctx, accessTokenRequest, oauthAccessGrant))
+				})
+			})
+
+		})
+	})
+
+	t.Run("ValidateTokenRefreshToken", func(t *testing.T) {
+		t.Run("Given context and oauth refresh token", func(t *testing.T) {
+			ctx := context.Background()
+
+			t.Run("When refresh token request is valid", func(t *testing.T) {
+				t.Run("Then return nil", func(t *testing.T) {
+					oauthRefreshToken := entity.OauthRefreshToken{
+						ID:                 1,
+						OauthAccessTokenID: 2,
+						CreatedAt:          time.Now(),
+						ExpiresIn:          time.Now().Add(time.Hour),
+						Token:              "TOKEN",
+						RevokedAT: mysql.NullTime{
+							Time:  time.Now(),
+							Valid: false,
+						},
+					}
+
+					applicationValidator := validator.NewOauth()
+					assert.Nil(t, applicationValidator.ValidateTokenRefreshToken(ctx, oauthRefreshToken))
+				})
+			})
+
+			t.Run("When refresh token request is already revoked", func(t *testing.T) {
+				t.Run("Then return nil", func(t *testing.T) {
+					oauthRefreshToken := entity.OauthRefreshToken{
+						ID:                 1,
+						OauthAccessTokenID: 2,
+						CreatedAt:          time.Now().Add(-time.Hour * 2),
+						ExpiresIn:          time.Now().Add(-time.Hour),
+						Token:              "TOKEN",
+						RevokedAT: mysql.NullTime{
+							Time:  time.Now(),
+							Valid: true,
+						},
+					}
+
+					expectedError := &entity.Error{
+						HttpStatus: http.StatusForbidden,
+						Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "refresh token already used")),
+					}
+
+					applicationValidator := validator.NewOauth()
+					assert.Equal(t, expectedError, applicationValidator.ValidateTokenRefreshToken(ctx, oauthRefreshToken))
 				})
 			})
 		})

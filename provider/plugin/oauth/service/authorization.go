@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"net/http"
-	"time"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
@@ -22,6 +21,8 @@ type Authorization struct {
 
 	modelFormatter interfaces.ModelFormater
 	oauthFormatter interfaces.OauthFormatter
+
+	config entity.PluginConfig
 }
 
 // NewAuthorization create new service to handler authorize related flow
@@ -32,6 +33,7 @@ func NewAuthorization(
 	modelFormatter interfaces.ModelFormater,
 	oauthValidator interfaces.OauthValidator,
 	oauthFormatter interfaces.OauthFormatter,
+	config entity.PluginConfig,
 ) *Authorization {
 	return &Authorization{
 		oauthApplicationModel: oauthApplicationModel,
@@ -40,6 +42,7 @@ func NewAuthorization(
 		modelFormatter:        modelFormatter,
 		oauthValidator:        oauthValidator,
 		oauthFormatter:        oauthFormatter,
+		config:                config,
 	}
 }
 
@@ -52,9 +55,10 @@ func (a *Authorization) Grantor(ctx context.Context, authorizationReq entity.Aut
 		}
 	}
 
-	if *authorizationReq.ResponseType == "token" {
+	switch *authorizationReq.ResponseType {
+	case "token":
 		return a.GrantToken(ctx, authorizationReq)
-	} else if *authorizationReq.ResponseType == "code" {
+	case "code":
 		return a.Grant(ctx, authorizationReq)
 	}
 
@@ -243,25 +247,8 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 		}
 	}
 
-	if oauthAccessGrant.RevokedAT.Valid {
-		return entity.OauthAccessTokenJSON{}, &entity.Error{
-			HttpStatus: http.StatusForbidden,
-			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "authorization code already used")),
-		}
-	}
-
-	if time.Now().After(oauthAccessGrant.ExpiresIn) {
-		return entity.OauthAccessTokenJSON{}, &entity.Error{
-			HttpStatus: http.StatusForbidden,
-			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "authorization code already expired")),
-		}
-	}
-
-	if oauthAccessGrant.RedirectURI.String != *accessTokenReq.RedirectURI {
-		return entity.OauthAccessTokenJSON{}, &entity.Error{
-			HttpStatus: http.StatusForbidden,
-			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "redirect_uri", "redirect uri is different from one that generated before")),
-		}
+	if err := a.oauthValidator.ValidateTokenAuthorizationCode(ctx, accessTokenReq, oauthAccessGrant); err != nil {
+		return entity.OauthAccessTokenJSON{}, err
 	}
 
 	id, err := a.oauthAccessTokenModel.Create(ctx, a.modelFormatter.AccessTokenFromOauthAccessGrant(oauthAccessGrant, oauthApplication))

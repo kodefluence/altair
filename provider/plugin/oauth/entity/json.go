@@ -96,6 +96,8 @@ type AccessTokenRequestJSON struct {
 	ClientUID    *string `json:"client_uid"`
 	ClientSecret *string `json:"client_secret"`
 
+	RefreshToken *string `json:"refresh_token"`
+
 	Code        *string `json:"code"`
 	RedirectURI *string `json:"redirect_uri"`
 }
