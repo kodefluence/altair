@@ -1,4 +1,4 @@
-![Altair - Lightweight and Robust API Gateway](https://user-images.githubusercontent.com/1132660/85085782-0bc00100-b203-11ea-8e89-bbeb7d03a418.png)
+![Altair - Lightweight and Robust API Gateway](https://user-images.githubusercontent.com/1132660/85085782-0bc00100-b203-11ea-8e89-bbeb7d03a418.png "Altair - Lightweight and Robust API Gateway")
 
 <p align="center">
   <a href="https://coveralls.io/github/codefluence-x/altair?branch=master"><img src="https://coveralls.io/repos/github/codefluence-x/altair/badge.svg?branch=master" alt="Coverage Status"></a>
