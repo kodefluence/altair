@@ -230,47 +230,16 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 		return entity.OauthAccessTokenJSON{}, entityErr
 	}
 
-	var accessTokenID int
-	var redirectURI string
-	var oauthAccessToken entity.OauthAccessToken
-
 	switch *accessTokenReq.GrantType {
-	case "authorization_code":
-		var err error
 
-		accessTokenID, redirectURI, entityErr = a.grantTokenFromAuthorizationCode(ctx, accessTokenReq, oauthApplication, accessTokenID)
+	case "authorization_code":
+		oauthAccessToken, redirectURI, entityErr := a.grantTokenFromAuthorizationCode(ctx, accessTokenReq, oauthApplication)
 		if entityErr != nil {
 			return entity.OauthAccessTokenJSON{}, entityErr
 		}
 
-		oauthAccessToken, err = a.oauthAccessTokenModel.One(ctx, accessTokenID)
-		if err != nil {
-
-			log.Error().
-				Err(err).
-				Stack().
-				Interface("request_id", ctx.Value("request_id")).
-				Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
-				Msg("Error selecting one access token")
-
-			return entity.OauthAccessTokenJSON{}, &entity.Error{
-				HttpStatus: http.StatusInternalServerError,
-				Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
-			}
-		}
-
-		err = a.oauthAccessGrantModel.Revoke(ctx, *accessTokenReq.Code)
-		if err != nil {
-			// TODO: Error is intended to be suppressed until database transaction is implemented. After database transaction is implemented, then it will be rollbacked if there is error in revoke oauth access grants process
-			log.Error().
-				Err(err).
-				Stack().
-				Interface("request_id", ctx.Value("request_id")).
-				Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
-				Msg("Error revoke oauth access grant")
-		}
-
 		return a.oauthFormatter.AccessToken(oauthAccessToken, redirectURI), nil
+
 	case "refresh_token":
 		if a.refreshTokenToggle {
 			oauthRefreshToken, err := a.oauthRefreshTokenModel.OneByToken(ctx, *accessTokenReq.RefreshToken)
@@ -330,7 +299,7 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 				}
 			}
 
-			oauthAccessToken, err = a.oauthAccessTokenModel.One(ctx, id)
+			oauthAccessToken, err := a.oauthAccessTokenModel.One(ctx, id)
 			if err != nil {
 
 				log.Error().
@@ -372,7 +341,7 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 				}
 			}
 
-			return a.oauthFormatter.AccessToken(oauthAccessToken, redirectURI), nil
+			return a.oauthFormatter.AccessToken(oauthAccessToken, ""), nil
 		}
 	}
 
@@ -382,7 +351,7 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 	}
 }
 
-func (a *Authorization) grantTokenFromAuthorizationCode(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON, oauthApplication entity.OauthApplication, accessTokenID int) (int, string, *entity.Error) {
+func (a *Authorization) grantTokenFromAuthorizationCode(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON, oauthApplication entity.OauthApplication) (entity.OauthAccessToken, string, *entity.Error) {
 	oauthAccessGrant, err := a.oauthAccessGrantModel.OneByCode(ctx, *accessTokenReq.Code)
 	if err != nil {
 		log.Error().
@@ -392,20 +361,20 @@ func (a *Authorization) grantTokenFromAuthorizationCode(ctx context.Context, acc
 			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("authorization_code").Str("one_by_code")).
 			Msg("authorization code cannot be found because there was an error")
 		if err == sql.ErrNoRows {
-			return 0, "", &entity.Error{
+			return entity.OauthAccessToken{}, "", &entity.Error{
 				HttpStatus: http.StatusNotFound,
 				Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "authorization_code")),
 			}
 		}
 
-		return 0, "", &entity.Error{
+		return entity.OauthAccessToken{}, oauthAccessGrant.RedirectURI.String, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 		}
 	}
 
 	if err := a.oauthValidator.ValidateTokenAuthorizationCode(ctx, accessTokenReq, oauthAccessGrant); err != nil {
-		return 0, "", err
+		return entity.OauthAccessToken{}, oauthAccessGrant.RedirectURI.String, err
 	}
 
 	id, err := a.oauthAccessTokenModel.Create(ctx, a.modelFormatter.AccessTokenFromOauthAccessGrant(oauthAccessGrant, oauthApplication))
@@ -418,13 +387,40 @@ func (a *Authorization) grantTokenFromAuthorizationCode(ctx context.Context, acc
 			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
 			Msg("Error creating access token after creating the data")
 
-		return 0, "", &entity.Error{
+		return entity.OauthAccessToken{}, oauthAccessGrant.RedirectURI.String, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 		}
 	}
 
-	return id, oauthAccessGrant.RedirectURI.String, nil
+	oauthAccessToken, err := a.oauthAccessTokenModel.One(ctx, id)
+	if err != nil {
+
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", ctx.Value("request_id")).
+			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
+			Msg("Error selecting one access token")
+
+		return entity.OauthAccessToken{}, oauthAccessGrant.RedirectURI.String, &entity.Error{
+			HttpStatus: http.StatusInternalServerError,
+			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+		}
+	}
+
+	err = a.oauthAccessGrantModel.Revoke(ctx, *accessTokenReq.Code)
+	if err != nil {
+		// TODO: Error is intended to be suppressed until database transaction is implemented. After database transaction is implemented, then it will be rollbacked if there is error in revoke oauth access grants process
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", ctx.Value("request_id")).
+			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
+			Msg("Error revoke oauth access grant")
+	}
+
+	return oauthAccessToken, oauthAccessGrant.RedirectURI.String, nil
 }
 
 // RevokeToken revoke given access token request
