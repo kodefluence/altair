@@ -41,10 +41,10 @@ type OauthAccessGrantModel interface {
 // OauthRefreshTokenModel handle all database connection to oauth_refresh_tokens table
 type OauthRefreshTokenModel interface {
 	Name() string
-	One(ctx context.Context, ID int) (entity.OauthAccessGrant, error)
-	Create(ctx context.Context, data entity.OauthAccessGrantInsertable, txs ...*sql.Tx) (int, error)
-	OneByCode(ctx context.Context, code string) (entity.OauthAccessGrant, error)
-	Revoke(ctx context.Context, code string, txs ...*sql.Tx) error
+	One(ctx context.Context, ID int) (entity.OauthRefreshToken, error)
+	Create(ctx context.Context, data entity.OauthRefreshTokenInsertable, txs ...*sql.Tx) (int, error)
+	OneByToken(ctx context.Context, token string) (entity.OauthRefreshToken, error)
+	Revoke(ctx context.Context, token string) error
 }
 
 // ApplicationManager manage all flow related oauth application CRUD
@@ -74,11 +74,14 @@ type OauthFormatter interface {
 	AccessToken(e entity.OauthAccessToken, redirectURI string) entity.OauthAccessTokenJSON
 }
 
+// ModelFormater format compiled entity into insertable
 type ModelFormater interface {
 	AccessTokenFromAuthorizationRequest(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessTokenInsertable
 	AccessTokenFromOauthAccessGrant(oauthAccessGrant entity.OauthAccessGrant, application entity.OauthApplication) entity.OauthAccessTokenInsertable
 	AccessGrantFromAuthorizationRequest(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessGrantInsertable
 	OauthApplication(r entity.OauthApplicationJSON) entity.OauthApplicationInsertable
+	AccessTokenFromOauthRefreshToken(application entity.OauthApplication, accessToken entity.OauthAccessToken) entity.OauthAccessTokenInsertable
+	RefreshToken(application entity.OauthApplication, accessToken entity.OauthAccessToken) entity.OauthRefreshTokenInsertable
 }
 
 type OauthValidator interface {

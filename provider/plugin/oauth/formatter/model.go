@@ -12,15 +12,17 @@ import (
 
 // Model implement converter from other struct into model insertable struct
 type Model struct {
-	tokenExpiresIn time.Duration
-	codeExpiresIn  time.Duration
+	tokenExpiresIn        time.Duration
+	codeExpiresIn         time.Duration
+	refreshTokenExpiresIn time.Duration
 }
 
 // NewModel create new model object
-func NewModel(tokenExpiresIn time.Duration, codeExpiresIn time.Duration) *Model {
+func NewModel(tokenExpiresIn time.Duration, codeExpiresIn time.Duration, refreshTokenExpiresIn time.Duration) *Model {
 	return &Model{
-		tokenExpiresIn: tokenExpiresIn,
-		codeExpiresIn:  codeExpiresIn,
+		tokenExpiresIn:        tokenExpiresIn,
+		codeExpiresIn:         codeExpiresIn,
+		refreshTokenExpiresIn: refreshTokenExpiresIn,
 	}
 }
 
@@ -76,4 +78,28 @@ func (m *Model) AccessTokenFromOauthAccessGrant(oauthAccessGrant entity.OauthAcc
 	accessTokenInsertable.ExpiresIn = time.Now().Add(m.tokenExpiresIn)
 
 	return accessTokenInsertable
+}
+
+// AccessTokenFromOauthRefreshToken _
+func (m *Model) AccessTokenFromOauthRefreshToken(application entity.OauthApplication, accessToken entity.OauthAccessToken) entity.OauthAccessTokenInsertable {
+	var accessTokenInsertable entity.OauthAccessTokenInsertable
+
+	accessTokenInsertable.OauthApplicationID = application.ID
+	accessTokenInsertable.ResourceOwnerID = accessToken.ResourceOwnerID
+	accessTokenInsertable.Token = aurelia.Hash(application.ClientUID, application.ClientSecret+strconv.Itoa(accessToken.ResourceOwnerID))
+	accessTokenInsertable.Scopes = accessToken.Scopes.String
+	accessTokenInsertable.ExpiresIn = time.Now().Add(m.tokenExpiresIn)
+
+	return accessTokenInsertable
+}
+
+// RefreshToken _
+func (m *Model) RefreshToken(application entity.OauthApplication, accessToken entity.OauthAccessToken) entity.OauthRefreshTokenInsertable {
+	var refreshTokenInsertable entity.OauthRefreshTokenInsertable
+
+	refreshTokenInsertable.Token = aurelia.Hash(application.ClientUID, application.ClientSecret+strconv.Itoa(accessToken.ResourceOwnerID))
+	refreshTokenInsertable.OauthAccessTokenID = accessToken.ID
+	refreshTokenInsertable.ExpiresIn = time.Now().Add(m.refreshTokenExpiresIn)
+
+	return refreshTokenInsertable
 }

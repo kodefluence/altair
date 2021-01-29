@@ -47,6 +47,11 @@ type PluginConfig struct {
 	} `yaml:"refresh_token"`
 }
 
+type RefreshTokenConfig struct {
+	Timeout time.Duration
+	Active  bool
+}
+
 func (o OauthPlugin) DatabaseInstance() string {
 	return o.Config.Database
 }

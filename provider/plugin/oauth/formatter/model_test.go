@@ -16,6 +16,7 @@ import (
 func TestModel(t *testing.T) {
 	tokenExpiresIn := time.Hour * 24
 	codeExpiresIn := time.Hour * 24
+	refreshTokenExpiresIn := time.Hour * 24
 
 	t.Run("AccessTokenFromAuthorizationRequest", func(t *testing.T) {
 		t.Run("Given authorization request and oauth application", func(t *testing.T) {
@@ -29,7 +30,7 @@ func TestModel(t *testing.T) {
 					ID: 1,
 				}
 
-				modelFormatter := formatter.NewModel(tokenExpiresIn, codeExpiresIn)
+				modelFormatter := formatter.NewModel(tokenExpiresIn, codeExpiresIn, refreshTokenExpiresIn)
 				insertable := modelFormatter.AccessTokenFromAuthorizationRequest(authorizationRequest, application)
 
 				assert.Equal(t, application.ID, insertable.OauthApplicationID)
@@ -54,7 +55,7 @@ func TestModel(t *testing.T) {
 					ID: 1,
 				}
 
-				modelFormatter := formatter.NewModel(tokenExpiresIn, codeExpiresIn)
+				modelFormatter := formatter.NewModel(tokenExpiresIn, codeExpiresIn, refreshTokenExpiresIn)
 				insertable := modelFormatter.AccessGrantFromAuthorizationRequest(authorizationRequest, application)
 
 				assert.Equal(t, application.ID, insertable.OauthApplicationID)
@@ -78,7 +79,7 @@ func TestModel(t *testing.T) {
 					Scopes:      util.StringToPointer("public user"),
 				}
 
-				modelFormatter := formatter.NewModel(tokenExpiresIn, codeExpiresIn)
+				modelFormatter := formatter.NewModel(tokenExpiresIn, codeExpiresIn, refreshTokenExpiresIn)
 				insertable := modelFormatter.OauthApplication(oauthApplicationJSON)
 
 				assert.Equal(t, *oauthApplicationJSON.OwnerID, insertable.OwnerID)
@@ -120,13 +121,63 @@ func TestModel(t *testing.T) {
 					ID: 1,
 				}
 
-				modelFormatter := formatter.NewModel(tokenExpiresIn, codeExpiresIn)
+				modelFormatter := formatter.NewModel(tokenExpiresIn, codeExpiresIn, refreshTokenExpiresIn)
 				insertable := modelFormatter.AccessTokenFromOauthAccessGrant(oauthAccessGrant, application)
 
 				assert.Equal(t, application.ID, insertable.OauthApplicationID)
 				assert.Equal(t, oauthAccessGrant.ResourceOwnerID, insertable.ResourceOwnerID)
 				assert.Equal(t, oauthAccessGrant.Scopes.String, insertable.Scopes)
 				assert.NotEqual(t, time.Time{}, insertable.ExpiresIn)
+			})
+		})
+	})
+
+	t.Run("AccessTokenFromOauthRefreshToken", func(t *testing.T) {
+		t.Run("Given application and access token", func(t *testing.T) {
+			t.Run("Return oauth access token insertable", func(t *testing.T) {
+				oauthAccessToken := entity.OauthAccessToken{
+					Scopes: sql.NullString{
+						String: "public",
+						Valid:  true,
+					},
+					ResourceOwnerID: 1,
+				}
+
+				application := entity.OauthApplication{
+					ID: 1,
+				}
+
+				modelFormatter := formatter.NewModel(tokenExpiresIn, codeExpiresIn, refreshTokenExpiresIn)
+				insertable := modelFormatter.AccessTokenFromOauthRefreshToken(application, oauthAccessToken)
+
+				assert.Equal(t, application.ID, insertable.OauthApplicationID)
+				assert.Equal(t, oauthAccessToken.ResourceOwnerID, insertable.ResourceOwnerID)
+				assert.Equal(t, oauthAccessToken.Scopes.String, insertable.Scopes)
+				assert.NotEqual(t, time.Time{}, insertable.ExpiresIn)
+			})
+		})
+	})
+
+	t.Run("AccessTokenFromOauthRefreshToken", func(t *testing.T) {
+		t.Run("Given application and access token", func(t *testing.T) {
+			t.Run("Return oauth access token insertable", func(t *testing.T) {
+				oauthAccessToken := entity.OauthAccessToken{
+					ID: 1,
+					Scopes: sql.NullString{
+						String: "public",
+						Valid:  true,
+					},
+					ResourceOwnerID: 1,
+				}
+
+				application := entity.OauthApplication{
+					ID: 1,
+				}
+
+				modelFormatter := formatter.NewModel(tokenExpiresIn, codeExpiresIn, refreshTokenExpiresIn)
+				insertable := modelFormatter.RefreshToken(application, oauthAccessToken)
+
+				assert.Equal(t, oauthAccessToken.ID, insertable.OauthAccessTokenID)
 			})
 		})
 	})

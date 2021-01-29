@@ -10,11 +10,9 @@ import (
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
-
 	"github.com/codefluence-x/altair/provider/plugin/oauth/formatter"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/service"
-
 	"github.com/codefluence-x/altair/util"
 	"github.com/codefluence-x/aurelia"
 	"github.com/go-sql-driver/mysql"
@@ -33,8 +31,9 @@ func TestAuthorization(t *testing.T) {
 				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+				oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-				modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
+				modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatter := formatter.Oauth()
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -98,7 +97,7 @@ func TestAuthorization(t *testing.T) {
 					oauthFormatterMock.EXPECT().AccessToken(oauthAccessToken, *authorizationRequest.RedirectURI).Return(oauthAccessTokenJSON),
 				)
 
-				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 				results, err := authorizationService.Grantor(ctx, authorizationRequest)
 				assert.Nil(t, err)
 				assert.Equal(t, oauthAccessTokenJSON, results)
@@ -111,6 +110,7 @@ func TestAuthorization(t *testing.T) {
 						oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 						oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+						oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 						oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 						modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 						oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -140,7 +140,7 @@ func TestAuthorization(t *testing.T) {
 							oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
 						)
 
-						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 						results, err := authorizationService.Grantor(ctx, authorizationRequest)
 						assert.NotNil(t, err)
 						assert.Equal(t, expectedError, err)
@@ -153,6 +153,7 @@ func TestAuthorization(t *testing.T) {
 						oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 						oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+						oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 						oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 						modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 						oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -182,7 +183,7 @@ func TestAuthorization(t *testing.T) {
 							oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
 						)
 
-						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 						results, err := authorizationService.Grantor(ctx, authorizationRequest)
 						assert.NotNil(t, err)
 						assert.Equal(t, expectedError, err)
@@ -196,6 +197,7 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -248,7 +250,7 @@ func TestAuthorization(t *testing.T) {
 						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.NotNil(t, err)
 					assert.Equal(t, expectedError, err)
@@ -261,8 +263,9 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
@@ -316,7 +319,7 @@ func TestAuthorization(t *testing.T) {
 						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 					}
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.NotNil(t, err)
 					assert.Equal(t, expectedError, err)
@@ -329,8 +332,9 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
@@ -397,7 +401,7 @@ func TestAuthorization(t *testing.T) {
 						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 					}
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.NotNil(t, err)
 					assert.Equal(t, expectedError, err)
@@ -411,8 +415,9 @@ func TestAuthorization(t *testing.T) {
 				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+				oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-				modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
+				modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatter := formatter.Oauth()
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -484,7 +489,7 @@ func TestAuthorization(t *testing.T) {
 					oauthFormatterMock.EXPECT().AccessGrant(oauthAccessGrant).Return(oauthAccessGrantJSON),
 				)
 
-				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 				results, err := authorizationService.Grantor(ctx, authorizationRequest)
 				assert.Nil(t, err)
 				assert.Equal(t, oauthAccessGrantJSON, results)
@@ -495,6 +500,7 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -547,7 +553,7 @@ func TestAuthorization(t *testing.T) {
 						oauthFormatterMock.EXPECT().AccessGrant(gomock.Any()).Times(0),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.NotNil(t, err)
 					assert.Equal(t, expectedError, err)
@@ -561,6 +567,7 @@ func TestAuthorization(t *testing.T) {
 						oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 						oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+						oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 						oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 						modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 						oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -590,7 +597,7 @@ func TestAuthorization(t *testing.T) {
 							oauthFormatterMock.EXPECT().AccessGrant(gomock.Any()).Times(0),
 						)
 
-						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 						results, err := authorizationService.Grantor(ctx, authorizationRequest)
 						assert.NotNil(t, err)
 						assert.Equal(t, expectedError, err)
@@ -604,8 +611,9 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
@@ -659,7 +667,7 @@ func TestAuthorization(t *testing.T) {
 						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 					}
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.NotNil(t, err)
 					assert.Equal(t, expectedErr, err)
@@ -672,8 +680,9 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
@@ -748,7 +757,7 @@ func TestAuthorization(t *testing.T) {
 						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 					}
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.NotNil(t, err)
 					assert.Equal(t, expectedErr, err)
@@ -762,6 +771,7 @@ func TestAuthorization(t *testing.T) {
 				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+				oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -782,7 +792,7 @@ func TestAuthorization(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("response_type is invalid. Should be either `token` or `code`.")),
 				}
 
-				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 				results, err := authorizationService.Grantor(ctx, authorizationRequest)
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedError, err)
@@ -795,6 +805,7 @@ func TestAuthorization(t *testing.T) {
 				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+				oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -815,7 +826,7 @@ func TestAuthorization(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("client_uid cannot be empty")),
 				}
 
-				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 				results, err := authorizationService.Grantor(ctx, authorizationRequest)
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedError, err)
@@ -828,6 +839,7 @@ func TestAuthorization(t *testing.T) {
 				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+				oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -848,7 +860,7 @@ func TestAuthorization(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("client_secret cannot be empty")),
 				}
 
-				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 				results, err := authorizationService.Grantor(ctx, authorizationRequest)
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedError, err)
@@ -861,6 +873,7 @@ func TestAuthorization(t *testing.T) {
 				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+				oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -881,7 +894,7 @@ func TestAuthorization(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("response_type cannot be empty")),
 				}
 
-				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 				results, err := authorizationService.Grantor(ctx, authorizationRequest)
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedError, err)
@@ -897,8 +910,9 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatter := formatter.Oauth()
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -984,7 +998,7 @@ func TestAuthorization(t *testing.T) {
 						oauthFormatterMock.EXPECT().AccessToken(oauthAccessToken, oauthAccessGrant.RedirectURI.String).Return(oauthAccessTokenJSON),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					oauthAccessTokenOutput, err := authorizationService.Token(ctx, accessTokenRequest)
 
 					assert.Nil(t, err)
@@ -997,8 +1011,9 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatter := formatter.Oauth()
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -1084,7 +1099,7 @@ func TestAuthorization(t *testing.T) {
 						oauthFormatterMock.EXPECT().AccessToken(oauthAccessToken, oauthAccessGrant.RedirectURI.String).Return(oauthAccessTokenJSON),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					oauthAccessTokenOutput, err := authorizationService.Token(ctx, accessTokenRequest)
 
 					assert.Nil(t, err)
@@ -1097,6 +1112,7 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -1130,7 +1146,7 @@ func TestAuthorization(t *testing.T) {
 						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					oauthAccessTokenOutput, err := authorizationService.Token(ctx, accessTokenRequest)
 
 					assert.NotNil(t, err)
@@ -1144,6 +1160,7 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -1200,7 +1217,7 @@ func TestAuthorization(t *testing.T) {
 						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					oauthAccessTokenOutput, err := authorizationService.Token(ctx, accessTokenRequest)
 
 					assert.NotNil(t, err)
@@ -1214,6 +1231,7 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -1290,7 +1308,7 @@ func TestAuthorization(t *testing.T) {
 						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					oauthAccessTokenOutput, err := authorizationService.Token(ctx, accessTokenRequest)
 
 					assert.NotNil(t, err)
@@ -1304,6 +1322,7 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -1358,7 +1377,7 @@ func TestAuthorization(t *testing.T) {
 						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					oauthAccessTokenOutput, err := authorizationService.Token(ctx, accessTokenRequest)
 
 					assert.NotNil(t, err)
@@ -1372,6 +1391,7 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -1426,7 +1446,7 @@ func TestAuthorization(t *testing.T) {
 						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					oauthAccessTokenOutput, err := authorizationService.Token(ctx, accessTokenRequest)
 
 					assert.NotNil(t, err)
@@ -1440,8 +1460,9 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
@@ -1517,7 +1538,7 @@ func TestAuthorization(t *testing.T) {
 						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					oauthAccessTokenOutput, err := authorizationService.Token(ctx, accessTokenRequest)
 
 					assert.NotNil(t, err)
@@ -1531,8 +1552,9 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
-					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
@@ -1608,7 +1630,7 @@ func TestAuthorization(t *testing.T) {
 						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					oauthAccessTokenOutput, err := authorizationService.Token(ctx, accessTokenRequest)
 
 					assert.NotNil(t, err)
@@ -1626,6 +1648,7 @@ func TestAuthorization(t *testing.T) {
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -1638,7 +1661,7 @@ func TestAuthorization(t *testing.T) {
 
 					oauthAccessTokenModel.EXPECT().Revoke(ctx, *revokeRequest.Token).Return(nil)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 					err := authorizationService.RevokeToken(ctx, revokeRequest)
 					assert.Nil(t, err)
 				})
@@ -1650,6 +1673,7 @@ func TestAuthorization(t *testing.T) {
 						oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 						oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+						oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 						oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 						modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 						oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -1667,7 +1691,7 @@ func TestAuthorization(t *testing.T) {
 							Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "token")),
 						}
 
-						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 						err := authorizationService.RevokeToken(ctx, revokeRequest)
 						assert.Equal(t, expectedError, err)
 					})
@@ -1678,6 +1702,7 @@ func TestAuthorization(t *testing.T) {
 						oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 						oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+						oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 						oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 						modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 						oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -1695,7 +1720,7 @@ func TestAuthorization(t *testing.T) {
 							Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 						}
 
-						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 						err := authorizationService.RevokeToken(ctx, revokeRequest)
 						assert.Equal(t, expectedError, err)
 					})
@@ -1708,6 +1733,7 @@ func TestAuthorization(t *testing.T) {
 				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
 				oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
 				oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+				oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
 				oauthValidator := mock.NewMockOauthValidator(mockCtrl)
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
@@ -1725,7 +1751,7 @@ func TestAuthorization(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("token is empty")),
 				}
 
-				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, modelFormatterMock, oauthValidator, oauthFormatterMock, entity.PluginConfig{})
+				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
 				err := authorizationService.RevokeToken(ctx, revokeRequest)
 				assert.Equal(t, expectedError, err)
 			})

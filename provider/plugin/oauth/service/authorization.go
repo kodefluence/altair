@@ -14,15 +14,17 @@ import (
 
 // Authorization struct handle all of things related to oauth2 authorization
 type Authorization struct {
-	oauthApplicationModel interfaces.OauthApplicationModel
-	oauthAccessTokenModel interfaces.OauthAccessTokenModel
-	oauthAccessGrantModel interfaces.OauthAccessGrantModel
-	oauthValidator        interfaces.OauthValidator
+	oauthApplicationModel  interfaces.OauthApplicationModel
+	oauthAccessTokenModel  interfaces.OauthAccessTokenModel
+	oauthAccessGrantModel  interfaces.OauthAccessGrantModel
+	oauthRefreshTokenModel interfaces.OauthRefreshTokenModel
+
+	oauthValidator interfaces.OauthValidator
 
 	modelFormatter interfaces.ModelFormater
 	oauthFormatter interfaces.OauthFormatter
 
-	config entity.PluginConfig
+	refreshTokenToggle bool
 }
 
 // NewAuthorization create new service to handler authorize related flow
@@ -30,19 +32,21 @@ func NewAuthorization(
 	oauthApplicationModel interfaces.OauthApplicationModel,
 	oauthAccessTokenModel interfaces.OauthAccessTokenModel,
 	oauthAccessGrantModel interfaces.OauthAccessGrantModel,
+	oauthRefreshTokenModel interfaces.OauthRefreshTokenModel,
 	modelFormatter interfaces.ModelFormater,
 	oauthValidator interfaces.OauthValidator,
 	oauthFormatter interfaces.OauthFormatter,
-	config entity.PluginConfig,
+	refreshTokenToggle bool,
 ) *Authorization {
 	return &Authorization{
-		oauthApplicationModel: oauthApplicationModel,
-		oauthAccessTokenModel: oauthAccessTokenModel,
-		oauthAccessGrantModel: oauthAccessGrantModel,
-		modelFormatter:        modelFormatter,
-		oauthValidator:        oauthValidator,
-		oauthFormatter:        oauthFormatter,
-		config:                config,
+		oauthApplicationModel:  oauthApplicationModel,
+		oauthAccessTokenModel:  oauthAccessTokenModel,
+		oauthAccessGrantModel:  oauthAccessGrantModel,
+		oauthRefreshTokenModel: oauthRefreshTokenModel,
+		modelFormatter:         modelFormatter,
+		oauthValidator:         oauthValidator,
+		oauthFormatter:         oauthFormatter,
+		refreshTokenToggle:     refreshTokenToggle,
 	}
 }
 
@@ -226,29 +230,182 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 		return entity.OauthAccessTokenJSON{}, entityErr
 	}
 
+	var accessTokenID int
+	var redirectURI string
+	var oauthAccessToken entity.OauthAccessToken
+
+	switch *accessTokenReq.GrantType {
+	case "authorization_code":
+		var err error
+
+		accessTokenID, redirectURI, entityErr = a.grantTokenFromAuthorizationCode(ctx, accessTokenReq, oauthApplication, accessTokenID)
+		if entityErr != nil {
+			return entity.OauthAccessTokenJSON{}, entityErr
+		}
+
+		oauthAccessToken, err = a.oauthAccessTokenModel.One(ctx, accessTokenID)
+		if err != nil {
+
+			log.Error().
+				Err(err).
+				Stack().
+				Interface("request_id", ctx.Value("request_id")).
+				Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
+				Msg("Error selecting one access token")
+
+			return entity.OauthAccessTokenJSON{}, &entity.Error{
+				HttpStatus: http.StatusInternalServerError,
+				Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+			}
+		}
+
+		err = a.oauthAccessGrantModel.Revoke(ctx, *accessTokenReq.Code)
+		if err != nil {
+			// TODO: Error is intended to be suppressed until database transaction is implemented. After database transaction is implemented, then it will be rollbacked if there is error in revoke oauth access grants process
+			log.Error().
+				Err(err).
+				Stack().
+				Interface("request_id", ctx.Value("request_id")).
+				Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
+				Msg("Error revoke oauth access grant")
+		}
+
+		return a.oauthFormatter.AccessToken(oauthAccessToken, redirectURI), nil
+	case "refresh_token":
+		if a.refreshTokenToggle {
+			oauthRefreshToken, err := a.oauthRefreshTokenModel.OneByToken(ctx, *accessTokenReq.RefreshToken)
+			if err != nil {
+				log.Error().
+					Err(err).
+					Stack().
+					Interface("request_id", ctx.Value("request_id")).
+					Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("refresh_token").Str("one_by_code")).
+					Msg("refresh token cannot be found because there was an error")
+
+				if err == sql.ErrNoRows {
+					return entity.OauthAccessTokenJSON{}, &entity.Error{
+						HttpStatus: http.StatusNotFound,
+						Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "refresh_token")),
+					}
+				}
+
+				return entity.OauthAccessTokenJSON{}, &entity.Error{
+					HttpStatus: http.StatusInternalServerError,
+					Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+				}
+			}
+
+			if err := a.oauthValidator.ValidateTokenRefreshToken(ctx, oauthRefreshToken); err != nil {
+				return entity.OauthAccessTokenJSON{}, err
+			}
+
+			oldAccessToken, err := a.oauthAccessTokenModel.One(ctx, oauthRefreshToken.OauthAccessTokenID)
+			if err != nil {
+				log.Error().
+					Err(err).
+					Stack().
+					Interface("request_id", ctx.Value("request_id")).
+					Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
+					Msg("Error selecting one access token")
+
+				return entity.OauthAccessTokenJSON{}, &entity.Error{
+					HttpStatus: http.StatusInternalServerError,
+					Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+				}
+			}
+
+			id, err := a.oauthAccessTokenModel.Create(ctx, a.modelFormatter.AccessTokenFromOauthRefreshToken(oauthApplication, oldAccessToken))
+			if err != nil {
+
+				log.Error().
+					Err(err).
+					Stack().
+					Interface("request_id", ctx.Value("request_id")).
+					Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
+					Msg("Error creating access token after creating the data")
+
+				return entity.OauthAccessTokenJSON{}, &entity.Error{
+					HttpStatus: http.StatusInternalServerError,
+					Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+				}
+			}
+
+			oauthAccessToken, err = a.oauthAccessTokenModel.One(ctx, id)
+			if err != nil {
+
+				log.Error().
+					Err(err).
+					Stack().
+					Interface("request_id", ctx.Value("request_id")).
+					Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
+					Msg("Error selecting one access token")
+
+				return entity.OauthAccessTokenJSON{}, &entity.Error{
+					HttpStatus: http.StatusInternalServerError,
+					Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+				}
+			}
+
+			err = a.oauthRefreshTokenModel.Revoke(ctx, *accessTokenReq.RefreshToken)
+			if err != nil {
+				// TODO: Error is intended to be suppressed until database transaction is implemented. After database transaction is implemented, then it will be rollbacked if there is error in revoke oauth access grants process
+				log.Error().
+					Err(err).
+					Stack().
+					Interface("request_id", ctx.Value("request_id")).
+					Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
+					Msg("Error revoke refresh token")
+			}
+
+			if _, err := a.oauthRefreshTokenModel.Create(ctx, a.modelFormatter.RefreshToken(oauthApplication, oauthAccessToken)); err != nil {
+
+				log.Error().
+					Err(err).
+					Stack().
+					Interface("request_id", ctx.Value("request_id")).
+					Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
+					Msg("Error creating access token after creating the data")
+
+				return entity.OauthAccessTokenJSON{}, &entity.Error{
+					HttpStatus: http.StatusInternalServerError,
+					Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+				}
+			}
+
+			return a.oauthFormatter.AccessToken(oauthAccessToken, redirectURI), nil
+		}
+	}
+
+	return entity.OauthAccessTokenJSON{}, &entity.Error{
+		HttpStatus: http.StatusUnprocessableEntity,
+		Errors:     eobject.Wrap(eobject.ValidationError(`grant_type can't be empty`)),
+	}
+}
+
+func (a *Authorization) grantTokenFromAuthorizationCode(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON, oauthApplication entity.OauthApplication, accessTokenID int) (int, string, *entity.Error) {
 	oauthAccessGrant, err := a.oauthAccessGrantModel.OneByCode(ctx, *accessTokenReq.Code)
 	if err != nil {
 		log.Error().
 			Err(err).
 			Stack().
 			Interface("request_id", ctx.Value("request_id")).
-			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("one_by_code")).
+			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("authorization_code").Str("one_by_code")).
 			Msg("authorization code cannot be found because there was an error")
 		if err == sql.ErrNoRows {
-			return entity.OauthAccessTokenJSON{}, &entity.Error{
+			return 0, "", &entity.Error{
 				HttpStatus: http.StatusNotFound,
 				Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "authorization_code")),
 			}
 		}
 
-		return entity.OauthAccessTokenJSON{}, &entity.Error{
+		return 0, "", &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 		}
 	}
 
 	if err := a.oauthValidator.ValidateTokenAuthorizationCode(ctx, accessTokenReq, oauthAccessGrant); err != nil {
-		return entity.OauthAccessTokenJSON{}, err
+		return 0, "", err
 	}
 
 	id, err := a.oauthAccessTokenModel.Create(ctx, a.modelFormatter.AccessTokenFromOauthAccessGrant(oauthAccessGrant, oauthApplication))
@@ -261,40 +418,13 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
 			Msg("Error creating access token after creating the data")
 
-		return entity.OauthAccessTokenJSON{}, &entity.Error{
+		return 0, "", &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 		}
 	}
 
-	oauthAccessToken, err := a.oauthAccessTokenModel.One(ctx, id)
-	if err != nil {
-
-		log.Error().
-			Err(err).
-			Stack().
-			Interface("request_id", ctx.Value("request_id")).
-			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
-			Msg("Error selecting one access token")
-
-		return entity.OauthAccessTokenJSON{}, &entity.Error{
-			HttpStatus: http.StatusInternalServerError,
-			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
-		}
-	}
-
-	err = a.oauthAccessGrantModel.Revoke(ctx, *accessTokenReq.Code)
-	if err != nil {
-		// TODO: Error is intended to be suppressed until database transaction is implemented. After database transaction is implemented, then it will be rollbacked if there is error in revoke oauth access grants process
-		log.Error().
-			Err(err).
-			Stack().
-			Interface("request_id", ctx.Value("request_id")).
-			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
-			Msg("Error revoke oauth access grant")
-	}
-
-	return a.oauthFormatter.AccessToken(oauthAccessToken, oauthAccessGrant.RedirectURI.String), nil
+	return id, oauthAccessGrant.RedirectURI.String, nil
 }
 
 // RevokeToken revoke given access token request
