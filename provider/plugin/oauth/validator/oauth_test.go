@@ -27,7 +27,7 @@ func TestApplication(t *testing.T) {
 					Description: util.StringToPointer("This is description"),
 					Scopes:      util.StringToPointer("public users"),
 				}
-				applicationValidator := validator.NewOauth()
+				applicationValidator := validator.NewOauth(true)
 				assert.Nil(t, applicationValidator.ValidateApplication(context.Background(), data))
 			})
 		})
@@ -46,7 +46,7 @@ func TestApplication(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("object `owner_type` is nil or not exists")),
 				}
 
-				applicationValidator := validator.NewOauth()
+				applicationValidator := validator.NewOauth(true)
 				err := applicationValidator.ValidateApplication(context.Background(), data)
 
 				assert.NotNil(t, err)
@@ -70,7 +70,7 @@ func TestApplication(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("object `owner_type` must be either of `confidential` or `public`")),
 				}
 
-				applicationValidator := validator.NewOauth()
+				applicationValidator := validator.NewOauth(true)
 				err := applicationValidator.ValidateApplication(context.Background(), data)
 
 				assert.NotNil(t, err)
@@ -99,7 +99,7 @@ func TestApplication(t *testing.T) {
 						},
 					}
 
-					applicationValidator := validator.NewOauth()
+					applicationValidator := validator.NewOauth(true)
 					err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
 					assert.Nil(t, err)
 				})
@@ -119,7 +119,7 @@ func TestApplication(t *testing.T) {
 						},
 					}
 
-					applicationValidator := validator.NewOauth()
+					applicationValidator := validator.NewOauth(true)
 					err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
 					assert.Nil(t, err)
 				})
@@ -140,7 +140,7 @@ func TestApplication(t *testing.T) {
 					},
 				}
 
-				applicationValidator := validator.NewOauth()
+				applicationValidator := validator.NewOauth(true)
 				err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
 
 				expectedErr := &entity.Error{
@@ -169,7 +169,7 @@ func TestApplication(t *testing.T) {
 					},
 				}
 
-				applicationValidator := validator.NewOauth()
+				applicationValidator := validator.NewOauth(true)
 				err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
 				assert.Nil(t, err)
 			})
@@ -197,7 +197,7 @@ func TestApplication(t *testing.T) {
 					),
 				}
 
-				applicationValidator := validator.NewOauth()
+				applicationValidator := validator.NewOauth(true)
 				err := applicationValidator.ValidateAuthorizationGrant(context.Background(), authorizationRequest, oauthApplication)
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedErr.Error(), err.Error())
@@ -231,7 +231,7 @@ func TestApplication(t *testing.T) {
 					),
 				}
 
-				applicationValidator := validator.NewOauth()
+				applicationValidator := validator.NewOauth(true)
 				err := applicationValidator.ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication)
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedErr.Error(), err.Error())
@@ -254,7 +254,7 @@ func TestApplication(t *testing.T) {
 
 			t.Run("When access token request is valid", func(t *testing.T) {
 				t.Run("Then return nil", func(t *testing.T) {
-					applicationValidator := validator.NewOauth()
+					applicationValidator := validator.NewOauth(true)
 					assert.Nil(t, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
 				})
 			})
@@ -270,7 +270,7 @@ func TestApplication(t *testing.T) {
 						RedirectURI:  util.StringToPointer("http://localhost:8000/oauth_redirect"),
 					}
 
-					applicationValidator := validator.NewOauth()
+					applicationValidator := validator.NewOauth(true)
 					assert.Nil(t, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
 				})
 			})
@@ -285,7 +285,7 @@ func TestApplication(t *testing.T) {
 						RedirectURI:  util.StringToPointer("http://localhost:8000/oauth_redirect"),
 					}
 
-					applicationValidator := validator.NewOauth()
+					applicationValidator := validator.NewOauth(true)
 
 					expectedErr := &entity.Error{
 						HttpStatus: http.StatusUnprocessableEntity,
@@ -295,6 +295,22 @@ func TestApplication(t *testing.T) {
 					}
 
 					assert.Equal(t, expectedErr, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
+				})
+			})
+
+			t.Run("When `refresh_token` grant type, refresh token is nil but refresh token toggle is false", func(t *testing.T) {
+				t.Run("Then it will return nil", func(t *testing.T) {
+					accessTokenRequest := entity.AccessTokenRequestJSON{
+						ClientSecret: util.StringToPointer("client_secret"),
+						ClientUID:    util.StringToPointer("client_uid"),
+						Code:         util.StringToPointer("abcdef_123456"),
+						GrantType:    util.StringToPointer("refresh_token"),
+						RedirectURI:  util.StringToPointer("http://localhost:8000/oauth_redirect"),
+					}
+
+					applicationValidator := validator.NewOauth(false)
+
+					assert.Nil(t, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
 				})
 			})
 
@@ -315,7 +331,7 @@ func TestApplication(t *testing.T) {
 						),
 					}
 
-					applicationValidator := validator.NewOauth()
+					applicationValidator := validator.NewOauth(true)
 					assert.Equal(t, expectedErr, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
 				})
 			})
@@ -333,11 +349,11 @@ func TestApplication(t *testing.T) {
 					expectedErr := &entity.Error{
 						HttpStatus: http.StatusUnprocessableEntity,
 						Errors: eobject.Wrap(
-							eobject.ValidationError(`grant_type must be set to either 'authorization_code' or 'refresh_token'`),
+							eobject.ValidationError(`grant_type is not a valid value`),
 						),
 					}
 
-					applicationValidator := validator.NewOauth()
+					applicationValidator := validator.NewOauth(true)
 					assert.Equal(t, expectedErr, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
 				})
 			})
@@ -359,7 +375,7 @@ func TestApplication(t *testing.T) {
 						),
 					}
 
-					applicationValidator := validator.NewOauth()
+					applicationValidator := validator.NewOauth(true)
 					assert.Equal(t, expectedErr, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
 				})
 			})
@@ -381,7 +397,7 @@ func TestApplication(t *testing.T) {
 						),
 					}
 
-					applicationValidator := validator.NewOauth()
+					applicationValidator := validator.NewOauth(true)
 					assert.Equal(t, expectedErr, applicationValidator.ValidateTokenGrant(ctx, accessTokenRequest))
 				})
 			})
@@ -424,7 +440,7 @@ func TestApplication(t *testing.T) {
 						},
 					}
 
-					applicationValidator := validator.NewOauth()
+					applicationValidator := validator.NewOauth(true)
 					assert.Nil(t, applicationValidator.ValidateTokenAuthorizationCode(ctx, accessTokenRequest, oauthAccessGrant))
 				})
 			})
@@ -466,7 +482,7 @@ func TestApplication(t *testing.T) {
 						Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "authorization code already used")),
 					}
 
-					applicationValidator := validator.NewOauth()
+					applicationValidator := validator.NewOauth(true)
 					assert.Equal(t, expectedError, applicationValidator.ValidateTokenAuthorizationCode(ctx, accessTokenRequest, oauthAccessGrant))
 				})
 			})
@@ -508,7 +524,7 @@ func TestApplication(t *testing.T) {
 						Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "authorization code already expired")),
 					}
 
-					applicationValidator := validator.NewOauth()
+					applicationValidator := validator.NewOauth(true)
 					assert.Equal(t, expectedError, applicationValidator.ValidateTokenAuthorizationCode(ctx, accessTokenRequest, oauthAccessGrant))
 				})
 			})
@@ -550,7 +566,7 @@ func TestApplication(t *testing.T) {
 						Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "redirect uri is different from one that generated before")),
 					}
 
-					applicationValidator := validator.NewOauth()
+					applicationValidator := validator.NewOauth(true)
 					assert.Equal(t, expectedError, applicationValidator.ValidateTokenAuthorizationCode(ctx, accessTokenRequest, oauthAccessGrant))
 				})
 			})
@@ -576,7 +592,7 @@ func TestApplication(t *testing.T) {
 						},
 					}
 
-					applicationValidator := validator.NewOauth()
+					applicationValidator := validator.NewOauth(true)
 					assert.Nil(t, applicationValidator.ValidateTokenRefreshToken(ctx, oauthRefreshToken))
 				})
 			})
@@ -600,7 +616,7 @@ func TestApplication(t *testing.T) {
 						Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "refresh token already used")),
 					}
 
-					applicationValidator := validator.NewOauth()
+					applicationValidator := validator.NewOauth(true)
 					assert.Equal(t, expectedError, applicationValidator.ValidateTokenRefreshToken(ctx, oauthRefreshToken))
 				})
 			})

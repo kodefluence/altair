@@ -65,7 +65,7 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 	oauthFormatter := formatter.Oauth()
 
 	// Validator
-	oauthValidator := validator.NewOauth()
+	oauthValidator := validator.NewOauth(refreshTokenConfig.Active)
 
 	// Service
 	applicationManager := service.NewApplicationManager(oauthApplicationFormatter, oauthModelFormatter, oauthApplicationModel, oauthValidator)

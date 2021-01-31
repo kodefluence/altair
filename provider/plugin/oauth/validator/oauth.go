@@ -13,11 +13,14 @@ import (
 )
 
 type Oauth struct {
+	refreshTokenToggle bool
 }
 
 // NewOauth create Oauth struct for validation
-func NewOauth() *Oauth {
-	return &Oauth{}
+func NewOauth(refreshTokenToggle bool) *Oauth {
+	return &Oauth{
+		refreshTokenToggle: refreshTokenToggle,
+	}
 }
 
 // ValidateApplication will validate oauth application json
@@ -123,11 +126,13 @@ func (a *Oauth) ValidateTokenGrant(ctx context.Context, r entity.AccessTokenRequ
 			entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`redirect_uri can't be empty`))
 		}
 	case "refresh_token":
-		if r.RefreshToken == nil {
-			entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`refresh token can't be empty`))
+		if a.refreshTokenToggle {
+			if r.RefreshToken == nil {
+				entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`refresh token can't be empty`))
+			}
 		}
 	default:
-		entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`grant_type must be set to either 'authorization_code' or 'refresh_token'`))
+		entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`grant_type is not a valid value`))
 	}
 
 	if len(entityErr.Errors) > 0 {
