@@ -176,7 +176,7 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 		}
 	}
 
-	return a.oauthFormatter.AccessToken(oauthAccessToken, *authorizationReq.RedirectURI), nil
+	return a.oauthFormatter.AccessToken(oauthAccessToken, *authorizationReq.RedirectURI, nil), nil
 }
 
 func (a *Authorization) findAndValidateApplication(ctx context.Context, clientUID, clientSecret *string) (entity.OauthApplication, *entity.Error) {
@@ -238,15 +238,16 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 			return entity.OauthAccessTokenJSON{}, entityErr
 		}
 
-		return a.oauthFormatter.AccessToken(oauthAccessToken, redirectURI), nil
+		return a.oauthFormatter.AccessToken(oauthAccessToken, redirectURI, nil), nil
 	case "refresh_token":
 		if a.refreshTokenToggle {
-			oauthAccessToken, entityErr := a.grantTokenFromRefreshToken(ctx, accessTokenReq, oauthApplication)
+			oauthAccessToken, oauthRefreshToken, entityErr := a.grantTokenFromRefreshToken(ctx, accessTokenReq, oauthApplication)
 			if entityErr != nil {
 				return entity.OauthAccessTokenJSON{}, entityErr
 			}
 
-			return a.oauthFormatter.AccessToken(oauthAccessToken, *accessTokenReq.RedirectURI), nil
+			oauthRefreshTokenJSON := a.oauthFormatter.RefreshToken(oauthRefreshToken)
+			return a.oauthFormatter.AccessToken(oauthAccessToken, *accessTokenReq.RedirectURI, &oauthRefreshTokenJSON), nil
 		}
 	}
 
@@ -256,7 +257,7 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 	}
 }
 
-func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON, oauthApplication entity.OauthApplication) (entity.OauthAccessToken, *entity.Error) {
+func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON, oauthApplication entity.OauthApplication) (entity.OauthAccessToken, entity.OauthRefreshToken, *entity.Error) {
 	oauthRefreshToken, err := a.oauthRefreshTokenModel.OneByToken(ctx, *accessTokenReq.RefreshToken)
 	if err != nil {
 		log.Error().
@@ -267,20 +268,20 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 			Msg("refresh token cannot be found because there was an error")
 
 		if err == sql.ErrNoRows {
-			return entity.OauthAccessToken{}, &entity.Error{
+			return entity.OauthAccessToken{}, entity.OauthRefreshToken{}, &entity.Error{
 				HttpStatus: http.StatusNotFound,
 				Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "refresh_token")),
 			}
 		}
 
-		return entity.OauthAccessToken{}, &entity.Error{
+		return entity.OauthAccessToken{}, entity.OauthRefreshToken{}, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 		}
 	}
 
 	if err := a.oauthValidator.ValidateTokenRefreshToken(ctx, oauthRefreshToken); err != nil {
-		return entity.OauthAccessToken{}, err
+		return entity.OauthAccessToken{}, oauthRefreshToken, err
 	}
 
 	oldAccessToken, err := a.oauthAccessTokenModel.One(ctx, oauthRefreshToken.OauthAccessTokenID)
@@ -292,7 +293,7 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
 			Msg("Error selecting one access token")
 
-		return entity.OauthAccessToken{}, &entity.Error{
+		return entity.OauthAccessToken{}, oauthRefreshToken, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 		}
@@ -308,7 +309,7 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
 			Msg("Error creating access token after creating the data")
 
-		return entity.OauthAccessToken{}, &entity.Error{
+		return entity.OauthAccessToken{}, oauthRefreshToken, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 		}
@@ -324,7 +325,7 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
 			Msg("Error selecting one access token")
 
-		return entity.OauthAccessToken{}, &entity.Error{
+		return entity.OauthAccessToken{}, oauthRefreshToken, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 		}
@@ -350,13 +351,13 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
 			Msg("Error creating access token after creating the data")
 
-		return entity.OauthAccessToken{}, &entity.Error{
+		return entity.OauthAccessToken{}, oauthRefreshToken, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,
 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 		}
 	}
 
-	return oauthAccessToken, nil
+	return oauthAccessToken, oauthRefreshToken, nil
 }
 
 func (a *Authorization) grantTokenFromAuthorizationCode(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON, oauthApplication entity.OauthApplication) (entity.OauthAccessToken, string, *entity.Error) {

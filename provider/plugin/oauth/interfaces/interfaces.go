@@ -71,7 +71,8 @@ type OauthApplicationFormater interface {
 
 type OauthFormatter interface {
 	AccessGrant(e entity.OauthAccessGrant) entity.OauthAccessGrantJSON
-	AccessToken(e entity.OauthAccessToken, redirectURI string) entity.OauthAccessTokenJSON
+	AccessToken(e entity.OauthAccessToken, redirectURI string, refreshTokenJSON *entity.OauthRefreshTokenJSON) entity.OauthAccessTokenJSON
+	RefreshToken(e entity.OauthRefreshToken) entity.OauthRefreshTokenJSON
 }
 
 // ModelFormater format compiled entity into insertable

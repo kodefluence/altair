@@ -103,7 +103,7 @@ func TestAuthorizationToken(t *testing.T) {
 					}
 
 					oauthAccessTokenInsertable := modelFormatter.AccessTokenFromOauthAccessGrant(oauthAccessGrant, oauthApplication)
-					oauthAccessTokenJSON := oauthFormatter.AccessToken(oauthAccessToken, *accessTokenRequest.RedirectURI)
+					oauthAccessTokenJSON := oauthFormatter.AccessToken(oauthAccessToken, *accessTokenRequest.RedirectURI, nil)
 
 					gomock.InOrder(
 						oauthApplicationModel.EXPECT().
@@ -116,7 +116,7 @@ func TestAuthorizationToken(t *testing.T) {
 						oauthAccessTokenModel.EXPECT().Create(ctx, oauthAccessTokenInsertable).Return(1, nil),
 						oauthAccessTokenModel.EXPECT().One(ctx, 1).Return(oauthAccessToken, nil),
 						oauthAccessGrantModel.EXPECT().Revoke(ctx, *accessTokenRequest.Code).Return(nil),
-						oauthFormatterMock.EXPECT().AccessToken(oauthAccessToken, oauthAccessGrant.RedirectURI.String).Return(oauthAccessTokenJSON),
+						oauthFormatterMock.EXPECT().AccessToken(oauthAccessToken, oauthAccessGrant.RedirectURI.String, nil).Return(oauthAccessTokenJSON),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
@@ -204,7 +204,7 @@ func TestAuthorizationToken(t *testing.T) {
 					}
 
 					oauthAccessTokenInsertable := modelFormatter.AccessTokenFromOauthAccessGrant(oauthAccessGrant, oauthApplication)
-					oauthAccessTokenJSON := oauthFormatter.AccessToken(oauthAccessToken, *accessTokenRequest.RedirectURI)
+					oauthAccessTokenJSON := oauthFormatter.AccessToken(oauthAccessToken, *accessTokenRequest.RedirectURI, nil)
 
 					gomock.InOrder(
 						oauthApplicationModel.EXPECT().
@@ -217,7 +217,7 @@ func TestAuthorizationToken(t *testing.T) {
 						oauthAccessTokenModel.EXPECT().Create(ctx, oauthAccessTokenInsertable).Return(1, nil),
 						oauthAccessTokenModel.EXPECT().One(ctx, 1).Return(oauthAccessToken, nil),
 						oauthAccessGrantModel.EXPECT().Revoke(ctx, *accessTokenRequest.Code).Return(errors.New("unexpected error")),
-						oauthFormatterMock.EXPECT().AccessToken(oauthAccessToken, oauthAccessGrant.RedirectURI.String).Return(oauthAccessTokenJSON),
+						oauthFormatterMock.EXPECT().AccessToken(oauthAccessToken, oauthAccessGrant.RedirectURI.String, nil).Return(oauthAccessTokenJSON),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
@@ -264,7 +264,7 @@ func TestAuthorizationToken(t *testing.T) {
 						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
 						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
 						oauthAccessGrantModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
-						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
+						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
@@ -335,7 +335,7 @@ func TestAuthorizationToken(t *testing.T) {
 						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
 						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
 						oauthAccessGrantModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
-						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
+						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
@@ -426,7 +426,7 @@ func TestAuthorizationToken(t *testing.T) {
 						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
 						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
 						oauthAccessGrantModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
-						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
+						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
@@ -495,7 +495,7 @@ func TestAuthorizationToken(t *testing.T) {
 						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
 						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
 						oauthAccessGrantModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
-						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
+						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
@@ -564,7 +564,7 @@ func TestAuthorizationToken(t *testing.T) {
 						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
 						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
 						oauthAccessGrantModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
-						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
+						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
@@ -656,7 +656,7 @@ func TestAuthorizationToken(t *testing.T) {
 						oauthAccessTokenModel.EXPECT().Create(ctx, oauthAccessTokenInsertable).Return(0, errors.New("unexpected error")),
 						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
 						oauthAccessGrantModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
-						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
+						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
@@ -748,7 +748,7 @@ func TestAuthorizationToken(t *testing.T) {
 						oauthAccessTokenModel.EXPECT().Create(ctx, oauthAccessTokenInsertable).Return(1, nil),
 						oauthAccessTokenModel.EXPECT().One(ctx, 1).Return(entity.OauthAccessToken{}, sql.ErrNoRows),
 						oauthAccessGrantModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
-						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any()).Times(0),
+						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
