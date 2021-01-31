@@ -176,9 +176,44 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 		}
 	}
 
-	var oauthRefreshToken *entity.OauthRefreshTokenJSON
+	var oauthRefreshTokenJSON *entity.OauthRefreshTokenJSON
 
-	return a.oauthFormatter.AccessToken(oauthAccessToken, *authorizationReq.RedirectURI, oauthRefreshToken), nil
+	if a.refreshTokenToggle {
+		refreshTokenID, err := a.oauthRefreshTokenModel.Create(ctx, a.modelFormatter.RefreshToken(oauthApplication, oauthAccessToken))
+		if err != nil {
+			log.Error().
+				Err(err).
+				Stack().
+				Interface("request_id", ctx.Value("request_id")).
+				Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
+				Msg("Error creating refresh token")
+
+			return entity.OauthAccessTokenJSON{}, &entity.Error{
+				HttpStatus: http.StatusInternalServerError,
+				Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+			}
+		}
+
+		oauthRefreshToken, err := a.oauthRefreshTokenModel.One(ctx, refreshTokenID)
+		if err != nil {
+			log.Error().
+				Err(err).
+				Stack().
+				Interface("request_id", ctx.Value("request_id")).
+				Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
+				Msg("Error find newly created refresh token")
+
+			return entity.OauthAccessTokenJSON{}, &entity.Error{
+				HttpStatus: http.StatusInternalServerError,
+				Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+			}
+		}
+
+		newOauthRefreshTokenJSON := a.oauthFormatter.RefreshToken(oauthRefreshToken)
+		oauthRefreshTokenJSON = &newOauthRefreshTokenJSON
+	}
+
+	return a.oauthFormatter.AccessToken(oauthAccessToken, *authorizationReq.RedirectURI, oauthRefreshTokenJSON), nil
 }
 
 func (a *Authorization) findAndValidateApplication(ctx context.Context, clientUID, clientSecret *string) (entity.OauthApplication, *entity.Error) {
@@ -351,7 +386,7 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 			Stack().
 			Interface("request_id", ctx.Value("request_id")).
 			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
-			Msg("Error creating access token after creating the data")
+			Msg("Error creating refresh token")
 
 		return entity.OauthAccessToken{}, oauthRefreshToken, &entity.Error{
 			HttpStatus: http.StatusInternalServerError,

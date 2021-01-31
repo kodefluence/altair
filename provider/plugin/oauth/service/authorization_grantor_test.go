@@ -410,6 +410,274 @@ func TestAuthorizationGrantor(t *testing.T) {
 			})
 		})
 
+		t.Run("Given context and authorization request with a response type of token and refresh token feature is active", func(t *testing.T) {
+			t.Run("When there is no error in database", func(t *testing.T) {
+				t.Run("Return entity.OauthAccessTokenJSON and nil", func(t *testing.T) {
+					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
+					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
+					oauthFormatter := formatter.Oauth()
+
+					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+
+					authorizationRequest := entity.AuthorizationRequestJSON{
+						ResponseType:    util.StringToPointer("token"),
+						ResourceOwnerID: util.IntToPointer(1),
+						ClientUID:       util.StringToPointer(aurelia.Hash("x", "y")),
+						ClientSecret:    util.StringToPointer(aurelia.Hash("z", "a")),
+						RedirectURI:     util.StringToPointer("http://github.com"),
+						Scopes:          util.StringToPointer("public users"),
+					}
+
+					oauthApplication := entity.OauthApplication{
+						ID: 1,
+						OwnerID: sql.NullInt64{
+							Int64: 1,
+							Valid: true,
+						},
+						OwnerType: "confidential",
+						Description: sql.NullString{
+							String: "Application 01",
+							Valid:  true,
+						},
+						Scopes: sql.NullString{
+							String: "public users",
+							Valid:  true,
+						},
+						ClientUID:    *authorizationRequest.ClientUID,
+						ClientSecret: *authorizationRequest.ClientSecret,
+						CreatedAt:    time.Now().Add(-time.Hour * 4),
+						UpdatedAt:    time.Now(),
+					}
+
+					oauthAccessToken := entity.OauthAccessToken{
+						ID:                 1,
+						OauthApplicationID: oauthApplication.ID,
+						ResourceOwnerID:    *authorizationRequest.ResourceOwnerID,
+						Token:              aurelia.Hash("x", "y"),
+						Scopes: sql.NullString{
+							String: *authorizationRequest.Scopes,
+							Valid:  true,
+						},
+						ExpiresIn: time.Now().Add(time.Hour * 4),
+						CreatedAt: time.Now(),
+					}
+
+					oauthRefreshToken := entity.OauthRefreshToken{
+						ID:                 2,
+						OauthAccessTokenID: oauthAccessToken.ID,
+						Token:              "newly created token",
+					}
+
+					oauthRefreshTokenJSON := oauthFormatter.RefreshToken(oauthRefreshToken)
+					oauthRefreshTokenInsertable := modelFormatter.RefreshToken(oauthApplication, oauthAccessToken)
+
+					oauthAccessTokenInsertable := modelFormatter.AccessTokenFromAuthorizationRequest(authorizationRequest, oauthApplication)
+					oauthAccessTokenJSON := oauthFormatter.AccessToken(oauthAccessToken, *authorizationRequest.RedirectURI, &oauthRefreshTokenJSON)
+
+					gomock.InOrder(
+						oauthApplicationModel.EXPECT().
+							OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+							Return(oauthApplication, nil),
+						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
+						oauthAccessTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthAccessTokenInsertable) (int, error) {
+							assert.Equal(t, oauthAccessTokenInsertable.OauthApplicationID, insertable.OauthApplicationID)
+							assert.Equal(t, oauthAccessTokenInsertable.ResourceOwnerID, insertable.ResourceOwnerID)
+							assert.Equal(t, oauthAccessTokenInsertable.Scopes, insertable.Scopes)
+							return oauthAccessToken.ID, nil
+						}),
+						oauthAccessTokenModel.EXPECT().One(ctx, oauthAccessToken.ID).Return(oauthAccessToken, nil),
+						oauthRefreshTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthRefreshTokenInsertable) (int, error) {
+							assert.Equal(t, oauthRefreshTokenInsertable.OauthAccessTokenID, insertable.OauthAccessTokenID)
+							return 2, nil
+						}),
+						oauthRefreshTokenModel.EXPECT().One(ctx, 2).Return(oauthRefreshToken, nil),
+					)
+
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true)
+					results, err := authorizationService.Grantor(ctx, authorizationRequest)
+					assert.Nil(t, err)
+					assert.Equal(t, oauthAccessTokenJSON, results)
+				})
+			})
+
+			t.Run("When there is no error when creating oauth refresh token", func(t *testing.T) {
+				t.Run("Then it will return error", func(t *testing.T) {
+					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
+					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
+					oauthFormatter := formatter.Oauth()
+
+					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+
+					authorizationRequest := entity.AuthorizationRequestJSON{
+						ResponseType:    util.StringToPointer("token"),
+						ResourceOwnerID: util.IntToPointer(1),
+						ClientUID:       util.StringToPointer(aurelia.Hash("x", "y")),
+						ClientSecret:    util.StringToPointer(aurelia.Hash("z", "a")),
+						RedirectURI:     util.StringToPointer("http://github.com"),
+						Scopes:          util.StringToPointer("public users"),
+					}
+
+					oauthApplication := entity.OauthApplication{
+						ID: 1,
+						OwnerID: sql.NullInt64{
+							Int64: 1,
+							Valid: true,
+						},
+						OwnerType: "confidential",
+						Description: sql.NullString{
+							String: "Application 01",
+							Valid:  true,
+						},
+						Scopes: sql.NullString{
+							String: "public users",
+							Valid:  true,
+						},
+						ClientUID:    *authorizationRequest.ClientUID,
+						ClientSecret: *authorizationRequest.ClientSecret,
+						CreatedAt:    time.Now().Add(-time.Hour * 4),
+						UpdatedAt:    time.Now(),
+					}
+
+					oauthAccessToken := entity.OauthAccessToken{
+						ID:                 1,
+						OauthApplicationID: oauthApplication.ID,
+						ResourceOwnerID:    *authorizationRequest.ResourceOwnerID,
+						Token:              aurelia.Hash("x", "y"),
+						Scopes: sql.NullString{
+							String: *authorizationRequest.Scopes,
+							Valid:  true,
+						},
+						ExpiresIn: time.Now().Add(time.Hour * 4),
+						CreatedAt: time.Now(),
+					}
+
+					oauthAccessTokenInsertable := modelFormatter.AccessTokenFromAuthorizationRequest(authorizationRequest, oauthApplication)
+
+					gomock.InOrder(
+						oauthApplicationModel.EXPECT().
+							OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+							Return(oauthApplication, nil),
+						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
+						oauthAccessTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthAccessTokenInsertable) (int, error) {
+							assert.Equal(t, oauthAccessTokenInsertable.OauthApplicationID, insertable.OauthApplicationID)
+							assert.Equal(t, oauthAccessTokenInsertable.ResourceOwnerID, insertable.ResourceOwnerID)
+							assert.Equal(t, oauthAccessTokenInsertable.Scopes, insertable.Scopes)
+							return oauthAccessToken.ID, nil
+						}),
+						oauthAccessTokenModel.EXPECT().One(ctx, oauthAccessToken.ID).Return(oauthAccessToken, nil),
+						oauthRefreshTokenModel.EXPECT().Create(ctx, gomock.Any()).Return(0, errors.New("unexpected error")),
+						oauthRefreshTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
+					)
+
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true)
+					_, err := authorizationService.Grantor(ctx, authorizationRequest)
+
+					expectedErr := &entity.Error{
+						HttpStatus: http.StatusInternalServerError,
+						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+					}
+
+					assert.Equal(t, expectedErr, err)
+				})
+			})
+
+			t.Run("When there is no error in database", func(t *testing.T) {
+				t.Run("Return entity.OauthAccessTokenJSON and nil", func(t *testing.T) {
+					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
+					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
+					oauthFormatter := formatter.Oauth()
+
+					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+
+					authorizationRequest := entity.AuthorizationRequestJSON{
+						ResponseType:    util.StringToPointer("token"),
+						ResourceOwnerID: util.IntToPointer(1),
+						ClientUID:       util.StringToPointer(aurelia.Hash("x", "y")),
+						ClientSecret:    util.StringToPointer(aurelia.Hash("z", "a")),
+						RedirectURI:     util.StringToPointer("http://github.com"),
+						Scopes:          util.StringToPointer("public users"),
+					}
+
+					oauthApplication := entity.OauthApplication{
+						ID: 1,
+						OwnerID: sql.NullInt64{
+							Int64: 1,
+							Valid: true,
+						},
+						OwnerType: "confidential",
+						Description: sql.NullString{
+							String: "Application 01",
+							Valid:  true,
+						},
+						Scopes: sql.NullString{
+							String: "public users",
+							Valid:  true,
+						},
+						ClientUID:    *authorizationRequest.ClientUID,
+						ClientSecret: *authorizationRequest.ClientSecret,
+						CreatedAt:    time.Now().Add(-time.Hour * 4),
+						UpdatedAt:    time.Now(),
+					}
+
+					oauthAccessToken := entity.OauthAccessToken{
+						ID:                 1,
+						OauthApplicationID: oauthApplication.ID,
+						ResourceOwnerID:    *authorizationRequest.ResourceOwnerID,
+						Token:              aurelia.Hash("x", "y"),
+						Scopes: sql.NullString{
+							String: *authorizationRequest.Scopes,
+							Valid:  true,
+						},
+						ExpiresIn: time.Now().Add(time.Hour * 4),
+						CreatedAt: time.Now(),
+					}
+
+					oauthRefreshTokenInsertable := modelFormatter.RefreshToken(oauthApplication, oauthAccessToken)
+					oauthAccessTokenInsertable := modelFormatter.AccessTokenFromAuthorizationRequest(authorizationRequest, oauthApplication)
+
+					gomock.InOrder(
+						oauthApplicationModel.EXPECT().
+							OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+							Return(oauthApplication, nil),
+						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
+						oauthAccessTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthAccessTokenInsertable) (int, error) {
+							assert.Equal(t, oauthAccessTokenInsertable.OauthApplicationID, insertable.OauthApplicationID)
+							assert.Equal(t, oauthAccessTokenInsertable.ResourceOwnerID, insertable.ResourceOwnerID)
+							assert.Equal(t, oauthAccessTokenInsertable.Scopes, insertable.Scopes)
+							return oauthAccessToken.ID, nil
+						}),
+						oauthAccessTokenModel.EXPECT().One(ctx, oauthAccessToken.ID).Return(oauthAccessToken, nil),
+						oauthRefreshTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthRefreshTokenInsertable) (int, error) {
+							assert.Equal(t, oauthRefreshTokenInsertable.OauthAccessTokenID, insertable.OauthAccessTokenID)
+							return 2, nil
+						}),
+						oauthRefreshTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Return(entity.OauthRefreshToken{}, errors.New("unexpected error")),
+					)
+
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true)
+					_, err := authorizationService.Grantor(ctx, authorizationRequest)
+					expectedErr := &entity.Error{
+						HttpStatus: http.StatusInternalServerError,
+						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+					}
+
+					assert.Equal(t, expectedErr, err)
+				})
+			})
+		})
+
 		t.Run("Given context and authorization request with a response type of code", func(t *testing.T) {
 			t.Run("Return entity.OauthAccessGrantJSON and nil", func(t *testing.T) {
 				oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
