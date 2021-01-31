@@ -30,7 +30,7 @@ const UpdateOauthApplication = "update oauth_applications set description = ?, s
 const InsertOauthAccessToken = "insert into oauth_access_tokens (oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at) values(?, ?, ?, ?, ?, now(), null)"
 
 // SelectOneOauthAccessToken oauth_access_tokens table query
-const SelectOneOauthAccessToken = "select id, oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at from oauth_access_tokens where id = ? limit 1"
+const SelectOneOauthAccessToken = "select id, oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at from oauth_access_tokens where id = ? and revoked_at is null limit 1"
 
 // SelectOneOauthAccessTokenByToken oauth_access_tokens table query
 const SelectOneOauthAccessTokenByToken = "select id, oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at from oauth_access_tokens where token = ? and revoked_at is null limit 1"
