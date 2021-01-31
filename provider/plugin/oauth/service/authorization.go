@@ -176,7 +176,9 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 		}
 	}
 
-	return a.oauthFormatter.AccessToken(oauthAccessToken, *authorizationReq.RedirectURI, nil), nil
+	var oauthRefreshToken *entity.OauthRefreshTokenJSON
+
+	return a.oauthFormatter.AccessToken(oauthAccessToken, *authorizationReq.RedirectURI, oauthRefreshToken), nil
 }
 
 func (a *Authorization) findAndValidateApplication(ctx context.Context, clientUID, clientSecret *string) (entity.OauthApplication, *entity.Error) {
@@ -342,13 +344,13 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 			Msg("Error revoke refresh token")
 	}
 
-	if _, err := a.oauthRefreshTokenModel.Create(ctx, a.modelFormatter.RefreshToken(oauthApplication, oauthAccessToken)); err != nil {
-
+	newOauthRefreshTokenID, err := a.oauthRefreshTokenModel.Create(ctx, a.modelFormatter.RefreshToken(oauthApplication, oauthAccessToken))
+	if err != nil {
 		log.Error().
 			Err(err).
 			Stack().
 			Interface("request_id", ctx.Value("request_id")).
-			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
+			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
 			Msg("Error creating access token after creating the data")
 
 		return entity.OauthAccessToken{}, oauthRefreshToken, &entity.Error{
@@ -357,7 +359,22 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 		}
 	}
 
-	return oauthAccessToken, oauthRefreshToken, nil
+	newOauthRefreshToken, err := a.oauthRefreshTokenModel.One(ctx, newOauthRefreshTokenID)
+	if err != nil {
+		log.Error().
+			Err(err).
+			Stack().
+			Interface("request_id", ctx.Value("request_id")).
+			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
+			Msg("Error find newly created refresh token")
+
+		return entity.OauthAccessToken{}, oauthRefreshToken, &entity.Error{
+			HttpStatus: http.StatusInternalServerError,
+			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+		}
+	}
+
+	return oauthAccessToken, newOauthRefreshToken, nil
 }
 
 func (a *Authorization) grantTokenFromAuthorizationCode(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON, oauthApplication entity.OauthApplication) (entity.OauthAccessToken, string, *entity.Error) {
