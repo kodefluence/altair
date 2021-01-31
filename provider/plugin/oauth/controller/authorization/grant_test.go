@@ -114,7 +114,7 @@ func TestGrant(t *testing.T) {
 					oauthAccessToken := entity.OauthAccessToken{}
 					oauthAccessTokenJSON := formatter.Oauth().AccessToken(oauthAccessToken, *authorizationRequest.RedirectURI, nil)
 
-					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+					ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 					expectedError := &entity.Error{
 						HttpStatus: http.StatusNotFound,

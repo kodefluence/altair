@@ -38,7 +38,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 				oauthFormatter := formatter.Oauth()
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-				ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+				ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 				authorizationRequest := entity.AuthorizationRequestJSON{
 					ResponseType:    util.StringToPointer("token"),
@@ -115,7 +115,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 						modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 						oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-						ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+						ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 						authorizationRequest := entity.AuthorizationRequestJSON{
 							ResponseType:    util.StringToPointer("token"),
@@ -158,7 +158,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 						modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 						oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-						ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+						ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 						authorizationRequest := entity.AuthorizationRequestJSON{
 							ResponseType:    util.StringToPointer("token"),
@@ -202,7 +202,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+					ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 					authorizationRequest := entity.AuthorizationRequestJSON{
 						ResponseType:    util.StringToPointer("token"),
@@ -269,7 +269,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+					ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 					authorizationRequest := entity.AuthorizationRequestJSON{
 						ResponseType:    util.StringToPointer("token"),
@@ -338,7 +338,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+					ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 					authorizationRequest := entity.AuthorizationRequestJSON{
 						ResponseType:    util.StringToPointer("token"),
@@ -421,7 +421,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
 					oauthFormatter := formatter.Oauth()
 
-					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+					ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 					authorizationRequest := entity.AuthorizationRequestJSON{
 						ResponseType:    util.StringToPointer("token"),
@@ -514,7 +514,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
 					oauthFormatter := formatter.Oauth()
 
-					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+					ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 					authorizationRequest := entity.AuthorizationRequestJSON{
 						ResponseType:    util.StringToPointer("token"),
@@ -599,7 +599,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
 					oauthFormatter := formatter.Oauth()
 
-					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+					ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 					authorizationRequest := entity.AuthorizationRequestJSON{
 						ResponseType:    util.StringToPointer("token"),
@@ -690,7 +690,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 				oauthFormatter := formatter.Oauth()
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-				ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+				ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 				authorizationRequest := entity.AuthorizationRequestJSON{
 					ResponseType:    util.StringToPointer("code"),
@@ -773,7 +773,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+					ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 					authorizationRequest := entity.AuthorizationRequestJSON{
 						ResponseType:    util.StringToPointer("code"),
@@ -840,7 +840,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 						modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 						oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-						ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+						ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 						authorizationRequest := entity.AuthorizationRequestJSON{
 							ResponseType:    util.StringToPointer("code"),
@@ -885,7 +885,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+					ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 					authorizationRequest := entity.AuthorizationRequestJSON{
 						ResponseType:    util.StringToPointer("code"),
@@ -954,7 +954,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+					ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 					authorizationRequest := entity.AuthorizationRequestJSON{
 						ResponseType:    util.StringToPointer("code"),
@@ -1044,7 +1044,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-				ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+				ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 				authorizationRequest := entity.AuthorizationRequestJSON{
 					ResponseType:    util.StringToPointer("others"),
@@ -1078,7 +1078,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-				ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+				ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 				authorizationRequest := entity.AuthorizationRequestJSON{
 					ResponseType:    util.StringToPointer("token"),
@@ -1112,7 +1112,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-				ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+				ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 				authorizationRequest := entity.AuthorizationRequestJSON{
 					ResponseType:    util.StringToPointer("token"),
@@ -1146,7 +1146,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-				ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+				ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 				authorizationRequest := entity.AuthorizationRequestJSON{
 					ResponseType:    nil,

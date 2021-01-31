@@ -33,7 +33,7 @@ func TestAuthorization(t *testing.T) {
 					modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 					oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+					ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 					revokeRequest := entity.RevokeAccessTokenRequestJSON{
 						Token: util.StringToPointer("some-cool-token"),
@@ -58,7 +58,7 @@ func TestAuthorization(t *testing.T) {
 						modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 						oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-						ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+						ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 						revokeRequest := entity.RevokeAccessTokenRequestJSON{
 							Token: util.StringToPointer("some-cool-token"),
@@ -87,7 +87,7 @@ func TestAuthorization(t *testing.T) {
 						modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 						oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-						ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+						ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 						revokeRequest := entity.RevokeAccessTokenRequestJSON{
 							Token: util.StringToPointer("some-cool-token"),
@@ -118,7 +118,7 @@ func TestAuthorization(t *testing.T) {
 				modelFormatterMock := mock.NewMockModelFormater(mockCtrl)
 				oauthFormatterMock := mock.NewMockOauthFormatter(mockCtrl)
 
-				ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+				ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 				revokeRequest := entity.RevokeAccessTokenRequestJSON{
 					Token: nil,
