@@ -32,6 +32,13 @@ func NotFoundError(ctx context.Context, entityType string) entity.ErrorObject {
 	}
 }
 
+func UnauthorizedError() entity.ErrorObject {
+	return entity.ErrorObject{
+		Code:    "ERR0401",
+		Message: fmt.Sprintf("You are unauthorized."),
+	}
+}
+
 func ForbiddenError(ctx context.Context, entityType, reason string) entity.ErrorObject {
 	return entity.ErrorObject{
 		Code:    "ERR0403",

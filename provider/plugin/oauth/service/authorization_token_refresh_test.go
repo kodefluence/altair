@@ -467,7 +467,7 @@ func TestAuthorizationRefreshToken(t *testing.T) {
 						oauthValidator.EXPECT().ValidateTokenGrant(ctx, accessTokenRequest).Return(nil),
 						oauthRefreshTokenModel.EXPECT().OneByToken(ctx, *accessTokenRequest.RefreshToken).Return(oauthRefreshToken, nil),
 						oauthValidator.EXPECT().ValidateTokenRefreshToken(ctx, oauthRefreshToken).Return(nil),
-						oauthAccessTokenModel.EXPECT().One(ctx, oauthRefreshToken.OauthAccessTokenID).Return(entity.OauthAccessToken{}, sql.ErrNoRows),
+						oauthAccessTokenModel.EXPECT().One(ctx, oauthRefreshToken.OauthAccessTokenID).Return(entity.OauthAccessToken{}, errors.New("Unexpected error")),
 						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
 						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
 						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
@@ -480,6 +480,83 @@ func TestAuthorizationRefreshToken(t *testing.T) {
 					expectedError := &entity.Error{
 						HttpStatus: http.StatusInternalServerError,
 						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+					}
+
+					assert.Equal(t, expectedError, err)
+				})
+			})
+
+			t.Run("When old access token is already revoked", func(t *testing.T) {
+				t.Run("Then it will return unauthorzed error", func(t *testing.T) {
+					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
+					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
+					oauthAccessGrantModel := mock.NewMockOauthAccessGrantModel(mockCtrl)
+					oauthRefreshTokenModel := mock.NewMockOauthRefreshTokenModel(mockCtrl)
+					oauthValidator := mock.NewMockOauthValidator(mockCtrl)
+					modelFormatter := formatter.NewModel(time.Hour*4, time.Hour*2, time.Hour*2)
+					oauthFormatter := formatter.Oauth()
+
+					ctx := context.Background()
+
+					accessTokenRequest := entity.AccessTokenRequestJSON{
+						ClientSecret: util.StringToPointer("client_secret"),
+						ClientUID:    util.StringToPointer("client_uid"),
+						RefreshToken: util.StringToPointer("abcdef_123456"),
+						GrantType:    util.StringToPointer("refresh_token"),
+						RedirectURI:  util.StringToPointer("http://localhost:8000/oauth_redirect"),
+					}
+
+					oauthApplication := entity.OauthApplication{
+						ID: 1,
+						OwnerID: sql.NullInt64{
+							Int64: 1,
+							Valid: true,
+						},
+						OwnerType: "confidential",
+						Description: sql.NullString{
+							String: "Application 01",
+							Valid:  true,
+						},
+						Scopes: sql.NullString{
+							String: "public users",
+							Valid:  true,
+						},
+						ClientUID:    *accessTokenRequest.ClientUID,
+						ClientSecret: *accessTokenRequest.ClientSecret,
+						CreatedAt:    time.Now().Add(-time.Hour * 4),
+						UpdatedAt:    time.Now(),
+					}
+
+					oldAccessToken := entity.OauthAccessToken{
+						ID: 999,
+					}
+
+					oauthRefreshToken := entity.OauthRefreshToken{
+						ID:                 1,
+						OauthAccessTokenID: oldAccessToken.ID,
+						Token:              *accessTokenRequest.RefreshToken,
+					}
+
+					gomock.InOrder(
+						oauthApplicationModel.EXPECT().
+							OneByUIDandSecret(ctx, *accessTokenRequest.ClientUID, *accessTokenRequest.ClientSecret).
+							Return(oauthApplication, nil),
+						oauthValidator.EXPECT().ValidateTokenGrant(ctx, accessTokenRequest).Return(nil),
+						oauthRefreshTokenModel.EXPECT().OneByToken(ctx, *accessTokenRequest.RefreshToken).Return(oauthRefreshToken, nil),
+						oauthValidator.EXPECT().ValidateTokenRefreshToken(ctx, oauthRefreshToken).Return(nil),
+						oauthAccessTokenModel.EXPECT().One(ctx, oauthRefreshToken.OauthAccessTokenID).Return(entity.OauthAccessToken{}, sql.ErrNoRows),
+						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
+					)
+
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true)
+					_, err := authorizationService.Token(ctx, accessTokenRequest)
+
+					expectedError := &entity.Error{
+						HttpStatus: http.StatusUnauthorized,
+						Errors:     eobject.Wrap(eobject.UnauthorizedError()),
 					}
 
 					assert.Equal(t, expectedError, err)

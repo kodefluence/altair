@@ -34,6 +34,18 @@ func TestErrorObject(t *testing.T) {
 		assert.Equal(t, expectedErrorObject.Error(), errorObject.Error())
 	})
 
+	t.Run("Unauthorized", func(t *testing.T) {
+		errorObject := eobject.UnauthorizedError()
+		expectedErrorObject := entity.ErrorObject{
+			Code:    "ERR0401",
+			Message: fmt.Sprintf("You are unauthorized."),
+		}
+
+		assert.Equal(t, expectedErrorObject.Code, errorObject.Code)
+		assert.Equal(t, expectedErrorObject.Message, errorObject.Message)
+		assert.Equal(t, expectedErrorObject.Error(), errorObject.Error())
+	})
+
 	t.Run("Bad request error", func(t *testing.T) {
 		errorObject := eobject.BadRequestError("query parameter")
 		expectedErrorObject := entity.ErrorObject{

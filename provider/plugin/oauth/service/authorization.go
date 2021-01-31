@@ -323,6 +323,13 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 
 	oldAccessToken, err := a.oauthAccessTokenModel.One(ctx, oauthRefreshToken.OauthAccessTokenID)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return entity.OauthAccessToken{}, oauthRefreshToken, &entity.Error{
+				HttpStatus: http.StatusUnauthorized,
+				Errors:     eobject.Wrap(eobject.UnauthorizedError()),
+			}
+		}
+
 		log.Error().
 			Err(err).
 			Stack().
