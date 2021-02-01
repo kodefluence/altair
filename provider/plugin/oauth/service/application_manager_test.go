@@ -46,7 +46,7 @@ func TestApplicationManager(t *testing.T) {
 					oauthModel.EXPECT().Count(ctx).Return(len(oauthApplications), nil),
 				)
 
-				applicationManager := service.ApplicationManager(applicationFormatter, modelFormatter, oauthModel, oauthApplicationValidator)
+				applicationManager := service.NewApplicationManager(applicationFormatter, modelFormatter, oauthModel, oauthApplicationValidator)
 
 				oauthApplicationJSON, total, err := applicationManager.List(ctx, 0, 10)
 
@@ -74,7 +74,7 @@ func TestApplicationManager(t *testing.T) {
 					oauthModel.EXPECT().Count(gomock.Any()).Times(0),
 				)
 
-				applicationManager := service.ApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
+				applicationManager := service.NewApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
 
 				oauthApplicationJSON, total, err := applicationManager.List(ctx, 0, 10)
 
@@ -106,7 +106,7 @@ func TestApplicationManager(t *testing.T) {
 					oauthModel.EXPECT().Count(ctx).Return(0, expectedError),
 				)
 
-				applicationManager := service.ApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
+				applicationManager := service.NewApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
 
 				oauthApplicationJSON, total, err := applicationManager.List(ctx, 0, 10)
 
@@ -131,7 +131,7 @@ func TestApplicationManager(t *testing.T) {
 
 				oauthApplicationValidator := mock.NewMockOauthValidator(mockCtrl)
 
-				applicationManager := service.ApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
+				applicationManager := service.NewApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
 				oauthApplicationJSON, err := applicationManager.One(ctx, 1)
 
 				assert.Nil(t, err)
@@ -148,7 +148,7 @@ func TestApplicationManager(t *testing.T) {
 
 					oauthApplicationValidator := mock.NewMockOauthValidator(mockCtrl)
 
-					applicationManager := service.ApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
+					applicationManager := service.NewApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
 					oauthApplicationJSON, err := applicationManager.One(ctx, 1)
 
 					expectedError := &entity.Error{
@@ -172,7 +172,7 @@ func TestApplicationManager(t *testing.T) {
 
 					oauthApplicationValidator := mock.NewMockOauthValidator(mockCtrl)
 
-					applicationManager := service.ApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
+					applicationManager := service.NewApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
 					oauthApplicationJSON, err := applicationManager.One(ctx, 1)
 
 					expectedError := &entity.Error{
@@ -201,7 +201,7 @@ func TestApplicationManager(t *testing.T) {
 				modelFormatter := mock.NewMockModelFormater(mockCtrl)
 				oauthApplicationValidator := mock.NewMockOauthValidator(mockCtrl)
 
-				oauthApplicationInsertable := formatter.NewModel(time.Second, time.Second).OauthApplication(expectedOauthApplicationJSON)
+				oauthApplicationInsertable := formatter.NewModel(time.Second, time.Second, time.Second).OauthApplication(expectedOauthApplicationJSON)
 
 				gomock.InOrder(
 					oauthApplicationValidator.EXPECT().ValidateApplication(ctx, expectedOauthApplicationJSON).Return(nil),
@@ -210,7 +210,7 @@ func TestApplicationManager(t *testing.T) {
 					oauthModel.EXPECT().One(ctx, 1).Return(oauthApplication, nil),
 				)
 
-				applicationManager := service.ApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
+				applicationManager := service.NewApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
 				formattedResult, err := applicationManager.Create(ctx, expectedOauthApplicationJSON)
 
 				assert.Nil(t, err)
@@ -240,7 +240,7 @@ func TestApplicationManager(t *testing.T) {
 						oauthApplicationValidator.EXPECT().ValidateApplication(ctx, expectedOauthApplicationJSON).Return(expectedError),
 					)
 
-					applicationManager := service.ApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
+					applicationManager := service.NewApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
 					formattedResult, err := applicationManager.Create(ctx, expectedOauthApplicationJSON)
 
 					assert.NotNil(t, err)
@@ -264,7 +264,7 @@ func TestApplicationManager(t *testing.T) {
 					modelFormatter := mock.NewMockModelFormater(mockCtrl)
 					oauthModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0)
 
-					oauthApplicationInsertable := formatter.NewModel(time.Second, time.Second).OauthApplication(data)
+					oauthApplicationInsertable := formatter.NewModel(time.Second, time.Second, time.Second).OauthApplication(data)
 
 					gomock.InOrder(
 						oauthApplicationValidator.EXPECT().ValidateApplication(ctx, data).Return(nil),
@@ -272,7 +272,7 @@ func TestApplicationManager(t *testing.T) {
 						oauthModel.EXPECT().Create(ctx, oauthApplicationInsertable).Return(0, errors.New("Unexpected error")),
 					)
 
-					applicationManager := service.ApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
+					applicationManager := service.NewApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
 					formattedResult, err := applicationManager.Create(ctx, data)
 
 					expectedError := &entity.Error{
@@ -320,7 +320,7 @@ func TestApplicationManager(t *testing.T) {
 						oauthModel.EXPECT().One(ctx, 1).Return(oauthApplication, nil),
 					)
 
-					applicationManager := service.ApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
+					applicationManager := service.NewApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
 					formattedResult, err := applicationManager.Update(ctx, id, data)
 
 					assert.Nil(t, err)
@@ -351,7 +351,7 @@ func TestApplicationManager(t *testing.T) {
 						oauthModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
 					)
 
-					applicationManager := service.ApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
+					applicationManager := service.NewApplicationManager(formatter.OauthApplication(), modelFormatter, oauthModel, oauthApplicationValidator)
 					formattedResult, err := applicationManager.Update(ctx, id, data)
 
 					expectedError := &entity.Error{

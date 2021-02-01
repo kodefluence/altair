@@ -38,7 +38,7 @@ func TestOauthApplication(t *testing.T) {
 				t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 			}
 
-			assert.Equal(t, "oauth-application-model", model.OauthApplication(db).Name())
+			assert.Equal(t, "oauth-application-model", model.NewOauthApplication(db).Name())
 		})
 	})
 
@@ -70,7 +70,7 @@ func TestOauthApplication(t *testing.T) {
 
 				mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications limit \?, \?`).WillReturnRows(rows)
 
-				oauthApplicationModel := model.OauthApplication(db)
+				oauthApplicationModel := model.NewOauthApplication(db)
 				oauthApplications, err := oauthApplicationModel.Paginate(context.Background(), 0, 10)
 
 				assert.Nil(t, err)
@@ -87,7 +87,7 @@ func TestOauthApplication(t *testing.T) {
 
 					mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications limit \?, \?`).WillReturnError(errors.New("Unexpected error"))
 
-					oauthApplicationModel := model.OauthApplication(db)
+					oauthApplicationModel := model.NewOauthApplication(db)
 					oauthApplications, err := oauthApplicationModel.Paginate(context.Background(), 0, 10)
 
 					assert.NotNil(t, err)
@@ -121,7 +121,7 @@ func TestOauthApplication(t *testing.T) {
 
 					mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications limit \?, \?`).WillReturnRows(rows)
 
-					oauthApplicationModel := model.OauthApplication(db)
+					oauthApplicationModel := model.NewOauthApplication(db)
 					oauthApplications, err := oauthApplicationModel.Paginate(context.Background(), 0, 10)
 
 					assert.NotNil(t, err)
@@ -145,7 +145,7 @@ func TestOauthApplication(t *testing.T) {
 			mockdb.ExpectQuery(`select count\(\*\) as total from oauth_applications where revoked_at is null`).
 				WillReturnRows(rows)
 
-			oauthApplicationModel := model.OauthApplication(db)
+			oauthApplicationModel := model.NewOauthApplication(db)
 			total, err := oauthApplicationModel.Count(context.Background())
 
 			assert.Equal(t, 100, total)
@@ -175,7 +175,7 @@ func TestOauthApplication(t *testing.T) {
 					WithArgs(oauthApplication.OwnerID, oauthApplication.OwnerType, oauthApplication.Description, oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
-				oauthApplicationModel := model.OauthApplication(db)
+				oauthApplicationModel := model.NewOauthApplication(db)
 				lastInsertedID, err := oauthApplicationModel.Create(context.Background(), oauthApplication)
 
 				assert.Nil(t, err)
@@ -206,7 +206,7 @@ func TestOauthApplication(t *testing.T) {
 						WithArgs(oauthApplication.OwnerID, oauthApplication.OwnerType, oauthApplication.Description, oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
 						WillReturnResult(sqlmock.NewResult(1, 1))
 
-					oauthApplicationModel := model.OauthApplication(db)
+					oauthApplicationModel := model.NewOauthApplication(db)
 					lastInsertedID, err := oauthApplicationModel.Create(context.Background(), oauthApplication, tx)
 
 					assert.Nil(t, err)
@@ -235,7 +235,7 @@ func TestOauthApplication(t *testing.T) {
 						WithArgs(oauthApplication.OwnerID, oauthApplication.OwnerType, oauthApplication.Description, oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
 						WillReturnError(errors.New("unexpected error"))
 
-					oauthApplicationModel := model.OauthApplication(db)
+					oauthApplicationModel := model.NewOauthApplication(db)
 					lastInsertedID, err := oauthApplicationModel.Create(context.Background(), oauthApplication)
 
 					assert.NotNil(t, err)
@@ -262,7 +262,7 @@ func TestOauthApplication(t *testing.T) {
 						WithArgs(oauthApplication.OwnerID, oauthApplication.OwnerType, oauthApplication.Description, oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
 						WillReturnResult(sqlmock.NewErrorResult(errors.New("unexpected error")))
 
-					oauthApplicationModel := model.OauthApplication(db)
+					oauthApplicationModel := model.NewOauthApplication(db)
 					lastInsertedID, err := oauthApplicationModel.Create(context.Background(), oauthApplication)
 
 					assert.NotNil(t, err)
@@ -296,7 +296,7 @@ func TestOauthApplication(t *testing.T) {
 					WithArgs(1).
 					WillReturnRows(rows)
 
-				oauthApplicationModel := model.OauthApplication(db)
+				oauthApplicationModel := model.NewOauthApplication(db)
 				dataFromDB, err := oauthApplicationModel.One(context.Background(), 1)
 
 				assert.Nil(t, err)
@@ -315,7 +315,7 @@ func TestOauthApplication(t *testing.T) {
 						WithArgs(1).
 						WillReturnError(sql.ErrNoRows)
 
-					oauthApplicationModel := model.OauthApplication(db)
+					oauthApplicationModel := model.NewOauthApplication(db)
 					dataFromDB, err := oauthApplicationModel.One(context.Background(), 1)
 
 					assert.NotNil(t, err)
@@ -349,7 +349,7 @@ func TestOauthApplication(t *testing.T) {
 					WithArgs("sample_client_uid", "sample_client_secret").
 					WillReturnRows(rows)
 
-				oauthApplicationModel := model.OauthApplication(db)
+				oauthApplicationModel := model.NewOauthApplication(db)
 				dataFromDB, err := oauthApplicationModel.OneByUIDandSecret(context.Background(), "sample_client_uid", "sample_client_secret")
 
 				assert.Nil(t, err)
@@ -368,7 +368,7 @@ func TestOauthApplication(t *testing.T) {
 						WithArgs("sample_client_uid", "sample_client_secret").
 						WillReturnError(sql.ErrNoRows)
 
-					oauthApplicationModel := model.OauthApplication(db)
+					oauthApplicationModel := model.NewOauthApplication(db)
 					dataFromDB, err := oauthApplicationModel.OneByUIDandSecret(context.Background(), "sample_client_uid", "sample_client_secret")
 
 					assert.NotNil(t, err)
@@ -399,7 +399,7 @@ func TestOauthApplication(t *testing.T) {
 						WithArgs(updateable.Description, updateable.Scopes, ID).
 						WillReturnResult(sqlmock.NewResult(1, 1))
 
-					oauthApplicationModel := model.OauthApplication(db)
+					oauthApplicationModel := model.NewOauthApplication(db)
 					assert.Nil(t, oauthApplicationModel.Update(context.Background(), ID, updateable))
 					assert.Nil(t, mockdb.ExpectationsWereMet())
 				})
@@ -423,7 +423,7 @@ func TestOauthApplication(t *testing.T) {
 						WithArgs(updateable.Description, updateable.Scopes, ID).
 						WillReturnResult(sqlmock.NewResult(1, 0))
 
-					oauthApplicationModel := model.OauthApplication(db)
+					oauthApplicationModel := model.NewOauthApplication(db)
 					assert.Equal(t, sql.ErrNoRows, oauthApplicationModel.Update(context.Background(), ID, updateable))
 					assert.Nil(t, mockdb.ExpectationsWereMet())
 				})
@@ -447,7 +447,7 @@ func TestOauthApplication(t *testing.T) {
 						WithArgs(updateable.Description, updateable.Scopes, ID).
 						WillReturnError(errors.New("unexpected error"))
 
-					oauthApplicationModel := model.OauthApplication(db)
+					oauthApplicationModel := model.NewOauthApplication(db)
 					assert.NotNil(t, oauthApplicationModel.Update(context.Background(), ID, updateable))
 					assert.Nil(t, mockdb.ExpectationsWereMet())
 				})
@@ -471,7 +471,7 @@ func TestOauthApplication(t *testing.T) {
 						WithArgs(updateable.Description, updateable.Scopes, ID).
 						WillReturnResult(sqlmock.NewErrorResult(errors.New("unexpected error")))
 
-					oauthApplicationModel := model.OauthApplication(db)
+					oauthApplicationModel := model.NewOauthApplication(db)
 					assert.NotNil(t, oauthApplicationModel.Update(context.Background(), ID, updateable))
 					assert.Nil(t, mockdb.ExpectationsWereMet())
 				})
@@ -500,7 +500,7 @@ func TestOauthApplication(t *testing.T) {
 						WithArgs(updateable.Description, updateable.Scopes, ID).
 						WillReturnResult(sqlmock.NewResult(1, 1))
 
-					oauthApplicationModel := model.OauthApplication(db)
+					oauthApplicationModel := model.NewOauthApplication(db)
 					assert.Nil(t, oauthApplicationModel.Update(context.Background(), ID, updateable, tx))
 					assert.Nil(t, mockdb.ExpectationsWereMet())
 				})

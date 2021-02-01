@@ -39,6 +39,9 @@ config:
   database: ` + oauthDatabase + `
   access_token_timeout: 24h
   authorization_code_timeout: 24h
+  refresh_token:
+    timeout: 24h
+    active: true
 `)},
 	}
 

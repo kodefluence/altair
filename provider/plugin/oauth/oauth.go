@@ -43,22 +43,33 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 		return err
 	}
 
+	var refreshTokenConfig entity.RefreshTokenConfig
+	refreshTokenConfig.Active = oauthPluginConfig.Config.RefreshToken.Active
+	if refreshTokenConfig.Active {
+		refreshTokenTimeout, err := oauthPluginConfig.RefreshTokenTimeout()
+		if err != nil {
+			return err
+		}
+		refreshTokenConfig.Timeout = refreshTokenTimeout
+	}
+
 	// Model
-	oauthApplicationModel := model.OauthApplication(db)
-	oauthAccessTokenModel := model.OauthAccessToken(db)
+	oauthApplicationModel := model.NewOauthApplication(db)
+	oauthAccessTokenModel := model.NewOauthAccessToken(db)
 	oauthAccessGrantModel := model.NewOauthAccessGrant(db)
+	oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
 
 	// Formatter
 	oauthApplicationFormatter := formatter.OauthApplication()
-	oauthModelFormatter := formatter.NewModel(accessTokenTimeout, authorizationCodeTimeout)
+	oauthModelFormatter := formatter.NewModel(accessTokenTimeout, authorizationCodeTimeout, refreshTokenConfig.Timeout)
 	oauthFormatter := formatter.Oauth()
 
 	// Validator
-	oauthValidator := validator.Oauth()
+	oauthValidator := validator.NewOauth(refreshTokenConfig.Active)
 
 	// Service
-	applicationManager := service.ApplicationManager(oauthApplicationFormatter, oauthModelFormatter, oauthApplicationModel, oauthValidator)
-	authorization := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthModelFormatter, oauthValidator, oauthFormatter)
+	applicationManager := service.NewApplicationManager(oauthApplicationFormatter, oauthModelFormatter, oauthApplicationModel, oauthValidator)
+	authorization := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, oauthModelFormatter, oauthValidator, oauthFormatter, refreshTokenConfig.Active)
 
 	// DownStreamPlugin
 	oauthDownStream := downstream.NewOauth(oauthAccessTokenModel)

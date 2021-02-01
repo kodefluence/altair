@@ -43,6 +43,7 @@ func TestOauthPlugin(t *testing.T) {
 	oauthPlugin.Config.Database = "main_database"
 	oauthPlugin.Config.AccessTokenTimeoutRaw = "24h"
 	oauthPlugin.Config.AuthorizationCodeTimeoutRaw = "24h"
+	oauthPlugin.Config.RefreshToken.Timeout = "24h"
 
 	t.Run("DatabaseInstance", func(t *testing.T) {
 		t.Run("Return database instance", func(t *testing.T) {
@@ -89,6 +90,26 @@ func TestOauthPlugin(t *testing.T) {
 				oauthPlugin.Config.AuthorizationCodeTimeoutRaw = "abc"
 
 				_, err := oauthPlugin.AuthorizationCodeTimeout()
+				assert.NotNil(t, err)
+			})
+		})
+	})
+
+	t.Run("RefreshTokenTimeout", func(t *testing.T) {
+		t.Run("Right format", func(t *testing.T) {
+			t.Run("Return duration", func(t *testing.T) {
+				duration, err := oauthPlugin.RefreshTokenTimeout()
+				assert.Nil(t, err)
+				assert.Equal(t, time.Hour*24, duration)
+			})
+		})
+
+		t.Run("Wrong format", func(t *testing.T) {
+			t.Run("Return error", func(t *testing.T) {
+				oauthPlugin := entity.OauthPlugin{}
+				oauthPlugin.Config.RefreshToken.Timeout = "abc"
+
+				_, err := oauthPlugin.RefreshTokenTimeout()
 				assert.NotNil(t, err)
 			})
 		})

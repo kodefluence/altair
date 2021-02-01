@@ -14,7 +14,7 @@ import (
 func TestErrorObject(t *testing.T) {
 	t.Run("Wrap", func(t *testing.T) {
 		t.Run("Wrap 1 or more error", func(t *testing.T) {
-			ctx := context.WithValue(context.Background(), "track_id", uuid.New())
+			ctx := context.WithValue(context.Background(), "request_id", uuid.New())
 			err := eobject.Wrap(eobject.InternalServerError(ctx))
 
 			assert.Equal(t, 1, len(err))
@@ -22,11 +22,23 @@ func TestErrorObject(t *testing.T) {
 	})
 
 	t.Run("Internal server error", func(t *testing.T) {
-		ctx := context.WithValue(context.Background(), "track_id", uuid.New())
+		ctx := context.WithValue(context.Background(), "request_id", uuid.New())
 		errorObject := eobject.InternalServerError(ctx)
 		expectedErrorObject := entity.ErrorObject{
 			Code:    "ERR0500",
-			Message: fmt.Sprintf("Something is not right, help us fix this problem. Contribute to https://github.com/codefluence-x/altair. Or help us by give this code '%v' to the admin of this site.", ctx.Value("track_id")),
+			Message: fmt.Sprintf("Something is not right, help us fix this problem. Contribute to https://github.com/codefluence-x/altair. Or help us by give this code '%v' to the admin of this site.", ctx.Value("request_id")),
+		}
+
+		assert.Equal(t, expectedErrorObject.Code, errorObject.Code)
+		assert.Equal(t, expectedErrorObject.Message, errorObject.Message)
+		assert.Equal(t, expectedErrorObject.Error(), errorObject.Error())
+	})
+
+	t.Run("Unauthorized", func(t *testing.T) {
+		errorObject := eobject.UnauthorizedError()
+		expectedErrorObject := entity.ErrorObject{
+			Code:    "ERR0401",
+			Message: fmt.Sprintf("You are unauthorized."),
 		}
 
 		assert.Equal(t, expectedErrorObject.Code, errorObject.Code)
@@ -48,11 +60,11 @@ func TestErrorObject(t *testing.T) {
 
 	t.Run("Not found error", func(t *testing.T) {
 		ctx := context.Background()
-		ctx = context.WithValue(ctx, "track_id", "1234567890")
+		ctx = context.WithValue(ctx, "request_id", "1234567890")
 		errorObject := eobject.NotFoundError(ctx, "some entity")
 		expectedErrorObject := entity.ErrorObject{
 			Code:    "ERR0404",
-			Message: fmt.Sprintf("Resource of `%s` is not found, please report to admin of this site with this code `%v` if you think this is an error.", "some entity", ctx.Value("track_id")),
+			Message: fmt.Sprintf("Resource of `%s` is not found, please report to admin of this site with this code `%v` if you think this is an error.", "some entity", ctx.Value("request_id")),
 		}
 
 		assert.Equal(t, expectedErrorObject.Code, errorObject.Code)
@@ -62,11 +74,11 @@ func TestErrorObject(t *testing.T) {
 
 	t.Run("Forbidden error", func(t *testing.T) {
 		ctx := context.Background()
-		ctx = context.WithValue(ctx, "track_id", "1234567890")
+		ctx = context.WithValue(ctx, "request_id", "1234567890")
 		errorObject := eobject.ForbiddenError(ctx, "some entity", "your requested scope not exists in this applcation")
 		expectedErrorObject := entity.ErrorObject{
 			Code:    "ERR0403",
-			Message: fmt.Sprintf("Resource of `%s` is forbidden to be accessed, because of: %s. Please report to admin of this site with this code `%v` if you think this is an error.", "some entity", "your requested scope not exists in this applcation", ctx.Value("track_id")),
+			Message: fmt.Sprintf("Resource of `%s` is forbidden to be accessed, because of: %s. Please report to admin of this site with this code `%v` if you think this is an error.", "some entity", "your requested scope not exists in this applcation", ctx.Value("request_id")),
 		}
 
 		assert.Equal(t, expectedErrorObject.Code, errorObject.Code)

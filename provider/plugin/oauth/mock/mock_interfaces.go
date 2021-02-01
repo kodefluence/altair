@@ -355,6 +355,107 @@ func (mr *MockOauthAccessGrantModelMockRecorder) Revoke(ctx, code interface{}, t
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Revoke", reflect.TypeOf((*MockOauthAccessGrantModel)(nil).Revoke), varargs...)
 }
 
+// MockOauthRefreshTokenModel is a mock of OauthRefreshTokenModel interface
+type MockOauthRefreshTokenModel struct {
+	ctrl     *gomock.Controller
+	recorder *MockOauthRefreshTokenModelMockRecorder
+}
+
+// MockOauthRefreshTokenModelMockRecorder is the mock recorder for MockOauthRefreshTokenModel
+type MockOauthRefreshTokenModelMockRecorder struct {
+	mock *MockOauthRefreshTokenModel
+}
+
+// NewMockOauthRefreshTokenModel creates a new mock instance
+func NewMockOauthRefreshTokenModel(ctrl *gomock.Controller) *MockOauthRefreshTokenModel {
+	mock := &MockOauthRefreshTokenModel{ctrl: ctrl}
+	mock.recorder = &MockOauthRefreshTokenModelMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockOauthRefreshTokenModel) EXPECT() *MockOauthRefreshTokenModelMockRecorder {
+	return m.recorder
+}
+
+// Name mocks base method
+func (m *MockOauthRefreshTokenModel) Name() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Name")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// Name indicates an expected call of Name
+func (mr *MockOauthRefreshTokenModelMockRecorder) Name() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockOauthRefreshTokenModel)(nil).Name))
+}
+
+// One mocks base method
+func (m *MockOauthRefreshTokenModel) One(ctx context.Context, ID int) (entity.OauthRefreshToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "One", ctx, ID)
+	ret0, _ := ret[0].(entity.OauthRefreshToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// One indicates an expected call of One
+func (mr *MockOauthRefreshTokenModelMockRecorder) One(ctx, ID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "One", reflect.TypeOf((*MockOauthRefreshTokenModel)(nil).One), ctx, ID)
+}
+
+// Create mocks base method
+func (m *MockOauthRefreshTokenModel) Create(ctx context.Context, data entity.OauthRefreshTokenInsertable, txs ...*sql.Tx) (int, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, data}
+	for _, a := range txs {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Create", varargs...)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Create indicates an expected call of Create
+func (mr *MockOauthRefreshTokenModelMockRecorder) Create(ctx, data interface{}, txs ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, data}, txs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOauthRefreshTokenModel)(nil).Create), varargs...)
+}
+
+// OneByToken mocks base method
+func (m *MockOauthRefreshTokenModel) OneByToken(ctx context.Context, token string) (entity.OauthRefreshToken, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OneByToken", ctx, token)
+	ret0, _ := ret[0].(entity.OauthRefreshToken)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// OneByToken indicates an expected call of OneByToken
+func (mr *MockOauthRefreshTokenModelMockRecorder) OneByToken(ctx, token interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OneByToken", reflect.TypeOf((*MockOauthRefreshTokenModel)(nil).OneByToken), ctx, token)
+}
+
+// Revoke mocks base method
+func (m *MockOauthRefreshTokenModel) Revoke(ctx context.Context, token string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Revoke", ctx, token)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Revoke indicates an expected call of Revoke
+func (mr *MockOauthRefreshTokenModelMockRecorder) Revoke(ctx, token interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Revoke", reflect.TypeOf((*MockOauthRefreshTokenModel)(nil).Revoke), ctx, token)
+}
+
 // MockApplicationManager is a mock of ApplicationManager interface
 type MockApplicationManager struct {
 	ctrl     *gomock.Controller
@@ -625,17 +726,31 @@ func (mr *MockOauthFormatterMockRecorder) AccessGrant(e interface{}) *gomock.Cal
 }
 
 // AccessToken mocks base method
-func (m *MockOauthFormatter) AccessToken(e entity.OauthAccessToken, redirectURI string) entity.OauthAccessTokenJSON {
+func (m *MockOauthFormatter) AccessToken(e entity.OauthAccessToken, redirectURI string, refreshTokenJSON *entity.OauthRefreshTokenJSON) entity.OauthAccessTokenJSON {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AccessToken", e, redirectURI)
+	ret := m.ctrl.Call(m, "AccessToken", e, redirectURI, refreshTokenJSON)
 	ret0, _ := ret[0].(entity.OauthAccessTokenJSON)
 	return ret0
 }
 
 // AccessToken indicates an expected call of AccessToken
-func (mr *MockOauthFormatterMockRecorder) AccessToken(e, redirectURI interface{}) *gomock.Call {
+func (mr *MockOauthFormatterMockRecorder) AccessToken(e, redirectURI, refreshTokenJSON interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessToken", reflect.TypeOf((*MockOauthFormatter)(nil).AccessToken), e, redirectURI)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessToken", reflect.TypeOf((*MockOauthFormatter)(nil).AccessToken), e, redirectURI, refreshTokenJSON)
+}
+
+// RefreshToken mocks base method
+func (m *MockOauthFormatter) RefreshToken(e entity.OauthRefreshToken) entity.OauthRefreshTokenJSON {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RefreshToken", e)
+	ret0, _ := ret[0].(entity.OauthRefreshTokenJSON)
+	return ret0
+}
+
+// RefreshToken indicates an expected call of RefreshToken
+func (mr *MockOauthFormatterMockRecorder) RefreshToken(e interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshToken", reflect.TypeOf((*MockOauthFormatter)(nil).RefreshToken), e)
 }
 
 // MockModelFormater is a mock of ModelFormater interface
@@ -717,6 +832,34 @@ func (mr *MockModelFormaterMockRecorder) OauthApplication(r interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OauthApplication", reflect.TypeOf((*MockModelFormater)(nil).OauthApplication), r)
 }
 
+// AccessTokenFromOauthRefreshToken mocks base method
+func (m *MockModelFormater) AccessTokenFromOauthRefreshToken(application entity.OauthApplication, accessToken entity.OauthAccessToken) entity.OauthAccessTokenInsertable {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AccessTokenFromOauthRefreshToken", application, accessToken)
+	ret0, _ := ret[0].(entity.OauthAccessTokenInsertable)
+	return ret0
+}
+
+// AccessTokenFromOauthRefreshToken indicates an expected call of AccessTokenFromOauthRefreshToken
+func (mr *MockModelFormaterMockRecorder) AccessTokenFromOauthRefreshToken(application, accessToken interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessTokenFromOauthRefreshToken", reflect.TypeOf((*MockModelFormater)(nil).AccessTokenFromOauthRefreshToken), application, accessToken)
+}
+
+// RefreshToken mocks base method
+func (m *MockModelFormater) RefreshToken(application entity.OauthApplication, accessToken entity.OauthAccessToken) entity.OauthRefreshTokenInsertable {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RefreshToken", application, accessToken)
+	ret0, _ := ret[0].(entity.OauthRefreshTokenInsertable)
+	return ret0
+}
+
+// RefreshToken indicates an expected call of RefreshToken
+func (mr *MockModelFormaterMockRecorder) RefreshToken(application, accessToken interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RefreshToken", reflect.TypeOf((*MockModelFormater)(nil).RefreshToken), application, accessToken)
+}
+
 // MockOauthValidator is a mock of OauthValidator interface
 type MockOauthValidator struct {
 	ctrl     *gomock.Controller
@@ -780,4 +923,32 @@ func (m *MockOauthValidator) ValidateTokenGrant(ctx context.Context, r entity.Ac
 func (mr *MockOauthValidatorMockRecorder) ValidateTokenGrant(ctx, r interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateTokenGrant", reflect.TypeOf((*MockOauthValidator)(nil).ValidateTokenGrant), ctx, r)
+}
+
+// ValidateTokenRefreshToken mocks base method
+func (m *MockOauthValidator) ValidateTokenRefreshToken(ctx context.Context, data entity.OauthRefreshToken) *entity.Error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateTokenRefreshToken", ctx, data)
+	ret0, _ := ret[0].(*entity.Error)
+	return ret0
+}
+
+// ValidateTokenRefreshToken indicates an expected call of ValidateTokenRefreshToken
+func (mr *MockOauthValidatorMockRecorder) ValidateTokenRefreshToken(ctx, data interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateTokenRefreshToken", reflect.TypeOf((*MockOauthValidator)(nil).ValidateTokenRefreshToken), ctx, data)
+}
+
+// ValidateTokenAuthorizationCode mocks base method
+func (m *MockOauthValidator) ValidateTokenAuthorizationCode(ctx context.Context, r entity.AccessTokenRequestJSON, data entity.OauthAccessGrant) *entity.Error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateTokenAuthorizationCode", ctx, r, data)
+	ret0, _ := ret[0].(*entity.Error)
+	return ret0
+}
+
+// ValidateTokenAuthorizationCode indicates an expected call of ValidateTokenAuthorizationCode
+func (mr *MockOauthValidatorMockRecorder) ValidateTokenAuthorizationCode(ctx, r, data interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateTokenAuthorizationCode", reflect.TypeOf((*MockOauthValidator)(nil).ValidateTokenAuthorizationCode), ctx, r, data)
 }

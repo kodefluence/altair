@@ -5,20 +5,26 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/util"
 )
 
-type application struct {
+type Oauth struct {
+	refreshTokenToggle bool
 }
 
-func Oauth() *application {
-	return &application{}
+// NewOauth create Oauth struct for validation
+func NewOauth(refreshTokenToggle bool) *Oauth {
+	return &Oauth{
+		refreshTokenToggle: refreshTokenToggle,
+	}
 }
 
-func (a *application) ValidateApplication(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error {
+// ValidateApplication will validate oauth application json
+func (a *Oauth) ValidateApplication(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error {
 	var entityError = &entity.Error{}
 
 	if data.OwnerType == nil {
@@ -37,7 +43,8 @@ func (a *application) ValidateApplication(ctx context.Context, data entity.Oauth
 	return nil
 }
 
-func (a *application) ValidateAuthorizationGrant(ctx context.Context, r entity.AuthorizationRequestJSON, application entity.OauthApplication) *entity.Error {
+// ValidateAuthorizationGrant will validate authorization grant request
+func (a *Oauth) ValidateAuthorizationGrant(ctx context.Context, r entity.AuthorizationRequestJSON, application entity.OauthApplication) *entity.Error {
 	var entityErr = &entity.Error{}
 
 	if r.ResponseType == nil {
@@ -99,26 +106,77 @@ func (a *application) ValidateAuthorizationGrant(ctx context.Context, r entity.A
 	return nil
 }
 
-func (a *application) ValidateTokenGrant(ctx context.Context, r entity.AccessTokenRequestJSON) *entity.Error {
+// ValidateTokenGrant will validate token grant
+func (a *Oauth) ValidateTokenGrant(ctx context.Context, r entity.AccessTokenRequestJSON) *entity.Error {
 	var entityErr = &entity.Error{}
 
 	if r.GrantType == nil {
+		entityErr.HttpStatus = http.StatusUnprocessableEntity
 		entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`grant_type can't be empty`))
-	} else if *r.GrantType != "authorization_code" {
-		entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`grant_type must be set to 'authorization_code'`))
+		return entityErr
 	}
 
-	if r.Code == nil {
-		entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`code can't be empty`))
-	}
+	switch *r.GrantType {
+	case "authorization_code":
+		if r.Code == nil {
+			entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`code can't be empty`))
+		}
 
-	if r.RedirectURI == nil {
-		entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`redirect_uri can't be empty`))
+		if r.RedirectURI == nil {
+			entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`redirect_uri can't be empty`))
+		}
+	case "refresh_token":
+		if a.refreshTokenToggle {
+			if r.RefreshToken == nil {
+				entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`refresh token can't be empty`))
+			}
+		}
+	default:
+		entityErr.Errors = append(entityErr.Errors, eobject.ValidationError(`grant_type is not a valid value`))
 	}
 
 	if len(entityErr.Errors) > 0 {
 		entityErr.HttpStatus = http.StatusUnprocessableEntity
 		return entityErr
+	}
+
+	return nil
+}
+
+// ValidateTokenAuthorizationCode will validate oauth access grant
+func (a *Oauth) ValidateTokenAuthorizationCode(ctx context.Context, r entity.AccessTokenRequestJSON, data entity.OauthAccessGrant) *entity.Error {
+	if data.RevokedAT.Valid {
+		return &entity.Error{
+			HttpStatus: http.StatusForbidden,
+			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "authorization code already used")),
+		}
+	}
+
+	if time.Now().After(data.ExpiresIn) {
+		return &entity.Error{
+			HttpStatus: http.StatusForbidden,
+			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "authorization code already expired")),
+		}
+	}
+
+	if data.RedirectURI.String != *r.RedirectURI {
+		return &entity.Error{
+			HttpStatus: http.StatusForbidden,
+			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "redirect uri is different from one that generated before")),
+		}
+	}
+
+	return nil
+}
+
+// ValidateTokenRefreshToken will validate refresh token
+func (a *Oauth) ValidateTokenRefreshToken(ctx context.Context, data entity.OauthRefreshToken) *entity.Error {
+
+	if data.RevokedAT.Valid {
+		return &entity.Error{
+			HttpStatus: http.StatusForbidden,
+			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "refresh token already used")),
+		}
 	}
 
 	return nil

@@ -64,7 +64,7 @@ func TestToken(t *testing.T) {
 					ExpiresIn: time.Now().Add(time.Hour * 4),
 					CreatedAt: time.Now().Truncate(time.Second),
 				}
-				oauthAccessTokenJSON := formatter.Oauth().AccessToken(oauthAccessToken, *accessTokenRequest.RedirectURI)
+				oauthAccessTokenJSON := formatter.Oauth().AccessToken(oauthAccessToken, *accessTokenRequest.RedirectURI, nil)
 
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
 				authorizationService.EXPECT().Token(gomock.Any(), accessTokenRequest).Return(oauthAccessTokenJSON, nil)
@@ -103,9 +103,9 @@ func TestToken(t *testing.T) {
 					assert.Nil(t, err)
 
 					oauthAccessToken := entity.OauthAccessToken{}
-					oauthAccessTokenJSON := formatter.Oauth().AccessToken(oauthAccessToken, *accessTokenRequest.RedirectURI)
+					oauthAccessTokenJSON := formatter.Oauth().AccessToken(oauthAccessToken, *accessTokenRequest.RedirectURI, nil)
 
-					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+					ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 					expectedError := &entity.Error{
 						HttpStatus: http.StatusNotFound,

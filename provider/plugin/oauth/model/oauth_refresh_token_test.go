@@ -10,22 +10,19 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/model"
-
 	"github.com/stretchr/testify/assert"
 )
 
-var oauthAccessTokenModelRows = []string{
+var oauthRefreshTokenRows = []string{
 	"id",
-	"oauth_application_id",
-	"resource_owner_id",
+	"oauth_access_token_id",
 	"token",
-	"scopes",
 	"expires_in",
 	"created_at",
 	"revoked_at",
 }
 
-func TestOauthAccessToken(t *testing.T) {
+func TestOauthRefreshToken(t *testing.T) {
 
 	t.Run("Name", func(t *testing.T) {
 		t.Run("Return a model's name", func(t *testing.T) {
@@ -34,40 +31,38 @@ func TestOauthAccessToken(t *testing.T) {
 				t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 			}
 
-			assert.Equal(t, "oauth-access-token-model", model.NewOauthAccessToken(db).Name())
+			assert.Equal(t, "oauth-refresh-token-model", model.NewOauthRefreshToken(db).Name())
 		})
 	})
 
 	t.Run("One", func(t *testing.T) {
-		t.Run("Given oauth access token id", func(t *testing.T) {
-			t.Run("Return entity oauth access token", func(t *testing.T) {
+		t.Run("Given oauth refresh token id", func(t *testing.T) {
+			t.Run("Return entity oauth refresh token", func(t *testing.T) {
 				db, mockdb, err := sqlmock.New()
 				if err != nil {
 					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 				}
 
-				data := entity.OauthAccessToken{
+				data := entity.OauthRefreshToken{
 					ID: 1,
 				}
 
-				rows := sqlmock.NewRows(oauthAccessTokenModelRows).
+				rows := sqlmock.NewRows(oauthRefreshTokenRows).
 					AddRow(
 						data.ID,
-						data.OauthApplicationID,
-						data.ResourceOwnerID,
+						data.OauthAccessTokenID,
 						data.Token,
-						data.Scopes,
 						data.ExpiresIn,
 						data.CreatedAt,
 						data.RevokedAT,
 					)
 
-				mockdb.ExpectQuery(`select id, oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at from oauth_access_tokens where id = \? and revoked_at is null limit 1`).
+				mockdb.ExpectQuery(`select id, oauth_access_token_id, token, expires_in, created_at, revoked_at from oauth_refresh_tokens where id = \? limit 1`).
 					WithArgs(1).
 					WillReturnRows(rows)
 
-				oauthAccessTokenModel := model.NewOauthAccessToken(db)
-				dataFromDB, err := oauthAccessTokenModel.One(context.Background(), 1)
+				oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
+				dataFromDB, err := oauthRefreshTokenModel.One(context.Background(), 1)
 
 				assert.Nil(t, err)
 				assert.Nil(t, mockdb.ExpectationsWereMet())
@@ -80,51 +75,49 @@ func TestOauthAccessToken(t *testing.T) {
 					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 				}
 
-				mockdb.ExpectQuery(`select id, oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at from oauth_access_tokens where id = \? and revoked_at is null limit 1`).
+				mockdb.ExpectQuery(`select id, oauth_access_token_id, token, expires_in, created_at, revoked_at from oauth_refresh_tokens where id = \? limit 1`).
 					WithArgs(1).
 					WillReturnError(sql.ErrNoRows)
 
-				oauthAccessTokenModel := model.NewOauthAccessToken(db)
-				dataFromDB, err := oauthAccessTokenModel.One(context.Background(), 1)
+				oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
+				dataFromDB, err := oauthRefreshTokenModel.One(context.Background(), 1)
 
 				assert.NotNil(t, err)
 				assert.Equal(t, sql.ErrNoRows, err)
 				assert.Nil(t, mockdb.ExpectationsWereMet())
-				assert.Equal(t, entity.OauthAccessToken{}, dataFromDB)
+				assert.Equal(t, entity.OauthRefreshToken{}, dataFromDB)
 			})
 		})
 	})
 
 	t.Run("OneByToken", func(t *testing.T) {
-		t.Run("Given oauth access token", func(t *testing.T) {
-			t.Run("Return entity oauth access token", func(t *testing.T) {
+		t.Run("Given oauth refresh token", func(t *testing.T) {
+			t.Run("Return entity oauth refresh token", func(t *testing.T) {
 				db, mockdb, err := sqlmock.New()
 				if err != nil {
 					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 				}
 
-				data := entity.OauthAccessToken{
+				data := entity.OauthRefreshToken{
 					ID: 1,
 				}
 
-				rows := sqlmock.NewRows(oauthAccessTokenModelRows).
+				rows := sqlmock.NewRows(oauthRefreshTokenRows).
 					AddRow(
 						data.ID,
-						data.OauthApplicationID,
-						data.ResourceOwnerID,
+						data.OauthAccessTokenID,
 						data.Token,
-						data.Scopes,
 						data.ExpiresIn,
 						data.CreatedAt,
 						data.RevokedAT,
 					)
 
-				mockdb.ExpectQuery(`select id, oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at from oauth_access_tokens where token = \? and revoked_at is null limit 1`).
+				mockdb.ExpectQuery(`select id, oauth_access_token_id, token, expires_in, created_at, revoked_at from oauth_refresh_tokens where token = \? and revoked_at is null limit 1`).
 					WithArgs("token").
 					WillReturnRows(rows)
 
-				oauthAccessTokenModel := model.NewOauthAccessToken(db)
-				dataFromDB, err := oauthAccessTokenModel.OneByToken(context.Background(), "token")
+				oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
+				dataFromDB, err := oauthRefreshTokenModel.OneByToken(context.Background(), "token")
 
 				assert.Nil(t, err)
 				assert.Nil(t, mockdb.ExpectationsWereMet())
@@ -137,43 +130,41 @@ func TestOauthAccessToken(t *testing.T) {
 					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 				}
 
-				mockdb.ExpectQuery(`select id, oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at from oauth_access_tokens where token = \? and revoked_at is null limit 1`).
+				mockdb.ExpectQuery(`select id, oauth_access_token_id, token, expires_in, created_at, revoked_at from oauth_refresh_tokens where token = \? and revoked_at is null limit 1`).
 					WithArgs("token").
 					WillReturnError(sql.ErrNoRows)
 
-				oauthAccessTokenModel := model.NewOauthAccessToken(db)
-				dataFromDB, err := oauthAccessTokenModel.OneByToken(context.Background(), "token")
+				oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
+				dataFromDB, err := oauthRefreshTokenModel.OneByToken(context.Background(), "token")
 
 				assert.NotNil(t, err)
 				assert.Equal(t, sql.ErrNoRows, err)
 				assert.Nil(t, mockdb.ExpectationsWereMet())
-				assert.Equal(t, entity.OauthAccessToken{}, dataFromDB)
+				assert.Equal(t, entity.OauthRefreshToken{}, dataFromDB)
 			})
 		})
 	})
 
 	t.Run("Create", func(t *testing.T) {
-		t.Run("Given context and access token insertable", func(t *testing.T) {
+		t.Run("Given context and refresh token insertable", func(t *testing.T) {
 			t.Run("Return last inserted id", func(t *testing.T) {
 				db, mockdb, err := sqlmock.New()
 				if err != nil {
 					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 				}
 
-				insertable := entity.OauthAccessTokenInsertable{
-					OauthApplicationID: 1,
-					ResourceOwnerID:    1,
+				insertable := entity.OauthRefreshTokenInsertable{
+					OauthAccessTokenID: 1,
 					Token:              "token",
-					Scopes:             "public users stores",
 					ExpiresIn:          time.Now().Add(time.Hour * 24),
 				}
 
-				mockdb.ExpectExec(`insert into oauth_access_tokens \(oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at\) values\(\?, \?, \?, \?, \?, now\(\), null\)`).
-					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Token, insertable.Scopes, insertable.ExpiresIn).
+				mockdb.ExpectExec(`insert into oauth_refresh_tokens \(oauth_access_token_id, token, expires_in, created_at, revoked_at\) values\(\?, \?, \?, now\(\), null\)`).
+					WithArgs(insertable.OauthAccessTokenID, insertable.Token, insertable.ExpiresIn).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
-				oauthAccessTokenModel := model.NewOauthAccessToken(db)
-				lastInsertedID, err := oauthAccessTokenModel.Create(context.Background(), insertable)
+				oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
+				lastInsertedID, err := oauthRefreshTokenModel.Create(context.Background(), insertable)
 
 				assert.Nil(t, mockdb.ExpectationsWereMet())
 				assert.Nil(t, err)
@@ -186,20 +177,18 @@ func TestOauthAccessToken(t *testing.T) {
 					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 				}
 
-				insertable := entity.OauthAccessTokenInsertable{
-					OauthApplicationID: 1,
-					ResourceOwnerID:    1,
+				insertable := entity.OauthRefreshTokenInsertable{
+					OauthAccessTokenID: 1,
 					Token:              "token",
-					Scopes:             "public users stores",
 					ExpiresIn:          time.Now().Add(time.Hour * 24),
 				}
 
-				mockdb.ExpectExec(`insert into oauth_access_tokens \(oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at\) values\(\?, \?, \?, \?, \?, now\(\), null\)`).
-					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Token, insertable.Scopes, insertable.ExpiresIn).
+				mockdb.ExpectExec(`insert into oauth_refresh_tokens \(oauth_access_token_id, token, expires_in, created_at, revoked_at\) values\(\?, \?, \?, now\(\), null\)`).
+					WithArgs(insertable.OauthAccessTokenID, insertable.Token, insertable.ExpiresIn).
 					WillReturnError(errors.New("unexpected error"))
 
-				oauthAccessTokenModel := model.NewOauthAccessToken(db)
-				lastInsertedID, err := oauthAccessTokenModel.Create(context.Background(), insertable)
+				oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
+				lastInsertedID, err := oauthRefreshTokenModel.Create(context.Background(), insertable)
 
 				assert.Nil(t, mockdb.ExpectationsWereMet())
 				assert.NotNil(t, err)
@@ -212,20 +201,18 @@ func TestOauthAccessToken(t *testing.T) {
 					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 				}
 
-				insertable := entity.OauthAccessTokenInsertable{
-					OauthApplicationID: 1,
-					ResourceOwnerID:    1,
+				insertable := entity.OauthRefreshTokenInsertable{
+					OauthAccessTokenID: 1,
 					Token:              "token",
-					Scopes:             "public users stores",
 					ExpiresIn:          time.Now().Add(time.Hour * 24),
 				}
 
-				mockdb.ExpectExec(`insert into oauth_access_tokens \(oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at\) values\(\?, \?, \?, \?, \?, now\(\), null\)`).
-					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Token, insertable.Scopes, insertable.ExpiresIn).
+				mockdb.ExpectExec(`insert into oauth_refresh_tokens \(oauth_access_token_id, token, expires_in, created_at, revoked_at\) values\(\?, \?, \?, now\(\), null\)`).
+					WithArgs(insertable.OauthAccessTokenID, insertable.Token, insertable.ExpiresIn).
 					WillReturnResult(sqlmock.NewErrorResult(errors.New("unexpected error")))
 
-				oauthAccessTokenModel := model.NewOauthAccessToken(db)
-				lastInsertedID, err := oauthAccessTokenModel.Create(context.Background(), insertable)
+				oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
+				lastInsertedID, err := oauthRefreshTokenModel.Create(context.Background(), insertable)
 
 				assert.Nil(t, mockdb.ExpectationsWereMet())
 				assert.NotNil(t, err)
@@ -233,30 +220,28 @@ func TestOauthAccessToken(t *testing.T) {
 			})
 		})
 
-		t.Run("Given context, access token insertable and database transaction", func(t *testing.T) {
+		t.Run("Given context, refresh token insertable and database transaction", func(t *testing.T) {
 			t.Run("Return last inserted id", func(t *testing.T) {
 				db, mockdb, err := sqlmock.New()
 				if err != nil {
 					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 				}
 
-				insertable := entity.OauthAccessTokenInsertable{
-					OauthApplicationID: 1,
-					ResourceOwnerID:    1,
+				insertable := entity.OauthRefreshTokenInsertable{
+					OauthAccessTokenID: 1,
 					Token:              "token",
-					Scopes:             "public users stores",
 					ExpiresIn:          time.Now().Add(time.Hour * 24),
 				}
 
 				mockdb.ExpectBegin()
-				mockdb.ExpectExec(`insert into oauth_access_tokens \(oauth_application_id, resource_owner_id, token, scopes, expires_in, created_at, revoked_at\) values\(\?, \?, \?, \?, \?, now\(\), null\)`).
-					WithArgs(insertable.OauthApplicationID, insertable.ResourceOwnerID, insertable.Token, insertable.Scopes, insertable.ExpiresIn).
+				mockdb.ExpectExec(`insert into oauth_refresh_tokens \(oauth_access_token_id, token, expires_in, created_at, revoked_at\) values\(\?, \?, \?, now\(\), null\)`).
+					WithArgs(insertable.OauthAccessTokenID, insertable.Token, insertable.ExpiresIn).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				tx, _ := db.Begin()
 
-				oauthAccessTokenModel := model.NewOauthAccessToken(db)
-				lastInsertedID, err := oauthAccessTokenModel.Create(context.Background(), insertable, tx)
+				oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
+				lastInsertedID, err := oauthRefreshTokenModel.Create(context.Background(), insertable, tx)
 
 				assert.Nil(t, mockdb.ExpectationsWereMet())
 				assert.Nil(t, err)
@@ -274,11 +259,11 @@ func TestOauthAccessToken(t *testing.T) {
 						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 					}
 
-					mockdb.ExpectExec(`update oauth_access_tokens set revoked_at = now\(\) where token = \?`).
+					mockdb.ExpectExec(`update oauth_refresh_tokens set revoked_at = now\(\) where token = \?`).
 						WithArgs("token").WillReturnResult(sqlmock.NewResult(1, 1))
 
-					oauthAccessTokenModel := model.NewOauthAccessToken(db)
-					err = oauthAccessTokenModel.Revoke(context.Background(), "token")
+					oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
+					err = oauthRefreshTokenModel.Revoke(context.Background(), "token")
 					assert.Nil(t, err)
 				})
 			})
@@ -290,11 +275,11 @@ func TestOauthAccessToken(t *testing.T) {
 						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 					}
 
-					mockdb.ExpectExec(`update oauth_access_tokens set revoked_at = now\(\) where token = \?`).
+					mockdb.ExpectExec(`update oauth_refresh_tokens set revoked_at = now\(\) where token = \?`).
 						WithArgs("token").WillReturnError(errors.New("unexpected error"))
 
-					oauthAccessTokenModel := model.NewOauthAccessToken(db)
-					err = oauthAccessTokenModel.Revoke(context.Background(), "token")
+					oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
+					err = oauthRefreshTokenModel.Revoke(context.Background(), "token")
 					assert.NotNil(t, err)
 				})
 			})
@@ -306,11 +291,11 @@ func TestOauthAccessToken(t *testing.T) {
 						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 					}
 
-					mockdb.ExpectExec(`update oauth_access_tokens set revoked_at = now\(\) where token = \?`).
+					mockdb.ExpectExec(`update oauth_refresh_tokens set revoked_at = now\(\) where token = \?`).
 						WithArgs("token").WillReturnResult(sqlmock.NewErrorResult(errors.New("unexpected error")))
 
-					oauthAccessTokenModel := model.NewOauthAccessToken(db)
-					err = oauthAccessTokenModel.Revoke(context.Background(), "token")
+					oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
+					err = oauthRefreshTokenModel.Revoke(context.Background(), "token")
 					assert.NotNil(t, err)
 				})
 			})
@@ -322,11 +307,11 @@ func TestOauthAccessToken(t *testing.T) {
 						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 					}
 
-					mockdb.ExpectExec(`update oauth_access_tokens set revoked_at = now\(\) where token = \?`).
+					mockdb.ExpectExec(`update oauth_refresh_tokens set revoked_at = now\(\) where token = \?`).
 						WithArgs("token").WillReturnResult(sqlmock.NewResult(1, 0))
 
-					oauthAccessTokenModel := model.NewOauthAccessToken(db)
-					err = oauthAccessTokenModel.Revoke(context.Background(), "token")
+					oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
+					err = oauthRefreshTokenModel.Revoke(context.Background(), "token")
 					assert.NotNil(t, err)
 					assert.Equal(t, sql.ErrNoRows, err)
 				})

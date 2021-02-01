@@ -72,7 +72,7 @@ func TestGrant(t *testing.T) {
 					ExpiresIn: time.Now().Add(time.Hour * 4),
 					CreatedAt: time.Now().Truncate(time.Second),
 				}
-				oauthAccessTokenJSON := formatter.Oauth().AccessToken(oauthAccessToken, *authorizationRequest.RedirectURI)
+				oauthAccessTokenJSON := formatter.Oauth().AccessToken(oauthAccessToken, *authorizationRequest.RedirectURI, nil)
 
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
 				authorizationService.EXPECT().Grantor(gomock.Any(), authorizationRequest).Return(oauthAccessTokenJSON, nil)
@@ -112,9 +112,9 @@ func TestGrant(t *testing.T) {
 					assert.Nil(t, err)
 
 					oauthAccessToken := entity.OauthAccessToken{}
-					oauthAccessTokenJSON := formatter.Oauth().AccessToken(oauthAccessToken, *authorizationRequest.RedirectURI)
+					oauthAccessTokenJSON := formatter.Oauth().AccessToken(oauthAccessToken, *authorizationRequest.RedirectURI, nil)
 
-					ctx := context.WithValue(context.Background(), "track_id", uuid.New().String())
+					ctx := context.WithValue(context.Background(), "request_id", uuid.New().String())
 
 					expectedError := &entity.Error{
 						HttpStatus: http.StatusNotFound,

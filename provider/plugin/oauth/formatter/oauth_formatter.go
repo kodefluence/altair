@@ -7,13 +7,13 @@ import (
 	"github.com/codefluence-x/altair/util"
 )
 
-type oauthFormatter struct{}
+type OauthFormatter struct{}
 
-func Oauth() *oauthFormatter {
-	return &oauthFormatter{}
+func Oauth() *OauthFormatter {
+	return &OauthFormatter{}
 }
 
-func (*oauthFormatter) AccessGrant(e entity.OauthAccessGrant) entity.OauthAccessGrantJSON {
+func (*OauthFormatter) AccessGrant(e entity.OauthAccessGrant) entity.OauthAccessGrantJSON {
 	var data entity.OauthAccessGrantJSON
 
 	data.ID = &e.ID
@@ -38,7 +38,7 @@ func (*oauthFormatter) AccessGrant(e entity.OauthAccessGrant) entity.OauthAccess
 	return data
 }
 
-func (*oauthFormatter) AccessToken(e entity.OauthAccessToken, redirectURI string) entity.OauthAccessTokenJSON {
+func (*OauthFormatter) AccessToken(e entity.OauthAccessToken, redirectURI string, refreshTokenJSON *entity.OauthRefreshTokenJSON) entity.OauthAccessTokenJSON {
 	var data entity.OauthAccessTokenJSON
 
 	data.ID = &e.ID
@@ -48,6 +48,29 @@ func (*oauthFormatter) AccessToken(e entity.OauthAccessToken, redirectURI string
 	data.Scopes = &e.Scopes.String
 	data.RedirectURI = &redirectURI
 	data.CreatedAt = &e.CreatedAt
+
+	if time.Now().Before(e.ExpiresIn) {
+		data.ExpiresIn = util.IntToPointer(int(e.ExpiresIn.Sub(time.Now()).Seconds()))
+	} else {
+		data.ExpiresIn = util.IntToPointer(0)
+	}
+
+	if e.RevokedAT.Valid {
+		data.RevokedAT = &e.RevokedAT.Time
+	}
+
+	if refreshTokenJSON != nil {
+		data.RefreshToken = refreshTokenJSON
+	}
+
+	return data
+}
+
+func (*OauthFormatter) RefreshToken(e entity.OauthRefreshToken) entity.OauthRefreshTokenJSON {
+	var data entity.OauthRefreshTokenJSON
+
+	data.CreatedAt = &e.CreatedAt
+	data.Token = &e.Token
 
 	if time.Now().Before(e.ExpiresIn) {
 		data.ExpiresIn = util.IntToPointer(int(e.ExpiresIn.Sub(time.Now()).Seconds()))

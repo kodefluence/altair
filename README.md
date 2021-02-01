@@ -80,39 +80,3 @@ We recommend you to use Altair using docker-compose like above. But if you want 
 4. `go run altair.go migrate main_database`
 5. `go run altair.go run`
 6. Read [CONTRIBUTING.md](https://github.com/codefluence-x/altair/blob/master/CONTRIBUTING.md)
-
-## Feature
-
-- [ ] Request Forwarder
-  - [x] Route Compiler
-  - [x] Route Generator Forwader
-  - [x] Downstream Plugins
-    - [x] Oauth Token Checking
-    - [x] Oauth Scope Checking
-    - [ ] Response Caching
-  - [ ] Persistent HTTP client implementation
-- [x] Metric & Monitoring
-  - [x] Prometheus
-- [x] Logging
-  - [x] Stdout
-- [ ] Plugins
-  - [ ] Plugin dynamic database migration
-  - [ ] Oauth Authorization
-    - [x] CRUD Oauth Application
-      - [x] Create
-      - [x] List
-      - [x] One
-      - [x] Update
-    - [x] Authorization
-      - [x] Authorization Code Grant
-    - [ ] Access Token
-      - [x] Access Token Implicit Request for Confidential Application
-      - [x] Access Token Code Grant Flow
-      - [ ] Refresh Token
-        - [ ] Access Token Refresh Token Flow
-        - [ ] Refresh Token Generation
-      - [x] Revoke Access Token
-  - [ ] Response Caching
-    - [ ] Route Config
-    - [ ] API for deleting the cache
-  - [ ] JWT
