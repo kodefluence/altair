@@ -154,5 +154,30 @@ config:
 
 			assert.NotNil(t, oauth.Provide(appBearer, dbBearer, pluginBearer))
 		})
+
+		t.Run("Refresh token timeout in wrong format", func(t *testing.T) {
+			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
+			appBearer.SetMetricProvider(metric.NewPrometheusMetric())
+
+			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
+			dbBearer.EXPECT().Database(oauthDatabase).Return(db, MYSQLConfig, nil)
+
+			plugins := map[string]coreEntity.Plugin{
+				"oauth": {Plugin: "oauth", Raw: []byte(`
+plugin: oauth
+config:
+  database: ` + oauthDatabase + `
+  access_token_timeout: 24h
+  authorization_code_timeout: 24h
+  refresh_token:
+    timeout: 24ssss
+    active: true
+`)},
+			}
+
+			pluginBearer := loader.PluginBearer(plugins)
+
+			assert.NotNil(t, oauth.Provide(appBearer, dbBearer, pluginBearer))
+		})
 	})
 }
