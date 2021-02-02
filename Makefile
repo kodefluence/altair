@@ -19,9 +19,24 @@ mock_routing:
 mock_all: mock_service mock_formatter mock_model mock_validator mock_plugin mock_routing
 
 build:
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o ./build/linux/altair
-	GOOS=windows GOARCH=386 CGO_ENABLED=0 go build -o ./build/windows/altair
-	GOOS=darwin GOARCH=386 CGO_ENABLED=0 go build -o ./build/darwin/altair
+	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s" -o ./build_output/linux/altair
+	GOOS=windows GOARCH=386 CGO_ENABLED=0 go build -ldflags="-s" -o ./build_output/windows/altair
+	GOOS=darwin GOARCH=386 CGO_ENABLED=0 go build -ldflags="-s" -o ./build_output/darwin/altair
+	upx -9 -k ./build_output/linux/altair
+	upx -9 -k ./build_output/windows/altair
+	upx -9 -k ./build_output/darwin/altair
+	cp -r config/ ./build_output/linux/config/
+	cp -r config/ ./build_output/windows/config/
+	cp -r config/ ./build_output/darwin/config/
+	cp -r migration/ ./build_output/linux/migration/
+	cp -r migration/ ./build_output/windows/migration/
+	cp -r migration/ ./build_output/darwin/migration/
+	cp -r routes/ ./build_output/linux/routes/
+	cp -r routes/ ./build_output/windows/routes/
+	cp -r routes/ ./build_output/darwin/routes/
+	cp .env.sample ./build_output/linux/.env.sample
+	cp .env.sample ./build_output/windows/.env.sample
+	cp .env.sample ./build_output/darwin/.env.sample
 
 build_docker: build_docker_latest
 	sudo docker build -t $(IMAGE):$(VERSION) -f ./Dockerfile .
