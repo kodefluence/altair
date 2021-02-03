@@ -22,10 +22,6 @@
 
 Open source API gateway written in Go. Designed to be distributed, lightweight, simple, fast, reliable, cross platform, programming language agnostic and robust - by default.
 
-## Notice
-
-This software is still in *alpha version*, which may contain several hidden bugs that can cause data loss or unexpected behaviour.
-
 ## Architecture Diagram
 
 <br>
