@@ -1,4 +1,11 @@
-![Altair - Lightweight and Robust API Gateway](https://user-images.githubusercontent.com/1132660/85085782-0bc00100-b203-11ea-8e89-bbeb7d03a418.png "Altair - Lightweight and Robust API Gateway")
+<center>
+  <h1>
+    Altair
+  </h1>
+  <h2>Distributed, Lightweight and Robust API Gateway</h2>
+</center>
+
+<br>
 
 <p align="center">
   <a href="https://coveralls.io/github/codefluence-x/altair?branch=master"><img src="https://coveralls.io/repos/github/codefluence-x/altair/badge.svg?branch=master" alt="Coverage Status"></a>
@@ -13,7 +20,7 @@
 
 ## Introduction
 
-Open source API gateway written in Go. Created to be lightweight, simple, fast, reliable, cross platform, and programming language agnostic.
+Open source API gateway written in Go. Designed to be distributed, lightweight, simple, fast, reliable, cross platform, programming language agnostic and robust - by default.
 
 ## Notice
 
