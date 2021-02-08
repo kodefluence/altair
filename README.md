@@ -1,11 +1,6 @@
-<center>
-  <h1>
-    Altair
-  </h1>
-  <h2>Distributed, Lightweight and Robust API Gateway</h2>
-</center>
-
-<br>
+<p align="center">
+  <img src="https://altair.codefluence.org/altair.png" alt="Distributed, Lightweight and Robust API Gateway"></img>
+</p>
 
 <p align="center">
   <a href="https://coveralls.io/github/codefluence-x/altair?branch=master"><img src="https://coveralls.io/repos/github/codefluence-x/altair/badge.svg?branch=master" alt="Coverage Status"></a>
