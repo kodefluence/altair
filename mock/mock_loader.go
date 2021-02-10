@@ -5,8 +5,8 @@
 package mock
 
 import (
-	sql "database/sql"
 	core "github.com/codefluence-x/altair/core"
+	db "github.com/codefluence-x/monorepo/db"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 	time "time"
@@ -408,10 +408,10 @@ func (m *MockDatabaseBearer) EXPECT() *MockDatabaseBearerMockRecorder {
 }
 
 // Database mocks base method
-func (m *MockDatabaseBearer) Database(dbName string) (*sql.DB, core.DatabaseConfig, error) {
+func (m *MockDatabaseBearer) Database(dbName string) (db.DB, core.DatabaseConfig, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Database", dbName)
-	ret0, _ := ret[0].(*sql.DB)
+	ret0, _ := ret[0].(db.DB)
 	ret1, _ := ret[1].(core.DatabaseConfig)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2

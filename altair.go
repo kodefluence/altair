@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 	"os"
@@ -23,12 +22,13 @@ import (
 	"github.com/codefluence-x/altair/forwarder"
 	"github.com/codefluence-x/altair/loader"
 	"github.com/codefluence-x/altair/provider"
+	"github.com/codefluence-x/monorepo/db"
 	"github.com/spf13/cobra"
 )
 
 var (
 	dbConfigs    map[string]core.DatabaseConfig = map[string]core.DatabaseConfig{}
-	databases    map[string]*sql.DB             = map[string]*sql.DB{}
+	databases    map[string]db.DB               = map[string]db.DB{}
 	appConfig    core.AppConfig
 	pluginBearer core.PluginBearer
 	apiEngine    *gin.Engine
@@ -147,164 +147,166 @@ func executeCommand() {
 		},
 	}
 
-	migrateCmd := &cobra.Command{
-		Use:   "migrate",
-		Short: "Do a migration from current version into latest versions.",
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
-				fmt.Println("Invalid number of arguments, expected 1. Example `altair migrate [database_instance_name]`.")
-				fmt.Println("To see available database instance, use `altair config db`.")
-				return
-			}
+	// migrateCmd := &cobra.Command{
+	// 	Use:   "migrate",
+	// 	Short: "Do a migration from current version into latest versions.",
+	// 	Run: func(cmd *cobra.Command, args []string) {
+	// 		if len(args) < 1 {
+	// 			fmt.Println("Invalid number of arguments, expected 1. Example `altair migrate [database_instance_name]`.")
+	// 			fmt.Println("To see available database instance, use `altair config db`.")
+	// 			return
+	// 		}
 
-			defer closeConnection()
-			if err := fabricateConnection(); err != nil {
-				return
-			}
+	// 		defer closeConnection()
+	// 		if err := fabricateConnection(); err != nil {
+	// 			return
+	// 		}
 
-			dbBearer := loader.DatabaseBearer(databases, dbConfigs)
-			db, config, err := dbBearer.Database(args[0])
-			if err != nil {
-				log.Error().
-					Err(err).
-					Stack().
-					Array("tags", zerolog.Arr().Str("altair").Str("main")).
-					Msgf("Error loading database instance of: `%s`", args[0])
-				return
-			}
+	// 		dbBearer := loader.DatabaseBearer(databases, dbConfigs)
+	// 		db, config, err := dbBearer.Database(args[0])
+	// 		if err != nil {
+	// 			log.Error().
+	// 				Err(err).
+	// 				Stack().
+	// 				Array("tags", zerolog.Arr().Str("altair").Str("main")).
+	// 				Msgf("Error loading database instance of: `%s`", args[0])
+	// 			return
+	// 		}
 
-			migrationProvider := provider.Migration().GoMigrate(db, config)
-			migrator, err := migrationProvider.Migrator()
-			if err != nil {
-				log.Error().
-					Err(err).
-					Stack().
-					Array("tags", zerolog.Arr().Str("altair").Str("main")).
-					Msg("Error providing migrator")
-				return
-			}
-			defer migrator.Close()
+	// 		migrationProvider := provider.Migration().GoMigrate(db, config)
+	// 		migrator, err := migrationProvider.Migrator()
+	// 		if err != nil {
+	// 			log.Error().
+	// 				Err(err).
+	// 				Stack().
+	// 				Array("tags", zerolog.Arr().Str("altair").Str("main")).
+	// 				Msg("Error providing migrator")
+	// 			return
+	// 		}
+	// 		defer migrator.Close()
 
-			if err := migrator.Up(); err != nil && err.Error() != "no change" {
-				log.Error().
-					Err(err).
-					Stack().
-					Array("tags", zerolog.Arr().Str("altair").Str("main")).
-					Msg("Error doing database migration")
-				return
-			}
+	// 		if err := migrator.Up(); err != nil && err.Error() != "no change" {
+	// 			log.Error().
+	// 				Err(err).
+	// 				Stack().
+	// 				Array("tags", zerolog.Arr().Str("altair").Str("main")).
+	// 				Msg("Error doing database migration")
+	// 			return
+	// 		}
 
-			fmt.Println("Successfully migrating up databases of:", args[0])
-		},
-	}
+	// 		fmt.Println("Successfully migrating up databases of:", args[0])
+	// 	},
+	// }
 
-	migrateDownCmd := &cobra.Command{
-		Use:   "migrate:down",
-		Short: "Down the migration from current version into earliest versions.",
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
-				fmt.Println("Invalid number of arguments, expected 1. Example `altair migrate:down [database_instance_name]`.")
-				fmt.Println("To see available database instance, use `altair config db`.")
-				return
-			}
+	// migrateDownCmd := &cobra.Command{
+	// 	Use:   "migrate:down",
+	// 	Short: "Down the migration from current version into earliest versions.",
+	// 	Run: func(cmd *cobra.Command, args []string) {
+	// 		if len(args) < 1 {
+	// 			fmt.Println("Invalid number of arguments, expected 1. Example `altair migrate:down [database_instance_name]`.")
+	// 			fmt.Println("To see available database instance, use `altair config db`.")
+	// 			return
+	// 		}
 
-			defer closeConnection()
-			if err := fabricateConnection(); err != nil {
-				return
-			}
+	// 		defer closeConnection()
+	// 		if err := fabricateConnection(); err != nil {
+	// 			return
+	// 		}
 
-			dbBearer := loader.DatabaseBearer(databases, dbConfigs)
-			db, config, err := dbBearer.Database(args[0])
-			if err != nil {
-				log.Error().
-					Err(err).
-					Stack().
-					Array("tags", zerolog.Arr().Str("altair").Str("main")).
-					Msgf("Error loading database instance of: `%s`", args[0])
-				return
-			}
+	// 		dbBearer := loader.DatabaseBearer(databases, dbConfigs)
+	// 		db, config, err := dbBearer.Database(args[0])
+	// 		if err != nil {
+	// 			log.Error().
+	// 				Err(err).
+	// 				Stack().
+	// 				Array("tags", zerolog.Arr().Str("altair").Str("main")).
+	// 				Msgf("Error loading database instance of: `%s`", args[0])
+	// 			return
+	// 		}
 
-			migrationProvider := provider.Migration().GoMigrate(db, config)
-			migrator, err := migrationProvider.Migrator()
-			if err != nil {
-				log.Error().
-					Err(err).
-					Stack().
-					Array("tags", zerolog.Arr().Str("altair").Str("main")).
-					Msg("Error providing migrator")
-				return
-			}
-			defer migrator.Close()
+	// 		migrationProvider := provider.Migration().GoMigrate(db, config)
+	// 		migrator, err := migrationProvider.Migrator()
+	// 		if err != nil {
+	// 			log.Error().
+	// 				Err(err).
+	// 				Stack().
+	// 				Array("tags", zerolog.Arr().Str("altair").Str("main")).
+	// 				Msg("Error providing migrator")
+	// 			return
+	// 		}
+	// 		defer migrator.Close()
 
-			if err := migrator.Down(); err != nil && err.Error() != "no change" {
-				log.Error().
-					Err(err).
-					Stack().
-					Array("tags", zerolog.Arr().Str("altair").Str("main")).
-					Msg("Error doing database migration")
-				return
-			}
+	// 		if err := migrator.Down(); err != nil && err.Error() != "no change" {
+	// 			log.Error().
+	// 				Err(err).
+	// 				Stack().
+	// 				Array("tags", zerolog.Arr().Str("altair").Str("main")).
+	// 				Msg("Error doing database migration")
+	// 			return
+	// 		}
 
-			fmt.Println("Successfully migrating down databases of:", args[0])
-		},
-	}
+	// 		fmt.Println("Successfully migrating down databases of:", args[0])
+	// 	},
+	// }
 
-	migrateRollbackCmd := &cobra.Command{
-		Use:   "migrate:rollback",
-		Short: "Do a migration rollback from current versions into previous versions.",
-		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) < 1 {
-				fmt.Println("Invalid number of arguments, expected 1. Example `altair migrate:rollback [database_instance_name]`.")
-				fmt.Println("To see available database instance, use `altair config db`.")
-				return
-			}
+	// migrateRollbackCmd := &cobra.Command{
+	// 	Use:   "migrate:rollback",
+	// 	Short: "Do a migration rollback from current versions into previous versions.",
+	// 	Run: func(cmd *cobra.Command, args []string) {
+	// 		if len(args) < 1 {
+	// 			fmt.Println("Invalid number of arguments, expected 1. Example `altair migrate:rollback [database_instance_name]`.")
+	// 			fmt.Println("To see available database instance, use `altair config db`.")
+	// 			return
+	// 		}
 
-			defer closeConnection()
-			if err := fabricateConnection(); err != nil {
-				return
-			}
+	// 		defer closeConnection()
+	// 		if err := fabricateConnection(); err != nil {
+	// 			return
+	// 		}
 
-			dbBearer := loader.DatabaseBearer(databases, dbConfigs)
-			db, config, err := dbBearer.Database(args[0])
-			if err != nil {
-				log.Error().
-					Err(err).
-					Stack().
-					Array("tags", zerolog.Arr().Str("altair").Str("main")).
-					Msgf("Error loading database instance of: `%s`", args[0])
-				return
-			}
+	// 		dbBearer := loader.DatabaseBearer(databases, dbConfigs)
+	// 		db, config, err := dbBearer.Database(args[0])
+	// 		if err != nil {
+	// 			log.Error().
+	// 				Err(err).
+	// 				Stack().
+	// 				Array("tags", zerolog.Arr().Str("altair").Str("main")).
+	// 				Msgf("Error loading database instance of: `%s`", args[0])
+	// 			return
+	// 		}
 
-			migrationProvider := provider.Migration().GoMigrate(db, config)
-			migrator, err := migrationProvider.Migrator()
-			if err != nil {
-				log.Error().
-					Err(err).
-					Stack().
-					Array("tags", zerolog.Arr().Str("altair").Str("main")).
-					Msg("Error providing migrator")
-				return
-			}
-			defer migrator.Close()
+	// 		migrationProvider := provider.Migration().GoMigrate(db, config)
+	// 		migrator, err := migrationProvider.Migrator()
+	// 		if err != nil {
+	// 			log.Error().
+	// 				Err(err).
+	// 				Stack().
+	// 				Array("tags", zerolog.Arr().Str("altair").Str("main")).
+	// 				Msg("Error providing migrator")
+	// 			return
+	// 		}
+	// 		defer migrator.Close()
 
-			if err := migrator.Steps(-1); err != nil && err.Error() != "no change" {
-				log.Error().
-					Err(err).
-					Stack().
-					Array("tags", zerolog.Arr().Str("altair").Str("main")).
-					Msg("Error doing database migration")
-				return
-			}
+	// 		if err := migrator.Steps(-1); err != nil && err.Error() != "no change" {
+	// 			log.Error().
+	// 				Err(err).
+	// 				Stack().
+	// 				Array("tags", zerolog.Arr().Str("altair").Str("main")).
+	// 				Msg("Error doing database migration")
+	// 			return
+	// 		}
 
-			fmt.Println("Successfully rolback database migration of:", args[0])
-		},
-	}
+	// 		fmt.Println("Successfully rolback database migration of:", args[0])
+	// 	},
+	// }
 
-	rootCmd.AddCommand(runCmd, migrateCmd, migrateDownCmd, migrateRollbackCmd, configCmd)
+	// rootCmd.AddCommand(runCmd, migrateCmd, migrateDownCmd, migrateRollbackCmd, configCmd)
+
+	rootCmd.AddCommand(runCmd, configCmd)
 	_ = rootCmd.Execute()
 }
 
-func dbConnectionFabricator(dbConfig core.DatabaseConfig) (*sql.DB, error) {
+func dbConnectionFabricator(instanceName string, dbConfig core.DatabaseConfig) (db.DB, error) {
 	port, err := dbConfig.DBPort()
 	if err != nil {
 		return nil, err
@@ -315,20 +317,35 @@ func dbConnectionFabricator(dbConfig core.DatabaseConfig) (*sql.DB, error) {
 		return nil, err
 	}
 
-	db, err := sql.Open(dbConfig.Driver(), fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&interpolateParams=true", dbConfig.DBUsername(), dbConfig.DBPassword(), dbConfig.DBHost(), port, dbConfig.DBDatabase()))
+	maxIdleConn, err := dbConfig.DBMaxIddleConn()
 	if err != nil {
 		return nil, err
 	}
 
-	db.SetConnMaxLifetime(maxConnLifetime)
+	maxOpenConn, err := dbConfig.DBMaxOpenConn()
+	if err != nil {
+		return nil, err
+	}
+
+	sqldb, err := db.FabricateMySQL(instanceName, db.Config{
+		Username: dbConfig.DBUsername(),
+		Password: dbConfig.DBPassword(),
+		Host:     dbConfig.DBHost(),
+		Port:     fmt.Sprintf("%d", port),
+		Name:     dbConfig.DBDatabase(),
+	}, db.WithConnMaxLifetime(maxConnLifetime), db.WithMaxIdleConn(maxIdleConn), db.WithMaxOpenConn(maxOpenConn))
+	if err != nil {
+		return nil, err
+	}
 
 	log.Info().Msg(fmt.Sprintf("Complete fabricating mysql writer connection: %s:%s@tcp(%s:%d)/%s?", dbConfig.DBUsername(), "***********", dbConfig.DBHost(), port, dbConfig.DBDatabase()))
-	return db, nil
+
+	return sqldb, nil
 }
 
 func fabricateConnection() error {
 	for key, config := range dbConfigs {
-		sqlDB, err := dbConnectionFabricator(config)
+		sqlDB, err := dbConnectionFabricator(key, config)
 		if err != nil {
 			return err
 		}
@@ -340,30 +357,14 @@ func fabricateConnection() error {
 }
 
 func closeConnection() {
-	for dbName, db := range databases {
-		var err error
-
-		for i := 0; i < 3; i++ {
-			err = db.Close()
-			if err != nil {
-				log.Error().
-					Err(err).
-					Stack().
-					Array("tags", zerolog.Arr().Str("altair").Str("main").Str(dbName)).
-					Msg("Error closing mysql writer")
-				continue
-			}
-
-			if err == nil {
-				break
-			}
-		}
-		if err != nil {
-			log.Warn().Array("tags", zerolog.Arr().Str("altair").Str("main").Str(dbName)).Msg("Failed closing mysql writer and reader connection.")
-			return
-		}
-
-		log.Info().Array("tags", zerolog.Arr().Str("altair").Str("main").Str(dbName)).Msg("Success closing mysql writer and reader connection.")
+	excs := db.CloseAll()
+	for _, exc := range excs {
+		log.Error().
+			Err(exc).
+			Stack().
+			Str("detail", exc.Detail()).
+			Array("tags", zerolog.Arr().Str("altair").Str("main").Str(exc.Title())).
+			Msg("Error closing mysql writer")
 	}
 }
 

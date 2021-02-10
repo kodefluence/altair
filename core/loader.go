@@ -1,8 +1,9 @@
 package core
 
 import (
-	"database/sql"
 	"time"
+
+	"github.com/codefluence-x/monorepo/db"
 )
 
 type AppLoader interface {
@@ -39,7 +40,7 @@ type DatabaseConfig interface {
 }
 
 type DatabaseBearer interface {
-	Database(dbName string) (*sql.DB, DatabaseConfig, error)
+	Database(dbName string) (db.DB, DatabaseConfig, error)
 }
 
 type AppConfig interface {
