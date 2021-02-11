@@ -55,24 +55,24 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 
 	// Model
 	oauthApplicationModel := model.NewOauthApplication()
-	// oauthAccessTokenModel := model.NewOauthAccessToken(db)
-	// oauthAccessGrantModel := model.NewOauthAccessGrant(db)
-	// oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
+	oauthAccessTokenModel := model.NewOauthAccessToken()
+	oauthAccessGrantModel := model.NewOauthAccessGrant()
+	oauthRefreshTokenModel := model.NewOauthRefreshToken()
 
 	// // Formatter
 	oauthApplicationFormatter := formatter.OauthApplication()
 	oauthModelFormatter := formatter.NewModel(accessTokenTimeout, authorizationCodeTimeout, refreshTokenConfig.Timeout)
-	// oauthFormatter := formatter.Oauth()
+	oauthFormatter := formatter.Oauth()
 
 	// Validator
 	oauthValidator := validator.NewOauth(refreshTokenConfig.Active)
 
 	// Service
 	applicationManager := service.NewApplicationManager(oauthApplicationFormatter, oauthModelFormatter, oauthApplicationModel, oauthValidator, db)
-	// authorization := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, oauthModelFormatter, oauthValidator, oauthFormatter, refreshTokenConfig.Active)
+	authorization := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, oauthModelFormatter, oauthValidator, oauthFormatter, refreshTokenConfig.Active, db)
 
 	// DownStreamPlugin
-	// oauthDownStream := downstream.NewOauth(oauthAccessTokenModel)
+	oauthDownStream := downstream.NewOauth(oauthAccessTokenModel, db)
 	applicationValidationDownStream := downstream.NewApplicationValidation(oauthApplicationModel, db)
 
 	// Controller of /oauth/applications
@@ -82,13 +82,13 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 	appBearer.InjectController(applicationControllerDispatcher.Create(applicationManager))
 	appBearer.InjectController(applicationControllerDispatcher.Update(applicationManager))
 
-	// // Controller of /oauth/authorizations
-	// authorizationControllerDispatcher := controller.NewAuthorization()
-	// appBearer.InjectController(authorizationControllerDispatcher.Grant(authorization))
-	// appBearer.InjectController(authorizationControllerDispatcher.Revoke(authorization))
-	// appBearer.InjectController(authorizationControllerDispatcher.Token(authorization))
+	// Controller of /oauth/authorizations
+	authorizationControllerDispatcher := controller.NewAuthorization()
+	appBearer.InjectController(authorizationControllerDispatcher.Grant(authorization))
+	appBearer.InjectController(authorizationControllerDispatcher.Revoke(authorization))
+	appBearer.InjectController(authorizationControllerDispatcher.Token(authorization))
 
-	// appBearer.InjectDownStreamPlugin(oauthDownStream)
+	appBearer.InjectDownStreamPlugin(oauthDownStream)
 	appBearer.InjectDownStreamPlugin(applicationValidationDownStream)
 
 	return nil

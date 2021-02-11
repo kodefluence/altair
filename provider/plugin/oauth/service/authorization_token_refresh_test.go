@@ -15,7 +15,10 @@ import (
 	"github.com/codefluence-x/altair/provider/plugin/oauth/service"
 	"github.com/codefluence-x/altair/util"
 	"github.com/codefluence-x/aurelia"
+	"github.com/codefluence-x/monorepo/db"
 	mockdb "github.com/codefluence-x/monorepo/db/mock"
+	"github.com/codefluence-x/monorepo/exception"
+	"github.com/codefluence-x/monorepo/kontext"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
@@ -109,21 +112,21 @@ func TestAuthorizationRefreshToken(t *testing.T) {
 							OneByUIDandSecret(gomock.Any(), *accessTokenRequest.ClientUID, *accessTokenRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateTokenGrant(ctx, accessTokenRequest).Return(nil),
-						oauthRefreshTokenModel.EXPECT().OneByToken(ctx, *accessTokenRequest.RefreshToken).Return(oauthRefreshToken, nil),
+						oauthRefreshTokenModel.EXPECT().OneByToken(gomock.Any(), *accessTokenRequest.RefreshToken, sqldb).Return(oauthRefreshToken, nil),
 						oauthValidator.EXPECT().ValidateTokenRefreshToken(ctx, oauthRefreshToken).Return(nil),
-						oauthAccessTokenModel.EXPECT().One(ctx, oauthRefreshToken.OauthAccessTokenID).Return(oldAccessToken, nil),
-						oauthAccessTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthAccessTokenInsertable) (int, error) {
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), oauthRefreshToken.OauthAccessTokenID, sqldb).Return(oldAccessToken, nil),
+						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), sqldb).DoAndReturn(func(ktx kontext.Context, insertable entity.OauthAccessTokenInsertable, tx db.TX) (int, error) {
 							assert.Equal(t, oauthAccessTokenInsertable.ResourceOwnerID, insertable.ResourceOwnerID)
 							assert.Equal(t, oauthAccessTokenInsertable.OauthApplicationID, insertable.OauthApplicationID)
 							return 1000, nil
 						}),
-						oauthAccessTokenModel.EXPECT().One(ctx, 1000).Return(oauthAccessToken, nil),
-						oauthRefreshTokenModel.EXPECT().Revoke(ctx, oauthRefreshToken.Token).Return(nil),
-						oauthRefreshTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthRefreshTokenInsertable) (int, error) {
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), 1000, sqldb).Return(oauthAccessToken, nil),
+						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), oauthRefreshToken.Token, sqldb).Return(nil),
+						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(func(ktx kontext.Context, insertable entity.OauthRefreshTokenInsertable, tx db.TX) (int, error) {
 							assert.Equal(t, oauthRefreshTokenInsertable.OauthAccessTokenID, insertable.OauthAccessTokenID)
 							return 2, nil
 						}),
-						oauthRefreshTokenModel.EXPECT().One(ctx, 2).Return(newOauthRefreshToken, nil),
+						oauthRefreshTokenModel.EXPECT().One(gomock.Any(), 2, sqldb).Return(newOauthRefreshToken, nil),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true, sqldb)
@@ -180,13 +183,13 @@ func TestAuthorizationRefreshToken(t *testing.T) {
 							OneByUIDandSecret(gomock.Any(), *accessTokenRequest.ClientUID, *accessTokenRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateTokenGrant(ctx, accessTokenRequest).Return(nil),
-						oauthRefreshTokenModel.EXPECT().OneByToken(gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().OneByToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 						oauthValidator.EXPECT().ValidateTokenRefreshToken(gomock.Any(), gomock.Any()).Times(0),
-						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
-						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
-						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
-						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
-						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, false, sqldb)
@@ -247,13 +250,13 @@ func TestAuthorizationRefreshToken(t *testing.T) {
 							OneByUIDandSecret(gomock.Any(), *accessTokenRequest.ClientUID, *accessTokenRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateTokenGrant(ctx, accessTokenRequest).Return(nil),
-						oauthRefreshTokenModel.EXPECT().OneByToken(ctx, *accessTokenRequest.RefreshToken).Return(entity.OauthRefreshToken{}, sql.ErrNoRows),
+						oauthRefreshTokenModel.EXPECT().OneByToken(gomock.Any(), *accessTokenRequest.RefreshToken, sqldb).Return(entity.OauthRefreshToken{}, exception.Throw(sql.ErrNoRows, exception.WithType(exception.NotFound))),
 						oauthValidator.EXPECT().ValidateTokenRefreshToken(gomock.Any(), gomock.Any()).Times(0),
-						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
-						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
-						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
-						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
-						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true, sqldb)
@@ -314,13 +317,13 @@ func TestAuthorizationRefreshToken(t *testing.T) {
 							OneByUIDandSecret(gomock.Any(), *accessTokenRequest.ClientUID, *accessTokenRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateTokenGrant(ctx, accessTokenRequest).Return(nil),
-						oauthRefreshTokenModel.EXPECT().OneByToken(ctx, *accessTokenRequest.RefreshToken).Return(entity.OauthRefreshToken{}, errors.New("unexpected error")),
+						oauthRefreshTokenModel.EXPECT().OneByToken(gomock.Any(), *accessTokenRequest.RefreshToken, sqldb).Return(entity.OauthRefreshToken{}, exception.Throw(errors.New("unexpected error"))),
 						oauthValidator.EXPECT().ValidateTokenRefreshToken(gomock.Any(), gomock.Any()).Times(0),
-						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
-						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
-						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
-						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
-						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true, sqldb)
@@ -396,13 +399,13 @@ func TestAuthorizationRefreshToken(t *testing.T) {
 							OneByUIDandSecret(gomock.Any(), *accessTokenRequest.ClientUID, *accessTokenRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateTokenGrant(ctx, accessTokenRequest).Return(nil),
-						oauthRefreshTokenModel.EXPECT().OneByToken(ctx, *accessTokenRequest.RefreshToken).Return(oauthRefreshToken, nil),
+						oauthRefreshTokenModel.EXPECT().OneByToken(gomock.Any(), *accessTokenRequest.RefreshToken, sqldb).Return(oauthRefreshToken, nil),
 						oauthValidator.EXPECT().ValidateTokenRefreshToken(ctx, oauthRefreshToken).Return(expectedError),
-						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
-						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
-						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
-						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
-						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true, sqldb)
@@ -468,13 +471,13 @@ func TestAuthorizationRefreshToken(t *testing.T) {
 							OneByUIDandSecret(gomock.Any(), *accessTokenRequest.ClientUID, *accessTokenRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateTokenGrant(ctx, accessTokenRequest).Return(nil),
-						oauthRefreshTokenModel.EXPECT().OneByToken(ctx, *accessTokenRequest.RefreshToken).Return(oauthRefreshToken, nil),
+						oauthRefreshTokenModel.EXPECT().OneByToken(gomock.Any(), *accessTokenRequest.RefreshToken, sqldb).Return(oauthRefreshToken, nil),
 						oauthValidator.EXPECT().ValidateTokenRefreshToken(ctx, oauthRefreshToken).Return(nil),
-						oauthAccessTokenModel.EXPECT().One(ctx, oauthRefreshToken.OauthAccessTokenID).Return(entity.OauthAccessToken{}, errors.New("Unexpected error")),
-						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
-						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
-						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
-						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), oauthRefreshToken.OauthAccessTokenID, sqldb).Return(entity.OauthAccessToken{}, exception.Throw(errors.New("Unexpected error"))),
+						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true, sqldb)
@@ -545,13 +548,13 @@ func TestAuthorizationRefreshToken(t *testing.T) {
 							OneByUIDandSecret(gomock.Any(), *accessTokenRequest.ClientUID, *accessTokenRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateTokenGrant(ctx, accessTokenRequest).Return(nil),
-						oauthRefreshTokenModel.EXPECT().OneByToken(ctx, *accessTokenRequest.RefreshToken).Return(oauthRefreshToken, nil),
+						oauthRefreshTokenModel.EXPECT().OneByToken(gomock.Any(), *accessTokenRequest.RefreshToken, sqldb).Return(oauthRefreshToken, nil),
 						oauthValidator.EXPECT().ValidateTokenRefreshToken(ctx, oauthRefreshToken).Return(nil),
-						oauthAccessTokenModel.EXPECT().One(ctx, oauthRefreshToken.OauthAccessTokenID).Return(entity.OauthAccessToken{}, sql.ErrNoRows),
-						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
-						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
-						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
-						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), oauthRefreshToken.OauthAccessTokenID, sqldb).Return(entity.OauthAccessToken{}, exception.Throw(sql.ErrNoRows, exception.WithType(exception.NotFound))),
+						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true, sqldb)
@@ -622,13 +625,13 @@ func TestAuthorizationRefreshToken(t *testing.T) {
 							OneByUIDandSecret(gomock.Any(), *accessTokenRequest.ClientUID, *accessTokenRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateTokenGrant(ctx, accessTokenRequest).Return(nil),
-						oauthRefreshTokenModel.EXPECT().OneByToken(ctx, *accessTokenRequest.RefreshToken).Return(oauthRefreshToken, nil),
+						oauthRefreshTokenModel.EXPECT().OneByToken(gomock.Any(), *accessTokenRequest.RefreshToken, sqldb).Return(oauthRefreshToken, nil),
 						oauthValidator.EXPECT().ValidateTokenRefreshToken(ctx, oauthRefreshToken).Return(nil),
-						oauthAccessTokenModel.EXPECT().One(ctx, oauthRefreshToken.OauthAccessTokenID).Return(oldAccessToken, nil),
-						oauthAccessTokenModel.EXPECT().Create(ctx, gomock.Any()).Return(0, errors.New("unexpected error")),
-						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
-						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
-						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), oauthRefreshToken.OauthAccessTokenID, sqldb).Return(oldAccessToken, nil),
+						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), sqldb).Return(0, exception.Throw(errors.New("unexpected error"))),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true, sqldb)
@@ -701,17 +704,17 @@ func TestAuthorizationRefreshToken(t *testing.T) {
 							OneByUIDandSecret(gomock.Any(), *accessTokenRequest.ClientUID, *accessTokenRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateTokenGrant(ctx, accessTokenRequest).Return(nil),
-						oauthRefreshTokenModel.EXPECT().OneByToken(ctx, *accessTokenRequest.RefreshToken).Return(oauthRefreshToken, nil),
+						oauthRefreshTokenModel.EXPECT().OneByToken(gomock.Any(), *accessTokenRequest.RefreshToken, sqldb).Return(oauthRefreshToken, nil),
 						oauthValidator.EXPECT().ValidateTokenRefreshToken(ctx, oauthRefreshToken).Return(nil),
-						oauthAccessTokenModel.EXPECT().One(ctx, oauthRefreshToken.OauthAccessTokenID).Return(oldAccessToken, nil),
-						oauthAccessTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthAccessTokenInsertable) (int, error) {
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), oauthRefreshToken.OauthAccessTokenID, sqldb).Return(oldAccessToken, nil),
+						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), sqldb).DoAndReturn(func(ktx kontext.Context, insertable entity.OauthAccessTokenInsertable, tx db.TX) (int, error) {
 							assert.Equal(t, oauthAccessTokenInsertable.ResourceOwnerID, insertable.ResourceOwnerID)
 							assert.Equal(t, oauthAccessTokenInsertable.OauthApplicationID, insertable.OauthApplicationID)
 							return 1000, nil
 						}),
-						oauthAccessTokenModel.EXPECT().One(ctx, 1000).Return(entity.OauthAccessToken{}, errors.New("unexpected error")),
-						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any()).Times(0),
-						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), 1000, sqldb).Return(entity.OauthAccessToken{}, exception.Throw(errors.New("unexpected error"))),
+						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true, sqldb)
@@ -807,21 +810,21 @@ func TestAuthorizationRefreshToken(t *testing.T) {
 							OneByUIDandSecret(gomock.Any(), *accessTokenRequest.ClientUID, *accessTokenRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateTokenGrant(ctx, accessTokenRequest).Return(nil),
-						oauthRefreshTokenModel.EXPECT().OneByToken(ctx, *accessTokenRequest.RefreshToken).Return(oauthRefreshToken, nil),
+						oauthRefreshTokenModel.EXPECT().OneByToken(gomock.Any(), *accessTokenRequest.RefreshToken, sqldb).Return(oauthRefreshToken, nil),
 						oauthValidator.EXPECT().ValidateTokenRefreshToken(ctx, oauthRefreshToken).Return(nil),
-						oauthAccessTokenModel.EXPECT().One(ctx, oauthRefreshToken.OauthAccessTokenID).Return(oldAccessToken, nil),
-						oauthAccessTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthAccessTokenInsertable) (int, error) {
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), oauthRefreshToken.OauthAccessTokenID, sqldb).Return(oldAccessToken, nil),
+						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), sqldb).DoAndReturn(func(ktx kontext.Context, insertable entity.OauthAccessTokenInsertable, tx db.TX) (int, error) {
 							assert.Equal(t, oauthAccessTokenInsertable.ResourceOwnerID, insertable.ResourceOwnerID)
 							assert.Equal(t, oauthAccessTokenInsertable.OauthApplicationID, insertable.OauthApplicationID)
 							return 1000, nil
 						}),
-						oauthAccessTokenModel.EXPECT().One(ctx, 1000).Return(oauthAccessToken, nil),
-						oauthRefreshTokenModel.EXPECT().Revoke(ctx, oauthRefreshToken.Token).Return(errors.New("unexpected error")),
-						oauthRefreshTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthRefreshTokenInsertable) (int, error) {
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), 1000, sqldb).Return(oauthAccessToken, nil),
+						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), oauthRefreshToken.Token, sqldb).Return(exception.Throw(errors.New("unexpected error"))),
+						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(func(ktx kontext.Context, insertable entity.OauthRefreshTokenInsertable, tx db.TX) (int, error) {
 							assert.Equal(t, oauthRefreshTokenInsertable.OauthAccessTokenID, insertable.OauthAccessTokenID)
 							return 2, nil
 						}),
-						oauthRefreshTokenModel.EXPECT().One(ctx, 2).Return(newOauthRefreshToken, nil),
+						oauthRefreshTokenModel.EXPECT().One(gomock.Any(), 2, sqldb).Return(newOauthRefreshToken, nil),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true, sqldb)
@@ -903,17 +906,17 @@ func TestAuthorizationRefreshToken(t *testing.T) {
 							OneByUIDandSecret(gomock.Any(), *accessTokenRequest.ClientUID, *accessTokenRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateTokenGrant(ctx, accessTokenRequest).Return(nil),
-						oauthRefreshTokenModel.EXPECT().OneByToken(ctx, *accessTokenRequest.RefreshToken).Return(oauthRefreshToken, nil),
+						oauthRefreshTokenModel.EXPECT().OneByToken(gomock.Any(), *accessTokenRequest.RefreshToken, sqldb).Return(oauthRefreshToken, nil),
 						oauthValidator.EXPECT().ValidateTokenRefreshToken(ctx, oauthRefreshToken).Return(nil),
-						oauthAccessTokenModel.EXPECT().One(ctx, oauthRefreshToken.OauthAccessTokenID).Return(oldAccessToken, nil),
-						oauthAccessTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthAccessTokenInsertable) (int, error) {
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), oauthRefreshToken.OauthAccessTokenID, sqldb).Return(oldAccessToken, nil),
+						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), sqldb).DoAndReturn(func(ktx kontext.Context, insertable entity.OauthAccessTokenInsertable, tx db.TX) (int, error) {
 							assert.Equal(t, oauthAccessTokenInsertable.ResourceOwnerID, insertable.ResourceOwnerID)
 							assert.Equal(t, oauthAccessTokenInsertable.OauthApplicationID, insertable.OauthApplicationID)
 							return 1000, nil
 						}),
-						oauthAccessTokenModel.EXPECT().One(ctx, 1000).Return(oauthAccessToken, nil),
-						oauthRefreshTokenModel.EXPECT().Revoke(ctx, oauthRefreshToken.Token).Return(nil),
-						oauthRefreshTokenModel.EXPECT().Create(ctx, gomock.Any()).Return(0, errors.New("unexpected error")),
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), 1000, sqldb).Return(oauthAccessToken, nil),
+						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), oauthRefreshToken.Token, sqldb).Return(nil),
+						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Return(0, exception.Throw(errors.New("unexpected error"))),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true, sqldb)
@@ -1000,21 +1003,21 @@ func TestAuthorizationRefreshToken(t *testing.T) {
 							OneByUIDandSecret(gomock.Any(), *accessTokenRequest.ClientUID, *accessTokenRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateTokenGrant(ctx, accessTokenRequest).Return(nil),
-						oauthRefreshTokenModel.EXPECT().OneByToken(ctx, *accessTokenRequest.RefreshToken).Return(oauthRefreshToken, nil),
+						oauthRefreshTokenModel.EXPECT().OneByToken(gomock.Any(), *accessTokenRequest.RefreshToken, sqldb).Return(oauthRefreshToken, nil),
 						oauthValidator.EXPECT().ValidateTokenRefreshToken(ctx, oauthRefreshToken).Return(nil),
-						oauthAccessTokenModel.EXPECT().One(ctx, oauthRefreshToken.OauthAccessTokenID).Return(oldAccessToken, nil),
-						oauthAccessTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthAccessTokenInsertable) (int, error) {
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), oauthRefreshToken.OauthAccessTokenID, sqldb).Return(oldAccessToken, nil),
+						oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), sqldb).DoAndReturn(func(ktx kontext.Context, insertable entity.OauthAccessTokenInsertable, tx db.TX) (int, error) {
 							assert.Equal(t, oauthAccessTokenInsertable.ResourceOwnerID, insertable.ResourceOwnerID)
 							assert.Equal(t, oauthAccessTokenInsertable.OauthApplicationID, insertable.OauthApplicationID)
 							return 1000, nil
 						}),
-						oauthAccessTokenModel.EXPECT().One(ctx, 1000).Return(oauthAccessToken, nil),
-						oauthRefreshTokenModel.EXPECT().Revoke(ctx, oauthRefreshToken.Token).Return(nil),
-						oauthRefreshTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthRefreshTokenInsertable) (int, error) {
+						oauthAccessTokenModel.EXPECT().One(gomock.Any(), 1000, sqldb).Return(oauthAccessToken, nil),
+						oauthRefreshTokenModel.EXPECT().Revoke(gomock.Any(), oauthRefreshToken.Token, sqldb).Return(nil),
+						oauthRefreshTokenModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(func(ktx kontext.Context, insertable entity.OauthRefreshTokenInsertable, tx db.TX) (int, error) {
 							assert.Equal(t, oauthRefreshTokenInsertable.OauthAccessTokenID, insertable.OauthAccessTokenID)
 							return 2, nil
 						}),
-						oauthRefreshTokenModel.EXPECT().One(ctx, 2).Return(entity.OauthRefreshToken{}, errors.New("unexpected error")),
+						oauthRefreshTokenModel.EXPECT().One(gomock.Any(), 2, sqldb).Return(entity.OauthRefreshToken{}, exception.Throw(errors.New("unexpected error"))),
 					)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true, sqldb)

@@ -11,6 +11,8 @@ import (
 
 	coreEntity "github.com/codefluence-x/altair/entity"
 	coreMock "github.com/codefluence-x/altair/mock"
+	mockdb "github.com/codefluence-x/monorepo/db/mock"
+	"github.com/codefluence-x/monorepo/exception"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/downstream"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
@@ -26,10 +28,12 @@ func TestOauth(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	sqldb := mockdb.NewMockDB(mockCtrl)
+
 	t.Run("Name", func(t *testing.T) {
 		t.Run("Return oauth-plugin", func(t *testing.T) {
 			oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
-			oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
+			oauthPlugin := downstream.NewOauth(oauthAccessTokenModel, sqldb)
 			assert.Equal(t, "oauth-plugin", oauthPlugin.Name())
 		})
 	})
@@ -64,9 +68,9 @@ func TestOauth(t *testing.T) {
 					}
 
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
-					oauthAccessTokenModel.EXPECT().OneByToken(c, token).Return(entityAccessToken, nil)
+					oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), token, sqldb).Return(entityAccessToken, nil)
 
-					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
+					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel, sqldb)
 
 					err := oauthPlugin.Intervene(c, r, routePath)
 
@@ -104,9 +108,9 @@ func TestOauth(t *testing.T) {
 					}
 
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
-					oauthAccessTokenModel.EXPECT().OneByToken(c, token).Return(entityAccessToken, nil)
+					oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), token, sqldb).Return(entityAccessToken, nil)
 
-					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
+					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel, sqldb)
 
 					err := oauthPlugin.Intervene(c, r, routePath)
 
@@ -131,9 +135,9 @@ func TestOauth(t *testing.T) {
 					routePath := coreEntity.RouterPath{Auth: "none"}
 
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
-					oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), gomock.Any()).Times(0)
+					oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
+					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel, sqldb)
 
 					err := oauthPlugin.Intervene(c, r, routePath)
 
@@ -164,9 +168,9 @@ func TestOauth(t *testing.T) {
 						routePath := coreEntity.RouterPath{Auth: "oauth"}
 
 						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
-						oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), gomock.Any()).Times(0)
+						oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-						oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
+						oauthPlugin := downstream.NewOauth(oauthAccessTokenModel, sqldb)
 
 						err := oauthPlugin.Intervene(c, r, routePath)
 
@@ -196,9 +200,9 @@ func TestOauth(t *testing.T) {
 						routePath := coreEntity.RouterPath{Auth: "oauth"}
 
 						oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
-						oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), gomock.Any()).Times(0)
+						oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-						oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
+						oauthPlugin := downstream.NewOauth(oauthAccessTokenModel, sqldb)
 
 						err := oauthPlugin.Intervene(c, r, routePath)
 
@@ -229,9 +233,9 @@ func TestOauth(t *testing.T) {
 					routePath := coreEntity.RouterPath{Auth: "oauth"}
 
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
-					oauthAccessTokenModel.EXPECT().OneByToken(c, token).Return(entity.OauthAccessToken{}, sql.ErrNoRows)
+					oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), token, sqldb).Return(entity.OauthAccessToken{}, exception.Throw(sql.ErrNoRows, exception.WithType(exception.NotFound)))
 
-					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
+					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel, sqldb)
 
 					err := oauthPlugin.Intervene(c, r, routePath)
 
@@ -262,9 +266,9 @@ func TestOauth(t *testing.T) {
 					routePath := coreEntity.RouterPath{Auth: "oauth"}
 
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
-					oauthAccessTokenModel.EXPECT().OneByToken(c, token).Return(entity.OauthAccessToken{}, errors.New("unexpected error"))
+					oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), token, sqldb).Return(entity.OauthAccessToken{}, exception.Throw(errors.New("unexpected error")))
 
-					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
+					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel, sqldb)
 
 					err := oauthPlugin.Intervene(c, r, routePath)
 
@@ -308,9 +312,9 @@ func TestOauth(t *testing.T) {
 					}
 
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
-					oauthAccessTokenModel.EXPECT().OneByToken(c, token).Return(entityAccessToken, nil)
+					oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), token, sqldb).Return(entityAccessToken, nil)
 
-					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
+					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel, sqldb)
 
 					err := oauthPlugin.Intervene(c, r, routePath)
 
@@ -354,9 +358,9 @@ func TestOauth(t *testing.T) {
 					}
 
 					oauthAccessTokenModel := mock.NewMockOauthAccessTokenModel(mockCtrl)
-					oauthAccessTokenModel.EXPECT().OneByToken(c, token).Return(entityAccessToken, nil)
+					oauthAccessTokenModel.EXPECT().OneByToken(gomock.Any(), token, sqldb).Return(entityAccessToken, nil)
 
-					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel)
+					oauthPlugin := downstream.NewOauth(oauthAccessTokenModel, sqldb)
 
 					err := oauthPlugin.Intervene(c, r, routePath)
 
