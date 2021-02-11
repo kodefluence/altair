@@ -73,7 +73,7 @@ func (*OauthApplication) One(ktx kontext.Context, ID int, tx db.TX) (entity.Oaut
 	ctxWithTimeout, cf := context.WithTimeout(ktx.Ctx(), time.Second*10)
 	defer cf()
 
-	row := tx.QueryRowContext(kontext.Fabricate(kontext.WithDefaultContext(ctxWithTimeout)), "oauth-application-one", query.SelectOneOauthApplication)
+	row := tx.QueryRowContext(kontext.Fabricate(kontext.WithDefaultContext(ctxWithTimeout)), "oauth-application-one", query.SelectOneOauthApplication, ID)
 	if err := row.Scan(
 		&data.ID, &data.OwnerID, &data.OwnerType, &data.Description,
 		&data.Scopes, &data.ClientUID, &data.ClientSecret,

@@ -188,7 +188,7 @@ func TestOauthApplication(t *testing.T) {
 					OwnerType: "confidential",
 				}
 
-				sqldb.EXPECT().QueryRowContext(gomock.Any(), "oauth-application-one", query.SelectOneOauthApplication).Return(row)
+				sqldb.EXPECT().QueryRowContext(gomock.Any(), "oauth-application-one", query.SelectOneOauthApplication, expectedData.ID).Return(row)
 				row.EXPECT().Scan(gomock.Any()).DoAndReturn(func(dest ...interface{}) exception.Exception {
 					val0, _ := dest[0].(*int)
 					*val0 = expectedData.ID
@@ -210,7 +210,7 @@ func TestOauthApplication(t *testing.T) {
 
 				expectedData := entity.OauthApplication{}
 
-				sqldb.EXPECT().QueryRowContext(gomock.Any(), "oauth-application-one", query.SelectOneOauthApplication).Return(row)
+				sqldb.EXPECT().QueryRowContext(gomock.Any(), "oauth-application-one", query.SelectOneOauthApplication, expectedData.ID).Return(row)
 				row.EXPECT().Scan(gomock.Any()).DoAndReturn(func(dest ...interface{}) exception.Exception {
 					return exception.Throw(errors.New("unexpected error"))
 				})
