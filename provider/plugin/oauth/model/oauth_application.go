@@ -2,167 +2,125 @@ package model
 
 import (
 	"context"
-	"database/sql"
 	"time"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/query"
+	"github.com/codefluence-x/monorepo/db"
+	"github.com/codefluence-x/monorepo/exception"
+	"github.com/codefluence-x/monorepo/kontext"
 )
 
+// OauthApplication handle all database operation of `oauth_applications` table
 type OauthApplication struct {
-	db *sql.DB
 }
 
-func NewOauthApplication(db *sql.DB) *OauthApplication {
-	return &OauthApplication{
-		db: db,
-	}
+// NewOauthApplication create new OauthApplication struct with db.DB
+func NewOauthApplication() *OauthApplication {
+	return &OauthApplication{}
 }
 
-func (oa *OauthApplication) Name() string {
-	return "oauth-application-model"
-}
-
-func (oa *OauthApplication) Paginate(ctx context.Context, offset, limit int) ([]entity.OauthApplication, error) {
+// Paginate oauth_applications data
+func (*OauthApplication) Paginate(ktx kontext.Context, offset, limit int, tx db.TX) ([]entity.OauthApplication, exception.Exception) {
 	var OauthApplications []entity.OauthApplication
 
-	err := monitor(ctx, oa.Name(), query.PaginateOauthApplication, func() error {
+	ctxWithTimeout, cf := context.WithTimeout(ktx.Ctx(), time.Second*10)
+	defer cf()
 
-		ctxWithTimeout, cf := context.WithTimeout(ctx, time.Second*10)
-		defer cf()
+	rows, err := tx.QueryContext(kontext.Fabricate(kontext.WithDefaultContext(ctxWithTimeout)), "oauth-application-paginate", query.PaginateOauthApplication, offset, limit)
+	if err != nil {
+		return OauthApplications, err
+	}
+	defer rows.Close()
 
-		rows, err := oa.db.QueryContext(ctxWithTimeout, query.PaginateOauthApplication, offset, limit)
+	for rows.Next() {
+		var OauthApplication entity.OauthApplication
+
+		err := rows.Scan(
+			&OauthApplication.ID, &OauthApplication.OwnerID, &OauthApplication.OwnerType, &OauthApplication.Description,
+			&OauthApplication.Scopes, &OauthApplication.ClientUID, &OauthApplication.ClientSecret,
+			&OauthApplication.RevokedAt, &OauthApplication.CreatedAt, &OauthApplication.UpdatedAt,
+		)
 		if err != nil {
-			return err
-		}
-		defer rows.Close()
-
-		for rows.Next() {
-			var OauthApplication entity.OauthApplication
-
-			err := rows.Scan(
-				&OauthApplication.ID, &OauthApplication.OwnerID, &OauthApplication.OwnerType, &OauthApplication.Description,
-				&OauthApplication.Scopes, &OauthApplication.ClientUID, &OauthApplication.ClientSecret,
-				&OauthApplication.RevokedAt, &OauthApplication.CreatedAt, &OauthApplication.UpdatedAt,
-			)
-			if err != nil {
-				return err
-			}
-
-			OauthApplications = append(OauthApplications, OauthApplication)
+			return OauthApplications, err
 		}
 
-		return rows.Err()
-	})
+		OauthApplications = append(OauthApplications, OauthApplication)
+	}
 
-	return OauthApplications, err
+	return OauthApplications, rows.Err()
 }
 
-func (oa *OauthApplication) Count(ctx context.Context) (int, error) {
+// Count all oauth_applications data
+func (*OauthApplication) Count(ktx kontext.Context, tx db.TX) (int, exception.Exception) {
 	var total int
 
-	err := monitor(ctx, oa.Name(), query.CountOauthApplication, func() error {
+	ctxWithTimeout, cf := context.WithTimeout(ktx.Ctx(), time.Second*10)
+	defer cf()
 
-		ctxWithTimeout, cf := context.WithTimeout(ctx, time.Second*10)
-		defer cf()
-
-		row := oa.db.QueryRowContext(ctxWithTimeout, query.CountOauthApplication)
-		return row.Scan(&total)
-	})
-
-	return total, err
-}
-
-func (oa *OauthApplication) One(ctx context.Context, ID int) (entity.OauthApplication, error) {
-	var data entity.OauthApplication
-
-	err := monitor(ctx, oa.Name(), query.SelectOneOauthApplication, func() error {
-
-		ctxWithTimeout, cf := context.WithTimeout(ctx, time.Second*10)
-		defer cf()
-
-		row := oa.db.QueryRowContext(ctxWithTimeout, query.SelectOneOauthApplication, ID)
-		return row.Scan(
-			&data.ID, &data.OwnerID, &data.OwnerType, &data.Description,
-			&data.Scopes, &data.ClientUID, &data.ClientSecret,
-			&data.RevokedAt, &data.CreatedAt, &data.UpdatedAt,
-		)
-	})
-
-	return data, err
-}
-
-func (oa *OauthApplication) OneByUIDandSecret(ctx context.Context, clientUID, clientSecret string) (entity.OauthApplication, error) {
-	var data entity.OauthApplication
-
-	err := monitor(ctx, oa.Name(), query.SelectOneByUIDandSecret, func() error {
-
-		ctxWithTimeout, cf := context.WithTimeout(ctx, time.Second*10)
-		defer cf()
-
-		row := oa.db.QueryRowContext(ctxWithTimeout, query.SelectOneByUIDandSecret, clientUID, clientSecret)
-		return row.Scan(
-			&data.ID, &data.OwnerID, &data.OwnerType, &data.Description,
-			&data.Scopes, &data.ClientUID, &data.ClientSecret,
-			&data.RevokedAt, &data.CreatedAt, &data.UpdatedAt,
-		)
-	})
-
-	return data, err
-}
-
-func (oa *OauthApplication) Create(ctx context.Context, data entity.OauthApplicationInsertable, txs ...*sql.Tx) (int, error) {
-	var lastInsertedID int
-	var dbExecutable DBExecutable
-
-	dbExecutable = oa.db
-	if len(txs) > 0 {
-		dbExecutable = txs[0]
+	row := tx.QueryRowContext(kontext.Fabricate(kontext.WithDefaultContext(ctxWithTimeout)), "oauth-application-count", query.CountOauthApplication)
+	if err := row.Scan(&total); err != nil {
+		return total, err
 	}
 
-	err := monitor(ctx, oa.Name(), query.InsertOauthApplication, func() error {
-
-		res, err := dbExecutable.Exec(query.InsertOauthApplication, data.OwnerID, data.OwnerType, data.Description, data.Scopes, data.ClientUID, data.ClientSecret)
-		if err != nil {
-			return err
-		}
-
-		id, err := res.LastInsertId()
-		if err != nil {
-			return err
-		}
-
-		lastInsertedID = int(id)
-		return nil
-	})
-
-	return lastInsertedID, err
+	return total, nil
 }
 
-func (oa *OauthApplication) Update(ctx context.Context, ID int, data entity.OauthApplicationUpdateable, txs ...*sql.Tx) error {
-	var dbExecutable DBExecutable
+// One get one oauth_applications by id
+func (*OauthApplication) One(ktx kontext.Context, ID int, tx db.TX) (entity.OauthApplication, exception.Exception) {
+	var data entity.OauthApplication
 
-	dbExecutable = oa.db
-	if len(txs) > 0 {
-		dbExecutable = txs[0]
+	ctxWithTimeout, cf := context.WithTimeout(ktx.Ctx(), time.Second*10)
+	defer cf()
+
+	row := tx.QueryRowContext(kontext.Fabricate(kontext.WithDefaultContext(ctxWithTimeout)), "oauth-application-one", query.SelectOneOauthApplication)
+	if err := row.Scan(
+		&data.ID, &data.OwnerID, &data.OwnerType, &data.Description,
+		&data.Scopes, &data.ClientUID, &data.ClientSecret,
+		&data.RevokedAt, &data.CreatedAt, &data.UpdatedAt,
+	); err != nil {
+		return data, err
 	}
 
-	err := monitor(ctx, oa.Name(), query.UpdateOauthApplication, func() error {
+	return data, nil
+}
 
-		res, err := dbExecutable.Exec(query.UpdateOauthApplication, data.Description, data.Scopes, ID)
-		if err != nil {
-			return err
-		}
+// OneByUIDandSecret get one oauth_applications by client uid and client secret
+func (*OauthApplication) OneByUIDandSecret(ktx kontext.Context, clientUID, clientSecret string, tx db.TX) (entity.OauthApplication, exception.Exception) {
+	var data entity.OauthApplication
 
-		affectedRows, err := res.RowsAffected()
-		if err != nil {
-			return err
-		} else if affectedRows == 0 {
-			return sql.ErrNoRows
-		}
+	ctxWithTimeout, cf := context.WithTimeout(ktx.Ctx(), time.Second*10)
+	defer cf()
 
-		return nil
-	})
+	row := tx.QueryRowContext(kontext.Fabricate(kontext.WithDefaultContext(ctxWithTimeout)), "oauth-application-one-by-id-and-secret", query.SelectOneByUIDandSecret, clientUID, clientSecret)
+	if err := row.Scan(
+		&data.ID, &data.OwnerID, &data.OwnerType, &data.Description,
+		&data.Scopes, &data.ClientUID, &data.ClientSecret,
+		&data.RevokedAt, &data.CreatedAt, &data.UpdatedAt,
+	); err != nil {
+		return data, err
+	}
 
+	return data, nil
+}
+
+// Create new oauth_applications data
+func (*OauthApplication) Create(ktx kontext.Context, data entity.OauthApplicationInsertable, tx db.TX) (int, exception.Exception) {
+	res, err := tx.ExecContext(ktx, "oauth-application-create", query.InsertOauthApplication, data.OwnerID, data.OwnerType, data.Description, data.Scopes, data.ClientUID, data.ClientSecret)
+	if err != nil {
+		return 0, err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(id), nil
+}
+
+// Update oauth_applications data
+func (*OauthApplication) Update(ktx kontext.Context, ID int, data entity.OauthApplicationUpdateable, tx db.TX) exception.Exception {
+	_, err := tx.ExecContext(kontext.Fabricate(), "oauth-application-update", query.UpdateOauthApplication, data.Description, data.Scopes, ID)
 	return err
 }

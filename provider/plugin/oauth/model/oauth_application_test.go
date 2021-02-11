@@ -1,54 +1,32 @@
 package model_test
 
 import (
-	"context"
-	"database/sql"
 	"errors"
+	"fmt"
 	"testing"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/model"
-
+	"github.com/codefluence-x/altair/provider/plugin/oauth/query"
+	mockdb "github.com/codefluence-x/monorepo/db/mock"
+	"github.com/codefluence-x/monorepo/exception"
+	"github.com/codefluence-x/monorepo/kontext"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
-
-var oauthApplicationModelRows = []string{
-	"id",
-	"owner_id",
-	"owner_type",
-	"description",
-	"scopes",
-	"client_uid",
-	"client_secret",
-	"revoked_at",
-	"created_at",
-	"updated_at",
-}
 
 func TestOauthApplication(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	t.Run("Name", func(t *testing.T) {
-		t.Run("Return a model's name", func(t *testing.T) {
-			db, _, err := sqlmock.New()
-			if err != nil {
-				t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-			}
-
-			assert.Equal(t, "oauth-application-model", model.NewOauthApplication(db).Name())
-		})
-	})
-
 	t.Run("Paginate", func(t *testing.T) {
 		t.Run("Given offset and limit", func(t *testing.T) {
-			t.Run("Return array of oauth applications data", func(t *testing.T) {
-				db, mockdb, err := sqlmock.New()
-				if err != nil {
-					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-				}
+			t.Run("When database operation complete then it will return array of oauth applications data", func(t *testing.T) {
+				offset := 0
+				limit := 10
+
+				sqldb := mockdb.NewMockDB(mockCtrl)
+				rows := mockdb.NewMockRows(mockCtrl)
 
 				expectedOauthApplications := []entity.OauthApplication{
 					{
@@ -59,451 +37,361 @@ func TestOauthApplication(t *testing.T) {
 					},
 				}
 
-				rows := sqlmock.NewRows(oauthApplicationModelRows)
+				sqldb.EXPECT().QueryContext(gomock.Any(), "oauth-application-paginate", query.PaginateOauthApplication, offset, limit).Return(rows, nil)
+				rows.EXPECT().Next().Return(true).Times(len(expectedOauthApplications))
 
-				for _, x := range expectedOauthApplications {
-					rows.AddRow(
-						x.ID, x.OwnerID, x.OwnerType, x.Description, x.Scopes, x.ClientUID,
-						x.ClientSecret, x.RevokedAt, x.CreatedAt, x.UpdatedAt,
-					)
-				}
+				rows.EXPECT().Scan(
+					gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(),
+					gomock.Any(), gomock.Any(), gomock.Any(),
+					gomock.Any(), gomock.Any(), gomock.Any(),
+				).DoAndReturn(func(dest ...interface{}) exception.Exception {
+					val, _ := dest[0].(*int)
+					*val = expectedOauthApplications[0].ID
+					fmt.Println(val)
+					return nil
+				})
+				rows.EXPECT().Scan(
+					gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(),
+					gomock.Any(), gomock.Any(), gomock.Any(),
+					gomock.Any(), gomock.Any(), gomock.Any(),
+				).DoAndReturn(func(dest ...interface{}) exception.Exception {
+					val, _ := dest[0].(*int)
+					*val = expectedOauthApplications[1].ID
+					fmt.Println(val)
+					return nil
+				})
 
-				mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications limit \?, \?`).WillReturnRows(rows)
+				rows.EXPECT().Next().Return(false)
+				rows.EXPECT().Err().Return(nil)
+				rows.EXPECT().Close()
 
-				oauthApplicationModel := model.NewOauthApplication(db)
-				oauthApplications, err := oauthApplicationModel.Paginate(context.Background(), 0, 10)
+				oauthApplicationModel := model.NewOauthApplication()
+				oauthApplications, err := oauthApplicationModel.Paginate(kontext.Fabricate(), offset, limit, sqldb)
 
 				assert.Nil(t, err)
 				assert.Equal(t, expectedOauthApplications, oauthApplications)
-				assert.Nil(t, mockdb.ExpectationsWereMet())
 			})
 
-			t.Run("Return an error", func(t *testing.T) {
-				t.Run("Query error", func(t *testing.T) {
-					db, mockdb, err := sqlmock.New()
-					if err != nil {
-						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-					}
+			t.Run("When database operation failed then it will return error", func(t *testing.T) {
+				offset := 0
+				limit := 10
 
-					mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications limit \?, \?`).WillReturnError(errors.New("Unexpected error"))
+				sqldb := mockdb.NewMockDB(mockCtrl)
+				sqldb.EXPECT().QueryContext(gomock.Any(), "oauth-application-paginate", query.PaginateOauthApplication, offset, limit).Return(nil, exception.Throw(errors.New("unexpected")))
 
-					oauthApplicationModel := model.NewOauthApplication(db)
-					oauthApplications, err := oauthApplicationModel.Paginate(context.Background(), 0, 10)
+				oauthApplicationModel := model.NewOauthApplication()
+				oauthApplications, err := oauthApplicationModel.Paginate(kontext.Fabricate(), offset, limit, sqldb)
 
-					assert.NotNil(t, err)
-					assert.Equal(t, []entity.OauthApplication(nil), oauthApplications)
-					assert.Nil(t, mockdb.ExpectationsWereMet())
+				assert.NotNil(t, err)
+				assert.Equal(t, exception.Unexpected, err.Type())
+				assert.Equal(t, 0, len(oauthApplications))
+			})
+
+			t.Run("When database operation complete but row scan error it will return error", func(t *testing.T) {
+				offset := 0
+				limit := 10
+
+				sqldb := mockdb.NewMockDB(mockCtrl)
+				rows := mockdb.NewMockRows(mockCtrl)
+
+				expectedOauthApplications := []entity.OauthApplication{
+					{
+						ID: 1,
+					},
+					{
+						ID: 2,
+					},
+				}
+
+				sqldb.EXPECT().QueryContext(gomock.Any(), "oauth-application-paginate", query.PaginateOauthApplication, offset, limit).Return(rows, nil)
+				rows.EXPECT().Next().Return(true).Times(len(expectedOauthApplications))
+
+				rows.EXPECT().Scan(
+					gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(),
+					gomock.Any(), gomock.Any(), gomock.Any(),
+					gomock.Any(), gomock.Any(), gomock.Any(),
+				).DoAndReturn(func(dest ...interface{}) exception.Exception {
+					val, _ := dest[0].(*int)
+					*val = expectedOauthApplications[0].ID
+					fmt.Println(val)
+					return nil
+				})
+				rows.EXPECT().Scan(
+					gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(),
+					gomock.Any(), gomock.Any(), gomock.Any(),
+					gomock.Any(), gomock.Any(), gomock.Any(),
+				).DoAndReturn(func(dest ...interface{}) exception.Exception {
+					return exception.Throw(errors.New("unexpected"))
 				})
 
-				t.Run("Row scan error", func(t *testing.T) {
-					db, mockdb, err := sqlmock.New()
-					if err != nil {
-						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-					}
+				rows.EXPECT().Close()
 
-					expectedOauthApplications := []entity.OauthApplication{
-						{
-							ID: 1,
-						},
-						{
-							ID: 2,
-						},
-					}
+				oauthApplicationModel := model.NewOauthApplication()
+				oauthApplications, err := oauthApplicationModel.Paginate(kontext.Fabricate(), offset, limit, sqldb)
 
-					rows := sqlmock.NewRows(append(oauthApplicationModelRows, "some_new_column_maybe"))
-
-					for _, x := range expectedOauthApplications {
-						rows.AddRow(
-							x.ID, x.OwnerID, x.OwnerType, x.Description, x.Scopes, x.ClientUID,
-							x.ClientSecret, x.RevokedAt, x.CreatedAt, x.UpdatedAt, x.UpdatedAt,
-						)
-					}
-
-					mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications limit \?, \?`).WillReturnRows(rows)
-
-					oauthApplicationModel := model.NewOauthApplication(db)
-					oauthApplications, err := oauthApplicationModel.Paginate(context.Background(), 0, 10)
-
-					assert.NotNil(t, err)
-					assert.Equal(t, []entity.OauthApplication(nil), oauthApplications)
-					assert.Nil(t, mockdb.ExpectationsWereMet())
-				})
+				assert.NotNil(t, err)
+				assert.Equal(t, exception.Unexpected, err.Type())
+				assert.Equal(t, 1, len(oauthApplications))
 			})
 		})
 	})
 
 	t.Run("Count", func(t *testing.T) {
-		t.Run("Return total data of oauth application", func(t *testing.T) {
-			db, mockdb, err := sqlmock.New()
-			if err != nil {
-				t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-			}
+		t.Run("When database operation complete it will return total data of oauth_applications", func(t *testing.T) {
+			sqldb := mockdb.NewMockDB(mockCtrl)
+			row := mockdb.NewMockRow(mockCtrl)
 
-			rows := sqlmock.NewRows([]string{"total"})
-			rows.AddRow(100)
+			expectedTotal := 100
 
-			mockdb.ExpectQuery(`select count\(\*\) as total from oauth_applications where revoked_at is null`).
-				WillReturnRows(rows)
+			sqldb.EXPECT().QueryRowContext(gomock.Any(), "oauth-application-count", query.CountOauthApplication).Return(row)
+			row.EXPECT().Scan(gomock.Any()).DoAndReturn(func(dest ...interface{}) exception.Exception {
+				val, _ := dest[0].(*int)
+				*val = expectedTotal
+				return nil
+			})
 
-			oauthApplicationModel := model.NewOauthApplication(db)
-			total, err := oauthApplicationModel.Count(context.Background())
+			oauthApplicationModel := model.NewOauthApplication()
+			total, err := oauthApplicationModel.Count(kontext.Fabricate(), sqldb)
 
-			assert.Equal(t, 100, total)
 			assert.Nil(t, err)
-			assert.Nil(t, mockdb.ExpectationsWereMet())
+			assert.Equal(t, expectedTotal, total)
 		})
-	})
 
-	t.Run("Create", func(t *testing.T) {
-		t.Run("Given context and oauth application json entity", func(t *testing.T) {
-			t.Run("Return last inserted id", func(t *testing.T) {
-				db, mockdb, err := sqlmock.New()
-				if err != nil {
-					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-				}
+		t.Run("When database operation complete but row scan error then it will return exception", func(t *testing.T) {
+			sqldb := mockdb.NewMockDB(mockCtrl)
+			row := mockdb.NewMockRow(mockCtrl)
 
-				oauthApplication := entity.OauthApplicationInsertable{
-					OwnerID:      nil,
-					OwnerType:    "confidential",
-					Description:  "This is description",
-					Scopes:       "This is scopes",
-					ClientUID:    "This is client uid",
-					ClientSecret: "This is client secret",
-				}
+			expectedTotal := 0
 
-				mockdb.ExpectExec(`insert into oauth_applications \(owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at\) values\(\?, \?, \?, \?, \?, \?, null, now\(\), now\(\)\)`).
-					WithArgs(oauthApplication.OwnerID, oauthApplication.OwnerType, oauthApplication.Description, oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
-					WillReturnResult(sqlmock.NewResult(1, 1))
-
-				oauthApplicationModel := model.NewOauthApplication(db)
-				lastInsertedID, err := oauthApplicationModel.Create(context.Background(), oauthApplication)
-
-				assert.Nil(t, err)
-				assert.Nil(t, mockdb.ExpectationsWereMet())
-				assert.Equal(t, 1, lastInsertedID)
+			sqldb.EXPECT().QueryRowContext(gomock.Any(), "oauth-application-count", query.CountOauthApplication).Return(row)
+			row.EXPECT().Scan(gomock.Any()).DoAndReturn(func(dest ...interface{}) exception.Exception {
+				return exception.Throw(errors.New("unexpected error"))
 			})
 
-			t.Run("Given sql transactions", func(t *testing.T) {
-				t.Run("Return last inserted id", func(t *testing.T) {
-					db, mockdb, err := sqlmock.New()
-					if err != nil {
-						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-					}
+			oauthApplicationModel := model.NewOauthApplication()
+			total, err := oauthApplicationModel.Count(kontext.Fabricate(), sqldb)
 
-					oauthApplication := entity.OauthApplicationInsertable{
-						OwnerID:      nil,
-						OwnerType:    "confidential",
-						Description:  "This is description",
-						Scopes:       "This is scopes",
-						ClientUID:    "This is client uid",
-						ClientSecret: "This is client secret",
-					}
-
-					mockdb.ExpectBegin()
-					tx, _ := db.Begin()
-
-					mockdb.ExpectExec(`insert into oauth_applications \(owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at\) values\(\?, \?, \?, \?, \?, \?, null, now\(\), now\(\)\)`).
-						WithArgs(oauthApplication.OwnerID, oauthApplication.OwnerType, oauthApplication.Description, oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
-						WillReturnResult(sqlmock.NewResult(1, 1))
-
-					oauthApplicationModel := model.NewOauthApplication(db)
-					lastInsertedID, err := oauthApplicationModel.Create(context.Background(), oauthApplication, tx)
-
-					assert.Nil(t, err)
-					assert.Nil(t, mockdb.ExpectationsWereMet())
-					assert.Equal(t, 1, lastInsertedID)
-				})
-			})
-
-			t.Run("Return zero value of last inserted id and error", func(t *testing.T) {
-				t.Run("Execution error", func(t *testing.T) {
-					db, mockdb, err := sqlmock.New()
-					if err != nil {
-						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-					}
-
-					oauthApplication := entity.OauthApplicationInsertable{
-						OwnerID:      nil,
-						OwnerType:    "confidential",
-						Description:  "This is description",
-						Scopes:       "This is scopes",
-						ClientUID:    "This is client uid",
-						ClientSecret: "This is client secret",
-					}
-
-					mockdb.ExpectExec(`insert into oauth_applications \(owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at\) values\(\?, \?, \?, \?, \?, \?, null, now\(\), now\(\)\)`).
-						WithArgs(oauthApplication.OwnerID, oauthApplication.OwnerType, oauthApplication.Description, oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
-						WillReturnError(errors.New("unexpected error"))
-
-					oauthApplicationModel := model.NewOauthApplication(db)
-					lastInsertedID, err := oauthApplicationModel.Create(context.Background(), oauthApplication)
-
-					assert.NotNil(t, err)
-					assert.Nil(t, mockdb.ExpectationsWereMet())
-					assert.Equal(t, 0, lastInsertedID)
-				})
-
-				t.Run("Get last inserted id error", func(t *testing.T) {
-					db, mockdb, err := sqlmock.New()
-					if err != nil {
-						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-					}
-
-					oauthApplication := entity.OauthApplicationInsertable{
-						OwnerID:      nil,
-						OwnerType:    "confidential",
-						Description:  "This is description",
-						Scopes:       "This is scopes",
-						ClientUID:    "This is client uid",
-						ClientSecret: "This is client secret",
-					}
-
-					mockdb.ExpectExec(`insert into oauth_applications \(owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at\) values\(\?, \?, \?, \?, \?, \?, null, now\(\), now\(\)\)`).
-						WithArgs(oauthApplication.OwnerID, oauthApplication.OwnerType, oauthApplication.Description, oauthApplication.Scopes, sqlmock.AnyArg(), sqlmock.AnyArg()).
-						WillReturnResult(sqlmock.NewErrorResult(errors.New("unexpected error")))
-
-					oauthApplicationModel := model.NewOauthApplication(db)
-					lastInsertedID, err := oauthApplicationModel.Create(context.Background(), oauthApplication)
-
-					assert.NotNil(t, err)
-					assert.Nil(t, mockdb.ExpectationsWereMet())
-					assert.Equal(t, 0, lastInsertedID)
-				})
-			})
+			assert.NotNil(t, err)
+			assert.Equal(t, exception.Unexpected, err.Type())
+			assert.Equal(t, expectedTotal, total)
 		})
 	})
 
 	t.Run("One", func(t *testing.T) {
 		t.Run("Given oauth application id", func(t *testing.T) {
-			t.Run("Return entity oauth application", func(t *testing.T) {
-				db, mockdb, err := sqlmock.New()
-				if err != nil {
-					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+			t.Run("When database operation complete then it will return oauth application data", func(t *testing.T) {
+				sqldb := mockdb.NewMockDB(mockCtrl)
+				row := mockdb.NewMockRow(mockCtrl)
+
+				expectedData := entity.OauthApplication{
+					ID:        1,
+					OwnerType: "confidential",
 				}
 
-				data := entity.OauthApplication{
-					ID: 1,
-				}
+				sqldb.EXPECT().QueryRowContext(gomock.Any(), "oauth-application-one", query.SelectOneOauthApplication).Return(row)
+				row.EXPECT().Scan(gomock.Any()).DoAndReturn(func(dest ...interface{}) exception.Exception {
+					val0, _ := dest[0].(*int)
+					*val0 = expectedData.ID
+					val2, _ := dest[2].(*string)
+					*val2 = expectedData.OwnerType
+					return nil
+				})
 
-				rows := sqlmock.NewRows(oauthApplicationModelRows).
-					AddRow(
-						data.ID, data.OwnerID, data.OwnerType, data.Description,
-						data.Scopes, data.ClientUID, data.ClientSecret,
-						data.RevokedAt, data.CreatedAt, data.UpdatedAt,
-					)
-
-				mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications where id = \?`).
-					WithArgs(1).
-					WillReturnRows(rows)
-
-				oauthApplicationModel := model.NewOauthApplication(db)
-				dataFromDB, err := oauthApplicationModel.One(context.Background(), 1)
+				oauthApplicationModel := model.NewOauthApplication()
+				data, err := oauthApplicationModel.One(kontext.Fabricate(), expectedData.ID, sqldb)
 
 				assert.Nil(t, err)
-				assert.Nil(t, mockdb.ExpectationsWereMet())
-				assert.Equal(t, data, dataFromDB)
+				assert.Equal(t, expectedData, data)
 			})
 
-			t.Run("Row not found in database", func(t *testing.T) {
-				t.Run("Return sql.ErrNoRows error", func(t *testing.T) {
-					db, mockdb, err := sqlmock.New()
-					if err != nil {
-						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-					}
+			t.Run("When database operation complete but scan failed then it will return error", func(t *testing.T) {
+				sqldb := mockdb.NewMockDB(mockCtrl)
+				row := mockdb.NewMockRow(mockCtrl)
 
-					mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications where id = \?`).
-						WithArgs(1).
-						WillReturnError(sql.ErrNoRows)
+				expectedData := entity.OauthApplication{}
 
-					oauthApplicationModel := model.NewOauthApplication(db)
-					dataFromDB, err := oauthApplicationModel.One(context.Background(), 1)
-
-					assert.NotNil(t, err)
-					assert.Nil(t, mockdb.ExpectationsWereMet())
-					assert.Equal(t, entity.OauthApplication{}, dataFromDB)
+				sqldb.EXPECT().QueryRowContext(gomock.Any(), "oauth-application-one", query.SelectOneOauthApplication).Return(row)
+				row.EXPECT().Scan(gomock.Any()).DoAndReturn(func(dest ...interface{}) exception.Exception {
+					return exception.Throw(errors.New("unexpected error"))
 				})
+
+				oauthApplicationModel := model.NewOauthApplication()
+				data, err := oauthApplicationModel.One(kontext.Fabricate(), expectedData.ID, sqldb)
+
+				assert.NotNil(t, err)
+				assert.Equal(t, exception.Unexpected, err.Type())
+				assert.Equal(t, expectedData, data)
 			})
 		})
 	})
 
 	t.Run("OneByUIDandSecret", func(t *testing.T) {
-		t.Run("Given oauth application id", func(t *testing.T) {
-			t.Run("Return entity oauth application", func(t *testing.T) {
-				db, mockdb, err := sqlmock.New()
-				if err != nil {
-					t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		t.Run("Given client uid and client secret", func(t *testing.T) {
+			t.Run("When database operation complete then it will return oauth application data", func(t *testing.T) {
+				sqldb := mockdb.NewMockDB(mockCtrl)
+				row := mockdb.NewMockRow(mockCtrl)
+
+				expectedData := entity.OauthApplication{
+					ID:           1,
+					OwnerType:    "confidential",
+					ClientUID:    "uid",
+					ClientSecret: "secret",
 				}
 
-				data := entity.OauthApplication{
-					ID: 1,
-				}
+				sqldb.EXPECT().QueryRowContext(gomock.Any(), "oauth-application-one-by-id-and-secret", query.SelectOneByUIDandSecret, expectedData.ClientUID, expectedData.ClientSecret).Return(row)
+				row.EXPECT().Scan(gomock.Any()).DoAndReturn(func(dest ...interface{}) exception.Exception {
+					val0, _ := dest[0].(*int)
+					*val0 = expectedData.ID
+					val2, _ := dest[2].(*string)
+					*val2 = expectedData.OwnerType
+					val3, _ := dest[5].(*string)
+					*val3 = expectedData.ClientUID
+					val4, _ := dest[6].(*string)
+					*val4 = expectedData.ClientSecret
+					return nil
+				})
 
-				rows := sqlmock.NewRows(oauthApplicationModelRows).
-					AddRow(
-						data.ID, data.OwnerID, data.OwnerType, data.Description,
-						data.Scopes, data.ClientUID, data.ClientSecret,
-						data.RevokedAt, data.CreatedAt, data.UpdatedAt,
-					)
-
-				mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications where client_uid = \? and client_secret = \? limit 1`).
-					WithArgs("sample_client_uid", "sample_client_secret").
-					WillReturnRows(rows)
-
-				oauthApplicationModel := model.NewOauthApplication(db)
-				dataFromDB, err := oauthApplicationModel.OneByUIDandSecret(context.Background(), "sample_client_uid", "sample_client_secret")
+				oauthApplicationModel := model.NewOauthApplication()
+				data, err := oauthApplicationModel.OneByUIDandSecret(kontext.Fabricate(), expectedData.ClientUID, expectedData.ClientSecret, sqldb)
 
 				assert.Nil(t, err)
-				assert.Nil(t, mockdb.ExpectationsWereMet())
-				assert.Equal(t, data, dataFromDB)
+				assert.Equal(t, expectedData, data)
 			})
 
-			t.Run("Row not found in database", func(t *testing.T) {
-				t.Run("Return sql.ErrNoRows error", func(t *testing.T) {
-					db, mockdb, err := sqlmock.New()
-					if err != nil {
-						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-					}
+			t.Run("When database operation complete but scan failed then it will return error", func(t *testing.T) {
+				sqldb := mockdb.NewMockDB(mockCtrl)
+				row := mockdb.NewMockRow(mockCtrl)
 
-					mockdb.ExpectQuery(`select id, owner_id, owner_type, description, scopes, client_uid, client_secret, revoked_at, created_at, updated_at from oauth_applications where client_uid = \? and client_secret = \? limit 1`).
-						WithArgs("sample_client_uid", "sample_client_secret").
-						WillReturnError(sql.ErrNoRows)
+				expectedData := entity.OauthApplication{}
 
-					oauthApplicationModel := model.NewOauthApplication(db)
-					dataFromDB, err := oauthApplicationModel.OneByUIDandSecret(context.Background(), "sample_client_uid", "sample_client_secret")
-
-					assert.NotNil(t, err)
-					assert.Nil(t, mockdb.ExpectationsWereMet())
-					assert.Equal(t, entity.OauthApplication{}, dataFromDB)
+				sqldb.EXPECT().QueryRowContext(gomock.Any(), "oauth-application-one-by-id-and-secret", query.SelectOneByUIDandSecret, "uid", "secret").Return(row)
+				row.EXPECT().Scan(gomock.Any()).DoAndReturn(func(dest ...interface{}) exception.Exception {
+					return exception.Throw(errors.New("unexpected error"))
 				})
+
+				oauthApplicationModel := model.NewOauthApplication()
+				data, err := oauthApplicationModel.OneByUIDandSecret(kontext.Fabricate(), "uid", "secret", sqldb)
+
+				assert.NotNil(t, err)
+				assert.Equal(t, exception.Unexpected, err.Type())
+				assert.Equal(t, expectedData, data)
+			})
+		})
+	})
+
+	t.Run("Create", func(t *testing.T) {
+		t.Run("Given context and oauth application json entity", func(t *testing.T) {
+			t.Run("When database operation is complete then it will return last inserted id", func(t *testing.T) {
+				sqldb := mockdb.NewMockDB(mockCtrl)
+				result := mockdb.NewMockResult(mockCtrl)
+
+				expectedID := 1
+				insertable := entity.OauthApplicationInsertable{
+					OwnerID:      1,
+					OwnerType:    "confidential",
+					Description:  "-",
+					Scopes:       "public user",
+					ClientUID:    "client-uid",
+					ClientSecret: "client-secret",
+				}
+
+				sqldb.EXPECT().ExecContext(gomock.Any(), "oauth-application-create", query.InsertOauthApplication,
+					insertable.OwnerID,
+					insertable.OwnerType,
+					insertable.Description,
+					insertable.Scopes,
+					insertable.ClientUID,
+					insertable.ClientSecret,
+				).Return(result, nil)
+
+				result.EXPECT().LastInsertId().Return(int64(expectedID), nil)
+
+				oauthApplicationModel := model.NewOauthApplication()
+				ID, err := oauthApplicationModel.Create(kontext.Fabricate(), insertable, sqldb)
+
+				assert.Equal(t, expectedID, ID)
+				assert.Nil(t, err)
+			})
+
+			t.Run("When database operation failed then it will return error", func(t *testing.T) {
+				sqldb := mockdb.NewMockDB(mockCtrl)
+
+				insertable := entity.OauthApplicationInsertable{
+					OwnerID:      1,
+					OwnerType:    "confidential",
+					Description:  "-",
+					Scopes:       "public user",
+					ClientUID:    "client-uid",
+					ClientSecret: "client-secret",
+				}
+
+				sqldb.EXPECT().ExecContext(gomock.Any(), "oauth-application-create", query.InsertOauthApplication,
+					insertable.OwnerID,
+					insertable.OwnerType,
+					insertable.Description,
+					insertable.Scopes,
+					insertable.ClientUID,
+					insertable.ClientSecret,
+				).Return(nil, exception.Throw(errors.New("unexpected")))
+
+				oauthApplicationModel := model.NewOauthApplication()
+				_, err := oauthApplicationModel.Create(kontext.Fabricate(), insertable, sqldb)
+
+				assert.Equal(t, exception.Unexpected, err.Type())
+				assert.NotNil(t, err)
+			})
+
+			t.Run("When database operation is complete but get last inserted id error then it will return error", func(t *testing.T) {
+				sqldb := mockdb.NewMockDB(mockCtrl)
+				result := mockdb.NewMockResult(mockCtrl)
+
+				insertable := entity.OauthApplicationInsertable{
+					OwnerID:      1,
+					OwnerType:    "confidential",
+					Description:  "-",
+					Scopes:       "public user",
+					ClientUID:    "client-uid",
+					ClientSecret: "client-secret",
+				}
+
+				sqldb.EXPECT().ExecContext(gomock.Any(), "oauth-application-create", query.InsertOauthApplication,
+					insertable.OwnerID,
+					insertable.OwnerType,
+					insertable.Description,
+					insertable.Scopes,
+					insertable.ClientUID,
+					insertable.ClientSecret,
+				).Return(result, nil)
+
+				result.EXPECT().LastInsertId().Return(int64(0), exception.Throw(errors.New("unexpected error")))
+
+				oauthApplicationModel := model.NewOauthApplication()
+				ID, err := oauthApplicationModel.Create(kontext.Fabricate(), insertable, sqldb)
+
+				assert.Equal(t, 0, ID)
+				assert.NotNil(t, err)
+				assert.Equal(t, exception.Unexpected, err.Type())
 			})
 		})
 	})
 
 	t.Run("Update", func(t *testing.T) {
 		t.Run("Given context, oauth application id and oauth application updateable", func(t *testing.T) {
-			t.Run("When database request is success", func(t *testing.T) {
-				t.Run("Then it will return nil", func(t *testing.T) {
-					db, mockdb, err := sqlmock.New()
-					if err != nil {
-						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-					}
+			t.Run("When database operation is complete it will return value", func(t *testing.T) {
+				sqldb := mockdb.NewMockDB(mockCtrl)
+				result := mockdb.NewMockResult(mockCtrl)
 
-					updateable := entity.OauthApplicationUpdateable{
-						Description: "New description",
-						Scopes:      "users public",
-					}
+				ID := 1
+				data := entity.OauthApplicationUpdateable{
+					Description: "X",
+					Scopes:      "public user",
+				}
 
-					ID := 1
+				sqldb.EXPECT().ExecContext(gomock.Any(), "oauth-application-update", query.UpdateOauthApplication, data.Description, data.Scopes, ID).Return(result, nil)
 
-					mockdb.ExpectExec(`update oauth_applications set description \= \?, scopes \= \?, updated_at \= now\(\) where id \= \?`).
-						WithArgs(updateable.Description, updateable.Scopes, ID).
-						WillReturnResult(sqlmock.NewResult(1, 1))
-
-					oauthApplicationModel := model.NewOauthApplication(db)
-					assert.Nil(t, oauthApplicationModel.Update(context.Background(), ID, updateable))
-					assert.Nil(t, mockdb.ExpectationsWereMet())
-				})
-			})
-
-			t.Run("When database request is success but the updated value is 0", func(t *testing.T) {
-				t.Run("Then it will return sql.ErrNoRows", func(t *testing.T) {
-					db, mockdb, err := sqlmock.New()
-					if err != nil {
-						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-					}
-
-					updateable := entity.OauthApplicationUpdateable{
-						Description: "New description",
-						Scopes:      "users public",
-					}
-
-					ID := 1
-
-					mockdb.ExpectExec(`update oauth_applications set description \= \?, scopes \= \?, updated_at \= now\(\) where id \= \?`).
-						WithArgs(updateable.Description, updateable.Scopes, ID).
-						WillReturnResult(sqlmock.NewResult(1, 0))
-
-					oauthApplicationModel := model.NewOauthApplication(db)
-					assert.Equal(t, sql.ErrNoRows, oauthApplicationModel.Update(context.Background(), ID, updateable))
-					assert.Nil(t, mockdb.ExpectationsWereMet())
-				})
-			})
-
-			t.Run("When database request is failed", func(t *testing.T) {
-				t.Run("Then it will return error", func(t *testing.T) {
-					db, mockdb, err := sqlmock.New()
-					if err != nil {
-						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-					}
-
-					updateable := entity.OauthApplicationUpdateable{
-						Description: "New description",
-						Scopes:      "users public",
-					}
-
-					ID := 1
-
-					mockdb.ExpectExec(`update oauth_applications set description \= \?, scopes \= \?, updated_at \= now\(\) where id \= \?`).
-						WithArgs(updateable.Description, updateable.Scopes, ID).
-						WillReturnError(errors.New("unexpected error"))
-
-					oauthApplicationModel := model.NewOauthApplication(db)
-					assert.NotNil(t, oauthApplicationModel.Update(context.Background(), ID, updateable))
-					assert.Nil(t, mockdb.ExpectationsWereMet())
-				})
-			})
-
-			t.Run("When database request is success but get results failed", func(t *testing.T) {
-				t.Run("Then it will return error", func(t *testing.T) {
-					db, mockdb, err := sqlmock.New()
-					if err != nil {
-						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-					}
-
-					updateable := entity.OauthApplicationUpdateable{
-						Description: "New description",
-						Scopes:      "users public",
-					}
-
-					ID := 1
-
-					mockdb.ExpectExec(`update oauth_applications set description \= \?, scopes \= \?, updated_at \= now\(\) where id \= \?`).
-						WithArgs(updateable.Description, updateable.Scopes, ID).
-						WillReturnResult(sqlmock.NewErrorResult(errors.New("unexpected error")))
-
-					oauthApplicationModel := model.NewOauthApplication(db)
-					assert.NotNil(t, oauthApplicationModel.Update(context.Background(), ID, updateable))
-					assert.Nil(t, mockdb.ExpectationsWereMet())
-				})
-			})
-		})
-
-		t.Run("Given context, oauth application id, oauth application updateable and database transactions", func(t *testing.T) {
-			t.Run("When database request is success", func(t *testing.T) {
-				t.Run("Then it will return nil", func(t *testing.T) {
-					db, mockdb, err := sqlmock.New()
-					if err != nil {
-						t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-					}
-
-					mockdb.ExpectBegin()
-					tx, _ := db.Begin()
-
-					updateable := entity.OauthApplicationUpdateable{
-						Description: "New description",
-						Scopes:      "users public",
-					}
-
-					ID := 1
-
-					mockdb.ExpectExec(`update oauth_applications set description \= \?, scopes \= \?, updated_at \= now\(\) where id \= \?`).
-						WithArgs(updateable.Description, updateable.Scopes, ID).
-						WillReturnResult(sqlmock.NewResult(1, 1))
-
-					oauthApplicationModel := model.NewOauthApplication(db)
-					assert.Nil(t, oauthApplicationModel.Update(context.Background(), ID, updateable, tx))
-					assert.Nil(t, mockdb.ExpectationsWereMet())
-				})
+				oauthApplicationModel := model.NewOauthApplication()
+				err := oauthApplicationModel.Update(kontext.Fabricate(), ID, data, sqldb)
+				assert.Nil(t, err)
 			})
 		})
 	})

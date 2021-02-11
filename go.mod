@@ -5,7 +5,7 @@ go 1.14
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/codefluence-x/aurelia v0.0.0-20190914065210-ba6f9a4a12fe
-	github.com/codefluence-x/monorepo v0.0.0-20210210162929-391d7696b95d
+	github.com/codefluence-x/monorepo v0.0.0-20210211142618-03bc52adf854
 	github.com/gin-gonic/gin v1.6.3
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang-migrate/migrate/v4 v4.14.1

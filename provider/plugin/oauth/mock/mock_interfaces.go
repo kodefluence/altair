@@ -8,6 +8,9 @@ import (
 	context "context"
 	sql "database/sql"
 	entity "github.com/codefluence-x/altair/provider/plugin/oauth/entity"
+	db "github.com/codefluence-x/monorepo/db"
+	exception "github.com/codefluence-x/monorepo/exception"
+	kontext "github.com/codefluence-x/monorepo/kontext"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -35,117 +38,93 @@ func (m *MockOauthApplicationModel) EXPECT() *MockOauthApplicationModelMockRecor
 	return m.recorder
 }
 
-// Name mocks base method
-func (m *MockOauthApplicationModel) Name() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Name")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// Name indicates an expected call of Name
-func (mr *MockOauthApplicationModelMockRecorder) Name() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockOauthApplicationModel)(nil).Name))
-}
-
 // Paginate mocks base method
-func (m *MockOauthApplicationModel) Paginate(ctx context.Context, offset, limit int) ([]entity.OauthApplication, error) {
+func (m *MockOauthApplicationModel) Paginate(ktx kontext.Context, offset, limit int, tx db.TX) ([]entity.OauthApplication, exception.Exception) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Paginate", ctx, offset, limit)
+	ret := m.ctrl.Call(m, "Paginate", ktx, offset, limit, tx)
 	ret0, _ := ret[0].([]entity.OauthApplication)
-	ret1, _ := ret[1].(error)
+	ret1, _ := ret[1].(exception.Exception)
 	return ret0, ret1
 }
 
 // Paginate indicates an expected call of Paginate
-func (mr *MockOauthApplicationModelMockRecorder) Paginate(ctx, offset, limit interface{}) *gomock.Call {
+func (mr *MockOauthApplicationModelMockRecorder) Paginate(ktx, offset, limit, tx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Paginate", reflect.TypeOf((*MockOauthApplicationModel)(nil).Paginate), ctx, offset, limit)
-}
-
-// One mocks base method
-func (m *MockOauthApplicationModel) One(ctx context.Context, ID int) (entity.OauthApplication, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "One", ctx, ID)
-	ret0, _ := ret[0].(entity.OauthApplication)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// One indicates an expected call of One
-func (mr *MockOauthApplicationModelMockRecorder) One(ctx, ID interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "One", reflect.TypeOf((*MockOauthApplicationModel)(nil).One), ctx, ID)
-}
-
-// OneByUIDandSecret mocks base method
-func (m *MockOauthApplicationModel) OneByUIDandSecret(ctx context.Context, clientUID, clientSecret string) (entity.OauthApplication, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "OneByUIDandSecret", ctx, clientUID, clientSecret)
-	ret0, _ := ret[0].(entity.OauthApplication)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// OneByUIDandSecret indicates an expected call of OneByUIDandSecret
-func (mr *MockOauthApplicationModelMockRecorder) OneByUIDandSecret(ctx, clientUID, clientSecret interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OneByUIDandSecret", reflect.TypeOf((*MockOauthApplicationModel)(nil).OneByUIDandSecret), ctx, clientUID, clientSecret)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Paginate", reflect.TypeOf((*MockOauthApplicationModel)(nil).Paginate), ktx, offset, limit, tx)
 }
 
 // Count mocks base method
-func (m *MockOauthApplicationModel) Count(ctx context.Context) (int, error) {
+func (m *MockOauthApplicationModel) Count(ktx kontext.Context, tx db.TX) (int, exception.Exception) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Count", ctx)
+	ret := m.ctrl.Call(m, "Count", ktx, tx)
 	ret0, _ := ret[0].(int)
-	ret1, _ := ret[1].(error)
+	ret1, _ := ret[1].(exception.Exception)
 	return ret0, ret1
 }
 
 // Count indicates an expected call of Count
-func (mr *MockOauthApplicationModelMockRecorder) Count(ctx interface{}) *gomock.Call {
+func (mr *MockOauthApplicationModelMockRecorder) Count(ktx, tx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Count", reflect.TypeOf((*MockOauthApplicationModel)(nil).Count), ctx)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Count", reflect.TypeOf((*MockOauthApplicationModel)(nil).Count), ktx, tx)
+}
+
+// One mocks base method
+func (m *MockOauthApplicationModel) One(ktx kontext.Context, ID int, tx db.TX) (entity.OauthApplication, exception.Exception) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "One", ktx, ID, tx)
+	ret0, _ := ret[0].(entity.OauthApplication)
+	ret1, _ := ret[1].(exception.Exception)
+	return ret0, ret1
+}
+
+// One indicates an expected call of One
+func (mr *MockOauthApplicationModelMockRecorder) One(ktx, ID, tx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "One", reflect.TypeOf((*MockOauthApplicationModel)(nil).One), ktx, ID, tx)
+}
+
+// OneByUIDandSecret mocks base method
+func (m *MockOauthApplicationModel) OneByUIDandSecret(ktx kontext.Context, clientUID, clientSecret string, tx db.TX) (entity.OauthApplication, exception.Exception) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OneByUIDandSecret", ktx, clientUID, clientSecret, tx)
+	ret0, _ := ret[0].(entity.OauthApplication)
+	ret1, _ := ret[1].(exception.Exception)
+	return ret0, ret1
+}
+
+// OneByUIDandSecret indicates an expected call of OneByUIDandSecret
+func (mr *MockOauthApplicationModelMockRecorder) OneByUIDandSecret(ktx, clientUID, clientSecret, tx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OneByUIDandSecret", reflect.TypeOf((*MockOauthApplicationModel)(nil).OneByUIDandSecret), ktx, clientUID, clientSecret, tx)
 }
 
 // Create mocks base method
-func (m *MockOauthApplicationModel) Create(ctx context.Context, data entity.OauthApplicationInsertable, txs ...*sql.Tx) (int, error) {
+func (m *MockOauthApplicationModel) Create(ktx kontext.Context, data entity.OauthApplicationInsertable, tx db.TX) (int, exception.Exception) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, data}
-	for _, a := range txs {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Create", varargs...)
+	ret := m.ctrl.Call(m, "Create", ktx, data, tx)
 	ret0, _ := ret[0].(int)
-	ret1, _ := ret[1].(error)
+	ret1, _ := ret[1].(exception.Exception)
 	return ret0, ret1
 }
 
 // Create indicates an expected call of Create
-func (mr *MockOauthApplicationModelMockRecorder) Create(ctx, data interface{}, txs ...interface{}) *gomock.Call {
+func (mr *MockOauthApplicationModelMockRecorder) Create(ktx, data, tx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, data}, txs...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOauthApplicationModel)(nil).Create), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockOauthApplicationModel)(nil).Create), ktx, data, tx)
 }
 
 // Update mocks base method
-func (m *MockOauthApplicationModel) Update(ctx context.Context, ID int, data entity.OauthApplicationUpdateable, txs ...*sql.Tx) error {
+func (m *MockOauthApplicationModel) Update(ktx kontext.Context, ID int, data entity.OauthApplicationUpdateable, tx db.TX) exception.Exception {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, ID, data}
-	for _, a := range txs {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "Update", varargs...)
-	ret0, _ := ret[0].(error)
+	ret := m.ctrl.Call(m, "Update", ktx, ID, data, tx)
+	ret0, _ := ret[0].(exception.Exception)
 	return ret0
 }
 
 // Update indicates an expected call of Update
-func (mr *MockOauthApplicationModelMockRecorder) Update(ctx, ID, data interface{}, txs ...interface{}) *gomock.Call {
+func (mr *MockOauthApplicationModelMockRecorder) Update(ktx, ID, data, tx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, ID, data}, txs...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockOauthApplicationModel)(nil).Update), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockOauthApplicationModel)(nil).Update), ktx, ID, data, tx)
 }
 
 // MockOauthAccessTokenModel is a mock of OauthAccessTokenModel interface

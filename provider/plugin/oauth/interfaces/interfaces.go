@@ -7,17 +7,19 @@ import (
 	"database/sql"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
+	"github.com/codefluence-x/monorepo/db"
+	"github.com/codefluence-x/monorepo/exception"
+	"github.com/codefluence-x/monorepo/kontext"
 )
 
 // OauthApplicationModel handle all database connection to oauth_applications table
 type OauthApplicationModel interface {
-	Name() string
-	Paginate(ctx context.Context, offset, limit int) ([]entity.OauthApplication, error)
-	One(ctx context.Context, ID int) (entity.OauthApplication, error)
-	OneByUIDandSecret(ctx context.Context, clientUID, clientSecret string) (entity.OauthApplication, error)
-	Count(ctx context.Context) (int, error)
-	Create(ctx context.Context, data entity.OauthApplicationInsertable, txs ...*sql.Tx) (int, error)
-	Update(ctx context.Context, ID int, data entity.OauthApplicationUpdateable, txs ...*sql.Tx) error
+	Paginate(ktx kontext.Context, offset, limit int, tx db.TX) ([]entity.OauthApplication, exception.Exception)
+	Count(ktx kontext.Context, tx db.TX) (int, exception.Exception)
+	One(ktx kontext.Context, ID int, tx db.TX) (entity.OauthApplication, exception.Exception)
+	OneByUIDandSecret(ktx kontext.Context, clientUID, clientSecret string, tx db.TX) (entity.OauthApplication, exception.Exception)
+	Create(ktx kontext.Context, data entity.OauthApplicationInsertable, tx db.TX) (int, exception.Exception)
+	Update(ktx kontext.Context, ID int, data entity.OauthApplicationUpdateable, tx db.TX) exception.Exception
 }
 
 // OauthAccessTokenModel handle all database connection to oauth_access_tokens table

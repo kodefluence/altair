@@ -12,6 +12,7 @@ import (
 	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/service"
 	"github.com/codefluence-x/altair/util"
+	mockdb "github.com/codefluence-x/monorepo/db/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -20,6 +21,8 @@ import (
 func TestAuthorization(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
+	sqldb := mockdb.NewMockDB(mockCtrl)
 
 	t.Run("RevokeToken", func(t *testing.T) {
 		t.Run("Given context and revoke access token request", func(t *testing.T) {
@@ -41,7 +44,7 @@ func TestAuthorization(t *testing.T) {
 
 					oauthAccessTokenModel.EXPECT().Revoke(ctx, *revokeRequest.Token).Return(nil)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 					err := authorizationService.RevokeToken(ctx, revokeRequest)
 					assert.Nil(t, err)
 				})
@@ -71,7 +74,7 @@ func TestAuthorization(t *testing.T) {
 							Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "token")),
 						}
 
-						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 						err := authorizationService.RevokeToken(ctx, revokeRequest)
 						assert.Equal(t, expectedError, err)
 					})
@@ -100,7 +103,7 @@ func TestAuthorization(t *testing.T) {
 							Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 						}
 
-						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 						err := authorizationService.RevokeToken(ctx, revokeRequest)
 						assert.Equal(t, expectedError, err)
 					})
@@ -131,7 +134,7 @@ func TestAuthorization(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("token is empty")),
 				}
 
-				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 				err := authorizationService.RevokeToken(ctx, revokeRequest)
 				assert.Equal(t, expectedError, err)
 			})

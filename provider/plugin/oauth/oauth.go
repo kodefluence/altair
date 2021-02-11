@@ -1,7 +1,16 @@
 package oauth
 
 import (
+	"time"
+
 	"github.com/codefluence-x/altair/core"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/controller"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/downstream"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/formatter"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/model"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/service"
+	"github.com/codefluence-x/altair/provider/plugin/oauth/validator"
 )
 
 // Provide create new oauth plugin provider
@@ -10,68 +19,68 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 		return nil
 	}
 
-	// var oauthPluginConfig entity.OauthPlugin
+	var oauthPluginConfig entity.OauthPlugin
 
-	// if err := pluginBearer.CompilePlugin("oauth", &oauthPluginConfig); err != nil {
-	// 	return err
-	// }
+	if err := pluginBearer.CompilePlugin("oauth", &oauthPluginConfig); err != nil {
+		return err
+	}
 
-	// db, _, err := dbBearer.Database(oauthPluginConfig.DatabaseInstance())
-	// if err != nil {
-	// 	return err
-	// }
+	db, _, err := dbBearer.Database(oauthPluginConfig.DatabaseInstance())
+	if err != nil {
+		return err
+	}
 
-	// var accessTokenTimeout time.Duration
-	// var authorizationCodeTimeout time.Duration
+	var accessTokenTimeout time.Duration
+	var authorizationCodeTimeout time.Duration
 
-	// accessTokenTimeout, err = oauthPluginConfig.AccessTokenTimeout()
-	// if err != nil {
-	// 	return err
-	// }
+	accessTokenTimeout, err = oauthPluginConfig.AccessTokenTimeout()
+	if err != nil {
+		return err
+	}
 
-	// authorizationCodeTimeout, err = oauthPluginConfig.AuthorizationCodeTimeout()
-	// if err != nil {
-	// 	return err
-	// }
+	authorizationCodeTimeout, err = oauthPluginConfig.AuthorizationCodeTimeout()
+	if err != nil {
+		return err
+	}
 
-	// var refreshTokenConfig entity.RefreshTokenConfig
-	// refreshTokenConfig.Active = oauthPluginConfig.Config.RefreshToken.Active
-	// if refreshTokenConfig.Active {
-	// 	refreshTokenTimeout, err := oauthPluginConfig.RefreshTokenTimeout()
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	refreshTokenConfig.Timeout = refreshTokenTimeout
-	// }
+	var refreshTokenConfig entity.RefreshTokenConfig
+	refreshTokenConfig.Active = oauthPluginConfig.Config.RefreshToken.Active
+	if refreshTokenConfig.Active {
+		refreshTokenTimeout, err := oauthPluginConfig.RefreshTokenTimeout()
+		if err != nil {
+			return err
+		}
+		refreshTokenConfig.Timeout = refreshTokenTimeout
+	}
 
-	// // Model
-	// oauthApplicationModel := model.NewOauthApplication(db)
+	// Model
+	oauthApplicationModel := model.NewOauthApplication()
 	// oauthAccessTokenModel := model.NewOauthAccessToken(db)
 	// oauthAccessGrantModel := model.NewOauthAccessGrant(db)
 	// oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
 
 	// // Formatter
-	// oauthApplicationFormatter := formatter.OauthApplication()
-	// oauthModelFormatter := formatter.NewModel(accessTokenTimeout, authorizationCodeTimeout, refreshTokenConfig.Timeout)
+	oauthApplicationFormatter := formatter.OauthApplication()
+	oauthModelFormatter := formatter.NewModel(accessTokenTimeout, authorizationCodeTimeout, refreshTokenConfig.Timeout)
 	// oauthFormatter := formatter.Oauth()
 
-	// // Validator
-	// oauthValidator := validator.NewOauth(refreshTokenConfig.Active)
+	// Validator
+	oauthValidator := validator.NewOauth(refreshTokenConfig.Active)
 
-	// // Service
-	// applicationManager := service.NewApplicationManager(oauthApplicationFormatter, oauthModelFormatter, oauthApplicationModel, oauthValidator)
+	// Service
+	applicationManager := service.NewApplicationManager(oauthApplicationFormatter, oauthModelFormatter, oauthApplicationModel, oauthValidator, db)
 	// authorization := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, oauthModelFormatter, oauthValidator, oauthFormatter, refreshTokenConfig.Active)
 
-	// // DownStreamPlugin
+	// DownStreamPlugin
 	// oauthDownStream := downstream.NewOauth(oauthAccessTokenModel)
-	// applicationValidationDownStream := downstream.NewApplicationValidation(oauthApplicationModel)
+	applicationValidationDownStream := downstream.NewApplicationValidation(oauthApplicationModel, db)
 
-	// // Controller of /oauth/applications
-	// applicationControllerDispatcher := controller.NewApplication()
-	// appBearer.InjectController(applicationControllerDispatcher.List(applicationManager))
-	// appBearer.InjectController(applicationControllerDispatcher.One(applicationManager))
-	// appBearer.InjectController(applicationControllerDispatcher.Create(applicationManager))
-	// appBearer.InjectController(applicationControllerDispatcher.Update(applicationManager))
+	// Controller of /oauth/applications
+	applicationControllerDispatcher := controller.NewApplication()
+	appBearer.InjectController(applicationControllerDispatcher.List(applicationManager))
+	appBearer.InjectController(applicationControllerDispatcher.One(applicationManager))
+	appBearer.InjectController(applicationControllerDispatcher.Create(applicationManager))
+	appBearer.InjectController(applicationControllerDispatcher.Update(applicationManager))
 
 	// // Controller of /oauth/authorizations
 	// authorizationControllerDispatcher := controller.NewAuthorization()
@@ -80,7 +89,7 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 	// appBearer.InjectController(authorizationControllerDispatcher.Token(authorization))
 
 	// appBearer.InjectDownStreamPlugin(oauthDownStream)
-	// appBearer.InjectDownStreamPlugin(applicationValidationDownStream)
+	appBearer.InjectDownStreamPlugin(applicationValidationDownStream)
 
 	return nil
 }

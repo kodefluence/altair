@@ -2,35 +2,41 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"net/http"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
+	"github.com/codefluence-x/monorepo/db"
+	"github.com/codefluence-x/monorepo/exception"
+	"github.com/codefluence-x/monorepo/kontext"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
+// ApplicationManager manage all oauth_applications CRUD
 type ApplicationManager struct {
 	formatter             interfaces.OauthApplicationFormater
 	modelFormatter        interfaces.ModelFormater
 	oauthApplicationModel interfaces.OauthApplicationModel
 	applicationValidator  interfaces.OauthValidator
+	sqldb                 db.DB
 }
 
 // NewApplicationManager manage all oauth application data business logic
-func NewApplicationManager(formatter interfaces.OauthApplicationFormater, modelFormatter interfaces.ModelFormater, oauthApplicationModel interfaces.OauthApplicationModel, applicationValidator interfaces.OauthValidator) *ApplicationManager {
+func NewApplicationManager(formatter interfaces.OauthApplicationFormater, modelFormatter interfaces.ModelFormater, oauthApplicationModel interfaces.OauthApplicationModel, applicationValidator interfaces.OauthValidator, sqldb db.DB) *ApplicationManager {
 	return &ApplicationManager{
 		formatter:             formatter,
 		modelFormatter:        modelFormatter,
 		oauthApplicationModel: oauthApplicationModel,
 		applicationValidator:  applicationValidator,
+		sqldb:                 sqldb,
 	}
 }
 
+// List of oauth applications
 func (am *ApplicationManager) List(ctx context.Context, offset, limit int) ([]entity.OauthApplicationJSON, int, *entity.Error) {
-	oauthApplications, err := am.oauthApplicationModel.Paginate(ctx, offset, limit)
+	oauthApplications, err := am.oauthApplicationModel.Paginate(kontext.Fabricate(kontext.WithDefaultContext(ctx)), offset, limit, am.sqldb)
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -47,7 +53,7 @@ func (am *ApplicationManager) List(ctx context.Context, offset, limit int) ([]en
 		}
 	}
 
-	total, err := am.oauthApplicationModel.Count(ctx)
+	total, err := am.oauthApplicationModel.Count(kontext.Fabricate(kontext.WithDefaultContext(ctx)), am.sqldb)
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -67,6 +73,7 @@ func (am *ApplicationManager) List(ctx context.Context, offset, limit int) ([]en
 	return formattedResult, total, nil
 }
 
+// Create oauth application
 func (am *ApplicationManager) Create(ctx context.Context, e entity.OauthApplicationJSON) (entity.OauthApplicationJSON, *entity.Error) {
 	if err := am.applicationValidator.ValidateApplication(ctx, e); err != nil {
 		log.Error().
@@ -78,7 +85,7 @@ func (am *ApplicationManager) Create(ctx context.Context, e entity.OauthApplicat
 		return entity.OauthApplicationJSON{}, err
 	}
 
-	id, err := am.oauthApplicationModel.Create(ctx, am.modelFormatter.OauthApplication(e))
+	id, err := am.oauthApplicationModel.Create(kontext.Fabricate(kontext.WithDefaultContext(ctx)), am.modelFormatter.OauthApplication(e), am.sqldb)
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -96,12 +103,13 @@ func (am *ApplicationManager) Create(ctx context.Context, e entity.OauthApplicat
 	return am.One(ctx, id)
 }
 
+// Update oauth application
 func (am *ApplicationManager) Update(ctx context.Context, ID int, e entity.OauthApplicationUpdateJSON) (entity.OauthApplicationJSON, *entity.Error) {
 
-	err := am.oauthApplicationModel.Update(ctx, ID, entity.OauthApplicationUpdateable{
+	err := am.oauthApplicationModel.Update(kontext.Fabricate(kontext.WithDefaultContext(ctx)), ID, entity.OauthApplicationUpdateable{
 		Description: e.Description,
 		Scopes:      e.Scopes,
-	})
+	}, am.sqldb)
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -118,10 +126,11 @@ func (am *ApplicationManager) Update(ctx context.Context, ID int, e entity.Oauth
 	return am.One(ctx, ID)
 }
 
+// One retrieve oauth application
 func (am *ApplicationManager) One(ctx context.Context, ID int) (entity.OauthApplicationJSON, *entity.Error) {
-	oauthApplication, err := am.oauthApplicationModel.One(ctx, ID)
+	oauthApplication, err := am.oauthApplicationModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), ID, am.sqldb)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err.Type() == exception.NotFound {
 			return entity.OauthApplicationJSON{}, &entity.Error{
 				HttpStatus: http.StatusNotFound,
 				Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "oauth_application")),

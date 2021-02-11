@@ -8,6 +8,9 @@ import (
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
+	"github.com/codefluence-x/monorepo/db"
+	"github.com/codefluence-x/monorepo/exception"
+	"github.com/codefluence-x/monorepo/kontext"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -25,6 +28,8 @@ type Authorization struct {
 	oauthFormatter interfaces.OauthFormatter
 
 	refreshTokenToggle bool
+
+	sqldb db.DB
 }
 
 // NewAuthorization create new service to handler authorize related flow
@@ -37,6 +42,7 @@ func NewAuthorization(
 	oauthValidator interfaces.OauthValidator,
 	oauthFormatter interfaces.OauthFormatter,
 	refreshTokenToggle bool,
+	sqldb db.DB,
 ) *Authorization {
 	return &Authorization{
 		oauthApplicationModel:  oauthApplicationModel,
@@ -47,6 +53,7 @@ func NewAuthorization(
 		oauthValidator:         oauthValidator,
 		oauthFormatter:         oauthFormatter,
 		refreshTokenToggle:     refreshTokenToggle,
+		sqldb:                  sqldb,
 	}
 }
 
@@ -231,7 +238,7 @@ func (a *Authorization) findAndValidateApplication(ctx context.Context, clientUI
 		}
 	}
 
-	oauthApplication, err := a.oauthApplicationModel.OneByUIDandSecret(ctx, *clientUID, *clientSecret)
+	oauthApplication, err := a.oauthApplicationModel.OneByUIDandSecret(kontext.Fabricate(kontext.WithDefaultContext(ctx)), *clientUID, *clientSecret, a.sqldb)
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -240,7 +247,7 @@ func (a *Authorization) findAndValidateApplication(ctx context.Context, clientUI
 			Str("client_uid", *clientUID).
 			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("find_secret")).
 			Msg("application cannot be found because there was an error")
-		if err == sql.ErrNoRows {
+		if err.Type() == exception.NotFound {
 			return entity.OauthApplication{}, &entity.Error{
 				HttpStatus: http.StatusNotFound,
 				Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "client_uid & client_secret")),

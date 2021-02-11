@@ -14,6 +14,8 @@ import (
 	"github.com/codefluence-x/altair/provider/plugin/oauth/downstream"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"
+	mockdb "github.com/codefluence-x/monorepo/db/mock"
+	"github.com/codefluence-x/monorepo/exception"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -23,10 +25,12 @@ func TestApplicationValidation(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
+	sqldb := mockdb.NewMockDB(mockCtrl)
+
 	t.Run("Name", func(t *testing.T) {
 		t.Run("Return application-validation-plugin", func(t *testing.T) {
 			oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
-			oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel)
+			oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel, sqldb)
 			assert.Equal(t, "application-validation-plugin", oauthPlugin.Name())
 		})
 	})
@@ -56,9 +60,9 @@ func TestApplicationValidation(t *testing.T) {
 					}
 
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
-					oauthApplicationModel.EXPECT().OneByUIDandSecret(c, clientUID, clientSecret).Return(entityOauthApplication, nil)
+					oauthApplicationModel.EXPECT().OneByUIDandSecret(gomock.Any(), clientUID, clientSecret, sqldb).Return(entityOauthApplication, nil)
 
-					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel)
+					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel, sqldb)
 					err := oauthPlugin.Intervene(c, r, routePath)
 
 					assert.Nil(t, err)
@@ -82,9 +86,9 @@ func TestApplicationValidation(t *testing.T) {
 					routePath := coreEntity.RouterPath{Auth: "none"}
 
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
-					oauthApplicationModel.EXPECT().OneByUIDandSecret(c, gomock.Any(), gomock.Any()).Times(0)
+					oauthApplicationModel.EXPECT().OneByUIDandSecret(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel)
+					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel, sqldb)
 					err := oauthPlugin.Intervene(c, r, routePath)
 
 					assert.Nil(t, err)
@@ -117,9 +121,9 @@ func TestApplicationValidation(t *testing.T) {
 					entityOauthApplication := entity.OauthApplication{}
 
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
-					oauthApplicationModel.EXPECT().OneByUIDandSecret(c, clientUID, clientSecret).Return(entityOauthApplication, sql.ErrNoRows)
+					oauthApplicationModel.EXPECT().OneByUIDandSecret(gomock.Any(), clientUID, clientSecret, sqldb).Return(entityOauthApplication, exception.Throw(sql.ErrNoRows, exception.WithType(exception.NotFound)))
 
-					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel)
+					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel, sqldb)
 					err := oauthPlugin.Intervene(c, r, routePath)
 
 					assert.NotNil(t, err)
@@ -152,9 +156,9 @@ func TestApplicationValidation(t *testing.T) {
 					entityOauthApplication := entity.OauthApplication{}
 
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
-					oauthApplicationModel.EXPECT().OneByUIDandSecret(c, clientUID, clientSecret).Return(entityOauthApplication, errors.New("database is not available"))
+					oauthApplicationModel.EXPECT().OneByUIDandSecret(gomock.Any(), clientUID, clientSecret, sqldb).Return(entityOauthApplication, exception.Throw(errors.New("data is not available")))
 
-					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel)
+					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel, sqldb)
 					err := oauthPlugin.Intervene(c, r, routePath)
 
 					assert.NotNil(t, err)
@@ -184,9 +188,9 @@ func TestApplicationValidation(t *testing.T) {
 					routePath := coreEntity.RouterPath{Auth: "oauth_application"}
 
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
-					oauthApplicationModel.EXPECT().OneByUIDandSecret(c, gomock.Any(), gomock.Any()).Times(0)
+					oauthApplicationModel.EXPECT().OneByUIDandSecret(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel)
+					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel, sqldb)
 					err := oauthPlugin.Intervene(c, r, routePath)
 
 					assert.NotNil(t, err)
@@ -216,9 +220,9 @@ func TestApplicationValidation(t *testing.T) {
 					routePath := coreEntity.RouterPath{Auth: "oauth_application"}
 
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
-					oauthApplicationModel.EXPECT().OneByUIDandSecret(c, gomock.Any(), gomock.Any()).Times(0)
+					oauthApplicationModel.EXPECT().OneByUIDandSecret(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel)
+					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel, sqldb)
 					err := oauthPlugin.Intervene(c, r, routePath)
 
 					assert.NotNil(t, err)
@@ -244,9 +248,9 @@ func TestApplicationValidation(t *testing.T) {
 					routePath := coreEntity.RouterPath{Auth: "oauth_application"}
 
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
-					oauthApplicationModel.EXPECT().OneByUIDandSecret(c, gomock.Any(), gomock.Any()).Times(0)
+					oauthApplicationModel.EXPECT().OneByUIDandSecret(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel)
+					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel, sqldb)
 					err := oauthPlugin.Intervene(c, r, routePath)
 
 					assert.NotNil(t, err)
@@ -280,9 +284,9 @@ func TestApplicationValidation(t *testing.T) {
 					routePath := coreEntity.RouterPath{Auth: "oauth_application"}
 
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
-					oauthApplicationModel.EXPECT().OneByUIDandSecret(c, gomock.Any(), gomock.Any()).Times(0)
+					oauthApplicationModel.EXPECT().OneByUIDandSecret(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel)
+					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel, sqldb)
 					err := oauthPlugin.Intervene(c, r, routePath)
 
 					assert.NotNil(t, err)
@@ -313,9 +317,9 @@ func TestApplicationValidation(t *testing.T) {
 					routePath := coreEntity.RouterPath{Auth: "oauth_application"}
 
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
-					oauthApplicationModel.EXPECT().OneByUIDandSecret(c, gomock.Any(), gomock.Any()).Times(0)
+					oauthApplicationModel.EXPECT().OneByUIDandSecret(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
 
-					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel)
+					oauthPlugin := downstream.NewApplicationValidation(oauthApplicationModel, sqldb)
 					err := oauthPlugin.Intervene(c, r, routePath)
 
 					assert.NotNil(t, err)

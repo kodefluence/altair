@@ -15,6 +15,8 @@ import (
 	"github.com/codefluence-x/altair/provider/plugin/oauth/service"
 	"github.com/codefluence-x/altair/util"
 	"github.com/codefluence-x/aurelia"
+	mockdb "github.com/codefluence-x/monorepo/db/mock"
+	"github.com/codefluence-x/monorepo/exception"
 	"github.com/go-sql-driver/mysql"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
@@ -24,6 +26,8 @@ import (
 func TestAuthorizationGrantor(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
+
+	sqldb := mockdb.NewMockDB(mockCtrl)
 
 	t.Run("Grantor", func(t *testing.T) {
 		t.Run("Given context and authorization request with a response type of token", func(t *testing.T) {
@@ -88,7 +92,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 
 				gomock.InOrder(
 					oauthApplicationModel.EXPECT().
-						OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+						OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).
 						Return(oauthApplication, nil),
 					oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
 					modelFormatterMock.EXPECT().AccessTokenFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessTokenInsertable),
@@ -97,14 +101,13 @@ func TestAuthorizationGrantor(t *testing.T) {
 					oauthFormatterMock.EXPECT().AccessToken(oauthAccessToken, *authorizationRequest.RedirectURI, nil).Return(oauthAccessTokenJSON),
 				)
 
-				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 				results, err := authorizationService.Grantor(ctx, authorizationRequest)
 				assert.Nil(t, err)
 				assert.Equal(t, oauthAccessTokenJSON, results)
 			})
 
 			t.Run("Oauth application model return error", func(t *testing.T) {
-
 				t.Run("Not found error", func(t *testing.T) {
 					t.Run("Return error 404", func(t *testing.T) {
 						oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
@@ -132,7 +135,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 						}
 
 						gomock.InOrder(
-							oauthApplicationModel.EXPECT().OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).Return(entity.OauthApplication{}, sql.ErrNoRows),
+							oauthApplicationModel.EXPECT().OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).Return(entity.OauthApplication{}, exception.Throw(sql.ErrNoRows, exception.WithType(exception.NotFound))),
 							oauthValidator.EXPECT().ValidateAuthorizationGrant(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 							modelFormatterMock.EXPECT().AccessTokenFromAuthorizationRequest(gomock.Any(), gomock.Any()).Times(0),
 							oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
@@ -140,7 +143,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 							oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 						)
 
-						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 						results, err := authorizationService.Grantor(ctx, authorizationRequest)
 						assert.NotNil(t, err)
 						assert.Equal(t, expectedError, err)
@@ -175,7 +178,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 						}
 
 						gomock.InOrder(
-							oauthApplicationModel.EXPECT().OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).Return(entity.OauthApplication{}, errors.New("unexpected error")),
+							oauthApplicationModel.EXPECT().OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).Return(entity.OauthApplication{}, exception.Throw(errors.New("unexpected error"))),
 							oauthValidator.EXPECT().ValidateAuthorizationGrant(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 							modelFormatterMock.EXPECT().AccessTokenFromAuthorizationRequest(gomock.Any(), gomock.Any()).Times(0),
 							oauthAccessTokenModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
@@ -183,7 +186,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 							oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 						)
 
-						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 						results, err := authorizationService.Grantor(ctx, authorizationRequest)
 						assert.NotNil(t, err)
 						assert.Equal(t, expectedError, err)
@@ -241,7 +244,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 
 					gomock.InOrder(
 						oauthApplicationModel.EXPECT().
-							OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+							OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(expectedError),
 						modelFormatterMock.EXPECT().AccessTokenFromAuthorizationRequest(gomock.Any(), gomock.Any()).Times(0),
@@ -250,7 +253,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 						oauthFormatterMock.EXPECT().AccessToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.NotNil(t, err)
 					assert.Equal(t, expectedError, err)
@@ -305,7 +308,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 
 					gomock.InOrder(
 						oauthApplicationModel.EXPECT().
-							OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+							OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
 						modelFormatterMock.EXPECT().AccessTokenFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessTokenInsertable),
@@ -319,7 +322,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 					}
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.NotNil(t, err)
 					assert.Equal(t, expectedError, err)
@@ -387,7 +390,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 
 					gomock.InOrder(
 						oauthApplicationModel.EXPECT().
-							OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+							OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
 						modelFormatterMock.EXPECT().AccessTokenFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessTokenInsertable),
@@ -401,7 +404,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 					}
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.NotNil(t, err)
 					assert.Equal(t, expectedError, err)
@@ -480,7 +483,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 
 					gomock.InOrder(
 						oauthApplicationModel.EXPECT().
-							OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+							OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
 						oauthAccessTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthAccessTokenInsertable) (int, error) {
@@ -497,7 +500,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 						oauthRefreshTokenModel.EXPECT().One(ctx, 2).Return(oauthRefreshToken, nil),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true)
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true, sqldb)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.Nil(t, err)
 					assert.Equal(t, oauthAccessTokenJSON, results)
@@ -563,7 +566,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 
 					gomock.InOrder(
 						oauthApplicationModel.EXPECT().
-							OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+							OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
 						oauthAccessTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthAccessTokenInsertable) (int, error) {
@@ -577,7 +580,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 						oauthRefreshTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Times(0),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true)
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true, sqldb)
 					_, err := authorizationService.Grantor(ctx, authorizationRequest)
 
 					expectedErr := &entity.Error{
@@ -649,7 +652,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 
 					gomock.InOrder(
 						oauthApplicationModel.EXPECT().
-							OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+							OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
 						oauthAccessTokenModel.EXPECT().Create(ctx, gomock.Any()).DoAndReturn(func(ctx context.Context, insertable entity.OauthAccessTokenInsertable) (int, error) {
@@ -666,7 +669,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 						oauthRefreshTokenModel.EXPECT().One(gomock.Any(), gomock.Any()).Return(entity.OauthRefreshToken{}, errors.New("unexpected error")),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true)
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatter, oauthValidator, oauthFormatter, true, sqldb)
 					_, err := authorizationService.Grantor(ctx, authorizationRequest)
 					expectedErr := &entity.Error{
 						HttpStatus: http.StatusInternalServerError,
@@ -748,7 +751,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 
 				gomock.InOrder(
 					oauthApplicationModel.EXPECT().
-						OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+						OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).
 						Return(oauthApplication, nil),
 					oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
 					modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessGrantInsertable),
@@ -757,7 +760,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 					oauthFormatterMock.EXPECT().AccessGrant(oauthAccessGrant).Return(oauthAccessGrantJSON),
 				)
 
-				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 				results, err := authorizationService.Grantor(ctx, authorizationRequest)
 				assert.Nil(t, err)
 				assert.Equal(t, oauthAccessGrantJSON, results)
@@ -812,7 +815,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 
 					gomock.InOrder(
 						oauthApplicationModel.EXPECT().
-							OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+							OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(expectedError),
 						modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(gomock.Any(), gomock.Any()).Times(0),
@@ -821,7 +824,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 						oauthFormatterMock.EXPECT().AccessGrant(gomock.Any()).Times(0),
 					)
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.NotNil(t, err)
 					assert.Equal(t, expectedError, err)
@@ -857,7 +860,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 						}
 
 						gomock.InOrder(
-							oauthApplicationModel.EXPECT().OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).Return(entity.OauthApplication{}, sql.ErrNoRows),
+							oauthApplicationModel.EXPECT().OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).Return(entity.OauthApplication{}, exception.Throw(sql.ErrNoRows, exception.WithType(exception.NotFound))),
 							oauthValidator.EXPECT().ValidateAuthorizationGrant(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
 							modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(gomock.Any(), gomock.Any()).Times(0),
 							oauthAccessGrantModel.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0),
@@ -865,7 +868,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 							oauthFormatterMock.EXPECT().AccessGrant(gomock.Any()).Times(0),
 						)
 
-						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 						results, err := authorizationService.Grantor(ctx, authorizationRequest)
 						assert.NotNil(t, err)
 						assert.Equal(t, expectedError, err)
@@ -921,7 +924,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 
 					gomock.InOrder(
 						oauthApplicationModel.EXPECT().
-							OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+							OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
 						modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessGrantInsertable),
@@ -935,7 +938,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 					}
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.NotNil(t, err)
 					assert.Equal(t, expectedErr, err)
@@ -1011,7 +1014,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 
 					gomock.InOrder(
 						oauthApplicationModel.EXPECT().
-							OneByUIDandSecret(ctx, *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret).
+							OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
 						modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessGrantInsertable),
@@ -1025,7 +1028,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 						Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
 					}
 
-					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
 					assert.NotNil(t, err)
 					assert.Equal(t, expectedErr, err)
@@ -1060,7 +1063,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("response_type is invalid. Should be either `token` or `code`.")),
 				}
 
-				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 				results, err := authorizationService.Grantor(ctx, authorizationRequest)
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedError, err)
@@ -1094,7 +1097,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("client_uid cannot be empty")),
 				}
 
-				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 				results, err := authorizationService.Grantor(ctx, authorizationRequest)
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedError, err)
@@ -1128,7 +1131,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("client_secret cannot be empty")),
 				}
 
-				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 				results, err := authorizationService.Grantor(ctx, authorizationRequest)
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedError, err)
@@ -1162,7 +1165,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 					Errors:     eobject.Wrap(eobject.ValidationError("response_type cannot be empty")),
 				}
 
-				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false)
+				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 				results, err := authorizationService.Grantor(ctx, authorizationRequest)
 				assert.NotNil(t, err)
 				assert.Equal(t, expectedError, err)
