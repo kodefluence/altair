@@ -100,6 +100,8 @@ github.com/codefluence-x/aurelia v0.0.0-20190914065210-ba6f9a4a12fe h1:QZZvF/n3z
 github.com/codefluence-x/aurelia v0.0.0-20190914065210-ba6f9a4a12fe/go.mod h1:vh9CoLBXBUa3/Q4R8ZPyAY+zvff/FHiLYRNM9GdgzqQ=
 github.com/codefluence-x/monorepo v0.0.0-20210211142618-03bc52adf854 h1:95VPsv2OJB+ORz91wSdO0vd/lsii5vvfhvQYYDkGLoE=
 github.com/codefluence-x/monorepo v0.0.0-20210211142618-03bc52adf854/go.mod h1:I5DWOM5EUCaf3wGRzaibij0KUs7AZ6+TOyG4OsmAssU=
+github.com/codefluence-x/monorepo v0.0.0-20210211165551-421fa588d4c2 h1:x7hPoAMdz5NDalZrBOh48gPb6jFEGuKNmjZO1LI8dm0=
+github.com/codefluence-x/monorepo v0.0.0-20210211165551-421fa588d4c2/go.mod h1:I5DWOM5EUCaf3wGRzaibij0KUs7AZ6+TOyG4OsmAssU=
 github.com/containerd/containerd v1.4.0/go.mod h1:bC6axHOhabU15QhwfG7w5PipXdVtMXFTttgp+kVtyUA=
 github.com/containerd/containerd v1.4.1 h1:pASeJT3R3YyVn+94qEPk0SnU1OQ20Jd/T+SPKy9xehY=
 github.com/containerd/containerd v1.4.1/go.mod h1:bC6axHOhabU15QhwfG7w5PipXdVtMXFTttgp+kVtyUA=
