@@ -90,7 +90,7 @@ func TestUpdate(t *testing.T) {
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				var response ErrorResponse
-				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "oauth/applications/1", bytes.NewReader(encodedBytes))
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/1", bytes.NewReader(encodedBytes))
 
 				err = json.Unmarshal(w.Body.Bytes(), &response)
 				assert.Nil(t, err)
@@ -116,7 +116,7 @@ func TestUpdate(t *testing.T) {
 				}
 
 				var response ErrorResponse
-				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "oauth/applications/1", testhelper.MockErrorIoReader{})
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/1", testhelper.MockErrorIoReader{})
 
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.Nil(t, err)
@@ -150,7 +150,7 @@ func TestUpdate(t *testing.T) {
 				}
 
 				var response ErrorResponse
-				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "oauth/applications/s", bytes.NewReader(encodedBytes))
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/s", bytes.NewReader(encodedBytes))
 
 				err = json.Unmarshal(w.Body.Bytes(), &response)
 				assert.Nil(t, err)
@@ -176,7 +176,7 @@ func TestUpdate(t *testing.T) {
 				}
 
 				var response ErrorResponse
-				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "oauth/applications/1", bytes.NewReader([]byte(`this is gonna be error`)))
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/1", bytes.NewReader([]byte(`this is gonna be error`)))
 
 				err := json.Unmarshal(w.Body.Bytes(), &response)
 				assert.Nil(t, err)
