@@ -24,10 +24,8 @@ jobs:
       - name: Unit Test
         run: make test
 
-      - name: Get goverall
-        run: go get github.com/mattn/goveralls
-
       - name: Upload coverage
-        env:
-          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: goveralls -coverprofile=cover.out -service=github
+        run: |
+          go get github.com/mattn/goveralls
+          go mod vendor
+          goveralls -coverprofile=cover.out -service=github
