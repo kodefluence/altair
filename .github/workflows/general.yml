@@ -18,6 +18,9 @@ jobs:
 
       - uses: actions/checkout@v2
 
+      - name: Get goverall
+        run: go get github.com/mattn/goveralls
+
       - name: Go mod vendor
         run: go mod vendor
 
@@ -25,7 +28,6 @@ jobs:
         run: make test
 
       - name: Upload coverage
-        run: |
-          go get github.com/mattn/goveralls
-          go mod vendor
-          goveralls -coverprofile=cover.out -service=github
+        env:
+          COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: goveralls -coverprofile=cover.out -service=github
