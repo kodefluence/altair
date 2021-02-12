@@ -87,6 +87,6 @@ type OauthValidator interface {
 	ValidateApplication(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error
 	ValidateAuthorizationGrant(ctx context.Context, r entity.AuthorizationRequestJSON, application entity.OauthApplication) *entity.Error
 	ValidateTokenGrant(ctx context.Context, r entity.AccessTokenRequestJSON) *entity.Error
-	ValidateTokenRefreshToken(ctx context.Context, data entity.OauthRefreshToken) *entity.Error
+	ValidateTokenRefreshToken(ctx context.Context, data entity.OauthRefreshToken) exception.Exception
 	ValidateTokenAuthorizationCode(ctx context.Context, r entity.AccessTokenRequestJSON, data entity.OauthAccessGrant) *entity.Error
 }

@@ -10,8 +10,10 @@ import (
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/util"
+	"github.com/codefluence-x/monorepo/exception"
 )
 
+// Oauth validator validate all oauth business flow logic
 type Oauth struct {
 	refreshTokenToggle bool
 }
@@ -170,13 +172,11 @@ func (a *Oauth) ValidateTokenAuthorizationCode(ctx context.Context, r entity.Acc
 }
 
 // ValidateTokenRefreshToken will validate refresh token
-func (a *Oauth) ValidateTokenRefreshToken(ctx context.Context, data entity.OauthRefreshToken) *entity.Error {
+func (a *Oauth) ValidateTokenRefreshToken(ctx context.Context, data entity.OauthRefreshToken) exception.Exception {
 
 	if data.RevokedAT.Valid {
-		return &entity.Error{
-			HttpStatus: http.StatusForbidden,
-			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "refresh token already used")),
-		}
+		errorObject := eobject.ForbiddenError(ctx, "access_token", "refresh token already used")
+		return exception.Throw(errorObject, exception.WithTitle(errorObject.Code), exception.WithDetail(errorObject.Message), exception.WithType(exception.Forbidden))
 	}
 
 	return nil

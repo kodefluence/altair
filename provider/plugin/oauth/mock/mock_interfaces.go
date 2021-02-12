@@ -842,10 +842,10 @@ func (mr *MockOauthValidatorMockRecorder) ValidateTokenGrant(ctx, r interface{})
 }
 
 // ValidateTokenRefreshToken mocks base method
-func (m *MockOauthValidator) ValidateTokenRefreshToken(ctx context.Context, data entity.OauthRefreshToken) *entity.Error {
+func (m *MockOauthValidator) ValidateTokenRefreshToken(ctx context.Context, data entity.OauthRefreshToken) exception.Exception {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidateTokenRefreshToken", ctx, data)
-	ret0, _ := ret[0].(*entity.Error)
+	ret0, _ := ret[0].(exception.Exception)
 	return ret0
 }
 

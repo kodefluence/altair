@@ -12,6 +12,7 @@ import (
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/validator"
 	"github.com/codefluence-x/altair/util"
+	"github.com/codefluence-x/monorepo/exception"
 	"github.com/go-sql-driver/mysql"
 	"github.com/stretchr/testify/assert"
 )
@@ -611,13 +612,11 @@ func TestApplication(t *testing.T) {
 						},
 					}
 
-					expectedError := &entity.Error{
-						HttpStatus: http.StatusForbidden,
-						Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "refresh token already used")),
-					}
+					errorObject := eobject.ForbiddenError(ctx, "access_token", "refresh token already used")
+					exc := exception.Throw(errorObject, exception.WithTitle(errorObject.Code), exception.WithDetail(errorObject.Message), exception.WithType(exception.Forbidden))
 
 					applicationValidator := validator.NewOauth(true)
-					assert.Equal(t, expectedError, applicationValidator.ValidateTokenRefreshToken(ctx, oauthRefreshToken))
+					assert.Equal(t, exc, applicationValidator.ValidateTokenRefreshToken(ctx, oauthRefreshToken))
 				})
 			})
 		})

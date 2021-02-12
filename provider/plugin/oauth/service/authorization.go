@@ -301,128 +301,106 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 }
 
 func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON, oauthApplication entity.OauthApplication) (entity.OauthAccessToken, entity.OauthRefreshToken, *entity.Error) {
-	oauthRefreshToken, err := a.oauthRefreshTokenModel.OneByToken(kontext.Fabricate(kontext.WithDefaultContext(ctx)), *accessTokenReq.RefreshToken, a.sqldb)
-	if err != nil {
+	var finalOauthAccessToken entity.OauthAccessToken
+	var finalOauthRefreshToken entity.OauthRefreshToken
+
+	exc := a.sqldb.Transaction(kontext.Fabricate(kontext.WithDefaultContext(ctx)), "authorization-grant-token-from-refresh-token", func(tx db.TX) exception.Exception {
+		oldOauthRefreshToken, err := a.oauthRefreshTokenModel.OneByToken(kontext.Fabricate(kontext.WithDefaultContext(ctx)), *accessTokenReq.RefreshToken, tx)
+		if err != nil {
+			if err.Type() == exception.NotFound {
+				errorObject := eobject.NotFoundError(ctx, "refresh_token")
+				return exception.Throw(err, exception.WithType(exception.NotFound), exception.WithDetail(errorObject.Message), exception.WithTitle(errorObject.Code))
+			}
+
+			return exception.Throw(err, exception.WithDetail("refresh token cannot be found because there was an error"))
+		}
+
+		if err := a.oauthValidator.ValidateTokenRefreshToken(ctx, oldOauthRefreshToken); err != nil {
+			return err
+		}
+
+		oldAccessToken, err := a.oauthAccessTokenModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), oldOauthRefreshToken.OauthAccessTokenID, tx)
+		if err != nil {
+			if err.Type() == exception.NotFound {
+				return exception.Throw(err, exception.WithType(exception.Unauthorized), exception.WithDetail("access token cannot be found because there was an error"))
+			}
+
+			return exception.Throw(err, exception.WithDetail("access token cannot be found because there was an error"))
+		}
+
+		oauthAccessTokenID, err := a.oauthAccessTokenModel.Create(kontext.Fabricate(kontext.WithDefaultContext(ctx)), a.modelFormatter.AccessTokenFromOauthRefreshToken(oauthApplication, oldAccessToken), tx)
+		if err != nil {
+			return exception.Throw(err, exception.WithDetail("error creating access token"))
+		}
+
+		oauthAccessToken, err := a.oauthAccessTokenModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), oauthAccessTokenID, tx)
+		if err != nil {
+			return exception.Throw(err, exception.WithDetail("error when selecting newly created access token"))
+		}
+
+		err = a.oauthRefreshTokenModel.Revoke(kontext.Fabricate(kontext.WithDefaultContext(ctx)), *accessTokenReq.RefreshToken, tx)
+		if err != nil {
+			return exception.Throw(err, exception.WithDetail("error revoke refresh token"))
+		}
+
+		oauthRefreshTokenID, err := a.oauthRefreshTokenModel.Create(kontext.Fabricate(kontext.WithDefaultContext(ctx)), a.modelFormatter.RefreshToken(oauthApplication, oauthAccessToken), tx)
+		if err != nil {
+			return exception.Throw(err, exception.WithDetail("error creating refresh token"))
+		}
+
+		oauthRefreshToken, err := a.oauthRefreshTokenModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), oauthRefreshTokenID, tx)
+		if err != nil {
+			return exception.Throw(err, exception.WithDetail("error when selecting newly created refresh token"))
+		}
+
+		finalOauthAccessToken = oauthAccessToken
+		finalOauthRefreshToken = oauthRefreshToken
+
+		return nil
+	})
+
+	if exc != nil {
 		log.Error().
-			Err(err).
+			Err(exc).
 			Stack().
 			Interface("request_id", ctx.Value("request_id")).
-			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("refresh_token").Str("one_by_code")).
-			Msg("refresh token cannot be found because there was an error")
+			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("refresh_token")).
+			Msg(exc.Detail())
 
-		if err.Type() == exception.NotFound {
+		switch exc.Type() {
+		case exception.NotFound:
 			return entity.OauthAccessToken{}, entity.OauthRefreshToken{}, &entity.Error{
 				HttpStatus: http.StatusNotFound,
-				Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "refresh_token")),
+				Errors: eobject.Wrap(entity.ErrorObject{
+					Code:    exc.Title(),
+					Message: exc.Detail(),
+				}),
 			}
-		}
 
-		return entity.OauthAccessToken{}, entity.OauthRefreshToken{}, &entity.Error{
-			HttpStatus: http.StatusInternalServerError,
-			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
-		}
-	}
-
-	if err := a.oauthValidator.ValidateTokenRefreshToken(ctx, oauthRefreshToken); err != nil {
-		return entity.OauthAccessToken{}, oauthRefreshToken, err
-	}
-
-	oldAccessToken, err := a.oauthAccessTokenModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), oauthRefreshToken.OauthAccessTokenID, a.sqldb)
-	if err != nil {
-		if err.Type() == exception.NotFound {
-			return entity.OauthAccessToken{}, oauthRefreshToken, &entity.Error{
+		case exception.Unauthorized:
+			return entity.OauthAccessToken{}, entity.OauthRefreshToken{}, &entity.Error{
 				HttpStatus: http.StatusUnauthorized,
 				Errors:     eobject.Wrap(eobject.UnauthorizedError()),
 			}
-		}
 
-		log.Error().
-			Err(err).
-			Stack().
-			Interface("request_id", ctx.Value("request_id")).
-			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
-			Msg("Error selecting one access token")
+		case exception.Forbidden:
+			return entity.OauthAccessToken{}, entity.OauthRefreshToken{}, &entity.Error{
+				HttpStatus: http.StatusForbidden,
+				Errors: eobject.Wrap(entity.ErrorObject{
+					Code:    exc.Title(),
+					Message: exc.Detail(),
+				}),
+			}
 
-		return entity.OauthAccessToken{}, oauthRefreshToken, &entity.Error{
-			HttpStatus: http.StatusInternalServerError,
-			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
-		}
-	}
-
-	id, err := a.oauthAccessTokenModel.Create(kontext.Fabricate(kontext.WithDefaultContext(ctx)), a.modelFormatter.AccessTokenFromOauthRefreshToken(oauthApplication, oldAccessToken), a.sqldb)
-	if err != nil {
-
-		log.Error().
-			Err(err).
-			Stack().
-			Interface("request_id", ctx.Value("request_id")).
-			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant_token")).
-			Msg("Error creating access token after creating the data")
-
-		return entity.OauthAccessToken{}, oauthRefreshToken, &entity.Error{
-			HttpStatus: http.StatusInternalServerError,
-			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+		default:
+			return entity.OauthAccessToken{}, entity.OauthRefreshToken{}, &entity.Error{
+				HttpStatus: http.StatusInternalServerError,
+				Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+			}
 		}
 	}
 
-	oauthAccessToken, err := a.oauthAccessTokenModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), id, a.sqldb)
-	if err != nil {
-
-		log.Error().
-			Err(err).
-			Stack().
-			Interface("request_id", ctx.Value("request_id")).
-			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
-			Msg("Error selecting one access token")
-
-		return entity.OauthAccessToken{}, oauthRefreshToken, &entity.Error{
-			HttpStatus: http.StatusInternalServerError,
-			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
-		}
-	}
-
-	err = a.oauthRefreshTokenModel.Revoke(kontext.Fabricate(kontext.WithDefaultContext(ctx)), *accessTokenReq.RefreshToken, a.sqldb)
-	if err != nil {
-		// TODO: Error is intended to be suppressed until database transaction is implemented. After database transaction is implemented, then it will be rollbacked if there is error in revoke oauth access grants process
-		log.Error().
-			Err(err).
-			Stack().
-			Interface("request_id", ctx.Value("request_id")).
-			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
-			Msg("Error revoke refresh token")
-	}
-
-	newOauthRefreshTokenID, err := a.oauthRefreshTokenModel.Create(kontext.Fabricate(kontext.WithDefaultContext(ctx)), a.modelFormatter.RefreshToken(oauthApplication, oauthAccessToken), a.sqldb)
-	if err != nil {
-		log.Error().
-			Err(err).
-			Stack().
-			Interface("request_id", ctx.Value("request_id")).
-			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
-			Msg("Error creating refresh token")
-
-		return entity.OauthAccessToken{}, oauthRefreshToken, &entity.Error{
-			HttpStatus: http.StatusInternalServerError,
-			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
-		}
-	}
-
-	newOauthRefreshToken, err := a.oauthRefreshTokenModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), newOauthRefreshTokenID, a.sqldb)
-	if err != nil {
-		log.Error().
-			Err(err).
-			Stack().
-			Interface("request_id", ctx.Value("request_id")).
-			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("token")).
-			Msg("Error find newly created refresh token")
-
-		return entity.OauthAccessToken{}, oauthRefreshToken, &entity.Error{
-			HttpStatus: http.StatusInternalServerError,
-			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
-		}
-	}
-
-	return oauthAccessToken, newOauthRefreshToken, nil
+	return finalOauthAccessToken, finalOauthRefreshToken, nil
 }
 
 func (a *Authorization) grantTokenFromAuthorizationCode(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON, oauthApplication entity.OauthApplication) (entity.OauthAccessToken, string, *entity.Error) {
