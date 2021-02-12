@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 	"os"
@@ -23,12 +22,13 @@ import (
 	"github.com/codefluence-x/altair/forwarder"
 	"github.com/codefluence-x/altair/loader"
 	"github.com/codefluence-x/altair/provider"
+	"github.com/codefluence-x/monorepo/db"
 	"github.com/spf13/cobra"
 )
 
 var (
 	dbConfigs    map[string]core.DatabaseConfig = map[string]core.DatabaseConfig{}
-	databases    map[string]*sql.DB             = map[string]*sql.DB{}
+	databases    map[string]db.DB               = map[string]db.DB{}
 	appConfig    core.AppConfig
 	pluginBearer core.PluginBearer
 	apiEngine    *gin.Engine
@@ -163,7 +163,7 @@ func executeCommand() {
 			}
 
 			dbBearer := loader.DatabaseBearer(databases, dbConfigs)
-			db, config, err := dbBearer.Database(args[0])
+			_, config, err := dbBearer.Database(args[0])
 			if err != nil {
 				log.Error().
 					Err(err).
@@ -173,7 +173,9 @@ func executeCommand() {
 				return
 			}
 
-			migrationProvider := provider.Migration().GoMigrate(db, config)
+			sqldb, _ := db.GetInstance(args[0])
+
+			migrationProvider := provider.Migration().GoMigrate(sqldb, config)
 			migrator, err := migrationProvider.Migrator()
 			if err != nil {
 				log.Error().
@@ -214,7 +216,7 @@ func executeCommand() {
 			}
 
 			dbBearer := loader.DatabaseBearer(databases, dbConfigs)
-			db, config, err := dbBearer.Database(args[0])
+			_, config, err := dbBearer.Database(args[0])
 			if err != nil {
 				log.Error().
 					Err(err).
@@ -224,7 +226,9 @@ func executeCommand() {
 				return
 			}
 
-			migrationProvider := provider.Migration().GoMigrate(db, config)
+			sqldb, _ := db.GetInstance(args[0])
+
+			migrationProvider := provider.Migration().GoMigrate(sqldb, config)
 			migrator, err := migrationProvider.Migrator()
 			if err != nil {
 				log.Error().
@@ -265,7 +269,7 @@ func executeCommand() {
 			}
 
 			dbBearer := loader.DatabaseBearer(databases, dbConfigs)
-			db, config, err := dbBearer.Database(args[0])
+			_, config, err := dbBearer.Database(args[0])
 			if err != nil {
 				log.Error().
 					Err(err).
@@ -275,7 +279,9 @@ func executeCommand() {
 				return
 			}
 
-			migrationProvider := provider.Migration().GoMigrate(db, config)
+			sqldb, _ := db.GetInstance(args[0])
+
+			migrationProvider := provider.Migration().GoMigrate(sqldb, config)
 			migrator, err := migrationProvider.Migrator()
 			if err != nil {
 				log.Error().
@@ -301,10 +307,11 @@ func executeCommand() {
 	}
 
 	rootCmd.AddCommand(runCmd, migrateCmd, migrateDownCmd, migrateRollbackCmd, configCmd)
+
 	_ = rootCmd.Execute()
 }
 
-func dbConnectionFabricator(dbConfig core.DatabaseConfig) (*sql.DB, error) {
+func dbConnectionFabricator(instanceName string, dbConfig core.DatabaseConfig) (db.DB, error) {
 	port, err := dbConfig.DBPort()
 	if err != nil {
 		return nil, err
@@ -315,20 +322,35 @@ func dbConnectionFabricator(dbConfig core.DatabaseConfig) (*sql.DB, error) {
 		return nil, err
 	}
 
-	db, err := sql.Open(dbConfig.Driver(), fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&interpolateParams=true", dbConfig.DBUsername(), dbConfig.DBPassword(), dbConfig.DBHost(), port, dbConfig.DBDatabase()))
+	maxIdleConn, err := dbConfig.DBMaxIddleConn()
 	if err != nil {
 		return nil, err
 	}
 
-	db.SetConnMaxLifetime(maxConnLifetime)
+	maxOpenConn, err := dbConfig.DBMaxOpenConn()
+	if err != nil {
+		return nil, err
+	}
+
+	sqldb, err := db.FabricateMySQL(instanceName, db.Config{
+		Username: dbConfig.DBUsername(),
+		Password: dbConfig.DBPassword(),
+		Host:     dbConfig.DBHost(),
+		Port:     fmt.Sprintf("%d", port),
+		Name:     dbConfig.DBDatabase(),
+	}, db.WithConnMaxLifetime(maxConnLifetime), db.WithMaxIdleConn(maxIdleConn), db.WithMaxOpenConn(maxOpenConn))
+	if err != nil {
+		return nil, err
+	}
 
 	log.Info().Msg(fmt.Sprintf("Complete fabricating mysql writer connection: %s:%s@tcp(%s:%d)/%s?", dbConfig.DBUsername(), "***********", dbConfig.DBHost(), port, dbConfig.DBDatabase()))
-	return db, nil
+
+	return sqldb, nil
 }
 
 func fabricateConnection() error {
 	for key, config := range dbConfigs {
-		sqlDB, err := dbConnectionFabricator(config)
+		sqlDB, err := dbConnectionFabricator(key, config)
 		if err != nil {
 			return err
 		}
@@ -340,30 +362,14 @@ func fabricateConnection() error {
 }
 
 func closeConnection() {
-	for dbName, db := range databases {
-		var err error
-
-		for i := 0; i < 3; i++ {
-			err = db.Close()
-			if err != nil {
-				log.Error().
-					Err(err).
-					Stack().
-					Array("tags", zerolog.Arr().Str("altair").Str("main").Str(dbName)).
-					Msg("Error closing mysql writer")
-				continue
-			}
-
-			if err == nil {
-				break
-			}
-		}
-		if err != nil {
-			log.Warn().Array("tags", zerolog.Arr().Str("altair").Str("main").Str(dbName)).Msg("Failed closing mysql writer and reader connection.")
-			return
-		}
-
-		log.Info().Array("tags", zerolog.Arr().Str("altair").Str("main").Str(dbName)).Msg("Success closing mysql writer and reader connection.")
+	excs := db.CloseAll()
+	for _, exc := range excs {
+		log.Error().
+			Err(exc).
+			Stack().
+			Str("detail", exc.Detail()).
+			Array("tags", zerolog.Arr().Str("altair").Str("main").Str(exc.Title())).
+			Msg("Error closing mysql writer")
 	}
 }
 

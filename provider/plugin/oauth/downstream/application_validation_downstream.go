@@ -1,24 +1,28 @@
 package downstream
 
 import (
-	"database/sql"
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	coreEntity "github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
+	"github.com/codefluence-x/monorepo/db"
+	"github.com/codefluence-x/monorepo/exception"
+	"github.com/codefluence-x/monorepo/kontext"
 	"github.com/gin-gonic/gin"
 )
 
 // ApplicationValidation implement downstream plugin interface
 type ApplicationValidation struct {
 	oauthApplicationModel interfaces.OauthApplicationModel
+	sqldb                 db.DB
 }
 
 // NewApplicationValidation create new downstream plugin to check the validity of application uid and application secret given by the client
-func NewApplicationValidation(oauthApplicationModel interfaces.OauthApplicationModel) *ApplicationValidation {
-	return &ApplicationValidation{oauthApplicationModel: oauthApplicationModel}
+func NewApplicationValidation(oauthApplicationModel interfaces.OauthApplicationModel, sqldb db.DB) *ApplicationValidation {
+	return &ApplicationValidation{oauthApplicationModel: oauthApplicationModel, sqldb: sqldb}
 }
 
 // Name of downstream plugin
@@ -36,36 +40,36 @@ func (o *ApplicationValidation) Intervene(c *gin.Context, proxyReq *http.Request
 	// For now we just make it like this.
 	if proxyReq.Body == nil {
 		c.AbortWithStatus(http.StatusUnprocessableEntity)
-		return ErrInvalidRequest
+		return exception.Throw(errors.New("invalid request"), exception.WithTitle("bad request"), exception.WithDetail("request body is can't be null"), exception.WithType(exception.BadInput))
 	}
 
 	body, err := proxyReq.GetBody()
 	if err != nil {
-		c.AbortWithStatus(http.StatusServiceUnavailable)
-		return ErrUnavailable
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return exception.Throw(errors.New("internal server error"))
 	}
 
 	applicationJSON := entity.OauthApplicationJSON{}
 	err = json.NewDecoder(body).Decode(&applicationJSON)
 	if err != nil {
 		c.AbortWithStatus(http.StatusBadRequest)
-		return ErrBadRequest
+		return exception.Throw(errors.New("invalid request"), exception.WithTitle("bad request"), exception.WithDetail("invalid json body"), exception.WithType(exception.BadInput))
 	}
 
 	if applicationJSON.ClientUID == nil || applicationJSON.ClientSecret == nil {
 		c.AbortWithStatus(http.StatusUnprocessableEntity)
-		return ErrInvalidRequest
+		return exception.Throw(errors.New("invalid request"), exception.WithTitle("bad request"), exception.WithDetail("`client_uid` and `client_secret` can't be null"), exception.WithType(exception.BadInput))
 	}
 
-	_, err = o.oauthApplicationModel.OneByUIDandSecret(c, *applicationJSON.ClientUID, *applicationJSON.ClientSecret)
-	if err != nil {
-		if err == sql.ErrNoRows {
+	_, exc := o.oauthApplicationModel.OneByUIDandSecret(kontext.Fabricate(kontext.WithDefaultContext(c)), *applicationJSON.ClientUID, *applicationJSON.ClientSecret, o.sqldb)
+	if exc != nil {
+		if exc.Type() == exception.NotFound {
 			c.AbortWithStatus(http.StatusUnauthorized)
-			return ErrApplicationNotExists
+			return exception.Throw(exc, exception.WithType(exception.Unauthorized))
 		}
 
 		c.AbortWithStatus(http.StatusServiceUnavailable)
-		return ErrUnavailable
+		return exc
 	}
 
 	return nil

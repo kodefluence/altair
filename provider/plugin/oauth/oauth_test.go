@@ -4,13 +4,13 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/codefluence-x/altair/adapter"
 	coreEntity "github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/loader"
 	"github.com/codefluence-x/altair/mock"
 	"github.com/codefluence-x/altair/provider/metric"
 	"github.com/codefluence-x/altair/provider/plugin/oauth"
+	mockdb "github.com/codefluence-x/monorepo/db/mock"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
@@ -57,10 +57,7 @@ config:
 		MigrationSource:       "file://migration",
 	}
 
-	db, _, err := sqlmock.New()
-	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
-	}
+	sqldb := mockdb.NewMockDB(mockCtrl)
 
 	t.Run("Provide", func(t *testing.T) {
 		t.Run("Run gracefully", func(t *testing.T) {
@@ -68,7 +65,7 @@ config:
 			appBearer.SetMetricProvider(metric.NewPrometheusMetric())
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
-			dbBearer.EXPECT().Database(oauthDatabase).Return(db, MYSQLConfig, nil)
+			dbBearer.EXPECT().Database(oauthDatabase).Return(sqldb, MYSQLConfig, nil)
 
 			pluginBearer := loader.PluginBearer(plugins)
 
@@ -119,7 +116,7 @@ config:
 			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
-			dbBearer.EXPECT().Database(oauthDatabase).Return(db, MYSQLConfig, nil)
+			dbBearer.EXPECT().Database(oauthDatabase).Return(sqldb, MYSQLConfig, nil)
 
 			plugins := map[string]coreEntity.Plugin{
 				"oauth": {Plugin: "oauth", Raw: []byte(`
@@ -139,7 +136,7 @@ config:
 			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
-			dbBearer.EXPECT().Database(oauthDatabase).Return(db, MYSQLConfig, nil)
+			dbBearer.EXPECT().Database(oauthDatabase).Return(sqldb, MYSQLConfig, nil)
 
 			plugins := map[string]coreEntity.Plugin{
 				"oauth": {Plugin: "oauth", Raw: []byte(`
@@ -160,7 +157,7 @@ config:
 			appBearer.SetMetricProvider(metric.NewPrometheusMetric())
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
-			dbBearer.EXPECT().Database(oauthDatabase).Return(db, MYSQLConfig, nil)
+			dbBearer.EXPECT().Database(oauthDatabase).Return(sqldb, MYSQLConfig, nil)
 
 			plugins := map[string]coreEntity.Plugin{
 				"oauth": {Plugin: "oauth", Raw: []byte(`

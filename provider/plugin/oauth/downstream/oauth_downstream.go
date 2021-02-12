@@ -1,7 +1,7 @@
 package downstream
 
 import (
-	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -9,6 +9,9 @@ import (
 	"time"
 
 	coreEntity "github.com/codefluence-x/altair/entity"
+	"github.com/codefluence-x/monorepo/db"
+	"github.com/codefluence-x/monorepo/exception"
+	"github.com/codefluence-x/monorepo/kontext"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
@@ -18,11 +21,12 @@ import (
 // Oauth implement downstream plugin interface
 type Oauth struct {
 	oauthAccessTokenModel interfaces.OauthAccessTokenModel
+	sqldb                 db.DB
 }
 
 // NewOauth create new downstream plugin to check the validity of access token given by the users
-func NewOauth(oauthAccessTokenModel interfaces.OauthAccessTokenModel) *Oauth {
-	return &Oauth{oauthAccessTokenModel: oauthAccessTokenModel}
+func NewOauth(oauthAccessTokenModel interfaces.OauthAccessTokenModel, sqldb db.DB) *Oauth {
+	return &Oauth{oauthAccessTokenModel: oauthAccessTokenModel, sqldb: sqldb}
 }
 
 // Name get the name of downstream plugin
@@ -41,11 +45,11 @@ func (o *Oauth) Intervene(c *gin.Context, proxyReq *http.Request, r coreEntity.R
 		return err
 	}
 
-	token, err := o.oauthAccessTokenModel.OneByToken(c, accessToken)
-	if err != nil {
-		if err == sql.ErrNoRows {
+	token, exc := o.oauthAccessTokenModel.OneByToken(kontext.Fabricate(kontext.WithDefaultContext(c)), accessToken, o.sqldb)
+	if exc != nil {
+		if exc.Type() == exception.NotFound {
 			c.AbortWithStatus(http.StatusUnauthorized)
-			return err
+			return exc
 		}
 
 		c.AbortWithStatus(http.StatusServiceUnavailable)
@@ -88,18 +92,18 @@ func (o *Oauth) validTokenScope(token entity.OauthAccessToken, r coreEntity.Rout
 	return false
 }
 
-func (o *Oauth) parseToken(c *gin.Context) (string, error) {
+func (o *Oauth) parseToken(c *gin.Context) (string, exception.Exception) {
 	authorizationHeader := c.Request.Header.Get("Authorization")
 	splittedToken := strings.Split(authorizationHeader, " ")
 
 	if len(splittedToken) < 2 {
 		c.AbortWithStatus(http.StatusUnauthorized)
-		return "", ErrInvalidBearerFormat
+		return "", exception.Throw(errors.New("invalid request"), exception.WithTitle("bad request"), exception.WithDetail("invalid bearer format"), exception.WithType(exception.BadInput))
 	}
 
 	if splittedToken[0] != "Bearer" {
 		c.AbortWithStatus(http.StatusUnauthorized)
-		return "", ErrInvalidBearerFormat
+		return "", exception.Throw(errors.New("invalid request"), exception.WithTitle("bad request"), exception.WithDetail("invalid bearer format"), exception.WithType(exception.BadInput))
 	}
 
 	return splittedToken[1], nil

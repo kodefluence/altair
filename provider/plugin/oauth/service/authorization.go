@@ -2,12 +2,14 @@ package service
 
 import (
 	"context"
-	"database/sql"
 	"net/http"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
+	"github.com/codefluence-x/monorepo/db"
+	"github.com/codefluence-x/monorepo/exception"
+	"github.com/codefluence-x/monorepo/kontext"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -25,6 +27,8 @@ type Authorization struct {
 	oauthFormatter interfaces.OauthFormatter
 
 	refreshTokenToggle bool
+
+	sqldb db.DB
 }
 
 // NewAuthorization create new service to handler authorize related flow
@@ -37,6 +41,7 @@ func NewAuthorization(
 	oauthValidator interfaces.OauthValidator,
 	oauthFormatter interfaces.OauthFormatter,
 	refreshTokenToggle bool,
+	sqldb db.DB,
 ) *Authorization {
 	return &Authorization{
 		oauthApplicationModel:  oauthApplicationModel,
@@ -47,6 +52,7 @@ func NewAuthorization(
 		oauthValidator:         oauthValidator,
 		oauthFormatter:         oauthFormatter,
 		refreshTokenToggle:     refreshTokenToggle,
+		sqldb:                  sqldb,
 	}
 }
 
@@ -94,7 +100,7 @@ func (a *Authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 		return oauthAccessGrantJSON, err
 	}
 
-	id, err := a.oauthAccessGrantModel.Create(ctx, a.modelFormatter.AccessGrantFromAuthorizationRequest(authorizationReq, oauthApplication))
+	id, err := a.oauthAccessGrantModel.Create(kontext.Fabricate(kontext.WithDefaultContext(ctx)), a.modelFormatter.AccessGrantFromAuthorizationRequest(authorizationReq, oauthApplication), a.sqldb)
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -111,7 +117,7 @@ func (a *Authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 		}
 	}
 
-	oauthAccessGrant, err := a.oauthAccessGrantModel.One(ctx, id)
+	oauthAccessGrant, err := a.oauthAccessGrantModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), id, a.sqldb)
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -142,7 +148,7 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 		return entity.OauthAccessTokenJSON{}, err
 	}
 
-	id, err := a.oauthAccessTokenModel.Create(ctx, a.modelFormatter.AccessTokenFromAuthorizationRequest(authorizationReq, oauthApplication))
+	id, err := a.oauthAccessTokenModel.Create(kontext.Fabricate(kontext.WithDefaultContext(ctx)), a.modelFormatter.AccessTokenFromAuthorizationRequest(authorizationReq, oauthApplication), a.sqldb)
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -158,7 +164,7 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 		}
 	}
 
-	oauthAccessToken, err := a.oauthAccessTokenModel.One(ctx, id)
+	oauthAccessToken, err := a.oauthAccessTokenModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), id, a.sqldb)
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -179,7 +185,7 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 	var oauthRefreshTokenJSON *entity.OauthRefreshTokenJSON
 
 	if a.refreshTokenToggle {
-		refreshTokenID, err := a.oauthRefreshTokenModel.Create(ctx, a.modelFormatter.RefreshToken(oauthApplication, oauthAccessToken))
+		refreshTokenID, err := a.oauthRefreshTokenModel.Create(kontext.Fabricate(kontext.WithDefaultContext(ctx)), a.modelFormatter.RefreshToken(oauthApplication, oauthAccessToken), a.sqldb)
 		if err != nil {
 			log.Error().
 				Err(err).
@@ -194,7 +200,7 @@ func (a *Authorization) GrantToken(ctx context.Context, authorizationReq entity.
 			}
 		}
 
-		oauthRefreshToken, err := a.oauthRefreshTokenModel.One(ctx, refreshTokenID)
+		oauthRefreshToken, err := a.oauthRefreshTokenModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), refreshTokenID, a.sqldb)
 		if err != nil {
 			log.Error().
 				Err(err).
@@ -231,7 +237,7 @@ func (a *Authorization) findAndValidateApplication(ctx context.Context, clientUI
 		}
 	}
 
-	oauthApplication, err := a.oauthApplicationModel.OneByUIDandSecret(ctx, *clientUID, *clientSecret)
+	oauthApplication, err := a.oauthApplicationModel.OneByUIDandSecret(kontext.Fabricate(kontext.WithDefaultContext(ctx)), *clientUID, *clientSecret, a.sqldb)
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -240,7 +246,7 @@ func (a *Authorization) findAndValidateApplication(ctx context.Context, clientUI
 			Str("client_uid", *clientUID).
 			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("find_secret")).
 			Msg("application cannot be found because there was an error")
-		if err == sql.ErrNoRows {
+		if err.Type() == exception.NotFound {
 			return entity.OauthApplication{}, &entity.Error{
 				HttpStatus: http.StatusNotFound,
 				Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "client_uid & client_secret")),
@@ -295,7 +301,7 @@ func (a *Authorization) Token(ctx context.Context, accessTokenReq entity.AccessT
 }
 
 func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON, oauthApplication entity.OauthApplication) (entity.OauthAccessToken, entity.OauthRefreshToken, *entity.Error) {
-	oauthRefreshToken, err := a.oauthRefreshTokenModel.OneByToken(ctx, *accessTokenReq.RefreshToken)
+	oauthRefreshToken, err := a.oauthRefreshTokenModel.OneByToken(kontext.Fabricate(kontext.WithDefaultContext(ctx)), *accessTokenReq.RefreshToken, a.sqldb)
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -304,7 +310,7 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("refresh_token").Str("one_by_code")).
 			Msg("refresh token cannot be found because there was an error")
 
-		if err == sql.ErrNoRows {
+		if err.Type() == exception.NotFound {
 			return entity.OauthAccessToken{}, entity.OauthRefreshToken{}, &entity.Error{
 				HttpStatus: http.StatusNotFound,
 				Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "refresh_token")),
@@ -321,9 +327,9 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 		return entity.OauthAccessToken{}, oauthRefreshToken, err
 	}
 
-	oldAccessToken, err := a.oauthAccessTokenModel.One(ctx, oauthRefreshToken.OauthAccessTokenID)
+	oldAccessToken, err := a.oauthAccessTokenModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), oauthRefreshToken.OauthAccessTokenID, a.sqldb)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if err.Type() == exception.NotFound {
 			return entity.OauthAccessToken{}, oauthRefreshToken, &entity.Error{
 				HttpStatus: http.StatusUnauthorized,
 				Errors:     eobject.Wrap(eobject.UnauthorizedError()),
@@ -343,7 +349,7 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 		}
 	}
 
-	id, err := a.oauthAccessTokenModel.Create(ctx, a.modelFormatter.AccessTokenFromOauthRefreshToken(oauthApplication, oldAccessToken))
+	id, err := a.oauthAccessTokenModel.Create(kontext.Fabricate(kontext.WithDefaultContext(ctx)), a.modelFormatter.AccessTokenFromOauthRefreshToken(oauthApplication, oldAccessToken), a.sqldb)
 	if err != nil {
 
 		log.Error().
@@ -359,7 +365,7 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 		}
 	}
 
-	oauthAccessToken, err := a.oauthAccessTokenModel.One(ctx, id)
+	oauthAccessToken, err := a.oauthAccessTokenModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), id, a.sqldb)
 	if err != nil {
 
 		log.Error().
@@ -375,7 +381,7 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 		}
 	}
 
-	err = a.oauthRefreshTokenModel.Revoke(ctx, *accessTokenReq.RefreshToken)
+	err = a.oauthRefreshTokenModel.Revoke(kontext.Fabricate(kontext.WithDefaultContext(ctx)), *accessTokenReq.RefreshToken, a.sqldb)
 	if err != nil {
 		// TODO: Error is intended to be suppressed until database transaction is implemented. After database transaction is implemented, then it will be rollbacked if there is error in revoke oauth access grants process
 		log.Error().
@@ -386,7 +392,7 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 			Msg("Error revoke refresh token")
 	}
 
-	newOauthRefreshTokenID, err := a.oauthRefreshTokenModel.Create(ctx, a.modelFormatter.RefreshToken(oauthApplication, oauthAccessToken))
+	newOauthRefreshTokenID, err := a.oauthRefreshTokenModel.Create(kontext.Fabricate(kontext.WithDefaultContext(ctx)), a.modelFormatter.RefreshToken(oauthApplication, oauthAccessToken), a.sqldb)
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -401,7 +407,7 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 		}
 	}
 
-	newOauthRefreshToken, err := a.oauthRefreshTokenModel.One(ctx, newOauthRefreshTokenID)
+	newOauthRefreshToken, err := a.oauthRefreshTokenModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), newOauthRefreshTokenID, a.sqldb)
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -420,7 +426,7 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 }
 
 func (a *Authorization) grantTokenFromAuthorizationCode(ctx context.Context, accessTokenReq entity.AccessTokenRequestJSON, oauthApplication entity.OauthApplication) (entity.OauthAccessToken, string, *entity.Error) {
-	oauthAccessGrant, err := a.oauthAccessGrantModel.OneByCode(ctx, *accessTokenReq.Code)
+	oauthAccessGrant, err := a.oauthAccessGrantModel.OneByCode(kontext.Fabricate(kontext.WithDefaultContext(ctx)), *accessTokenReq.Code, a.sqldb)
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -428,7 +434,7 @@ func (a *Authorization) grantTokenFromAuthorizationCode(ctx context.Context, acc
 			Interface("request_id", ctx.Value("request_id")).
 			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("authorization_code").Str("one_by_code")).
 			Msg("authorization code cannot be found because there was an error")
-		if err == sql.ErrNoRows {
+		if err.Type() == exception.NotFound {
 			return entity.OauthAccessToken{}, "", &entity.Error{
 				HttpStatus: http.StatusNotFound,
 				Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "authorization_code")),
@@ -445,7 +451,7 @@ func (a *Authorization) grantTokenFromAuthorizationCode(ctx context.Context, acc
 		return entity.OauthAccessToken{}, oauthAccessGrant.RedirectURI.String, err
 	}
 
-	id, err := a.oauthAccessTokenModel.Create(ctx, a.modelFormatter.AccessTokenFromOauthAccessGrant(oauthAccessGrant, oauthApplication))
+	id, err := a.oauthAccessTokenModel.Create(kontext.Fabricate(kontext.WithDefaultContext(ctx)), a.modelFormatter.AccessTokenFromOauthAccessGrant(oauthAccessGrant, oauthApplication), a.sqldb)
 	if err != nil {
 
 		log.Error().
@@ -461,7 +467,7 @@ func (a *Authorization) grantTokenFromAuthorizationCode(ctx context.Context, acc
 		}
 	}
 
-	oauthAccessToken, err := a.oauthAccessTokenModel.One(ctx, id)
+	oauthAccessToken, err := a.oauthAccessTokenModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), id, a.sqldb)
 	if err != nil {
 
 		log.Error().
@@ -477,7 +483,7 @@ func (a *Authorization) grantTokenFromAuthorizationCode(ctx context.Context, acc
 		}
 	}
 
-	err = a.oauthAccessGrantModel.Revoke(ctx, *accessTokenReq.Code)
+	err = a.oauthAccessGrantModel.Revoke(kontext.Fabricate(kontext.WithDefaultContext(ctx)), *accessTokenReq.Code, a.sqldb)
 	if err != nil {
 		// TODO: Error is intended to be suppressed until database transaction is implemented. After database transaction is implemented, then it will be rollbacked if there is error in revoke oauth access grants process
 		log.Error().
@@ -501,8 +507,8 @@ func (a *Authorization) RevokeToken(ctx context.Context, revokeAccessTokenReq en
 		}
 	}
 
-	err := a.oauthAccessTokenModel.Revoke(ctx, *revokeAccessTokenReq.Token)
-	if err == sql.ErrNoRows {
+	err := a.oauthAccessTokenModel.Revoke(kontext.Fabricate(kontext.WithDefaultContext(ctx)), *revokeAccessTokenReq.Token, a.sqldb)
+	if err != nil && err.Type() == exception.NotFound {
 		return &entity.Error{
 			HttpStatus: http.StatusNotFound,
 			Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "token")),

@@ -2,113 +2,98 @@ package model
 
 import (
 	"context"
-	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/query"
+	"github.com/codefluence-x/monorepo/db"
+	"github.com/codefluence-x/monorepo/exception"
+	"github.com/codefluence-x/monorepo/kontext"
 )
 
-type OauthAccessToken struct {
-	db *sql.DB
+// OauthAccessToken handle all database operation to oauth_access_tokens
+type OauthAccessToken struct{}
+
+// NewOauthAccessToken create new OauthAccessTokens struct
+func NewOauthAccessToken() *OauthAccessToken {
+	return &OauthAccessToken{}
 }
 
-func NewOauthAccessToken(db *sql.DB) *OauthAccessToken {
-	return &OauthAccessToken{
-		db: db,
-	}
+// OneByToken get oauth access token data by token string
+func (*OauthAccessToken) OneByToken(ktx kontext.Context, token string, tx db.TX) (entity.OauthAccessToken, exception.Exception) {
+	var oauthAccessToken entity.OauthAccessToken
+
+	ctxWithTimeout, cf := context.WithTimeout(ktx.Ctx(), time.Second*10)
+	defer cf()
+
+	row := tx.QueryRowContext(kontext.Fabricate(kontext.WithDefaultContext(ctxWithTimeout)), "oauth-access-token-one-by-token", query.SelectOneOauthAccessTokenByToken, token)
+	err := row.Scan(
+		&oauthAccessToken.ID,
+		&oauthAccessToken.OauthApplicationID,
+		&oauthAccessToken.ResourceOwnerID,
+		&oauthAccessToken.Token,
+		&oauthAccessToken.Scopes,
+		&oauthAccessToken.ExpiresIn,
+		&oauthAccessToken.CreatedAt,
+		&oauthAccessToken.RevokedAT,
+	)
+
+	return oauthAccessToken, err
 }
 
-func (oat *OauthAccessToken) Name() string {
-	return "oauth-access-token-model"
+// One get oauth access token data by id
+func (*OauthAccessToken) One(ktx kontext.Context, ID int, tx db.TX) (entity.OauthAccessToken, exception.Exception) {
+	var oauthAccessToken entity.OauthAccessToken
+
+	ctxWithTimeout, cf := context.WithTimeout(ktx.Ctx(), time.Second*10)
+	defer cf()
+
+	row := tx.QueryRowContext(kontext.Fabricate(kontext.WithDefaultContext(ctxWithTimeout)), "oauth-access-token-one", query.SelectOneOauthAccessToken, ID)
+	err := row.Scan(
+		&oauthAccessToken.ID,
+		&oauthAccessToken.OauthApplicationID,
+		&oauthAccessToken.ResourceOwnerID,
+		&oauthAccessToken.Token,
+		&oauthAccessToken.Scopes,
+		&oauthAccessToken.ExpiresIn,
+		&oauthAccessToken.CreatedAt,
+		&oauthAccessToken.RevokedAT,
+	)
+
+	return oauthAccessToken, err
 }
 
-func (oat *OauthAccessToken) OneByToken(ctx context.Context, token string) (entity.OauthAccessToken, error) {
-	var OauthAccessToken entity.OauthAccessToken
-
-	err := monitor(ctx, oat.Name(), query.SelectOneOauthAccessTokenByToken, func() error {
-		ctxWithTimeout, cf := context.WithTimeout(ctx, time.Second*10)
-		defer cf()
-
-		row := oat.db.QueryRowContext(ctxWithTimeout, query.SelectOneOauthAccessTokenByToken, token)
-		return row.Scan(
-			&OauthAccessToken.ID,
-			&OauthAccessToken.OauthApplicationID,
-			&OauthAccessToken.ResourceOwnerID,
-			&OauthAccessToken.Token,
-			&OauthAccessToken.Scopes,
-			&OauthAccessToken.ExpiresIn,
-			&OauthAccessToken.CreatedAt,
-			&OauthAccessToken.RevokedAT,
-		)
-	})
-
-	return OauthAccessToken, err
-}
-
-func (oat *OauthAccessToken) One(ctx context.Context, ID int) (entity.OauthAccessToken, error) {
-	var OauthAccessToken entity.OauthAccessToken
-
-	err := monitor(ctx, oat.Name(), query.SelectOneOauthAccessToken, func() error {
-		ctxWithTimeout, cf := context.WithTimeout(ctx, time.Second*10)
-		defer cf()
-
-		row := oat.db.QueryRowContext(ctxWithTimeout, query.SelectOneOauthAccessToken, ID)
-		return row.Scan(
-			&OauthAccessToken.ID,
-			&OauthAccessToken.OauthApplicationID,
-			&OauthAccessToken.ResourceOwnerID,
-			&OauthAccessToken.Token,
-			&OauthAccessToken.Scopes,
-			&OauthAccessToken.ExpiresIn,
-			&OauthAccessToken.CreatedAt,
-			&OauthAccessToken.RevokedAT,
-		)
-	})
-
-	return OauthAccessToken, err
-}
-
-func (oat *OauthAccessToken) Create(ctx context.Context, data entity.OauthAccessTokenInsertable, txs ...*sql.Tx) (int, error) {
-	var lastInsertedId int
-	var dbExecutable DBExecutable
-
-	dbExecutable = oat.db
-	if len(txs) > 0 {
-		dbExecutable = txs[0]
+// Create new oauth access token
+func (*OauthAccessToken) Create(ktx kontext.Context, data entity.OauthAccessTokenInsertable, tx db.TX) (int, exception.Exception) {
+	result, err := tx.ExecContext(ktx, "oauth-access-token-create", query.InsertOauthAccessToken, data.OauthApplicationID, data.ResourceOwnerID, data.Token, data.Scopes, data.ExpiresIn)
+	if err != nil {
+		return 0, err
 	}
 
-	err := monitor(ctx, oat.Name(), query.InsertOauthAccessToken, func() error {
-		result, err := dbExecutable.Exec(query.InsertOauthAccessToken, data.OauthApplicationID, data.ResourceOwnerID, data.Token, data.Scopes, data.ExpiresIn)
-		if err != nil {
-			return err
-		}
+	ID, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
 
-		id, err := result.LastInsertId()
-		lastInsertedId = int(id)
+	return int(ID), nil
+}
 
+// Revoke oauth access token
+func (*OauthAccessToken) Revoke(ktx kontext.Context, token string, tx db.TX) exception.Exception {
+	result, err := tx.ExecContext(ktx, "oauth-access-token-revoke", query.RevokeAccessToken, token)
+	if err != nil {
 		return err
-	})
+	}
 
-	return lastInsertedId, err
-}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
 
-func (oat *OauthAccessToken) Revoke(ctx context.Context, token string) error {
-	return monitor(ctx, oat.Name(), query.RevokeAccessToken, func() error {
-		result, err := oat.db.Exec(query.RevokeAccessToken, token)
-		if err != nil {
-			return err
-		}
+	if rows == 0 {
+		return exception.Throw(errors.New("not found"), exception.WithType(exception.NotFound))
+	}
 
-		affectedRows, err := result.RowsAffected()
-		if err != nil {
-			return err
-		}
-
-		if affectedRows == 0 {
-			return sql.ErrNoRows
-		}
-
-		return nil
-	})
+	return nil
 }

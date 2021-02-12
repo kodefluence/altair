@@ -2,116 +2,94 @@ package model
 
 import (
 	"context"
-	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/query"
+	"github.com/codefluence-x/monorepo/db"
+	"github.com/codefluence-x/monorepo/exception"
+	"github.com/codefluence-x/monorepo/kontext"
 )
 
 // OauthRefreshToken is a connector to oauth_refresh_tokens table
-type OauthRefreshToken struct {
-	db *sql.DB
-}
+type OauthRefreshToken struct{}
 
 // NewOauthRefreshToken create new OauthRefreshToken struct
-func NewOauthRefreshToken(db *sql.DB) *OauthRefreshToken {
-	return &OauthRefreshToken{
-		db: db,
-	}
-}
-
-// Name of the model
-func (ort *OauthRefreshToken) Name() string {
-	return "oauth-refresh-token-model"
+func NewOauthRefreshToken() *OauthRefreshToken {
+	return &OauthRefreshToken{}
 }
 
 // OneByToken selecting one oauth refresh token data based on given token data
-func (ort *OauthRefreshToken) OneByToken(ctx context.Context, token string) (entity.OauthRefreshToken, error) {
-	var OauthRefreshToken entity.OauthRefreshToken
+func (*OauthRefreshToken) OneByToken(ktx kontext.Context, token string, tx db.TX) (entity.OauthRefreshToken, exception.Exception) {
+	var oauthRefreshToken entity.OauthRefreshToken
 
-	err := monitor(ctx, ort.Name(), query.SelectOneOauthRefreshTokenByToken, func() error {
-		ctxWithTimeout, cf := context.WithTimeout(ctx, time.Second*10)
-		defer cf()
+	ctxWithTimeout, cf := context.WithTimeout(ktx.Ctx(), time.Second*10)
+	defer cf()
 
-		row := ort.db.QueryRowContext(ctxWithTimeout, query.SelectOneOauthRefreshTokenByToken, token)
-		return row.Scan(
-			&OauthRefreshToken.ID,
-			&OauthRefreshToken.OauthAccessTokenID,
-			&OauthRefreshToken.Token,
-			&OauthRefreshToken.ExpiresIn,
-			&OauthRefreshToken.CreatedAt,
-			&OauthRefreshToken.RevokedAT,
-		)
-	})
+	row := tx.QueryRowContext(kontext.Fabricate(kontext.WithDefaultContext(ctxWithTimeout)), "oauth-refresh-token-one-by-token", query.SelectOneOauthRefreshTokenByToken, token)
+	err := row.Scan(
+		&oauthRefreshToken.ID,
+		&oauthRefreshToken.OauthAccessTokenID,
+		&oauthRefreshToken.Token,
+		&oauthRefreshToken.ExpiresIn,
+		&oauthRefreshToken.CreatedAt,
+		&oauthRefreshToken.RevokedAT,
+	)
 
-	return OauthRefreshToken, err
+	return oauthRefreshToken, err
 }
 
 // One selecting one oauth refresh token data
-func (ort *OauthRefreshToken) One(ctx context.Context, ID int) (entity.OauthRefreshToken, error) {
-	var OauthRefreshToken entity.OauthRefreshToken
+func (*OauthRefreshToken) One(ktx kontext.Context, ID int, tx db.TX) (entity.OauthRefreshToken, exception.Exception) {
+	var oauthRefreshToken entity.OauthRefreshToken
 
-	err := monitor(ctx, ort.Name(), query.SelectOneOauthRefreshToken, func() error {
-		ctxWithTimeout, cf := context.WithTimeout(ctx, time.Second*10)
-		defer cf()
+	ctxWithTimeout, cf := context.WithTimeout(ktx.Ctx(), time.Second*10)
+	defer cf()
 
-		row := ort.db.QueryRowContext(ctxWithTimeout, query.SelectOneOauthRefreshToken, ID)
-		return row.Scan(
-			&OauthRefreshToken.ID,
-			&OauthRefreshToken.OauthAccessTokenID,
-			&OauthRefreshToken.Token,
-			&OauthRefreshToken.ExpiresIn,
-			&OauthRefreshToken.CreatedAt,
-			&OauthRefreshToken.RevokedAT,
-		)
-	})
+	row := tx.QueryRowContext(kontext.Fabricate(kontext.WithDefaultContext(ctxWithTimeout)), "oauth-refresh-token-one", query.SelectOneOauthRefreshToken, ID)
+	err := row.Scan(
+		&oauthRefreshToken.ID,
+		&oauthRefreshToken.OauthAccessTokenID,
+		&oauthRefreshToken.Token,
+		&oauthRefreshToken.ExpiresIn,
+		&oauthRefreshToken.CreatedAt,
+		&oauthRefreshToken.RevokedAT,
+	)
 
-	return OauthRefreshToken, err
+	return oauthRefreshToken, err
 }
 
 // Create new oauth refresh token based on oauth refresh token insertable
-func (ort *OauthRefreshToken) Create(ctx context.Context, data entity.OauthRefreshTokenInsertable, txs ...*sql.Tx) (int, error) {
-	var lastInsertedID int
-	var dbExecutable DBExecutable
-
-	dbExecutable = ort.db
-	if len(txs) > 0 {
-		dbExecutable = txs[0]
+func (*OauthRefreshToken) Create(ktx kontext.Context, data entity.OauthRefreshTokenInsertable, tx db.TX) (int, exception.Exception) {
+	result, err := tx.ExecContext(ktx, "oauth-refresh-token-create", query.InsertOauthRefreshToken, data.OauthAccessTokenID, data.Token, data.ExpiresIn)
+	if err != nil {
+		return 0, err
 	}
 
-	err := monitor(ctx, ort.Name(), query.InsertOauthRefreshToken, func() error {
-		result, err := dbExecutable.Exec(query.InsertOauthRefreshToken, data.OauthAccessTokenID, data.Token, data.ExpiresIn)
-		if err != nil {
-			return err
-		}
+	ID, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
 
-		id, err := result.LastInsertId()
-		lastInsertedID = int(id)
-
-		return err
-	})
-
-	return lastInsertedID, err
+	return int(ID), nil
 }
 
 // Revoke given token
-func (ort *OauthRefreshToken) Revoke(ctx context.Context, token string) error {
-	return monitor(ctx, ort.Name(), query.RevokeRefreshToken, func() error {
-		result, err := ort.db.Exec(query.RevokeRefreshToken, token)
-		if err != nil {
-			return err
-		}
+func (*OauthRefreshToken) Revoke(ktx kontext.Context, token string, tx db.TX) exception.Exception {
+	result, err := tx.ExecContext(ktx, "oauth-refresh-token-revoke", query.RevokeRefreshToken, token)
+	if err != nil {
+		return err
+	}
 
-		affectedRows, err := result.RowsAffected()
-		if err != nil {
-			return err
-		}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
 
-		if affectedRows == 0 {
-			return sql.ErrNoRows
-		}
+	if rows == 0 {
+		return exception.Throw(errors.New("not found"), exception.WithType(exception.NotFound))
+	}
 
-		return nil
-	})
+	return nil
 }

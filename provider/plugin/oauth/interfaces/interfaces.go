@@ -4,47 +4,45 @@ package interfaces
 
 import (
 	"context"
-	"database/sql"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
+	"github.com/codefluence-x/monorepo/db"
+	"github.com/codefluence-x/monorepo/exception"
+	"github.com/codefluence-x/monorepo/kontext"
 )
 
 // OauthApplicationModel handle all database connection to oauth_applications table
 type OauthApplicationModel interface {
-	Name() string
-	Paginate(ctx context.Context, offset, limit int) ([]entity.OauthApplication, error)
-	One(ctx context.Context, ID int) (entity.OauthApplication, error)
-	OneByUIDandSecret(ctx context.Context, clientUID, clientSecret string) (entity.OauthApplication, error)
-	Count(ctx context.Context) (int, error)
-	Create(ctx context.Context, data entity.OauthApplicationInsertable, txs ...*sql.Tx) (int, error)
-	Update(ctx context.Context, ID int, data entity.OauthApplicationUpdateable, txs ...*sql.Tx) error
+	Paginate(ktx kontext.Context, offset, limit int, tx db.TX) ([]entity.OauthApplication, exception.Exception)
+	Count(ktx kontext.Context, tx db.TX) (int, exception.Exception)
+	One(ktx kontext.Context, ID int, tx db.TX) (entity.OauthApplication, exception.Exception)
+	OneByUIDandSecret(ktx kontext.Context, clientUID, clientSecret string, tx db.TX) (entity.OauthApplication, exception.Exception)
+	Create(ktx kontext.Context, data entity.OauthApplicationInsertable, tx db.TX) (int, exception.Exception)
+	Update(ktx kontext.Context, ID int, data entity.OauthApplicationUpdateable, tx db.TX) exception.Exception
 }
 
 // OauthAccessTokenModel handle all database connection to oauth_access_tokens table
 type OauthAccessTokenModel interface {
-	Name() string
-	One(ctx context.Context, ID int) (entity.OauthAccessToken, error)
-	OneByToken(ctx context.Context, token string) (entity.OauthAccessToken, error)
-	Create(ctx context.Context, data entity.OauthAccessTokenInsertable, txs ...*sql.Tx) (int, error)
-	Revoke(ctx context.Context, token string) error
+	OneByToken(ktx kontext.Context, token string, tx db.TX) (entity.OauthAccessToken, exception.Exception)
+	One(ktx kontext.Context, ID int, tx db.TX) (entity.OauthAccessToken, exception.Exception)
+	Create(ktx kontext.Context, data entity.OauthAccessTokenInsertable, tx db.TX) (int, exception.Exception)
+	Revoke(ktx kontext.Context, token string, tx db.TX) exception.Exception
 }
 
 // OauthAccessGrantModel handle all database connection to oauth_access_grants table
 type OauthAccessGrantModel interface {
-	Name() string
-	One(ctx context.Context, ID int) (entity.OauthAccessGrant, error)
-	Create(ctx context.Context, data entity.OauthAccessGrantInsertable, txs ...*sql.Tx) (int, error)
-	OneByCode(ctx context.Context, code string) (entity.OauthAccessGrant, error)
-	Revoke(ctx context.Context, code string, txs ...*sql.Tx) error
+	One(ktx kontext.Context, ID int, tx db.TX) (entity.OauthAccessGrant, exception.Exception)
+	OneByCode(ktx kontext.Context, code string, tx db.TX) (entity.OauthAccessGrant, exception.Exception)
+	Create(ktx kontext.Context, data entity.OauthAccessGrantInsertable, tx db.TX) (int, exception.Exception)
+	Revoke(ktx kontext.Context, code string, tx db.TX) exception.Exception
 }
 
 // OauthRefreshTokenModel handle all database connection to oauth_refresh_tokens table
 type OauthRefreshTokenModel interface {
-	Name() string
-	One(ctx context.Context, ID int) (entity.OauthRefreshToken, error)
-	Create(ctx context.Context, data entity.OauthRefreshTokenInsertable, txs ...*sql.Tx) (int, error)
-	OneByToken(ctx context.Context, token string) (entity.OauthRefreshToken, error)
-	Revoke(ctx context.Context, token string) error
+	OneByToken(ktx kontext.Context, token string, tx db.TX) (entity.OauthRefreshToken, exception.Exception)
+	One(ktx kontext.Context, ID int, tx db.TX) (entity.OauthRefreshToken, exception.Exception)
+	Create(ktx kontext.Context, data entity.OauthRefreshTokenInsertable, tx db.TX) (int, exception.Exception)
+	Revoke(ktx kontext.Context, token string, tx db.TX) exception.Exception
 }
 
 // ApplicationManager manage all flow related oauth application CRUD

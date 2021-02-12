@@ -1,27 +1,28 @@
 package loader
 
 import (
-	"database/sql"
-
 	"github.com/codefluence-x/altair/core"
+	"github.com/codefluence-x/monorepo/db"
 	"github.com/pkg/errors"
 )
 
-var DatabasesIsNotExistsError = errors.New("Database is not exists")
+// ErrDatabasesIsNotExists thrown when database is not exists or not initialized yet in database bearer
+var ErrDatabasesIsNotExists = errors.New("Database is not exists")
 
 type databaseBearer struct {
-	databases map[string]*sql.DB
+	databases map[string]db.DB
 	configs   map[string]core.DatabaseConfig
 }
 
-func DatabaseBearer(databases map[string]*sql.DB, configs map[string]core.DatabaseConfig) core.DatabaseBearer {
+// DatabaseBearer handling on retrieval database instance
+func DatabaseBearer(databases map[string]db.DB, configs map[string]core.DatabaseConfig) core.DatabaseBearer {
 	return &databaseBearer{databases: databases, configs: configs}
 }
 
-func (d *databaseBearer) Database(dbName string) (*sql.DB, core.DatabaseConfig, error) {
+func (d *databaseBearer) Database(dbName string) (db.DB, core.DatabaseConfig, error) {
 	db, ok := d.databases[dbName]
 	if ok == false {
-		return nil, nil, DatabasesIsNotExistsError
+		return nil, nil, ErrDatabasesIsNotExists
 	}
 
 	return db, d.configs[dbName], nil

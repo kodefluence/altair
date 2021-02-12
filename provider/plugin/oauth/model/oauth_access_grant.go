@@ -2,122 +2,100 @@ package model
 
 import (
 	"context"
-	"database/sql"
+	"errors"
 	"time"
 
 	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
 	"github.com/codefluence-x/altair/provider/plugin/oauth/query"
+	"github.com/codefluence-x/monorepo/db"
+	"github.com/codefluence-x/monorepo/exception"
+	"github.com/codefluence-x/monorepo/kontext"
 )
 
 // OauthAccessGrant an interface to access oauth_access_grants table
-type OauthAccessGrant struct {
-	db *sql.DB
-}
+type OauthAccessGrant struct{}
 
 // NewOauthAccessGrant create new OauthAccessGrant interface
-func NewOauthAccessGrant(db *sql.DB) *OauthAccessGrant {
-	return &OauthAccessGrant{
-		db: db,
-	}
-}
-
-// Name return model name
-func (oag *OauthAccessGrant) Name() string {
-	return "oauth-access-grant-model"
+func NewOauthAccessGrant() *OauthAccessGrant {
+	return &OauthAccessGrant{}
 }
 
 // One selecting one record from database using id
-func (oag *OauthAccessGrant) One(ctx context.Context, ID int) (entity.OauthAccessGrant, error) {
+func (*OauthAccessGrant) One(ktx kontext.Context, ID int, tx db.TX) (entity.OauthAccessGrant, exception.Exception) {
 	var oauthAccessGrant entity.OauthAccessGrant
 
-	err := monitor(ctx, oag.Name(), query.SelectOneOauthAccessGrant, func() error {
-		ctxWithTimeout, cf := context.WithTimeout(ctx, time.Second*10)
-		defer cf()
+	ctxWithTimeout, cf := context.WithTimeout(ktx.Ctx(), time.Second*10)
+	defer cf()
 
-		row := oag.db.QueryRowContext(ctxWithTimeout, query.SelectOneOauthAccessGrant, ID)
-		return row.Scan(
-			&oauthAccessGrant.ID,
-			&oauthAccessGrant.OauthApplicationID,
-			&oauthAccessGrant.ResourceOwnerID,
-			&oauthAccessGrant.Scopes,
-			&oauthAccessGrant.Code,
-			&oauthAccessGrant.RedirectURI,
-			&oauthAccessGrant.ExpiresIn,
-			&oauthAccessGrant.CreatedAt,
-			&oauthAccessGrant.RevokedAT,
-		)
-	})
+	row := tx.QueryRowContext(kontext.Fabricate(kontext.WithDefaultContext(ctxWithTimeout)), "oauth-access-grant-one", query.SelectOneOauthAccessGrant, ID)
+	err := row.Scan(
+		&oauthAccessGrant.ID,
+		&oauthAccessGrant.OauthApplicationID,
+		&oauthAccessGrant.ResourceOwnerID,
+		&oauthAccessGrant.Scopes,
+		&oauthAccessGrant.Code,
+		&oauthAccessGrant.RedirectURI,
+		&oauthAccessGrant.ExpiresIn,
+		&oauthAccessGrant.CreatedAt,
+		&oauthAccessGrant.RevokedAT,
+	)
 
 	return oauthAccessGrant, err
 }
 
 // OneByCode selecting one record from database using code
-func (oag *OauthAccessGrant) OneByCode(ctx context.Context, code string) (entity.OauthAccessGrant, error) {
+func (*OauthAccessGrant) OneByCode(ktx kontext.Context, code string, tx db.TX) (entity.OauthAccessGrant, exception.Exception) {
 	var oauthAccessGrant entity.OauthAccessGrant
 
-	err := monitor(ctx, oag.Name(), query.SelectOneOauthAccessGrantByCode, func() error {
-		ctxWithTimeout, cf := context.WithTimeout(ctx, time.Second*10)
-		defer cf()
+	ctxWithTimeout, cf := context.WithTimeout(ktx.Ctx(), time.Second*10)
+	defer cf()
 
-		row := oag.db.QueryRowContext(ctxWithTimeout, query.SelectOneOauthAccessGrantByCode, code)
-		return row.Scan(
-			&oauthAccessGrant.ID,
-			&oauthAccessGrant.OauthApplicationID,
-			&oauthAccessGrant.ResourceOwnerID,
-			&oauthAccessGrant.Scopes,
-			&oauthAccessGrant.Code,
-			&oauthAccessGrant.RedirectURI,
-			&oauthAccessGrant.ExpiresIn,
-			&oauthAccessGrant.CreatedAt,
-			&oauthAccessGrant.RevokedAT,
-		)
-	})
+	row := tx.QueryRowContext(kontext.Fabricate(kontext.WithDefaultContext(ctxWithTimeout)), "oauth-access-grant-one-by-code", query.SelectOneOauthAccessGrantByCode, code)
+	err := row.Scan(
+		&oauthAccessGrant.ID,
+		&oauthAccessGrant.OauthApplicationID,
+		&oauthAccessGrant.ResourceOwnerID,
+		&oauthAccessGrant.Scopes,
+		&oauthAccessGrant.Code,
+		&oauthAccessGrant.RedirectURI,
+		&oauthAccessGrant.ExpiresIn,
+		&oauthAccessGrant.CreatedAt,
+		&oauthAccessGrant.RevokedAT,
+	)
 
 	return oauthAccessGrant, err
 }
 
 // Create new record
-func (oag *OauthAccessGrant) Create(ctx context.Context, data entity.OauthAccessGrantInsertable, txs ...*sql.Tx) (int, error) {
-	var lastInsertedID int
-	var dbExecutable DBExecutable
-
-	dbExecutable = oag.db
-	if len(txs) > 0 {
-		dbExecutable = txs[0]
+func (*OauthAccessGrant) Create(ktx kontext.Context, data entity.OauthAccessGrantInsertable, tx db.TX) (int, exception.Exception) {
+	result, err := tx.ExecContext(ktx, "oauth-access-grant-create", query.InsertOauthAccessGrant, data.OauthApplicationID, data.ResourceOwnerID, data.Scopes, data.Code, data.RedirectURI, data.ExpiresIn)
+	if err != nil {
+		return 0, err
 	}
 
-	err := monitor(ctx, oag.Name(), query.InsertOauthAccessGrant, func() error {
-		result, err := dbExecutable.Exec(query.InsertOauthAccessGrant, data.OauthApplicationID, data.ResourceOwnerID, data.Scopes, data.Code, data.RedirectURI, data.ExpiresIn)
-		if err != nil {
-			return err
-		}
+	ID, err := result.LastInsertId()
+	if err != nil {
+		return 0, err
+	}
 
-		id, err := result.LastInsertId()
-		lastInsertedID = int(id)
-
-		return err
-	})
-
-	return lastInsertedID, err
+	return int(ID), nil
 }
 
 // Revoke fill revoked_at of oauth_access_grants row
-func (oag *OauthAccessGrant) Revoke(ctx context.Context, code string, txs ...*sql.Tx) error {
-	return monitor(ctx, oag.Name(), query.RevokeAuthorizationCode, func() error {
-		result, err := oag.db.Exec(query.RevokeAuthorizationCode, code)
-		if err != nil {
-			return err
-		}
+func (*OauthAccessGrant) Revoke(ktx kontext.Context, code string, tx db.TX) exception.Exception {
+	result, err := tx.ExecContext(ktx, "oauth-access-grant-revoke", query.RevokeAuthorizationCode, code)
+	if err != nil {
+		return err
+	}
 
-		affectedRows, err := result.RowsAffected()
-		if err != nil {
-			return err
-		}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
 
-		if affectedRows == 0 {
-			return sql.ErrNoRows
-		}
+	if rows == 0 {
+		return exception.Throw(errors.New("not found"), exception.WithType(exception.NotFound))
+	}
 
-		return nil
-	})
+	return nil
 }

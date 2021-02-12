@@ -1,26 +1,26 @@
 package loader_test
 
 import (
-	"database/sql"
 	"testing"
 
-	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/codefluence-x/altair/core"
 	"github.com/codefluence-x/altair/entity"
 	"github.com/codefluence-x/altair/loader"
+	"github.com/codefluence-x/monorepo/db"
+	mockdb "github.com/codefluence-x/monorepo/db/mock"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestDatabaseBearer(t *testing.T) {
-	db, _, err := sqlmock.New()
-	if err != nil {
-		panic(err)
-	}
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
 
 	dbConfig := entity.MYSQLDatabaseConfig{}
 
-	databases := map[string]*sql.DB{
-		"main_database": db,
+	sqldb := mockdb.NewMockDB(mockCtrl)
+	databases := map[string]db.DB{
+		"main_database": sqldb,
 	}
 
 	configs := map[string]core.DatabaseConfig{
@@ -38,7 +38,7 @@ func TestDatabaseBearer(t *testing.T) {
 					loadedSQLDB, loadedDBConfig, err := dbBearer.Database(dbName)
 
 					assert.Nil(t, err)
-					assert.Equal(t, db, loadedSQLDB)
+					assert.Equal(t, sqldb, loadedSQLDB)
 					assert.Equal(t, dbConfig, loadedDBConfig)
 				})
 			})
@@ -49,7 +49,7 @@ func TestDatabaseBearer(t *testing.T) {
 
 					loadedSQLDB, loadedDBConfig, err := dbBearer.Database(dbName)
 
-					assert.Equal(t, loader.DatabasesIsNotExistsError, err)
+					assert.Equal(t, loader.ErrDatabasesIsNotExists, err)
 					assert.Nil(t, loadedSQLDB)
 					assert.Nil(t, loadedDBConfig)
 				})

@@ -54,12 +54,12 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 	}
 
 	// Model
-	oauthApplicationModel := model.NewOauthApplication(db)
-	oauthAccessTokenModel := model.NewOauthAccessToken(db)
-	oauthAccessGrantModel := model.NewOauthAccessGrant(db)
-	oauthRefreshTokenModel := model.NewOauthRefreshToken(db)
+	oauthApplicationModel := model.NewOauthApplication()
+	oauthAccessTokenModel := model.NewOauthAccessToken()
+	oauthAccessGrantModel := model.NewOauthAccessGrant()
+	oauthRefreshTokenModel := model.NewOauthRefreshToken()
 
-	// Formatter
+	// // Formatter
 	oauthApplicationFormatter := formatter.OauthApplication()
 	oauthModelFormatter := formatter.NewModel(accessTokenTimeout, authorizationCodeTimeout, refreshTokenConfig.Timeout)
 	oauthFormatter := formatter.Oauth()
@@ -68,12 +68,12 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 	oauthValidator := validator.NewOauth(refreshTokenConfig.Active)
 
 	// Service
-	applicationManager := service.NewApplicationManager(oauthApplicationFormatter, oauthModelFormatter, oauthApplicationModel, oauthValidator)
-	authorization := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, oauthModelFormatter, oauthValidator, oauthFormatter, refreshTokenConfig.Active)
+	applicationManager := service.NewApplicationManager(oauthApplicationFormatter, oauthModelFormatter, oauthApplicationModel, oauthValidator, db)
+	authorization := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, oauthModelFormatter, oauthValidator, oauthFormatter, refreshTokenConfig.Active, db)
 
 	// DownStreamPlugin
-	oauthDownStream := downstream.NewOauth(oauthAccessTokenModel)
-	applicationValidationDownStream := downstream.NewApplicationValidation(oauthApplicationModel)
+	oauthDownStream := downstream.NewOauth(oauthAccessTokenModel, db)
+	applicationValidationDownStream := downstream.NewApplicationValidation(oauthApplicationModel, db)
 
 	// Controller of /oauth/applications
 	applicationControllerDispatcher := controller.NewApplication()
