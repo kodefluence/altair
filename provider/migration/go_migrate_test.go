@@ -32,7 +32,7 @@ func TestGoMigrate(t *testing.T) {
 					"GET_LOCK(1, 10)",
 				}).AddRow(1))
 
-				mockDB.ExpectQuery(`SHOW TABLES LIKE "db_versions"`).WillReturnRows(sqlmock.NewRows([]string{
+				mockDB.ExpectQuery(`SHOW TABLES LIKE 'db_versions'`).WillReturnRows(sqlmock.NewRows([]string{
 					"TABLES IN DATABASES",
 				}).AddRow("db_versions"))
 
@@ -86,7 +86,7 @@ func TestGoMigrate(t *testing.T) {
 					"GET_LOCK(1, 10)",
 				}).AddRow(1))
 
-				mockDB.ExpectQuery(`SHOW TABLES LIKE "db_versions"`).WillReturnRows(sqlmock.NewRows([]string{
+				mockDB.ExpectQuery(`SHOW TABLES LIKE 'db_versions'`).WillReturnRows(sqlmock.NewRows([]string{
 					"TABLES IN DATABASES",
 				}).AddRow("db_versions"))
 
