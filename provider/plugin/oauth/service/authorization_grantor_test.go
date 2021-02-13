@@ -30,6 +30,7 @@ func TestAuthorizationGrantor(t *testing.T) {
 	defer mockCtrl.Finish()
 
 	sqldb := mockdb.NewMockDB(mockCtrl)
+	mockTx := mockdb.NewMockTX(mockCtrl)
 
 	t.Run("Grantor", func(t *testing.T) {
 		t.Run("Given context and authorization request with a response type of token", func(t *testing.T) {
@@ -751,16 +752,32 @@ func TestAuthorizationGrantor(t *testing.T) {
 				oauthAccessGrantInsertable := modelFormatter.AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication)
 				oauthAccessGrantJSON := oauthFormatter.AccessGrant(oauthAccessGrant)
 
-				gomock.InOrder(
+				mockCall := []*gomock.Call{}
+				mockCall = append(mockCall,
 					oauthApplicationModel.EXPECT().
 						OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).
 						Return(oauthApplication, nil),
 					oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
-					modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessGrantInsertable),
-					oauthAccessGrantModel.EXPECT().Create(gomock.Any(), oauthAccessGrantInsertable, sqldb).Return(oauthAccessGrant.ID, nil),
-					oauthAccessGrantModel.EXPECT().One(gomock.Any(), oauthAccessGrant.ID, sqldb).Return(oauthAccessGrant, nil),
-					oauthFormatterMock.EXPECT().AccessGrant(oauthAccessGrant).Return(oauthAccessGrantJSON),
 				)
+
+				insideTransactionCall := []*gomock.Call{}
+
+				sqlTransactionCall := sqldb.EXPECT().Transaction(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(func(ctx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
+					assert.Equal(t, "authorization-grant-authorization-code", transactionKey)
+
+					insideTransactionCall = append(insideTransactionCall,
+						modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessGrantInsertable),
+						oauthAccessGrantModel.EXPECT().Create(gomock.Any(), oauthAccessGrantInsertable, mockTx).Return(oauthAccessGrant.ID, nil),
+						oauthAccessGrantModel.EXPECT().One(gomock.Any(), oauthAccessGrant.ID, mockTx).Return(oauthAccessGrant, nil),
+						oauthFormatterMock.EXPECT().AccessGrant(oauthAccessGrant).Return(oauthAccessGrantJSON),
+					)
+					return f(mockTx)
+				})
+
+				mockCall = append(mockCall, sqlTransactionCall)
+				mockCall = append(mockCall, insideTransactionCall...)
+
+				gomock.InOrder(mockCall...)
 
 				authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 				results, err := authorizationService.Grantor(ctx, authorizationRequest)
@@ -815,16 +832,32 @@ func TestAuthorizationGrantor(t *testing.T) {
 						Errors:     eobject.Wrap(eobject.ValidationError("object `owner_type` must be either of `confidential` or `public`")),
 					}
 
-					gomock.InOrder(
+					mockCall := []*gomock.Call{}
+					mockCall = append(mockCall,
 						oauthApplicationModel.EXPECT().
 							OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(expectedError),
-						modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(gomock.Any(), gomock.Any()).Times(0),
-						oauthAccessGrantModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
-						oauthAccessGrantModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
-						oauthFormatterMock.EXPECT().AccessGrant(gomock.Any()).Times(0),
 					)
+
+					insideTransactionCall := []*gomock.Call{}
+
+					sqlTransactionCall := sqldb.EXPECT().Transaction(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(func(ctx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
+						assert.Equal(t, "authorization-grant-authorization-code", transactionKey)
+
+						insideTransactionCall = append(insideTransactionCall,
+							modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(gomock.Any(), gomock.Any()).Times(0),
+							oauthAccessGrantModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+							oauthAccessGrantModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+							oauthFormatterMock.EXPECT().AccessGrant(gomock.Any()).Times(0),
+						)
+						return f(mockTx)
+					}).Times(0)
+
+					mockCall = append(mockCall, sqlTransactionCall)
+					mockCall = append(mockCall, insideTransactionCall...)
+
+					gomock.InOrder(mockCall...)
 
 					authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 					results, err := authorizationService.Grantor(ctx, authorizationRequest)
@@ -861,14 +894,30 @@ func TestAuthorizationGrantor(t *testing.T) {
 							Errors:     eobject.Wrap(eobject.NotFoundError(ctx, "client_uid & client_secret")),
 						}
 
-						gomock.InOrder(
+						mockCall := []*gomock.Call{}
+						mockCall = append(mockCall,
 							oauthApplicationModel.EXPECT().OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).Return(entity.OauthApplication{}, exception.Throw(sql.ErrNoRows, exception.WithType(exception.NotFound))),
 							oauthValidator.EXPECT().ValidateAuthorizationGrant(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
-							modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(gomock.Any(), gomock.Any()).Times(0),
-							oauthAccessGrantModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
-							oauthAccessGrantModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
-							oauthFormatterMock.EXPECT().AccessGrant(gomock.Any()).Times(0),
 						)
+
+						insideTransactionCall := []*gomock.Call{}
+
+						sqlTransactionCall := sqldb.EXPECT().Transaction(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(func(ctx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
+							assert.Equal(t, "authorization-grant-authorization-code", transactionKey)
+
+							insideTransactionCall = append(insideTransactionCall,
+								modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(gomock.Any(), gomock.Any()).Times(0),
+								oauthAccessGrantModel.EXPECT().Create(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+								oauthAccessGrantModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+								oauthFormatterMock.EXPECT().AccessGrant(gomock.Any()).Times(0),
+							)
+							return f(mockTx)
+						}).Times(0)
+
+						mockCall = append(mockCall, sqlTransactionCall)
+						mockCall = append(mockCall, insideTransactionCall...)
+
+						gomock.InOrder(mockCall...)
 
 						authorizationService := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, modelFormatterMock, oauthValidator, oauthFormatterMock, false, sqldb)
 						results, err := authorizationService.Grantor(ctx, authorizationRequest)
@@ -924,16 +973,30 @@ func TestAuthorizationGrantor(t *testing.T) {
 
 					oauthAccessGrantInsertable := modelFormatter.AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication)
 
-					gomock.InOrder(
+					mockCall := []*gomock.Call{}
+					mockCall = append(mockCall,
 						oauthApplicationModel.EXPECT().
 							OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
-						modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessGrantInsertable),
-						oauthAccessGrantModel.EXPECT().Create(gomock.Any(), oauthAccessGrantInsertable, sqldb).Return(0, exception.Throw(exception.Throw(errors.New("unexpected error")))),
-						oauthAccessGrantModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
-						oauthFormatterMock.EXPECT().AccessGrant(gomock.Any()).Times(0),
 					)
+
+					insideTransactionCall := []*gomock.Call{}
+
+					sqlTransactionCall := sqldb.EXPECT().Transaction(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(func(ctx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
+						assert.Equal(t, "authorization-grant-authorization-code", transactionKey)
+
+						insideTransactionCall = append(insideTransactionCall,
+							modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessGrantInsertable),
+							oauthAccessGrantModel.EXPECT().Create(gomock.Any(), oauthAccessGrantInsertable, mockTx).Return(0, exception.Throw(exception.Throw(errors.New("unexpected error")))),
+							oauthAccessGrantModel.EXPECT().One(gomock.Any(), gomock.Any(), gomock.Any()).Times(0),
+							oauthFormatterMock.EXPECT().AccessGrant(gomock.Any()).Times(0),
+						)
+						return f(mockTx)
+					})
+
+					mockCall = append(mockCall, sqlTransactionCall)
+					mockCall = append(mockCall, insideTransactionCall...)
 
 					expectedErr := &entity.Error{
 						HttpStatus: http.StatusInternalServerError,
@@ -1014,16 +1077,30 @@ func TestAuthorizationGrantor(t *testing.T) {
 
 					oauthAccessGrantInsertable := modelFormatter.AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication)
 
-					gomock.InOrder(
+					mockCall := []*gomock.Call{}
+					mockCall = append(mockCall,
 						oauthApplicationModel.EXPECT().
 							OneByUIDandSecret(gomock.Any(), *authorizationRequest.ClientUID, *authorizationRequest.ClientSecret, sqldb).
 							Return(oauthApplication, nil),
 						oauthValidator.EXPECT().ValidateAuthorizationGrant(ctx, authorizationRequest, oauthApplication).Return(nil),
-						modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessGrantInsertable),
-						oauthAccessGrantModel.EXPECT().Create(gomock.Any(), oauthAccessGrantInsertable, sqldb).Return(oauthAccessGrant.ID, nil),
-						oauthAccessGrantModel.EXPECT().One(gomock.Any(), oauthAccessGrant.ID, sqldb).Return(entity.OauthAccessGrant{}, exception.Throw(exception.Throw(errors.New("unexpected error")))),
-						oauthFormatterMock.EXPECT().AccessGrant(gomock.Any()).Times(0),
 					)
+
+					insideTransactionCall := []*gomock.Call{}
+
+					sqlTransactionCall := sqldb.EXPECT().Transaction(gomock.Any(), gomock.Any(), gomock.Any()).DoAndReturn(func(ctx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
+						assert.Equal(t, "authorization-grant-authorization-code", transactionKey)
+
+						insideTransactionCall = append(insideTransactionCall,
+							modelFormatterMock.EXPECT().AccessGrantFromAuthorizationRequest(authorizationRequest, oauthApplication).Return(oauthAccessGrantInsertable),
+							oauthAccessGrantModel.EXPECT().Create(gomock.Any(), oauthAccessGrantInsertable, mockTx).Return(oauthAccessGrant.ID, nil),
+							oauthAccessGrantModel.EXPECT().One(gomock.Any(), oauthAccessGrant.ID, mockTx).Return(entity.OauthAccessGrant{}, exception.Throw(exception.Throw(errors.New("unexpected error")))),
+							oauthFormatterMock.EXPECT().AccessGrant(gomock.Any()).Times(0),
+						)
+						return f(mockTx)
+					})
+
+					mockCall = append(mockCall, sqlTransactionCall)
+					mockCall = append(mockCall, insideTransactionCall...)
 
 					expectedErr := &entity.Error{
 						HttpStatus: http.StatusInternalServerError,

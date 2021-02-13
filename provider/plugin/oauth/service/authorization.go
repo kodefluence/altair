@@ -100,41 +100,25 @@ func (a *Authorization) Grant(ctx context.Context, authorizationReq entity.Autho
 		return oauthAccessGrantJSON, err
 	}
 
-	id, err := a.oauthAccessGrantModel.Create(kontext.Fabricate(kontext.WithDefaultContext(ctx)), a.modelFormatter.AccessGrantFromAuthorizationRequest(authorizationReq, oauthApplication), a.sqldb)
-	if err != nil {
-		log.Error().
-			Err(err).
-			Stack().
-			Interface("request_id", ctx.Value("request_id")).
-			Interface("request", authorizationReq).
-			Int("application_id", oauthApplication.ID).
-			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant")).
-			Msg("Error creating access grant")
-
-		return entity.OauthAccessGrantJSON{}, &entity.Error{
-			HttpStatus: http.StatusInternalServerError,
-			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+	exc := a.sqldb.Transaction(kontext.Fabricate(kontext.WithDefaultContext(ctx)), "authorization-grant-authorization-code", func(tx db.TX) exception.Exception {
+		id, err := a.oauthAccessGrantModel.Create(kontext.Fabricate(kontext.WithDefaultContext(ctx)), a.modelFormatter.AccessGrantFromAuthorizationRequest(authorizationReq, oauthApplication), tx)
+		if err != nil {
+			return exception.Throw(err, exception.WithDetail("error creating authorization code"))
 		}
+
+		oauthAccessGrant, err := a.oauthAccessGrantModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), id, tx)
+		if err != nil {
+			return exception.Throw(err, exception.WithDetail("error selecting newly created authorization code"))
+		}
+
+		oauthAccessGrantJSON = a.oauthFormatter.AccessGrant(oauthAccessGrant)
+		return nil
+	})
+	if exc != nil {
+		return oauthAccessGrantJSON, a.exceptionMapping(ctx, exc, zerolog.Arr().Str("service").Str("authorization").Str("grant"))
 	}
 
-	oauthAccessGrant, err := a.oauthAccessGrantModel.One(kontext.Fabricate(kontext.WithDefaultContext(ctx)), id, a.sqldb)
-	if err != nil {
-		log.Error().
-			Err(err).
-			Stack().
-			Interface("request_id", ctx.Value("request_id")).
-			Interface("request", authorizationReq).
-			Int("application_id", oauthApplication.ID).
-			Int("last_inserted_id", id).
-			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("grant")).
-			Msg("Error selecting one access grant after creating the data")
-		return entity.OauthAccessGrantJSON{}, &entity.Error{
-			HttpStatus: http.StatusInternalServerError,
-			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
-		}
-	}
-
-	return a.oauthFormatter.AccessGrant(oauthAccessGrant), nil
+	return oauthAccessGrantJSON, nil
 }
 
 // GrantToken will grant an access token
@@ -360,44 +344,7 @@ func (a *Authorization) grantTokenFromRefreshToken(ctx context.Context, accessTo
 	})
 
 	if exc != nil {
-		log.Error().
-			Err(exc).
-			Stack().
-			Interface("request_id", ctx.Value("request_id")).
-			Array("tags", zerolog.Arr().Str("service").Str("authorization").Str("refresh_token")).
-			Msg(exc.Detail())
-
-		switch exc.Type() {
-		case exception.NotFound:
-			return entity.OauthAccessToken{}, entity.OauthRefreshToken{}, &entity.Error{
-				HttpStatus: http.StatusNotFound,
-				Errors: eobject.Wrap(entity.ErrorObject{
-					Code:    exc.Title(),
-					Message: exc.Detail(),
-				}),
-			}
-
-		case exception.Unauthorized:
-			return entity.OauthAccessToken{}, entity.OauthRefreshToken{}, &entity.Error{
-				HttpStatus: http.StatusUnauthorized,
-				Errors:     eobject.Wrap(eobject.UnauthorizedError()),
-			}
-
-		case exception.Forbidden:
-			return entity.OauthAccessToken{}, entity.OauthRefreshToken{}, &entity.Error{
-				HttpStatus: http.StatusForbidden,
-				Errors: eobject.Wrap(entity.ErrorObject{
-					Code:    exc.Title(),
-					Message: exc.Detail(),
-				}),
-			}
-
-		default:
-			return entity.OauthAccessToken{}, entity.OauthRefreshToken{}, &entity.Error{
-				HttpStatus: http.StatusInternalServerError,
-				Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
-			}
-		}
+		return entity.OauthAccessToken{}, entity.OauthRefreshToken{}, a.exceptionMapping(ctx, exc, zerolog.Arr().Str("service").Str("authorization").Str("refresh_token"))
 	}
 
 	return finalOauthAccessToken, finalOauthRefreshToken, nil
@@ -499,4 +446,45 @@ func (a *Authorization) RevokeToken(ctx context.Context, revokeAccessTokenReq en
 	}
 
 	return nil
+}
+
+func (a *Authorization) exceptionMapping(ctx context.Context, exc exception.Exception, tags *zerolog.Array) *entity.Error {
+	log.Error().
+		Err(exc).
+		Stack().
+		Interface("request_id", ctx.Value("request_id")).
+		Array("tags", tags).
+		Msg(exc.Detail())
+
+	switch exc.Type() {
+	case exception.NotFound:
+		return &entity.Error{
+			HttpStatus: http.StatusNotFound,
+			Errors: eobject.Wrap(entity.ErrorObject{
+				Code:    exc.Title(),
+				Message: exc.Detail(),
+			}),
+		}
+
+	case exception.Unauthorized:
+		return &entity.Error{
+			HttpStatus: http.StatusUnauthorized,
+			Errors:     eobject.Wrap(eobject.UnauthorizedError()),
+		}
+
+	case exception.Forbidden:
+		return &entity.Error{
+			HttpStatus: http.StatusForbidden,
+			Errors: eobject.Wrap(entity.ErrorObject{
+				Code:    exc.Title(),
+				Message: exc.Detail(),
+			}),
+		}
+
+	default:
+		return &entity.Error{
+			HttpStatus: http.StatusInternalServerError,
+			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
+		}
+	}
 }
