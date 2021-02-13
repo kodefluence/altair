@@ -856,10 +856,10 @@ func (mr *MockOauthValidatorMockRecorder) ValidateTokenRefreshToken(ctx, data in
 }
 
 // ValidateTokenAuthorizationCode mocks base method
-func (m *MockOauthValidator) ValidateTokenAuthorizationCode(ctx context.Context, r entity.AccessTokenRequestJSON, data entity.OauthAccessGrant) *entity.Error {
+func (m *MockOauthValidator) ValidateTokenAuthorizationCode(ctx context.Context, r entity.AccessTokenRequestJSON, data entity.OauthAccessGrant) exception.Exception {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ValidateTokenAuthorizationCode", ctx, r, data)
-	ret0, _ := ret[0].(*entity.Error)
+	ret0, _ := ret[0].(exception.Exception)
 	return ret0
 }
 

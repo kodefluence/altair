@@ -146,26 +146,20 @@ func (a *Oauth) ValidateTokenGrant(ctx context.Context, r entity.AccessTokenRequ
 }
 
 // ValidateTokenAuthorizationCode will validate oauth access grant
-func (a *Oauth) ValidateTokenAuthorizationCode(ctx context.Context, r entity.AccessTokenRequestJSON, data entity.OauthAccessGrant) *entity.Error {
+func (a *Oauth) ValidateTokenAuthorizationCode(ctx context.Context, r entity.AccessTokenRequestJSON, data entity.OauthAccessGrant) exception.Exception {
 	if data.RevokedAT.Valid {
-		return &entity.Error{
-			HttpStatus: http.StatusForbidden,
-			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "authorization code already used")),
-		}
+		errorObject := eobject.ForbiddenError(ctx, "access_token", "authorization code already used")
+		return exception.Throw(errorObject, exception.WithTitle(errorObject.Code), exception.WithDetail(errorObject.Message), exception.WithType(exception.Forbidden))
 	}
 
 	if time.Now().After(data.ExpiresIn) {
-		return &entity.Error{
-			HttpStatus: http.StatusForbidden,
-			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "authorization code already expired")),
-		}
+		errorObject := eobject.ForbiddenError(ctx, "access_token", "authorization code already expired")
+		return exception.Throw(errorObject, exception.WithTitle(errorObject.Code), exception.WithDetail(errorObject.Message), exception.WithType(exception.Forbidden))
 	}
 
 	if data.RedirectURI.String != *r.RedirectURI {
-		return &entity.Error{
-			HttpStatus: http.StatusForbidden,
-			Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "redirect uri is different from one that generated before")),
-		}
+		errorObject := eobject.ForbiddenError(ctx, "access_token", "redirect uri is different from one that generated before")
+		return exception.Throw(errorObject, exception.WithTitle(errorObject.Code), exception.WithDetail(errorObject.Message), exception.WithType(exception.Forbidden))
 	}
 
 	return nil

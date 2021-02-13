@@ -478,13 +478,9 @@ func TestApplication(t *testing.T) {
 						},
 					}
 
-					expectedError := &entity.Error{
-						HttpStatus: http.StatusForbidden,
-						Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "authorization code already used")),
-					}
-
+					errorObject := eobject.ForbiddenError(ctx, "access_token", "authorization code already used")
 					applicationValidator := validator.NewOauth(true)
-					assert.Equal(t, expectedError, applicationValidator.ValidateTokenAuthorizationCode(ctx, accessTokenRequest, oauthAccessGrant))
+					assert.Equal(t, exception.Throw(errorObject, exception.WithTitle(errorObject.Code), exception.WithDetail(errorObject.Message), exception.WithType(exception.Forbidden)), applicationValidator.ValidateTokenAuthorizationCode(ctx, accessTokenRequest, oauthAccessGrant))
 				})
 			})
 
@@ -520,13 +516,9 @@ func TestApplication(t *testing.T) {
 						},
 					}
 
-					expectedError := &entity.Error{
-						HttpStatus: http.StatusForbidden,
-						Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "authorization code already expired")),
-					}
-
+					errorObject := eobject.ForbiddenError(ctx, "access_token", "authorization code already expired")
 					applicationValidator := validator.NewOauth(true)
-					assert.Equal(t, expectedError, applicationValidator.ValidateTokenAuthorizationCode(ctx, accessTokenRequest, oauthAccessGrant))
+					assert.Equal(t, exception.Throw(errorObject, exception.WithTitle(errorObject.Code), exception.WithDetail(errorObject.Message), exception.WithType(exception.Forbidden)), applicationValidator.ValidateTokenAuthorizationCode(ctx, accessTokenRequest, oauthAccessGrant))
 				})
 			})
 
@@ -562,13 +554,9 @@ func TestApplication(t *testing.T) {
 						},
 					}
 
-					expectedError := &entity.Error{
-						HttpStatus: http.StatusForbidden,
-						Errors:     eobject.Wrap(eobject.ForbiddenError(ctx, "access_token", "redirect uri is different from one that generated before")),
-					}
-
+					errorObject := eobject.ForbiddenError(ctx, "access_token", "redirect uri is different from one that generated before")
 					applicationValidator := validator.NewOauth(true)
-					assert.Equal(t, expectedError, applicationValidator.ValidateTokenAuthorizationCode(ctx, accessTokenRequest, oauthAccessGrant))
+					assert.Equal(t, exception.Throw(errorObject, exception.WithTitle(errorObject.Code), exception.WithDetail(errorObject.Message), exception.WithType(exception.Forbidden)), applicationValidator.ValidateTokenAuthorizationCode(ctx, accessTokenRequest, oauthAccessGrant))
 				})
 			})
 
