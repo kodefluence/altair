@@ -42,3 +42,10 @@ Read [CONTRIBUTING.md](https://github.com/codefluence-x/altair/blob/master/CONTR
 ### Community
 
 Join our discord channel [here](https://discord.gg/jK5TS8X8).
+
+### Dependency
+
+You can also contribute to Altair's dependency.
+
+1. [Aurelia - Randomly generated hash function](https://github.com/codefluence-x/aurelia)
+2. [Monorepo - All of your packages in one place](https://github.com/codefluence-x/monorepo)
