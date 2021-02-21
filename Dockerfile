@@ -2,7 +2,7 @@ FROM alpine:3.6
 
 WORKDIR /opt/altair/
 
-COPY ./build/linux/altair /usr/local/bin/
+COPY ./build_output/linux/altair /usr/local/bin/
 COPY ./migration/ /opt/altair/migration/
 COPY ./config/ /opt/altair/config/
 COPY ./routes/ /opt/altair/routes/
