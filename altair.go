@@ -421,7 +421,7 @@ func runAPI() error {
 			Handler: apiEngine,
 		}
 
-		log.Info().Msg(fmt.Sprintf("Running Altair in: %d", appConfig.Port()))
+		log.Info().Msg(fmt.Sprintf("Running Altair in: http://127.0.0.1:%d", appConfig.Port()))
 
 		if err := srv.ListenAndServe(); err != nil {
 			log.Error().
