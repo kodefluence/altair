@@ -8,14 +8,14 @@ import (
 	"strings"
 	"time"
 
-	coreEntity "github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/monorepo/db"
-	"github.com/codefluence-x/monorepo/exception"
-	"github.com/codefluence-x/monorepo/kontext"
+	coreEntity "github.com/kodefluence/altair/entity"
+	"github.com/kodefluence/monorepo/db"
+	"github.com/kodefluence/monorepo/exception"
+	"github.com/kodefluence/monorepo/kontext"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
 	"github.com/gin-gonic/gin"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/provider/plugin/oauth/interfaces"
 )
 
 // Oauth implement downstream plugin interface

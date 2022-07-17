@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codefluence-x/altair/util"
+	"github.com/kodefluence/altair/util"
 	"github.com/stretchr/testify/assert"
 )
 

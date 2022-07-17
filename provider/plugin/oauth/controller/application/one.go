@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
 	"github.com/gin-gonic/gin"
+	"github.com/kodefluence/altair/provider/plugin/oauth/eobject"
+	"github.com/kodefluence/altair/provider/plugin/oauth/interfaces"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )

@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/altair/entity"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/entity"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )

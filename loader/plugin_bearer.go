@@ -3,8 +3,8 @@ package loader
 import (
 	"errors"
 
-	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/altair/entity"
+	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/entity"
 	"gopkg.in/yaml.v2"
 )
 

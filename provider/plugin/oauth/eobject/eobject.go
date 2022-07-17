@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
 )
 
 func Wrap(errorObject ...entity.ErrorObject) []entity.ErrorObject {
@@ -14,7 +14,7 @@ func Wrap(errorObject ...entity.ErrorObject) []entity.ErrorObject {
 func InternalServerError(ctx context.Context) entity.ErrorObject {
 	return entity.ErrorObject{
 		Code:    "ERR0500",
-		Message: fmt.Sprintf("Something is not right, help us fix this problem. Contribute to https://github.com/codefluence-x/altair. Or help us by give this code '%v' to the admin of this site.", ctx.Value("request_id")),
+		Message: fmt.Sprintf("Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Or help us by give this code '%v' to the admin of this site.", ctx.Value("request_id")),
 	}
 }
 

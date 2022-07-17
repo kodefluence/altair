@@ -4,15 +4,15 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/codefluence-x/altair/adapter"
-	coreEntity "github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/loader"
-	"github.com/codefluence-x/altair/mock"
-	"github.com/codefluence-x/altair/provider/metric"
-	"github.com/codefluence-x/altair/provider/plugin/oauth"
-	mockdb "github.com/codefluence-x/monorepo/db/mock"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/kodefluence/altair/adapter"
+	coreEntity "github.com/kodefluence/altair/entity"
+	"github.com/kodefluence/altair/loader"
+	"github.com/kodefluence/altair/mock"
+	"github.com/kodefluence/altair/provider/metric"
+	"github.com/kodefluence/altair/provider/plugin/oauth"
+	mockdb "github.com/kodefluence/monorepo/db/mock"
 	"github.com/stretchr/testify/assert"
 )
 

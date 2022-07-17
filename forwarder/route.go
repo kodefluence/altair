@@ -1,8 +1,8 @@
 package forwarder
 
 import (
-	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/altair/forwarder/route"
+	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/forwarder/route"
 )
 
 type routeDispatcher struct{}

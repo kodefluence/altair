@@ -3,8 +3,8 @@ package provider
 import (
 	"database/sql"
 
-	"github.com/codefluence-x/altair/core"
-	mp "github.com/codefluence-x/altair/provider/migration"
+	"github.com/kodefluence/altair/core"
+	mp "github.com/kodefluence/altair/provider/migration"
 )
 
 type migration struct{}

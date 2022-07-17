@@ -3,12 +3,12 @@
 </p>
 
 <p align="center">
-  <a href="https://coveralls.io/github/codefluence-x/altair?branch=master"><img src="https://coveralls.io/repos/github/codefluence-x/altair/badge.svg?branch=master" alt="Coverage Status"></a>
-  <a href="https://goreportcard.com/report/github.com/codefluence-x/altair"><img src="https://goreportcard.com/badge/github.com/codefluence-x/altair" alt="Go Report Card"></a>
-  <a href="https://github.com/codefluence-x/altair/issues"><img src="https://img.shields.io/github/issues/codefluence-x/altair" alt="GitHub Issues"></a>
-  <a href="https://github.com/codefluence-x/altair/network"><img src="https://img.shields.io/github/forks/codefluence-x/altair" alt="GitHub Forks"></a>
-  <a href="https://github.com/codefluence-x/altair/stargazers"><img src="https://img.shields.io/github/stars/codefluence-x/altair" alt="GitHub Stars"></a>
-  <a href="https://github.com/codefluence-x/altair/blob/master/LICENSE"><img src="https://img.shields.io/github/license/codefluence-x/altair" alt="GitHub License"></a>
+  <a href="https://coveralls.io/github/kodefluence/altair?branch=master"><img src="https://coveralls.io/repos/github/kodefluence/altair/badge.svg?branch=master" alt="Coverage Status"></a>
+  <a href="https://goreportcard.com/report/github.com/kodefluence/altair"><img src="https://goreportcard.com/badge/github.com/kodefluence/altair" alt="Go Report Card"></a>
+  <a href="https://github.com/kodefluence/altair/issues"><img src="https://img.shields.io/github/issues/kodefluence/altair" alt="GitHub Issues"></a>
+  <a href="https://github.com/kodefluence/altair/network"><img src="https://img.shields.io/github/forks/kodefluence/altair" alt="GitHub Forks"></a>
+  <a href="https://github.com/kodefluence/altair/stargazers"><img src="https://img.shields.io/github/stars/kodefluence/altair" alt="GitHub Stars"></a>
+  <a href="https://github.com/kodefluence/altair/blob/master/LICENSE"><img src="https://img.shields.io/github/license/kodefluence/altair" alt="GitHub License"></a>
 </p>
 
 <br><br>
@@ -37,7 +37,7 @@ See [altair.codefluence.org](http://altair.codefluence.org/)
 
 ### How To Contribute
 
-Read [CONTRIBUTING.md](https://github.com/codefluence-x/altair/blob/master/CONTRIBUTING.md)
+Read [CONTRIBUTING.md](https://github.com/kodefluence/altair/blob/master/CONTRIBUTING.md)
 
 ### Community
 
@@ -47,5 +47,5 @@ Join our discord channel [here](https://discord.gg/jK5TS8X8).
 
 You can also contribute to Altair's dependency.
 
-1. [Aurelia - Randomly generated hash function](https://github.com/codefluence-x/aurelia)
-2. [Monorepo - All of your packages in one place](https://github.com/codefluence-x/monorepo)
+1. [Aurelia - Randomly generated hash function](https://github.com/kodefluence/aurelia)
+2. [Monorepo - All of your packages in one place](https://github.com/kodefluence/monorepo)

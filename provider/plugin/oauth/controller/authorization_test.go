@@ -3,9 +3,9 @@ package controller_test
 import (
 	"testing"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/controller"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"
 	"github.com/golang/mock/gomock"
+	"github.com/kodefluence/altair/provider/plugin/oauth/controller"
+	"github.com/kodefluence/altair/provider/plugin/oauth/mock"
 	"github.com/stretchr/testify/assert"
 )
 

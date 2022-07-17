@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
 	"github.com/stretchr/testify/assert"
 )
 

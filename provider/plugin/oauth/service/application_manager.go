@@ -4,12 +4,12 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
-	"github.com/codefluence-x/monorepo/db"
-	"github.com/codefluence-x/monorepo/exception"
-	"github.com/codefluence-x/monorepo/kontext"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/provider/plugin/oauth/eobject"
+	"github.com/kodefluence/altair/provider/plugin/oauth/interfaces"
+	"github.com/kodefluence/monorepo/db"
+	"github.com/kodefluence/monorepo/exception"
+	"github.com/kodefluence/monorepo/kontext"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )

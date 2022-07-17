@@ -4,10 +4,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
-	"github.com/codefluence-x/altair/util"
-	"github.com/codefluence-x/aurelia"
 	"github.com/google/uuid"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/util"
+	"github.com/kodefluence/aurelia"
 )
 
 // Model implement converter from other struct into model insertable struct

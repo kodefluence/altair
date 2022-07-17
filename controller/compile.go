@@ -9,9 +9,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/codefluence-x/altair/core"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/kodefluence/altair/core"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -151,6 +151,6 @@ func logRequestInfo(requestID uuid.UUID, c *gin.Context, ctrl core.Controller, e
 
 func internalServerErrorResponse(requestID uuid.UUID, c *gin.Context) {
 	c.JSON(http.StatusInternalServerError, gin.H{
-		"message": fmt.Sprintf("Something is not right, help us fix this problem. Contribute to https://github.com/codefluence-x/altair. Or help us by give this code '%s' to the admin of this site.", requestID),
+		"message": fmt.Sprintf("Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Or help us by give this code '%s' to the admin of this site.", requestID),
 	})
 }

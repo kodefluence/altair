@@ -3,8 +3,8 @@ package loader_test
 import (
 	"testing"
 
-	"github.com/codefluence-x/altair/loader"
-	"github.com/codefluence-x/altair/testhelper"
+	"github.com/kodefluence/altair/loader"
+	"github.com/kodefluence/altair/testhelper"
 	"github.com/stretchr/testify/assert"
 )
 

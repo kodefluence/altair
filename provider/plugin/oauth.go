@@ -1,8 +1,8 @@
 package plugin
 
 import (
-	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/altair/provider/plugin/oauth"
+	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/provider/plugin/oauth"
 )
 
 func Oauth(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer) error {

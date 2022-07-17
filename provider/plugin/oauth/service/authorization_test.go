@@ -7,15 +7,15 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/service"
-	"github.com/codefluence-x/altair/util"
-	mockdb "github.com/codefluence-x/monorepo/db/mock"
-	"github.com/codefluence-x/monorepo/exception"
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/provider/plugin/oauth/eobject"
+	"github.com/kodefluence/altair/provider/plugin/oauth/mock"
+	"github.com/kodefluence/altair/provider/plugin/oauth/service"
+	"github.com/kodefluence/altair/util"
+	mockdb "github.com/kodefluence/monorepo/db/mock"
+	"github.com/kodefluence/monorepo/exception"
 	"github.com/stretchr/testify/assert"
 )
 

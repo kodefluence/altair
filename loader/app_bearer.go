@@ -3,8 +3,8 @@ package loader
 import (
 	"errors"
 
-	"github.com/codefluence-x/altair/controller"
-	"github.com/codefluence-x/altair/core"
+	"github.com/kodefluence/altair/controller"
+	"github.com/kodefluence/altair/core"
 )
 
 type appBearer struct {

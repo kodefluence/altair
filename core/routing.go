@@ -1,8 +1,8 @@
 package core
 
 import (
-	"github.com/codefluence-x/altair/entity"
 	"github.com/gin-gonic/gin"
+	"github.com/kodefluence/altair/entity"
 )
 
 type RouteCompiler interface {

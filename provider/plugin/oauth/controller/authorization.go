@@ -1,8 +1,8 @@
 package controller
 
 import (
-	auth "github.com/codefluence-x/altair/provider/plugin/oauth/controller/authorization"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
+	auth "github.com/kodefluence/altair/provider/plugin/oauth/controller/authorization"
+	"github.com/kodefluence/altair/provider/plugin/oauth/interfaces"
 )
 
 // Authorization dispatch authorization related controller

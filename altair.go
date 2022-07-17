@@ -17,12 +17,12 @@ import (
 
 	"github.com/subosito/gotenv"
 
-	"github.com/codefluence-x/altair/controller"
-	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/altair/forwarder"
-	"github.com/codefluence-x/altair/loader"
-	"github.com/codefluence-x/altair/provider"
-	"github.com/codefluence-x/monorepo/db"
+	"github.com/kodefluence/altair/controller"
+	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/forwarder"
+	"github.com/kodefluence/altair/loader"
+	"github.com/kodefluence/altair/provider"
+	"github.com/kodefluence/monorepo/db"
 	"github.com/spf13/cobra"
 )
 

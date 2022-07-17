@@ -3,7 +3,7 @@ package migration
 import (
 	"database/sql"
 
-	"github.com/codefluence-x/altair/core"
+	"github.com/kodefluence/altair/core"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/mysql"

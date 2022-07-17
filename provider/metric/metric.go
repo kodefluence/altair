@@ -1,6 +1,6 @@
 package metric
 
-import "github.com/codefluence-x/altair/core"
+import "github.com/kodefluence/altair/core"
 
 func Provide(appBearer core.AppBearer) {
 	appBearer.SetMetricProvider(NewPrometheusMetric())

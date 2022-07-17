@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/query"
-	"github.com/codefluence-x/monorepo/db"
-	"github.com/codefluence-x/monorepo/exception"
-	"github.com/codefluence-x/monorepo/kontext"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/provider/plugin/oauth/query"
+	"github.com/kodefluence/monorepo/db"
+	"github.com/kodefluence/monorepo/exception"
+	"github.com/kodefluence/monorepo/kontext"
 )
 
 // OauthApplication handle all database operation of `oauth_applications` table

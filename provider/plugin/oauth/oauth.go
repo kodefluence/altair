@@ -3,14 +3,14 @@ package oauth
 import (
 	"time"
 
-	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/controller"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/downstream"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/formatter"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/model"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/service"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/validator"
+	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/provider/plugin/oauth/controller"
+	"github.com/kodefluence/altair/provider/plugin/oauth/downstream"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/provider/plugin/oauth/formatter"
+	"github.com/kodefluence/altair/provider/plugin/oauth/model"
+	"github.com/kodefluence/altair/provider/plugin/oauth/service"
+	"github.com/kodefluence/altair/provider/plugin/oauth/validator"
 )
 
 // Provide create new oauth plugin provider

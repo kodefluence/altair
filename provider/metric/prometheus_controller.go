@@ -1,8 +1,8 @@
 package metric
 
 import (
-	"github.com/codefluence-x/altair/core"
 	"github.com/gin-gonic/gin"
+	"github.com/kodefluence/altair/core"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 

@@ -7,11 +7,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/codefluence-x/altair/controller"
-	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/altair/provider/metric"
-	"github.com/codefluence-x/altair/testhelper"
 	"github.com/gin-gonic/gin"
+	"github.com/kodefluence/altair/controller"
+	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/provider/metric"
+	"github.com/kodefluence/altair/testhelper"
 	"github.com/stretchr/testify/assert"
 )
 

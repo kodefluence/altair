@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/provider/migration"
-	"github.com/codefluence-x/altair/testhelper"
+	"github.com/kodefluence/altair/entity"
+	"github.com/kodefluence/altair/provider/migration"
+	"github.com/kodefluence/altair/testhelper"
 	"github.com/stretchr/testify/assert"
 )
 

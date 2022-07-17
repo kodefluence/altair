@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/provider"
+	"github.com/kodefluence/altair/entity"
+	"github.com/kodefluence/altair/provider"
 	"github.com/stretchr/testify/assert"
 )
 

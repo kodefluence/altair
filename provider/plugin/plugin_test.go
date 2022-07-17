@@ -3,9 +3,9 @@ package plugin_test
 import (
 	"testing"
 
-	"github.com/codefluence-x/altair/mock"
-	"github.com/codefluence-x/altair/provider/plugin"
 	"github.com/golang/mock/gomock"
+	"github.com/kodefluence/altair/mock"
+	"github.com/kodefluence/altair/provider/plugin"
 	"github.com/stretchr/testify/assert"
 )
 

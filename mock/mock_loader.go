@@ -5,8 +5,8 @@
 package mock
 
 import (
-	core "github.com/codefluence-x/altair/core"
-	db "github.com/codefluence-x/monorepo/db"
+	core "github.com/kodefluence/altair/core"
+	db "github.com/kodefluence/monorepo/db"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 	time "time"

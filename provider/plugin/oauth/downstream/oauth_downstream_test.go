@@ -9,18 +9,18 @@ import (
 	"testing"
 	"time"
 
-	coreEntity "github.com/codefluence-x/altair/entity"
-	coreMock "github.com/codefluence-x/altair/mock"
-	mockdb "github.com/codefluence-x/monorepo/db/mock"
-	"github.com/codefluence-x/monorepo/exception"
+	coreEntity "github.com/kodefluence/altair/entity"
+	coreMock "github.com/kodefluence/altair/mock"
+	mockdb "github.com/kodefluence/monorepo/db/mock"
+	"github.com/kodefluence/monorepo/exception"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/downstream"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"
+	"github.com/kodefluence/altair/provider/plugin/oauth/downstream"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/provider/plugin/oauth/mock"
 
-	"github.com/codefluence-x/aurelia"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/kodefluence/aurelia"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -50,7 +50,7 @@ func TestOauth(t *testing.T) {
 					}
 					c.Request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
 					routePath := coreEntity.RouterPath{Auth: "oauth"}
 
@@ -90,7 +90,7 @@ func TestOauth(t *testing.T) {
 					}
 					c.Request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
 					routePath := coreEntity.RouterPath{Auth: "oauth", Scope: "public"}
 
@@ -130,7 +130,7 @@ func TestOauth(t *testing.T) {
 					}
 					c.Request.Header.Add("Authorization", fmt.Sprintf("Bearer %s", token))
 
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
 					routePath := coreEntity.RouterPath{Auth: "none"}
 
@@ -163,7 +163,7 @@ func TestOauth(t *testing.T) {
 
 						c.Writer = responseWritterMock
 
-						r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
+						r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
 						routePath := coreEntity.RouterPath{Auth: "oauth"}
 
@@ -195,7 +195,7 @@ func TestOauth(t *testing.T) {
 
 						c.Writer = responseWritterMock
 
-						r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
+						r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
 						routePath := coreEntity.RouterPath{Auth: "oauth"}
 
@@ -228,7 +228,7 @@ func TestOauth(t *testing.T) {
 
 					c.Writer = responseWritterMock
 
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
 					routePath := coreEntity.RouterPath{Auth: "oauth"}
 
@@ -261,7 +261,7 @@ func TestOauth(t *testing.T) {
 
 					c.Writer = responseWritterMock
 
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
 					routePath := coreEntity.RouterPath{Auth: "oauth"}
 
@@ -294,7 +294,7 @@ func TestOauth(t *testing.T) {
 
 					c.Writer = responseWritterMock
 
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
 					routePath := coreEntity.RouterPath{Auth: "oauth", Scope: "user"}
 
@@ -340,7 +340,7 @@ func TestOauth(t *testing.T) {
 
 					c.Writer = responseWritterMock
 
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
 					routePath := coreEntity.RouterPath{Auth: "oauth", Scope: "user"}
 

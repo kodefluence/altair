@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/forwarder/route"
-	"github.com/codefluence-x/altair/provider/metric"
-	"github.com/codefluence-x/altair/testhelper"
 	"github.com/gin-gonic/gin"
+	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/entity"
+	"github.com/kodefluence/altair/forwarder/route"
+	"github.com/kodefluence/altair/provider/metric"
+	"github.com/kodefluence/altair/testhelper"
 	"github.com/stretchr/testify/assert"
 )
 

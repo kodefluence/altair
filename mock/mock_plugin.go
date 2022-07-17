@@ -5,7 +5,7 @@
 package mock
 
 import (
-	entity "github.com/codefluence-x/altair/entity"
+	entity "github.com/kodefluence/altair/entity"
 	gin "github.com/gin-gonic/gin"
 	gomock "github.com/golang/mock/gomock"
 	http "net/http"

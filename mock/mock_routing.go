@@ -5,8 +5,8 @@
 package mock
 
 import (
-	core "github.com/codefluence-x/altair/core"
-	entity "github.com/codefluence-x/altair/entity"
+	core "github.com/kodefluence/altair/core"
+	entity "github.com/kodefluence/altair/entity"
 	gin "github.com/gin-gonic/gin"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"

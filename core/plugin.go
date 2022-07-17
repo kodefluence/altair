@@ -3,8 +3,8 @@ package core
 import (
 	"net/http"
 
-	"github.com/codefluence-x/altair/entity"
 	"github.com/gin-gonic/gin"
+	"github.com/kodefluence/altair/entity"
 )
 
 type DownStreamPlugin interface {

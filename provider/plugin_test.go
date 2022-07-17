@@ -4,9 +4,9 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/codefluence-x/altair/mock"
-	"github.com/codefluence-x/altair/provider"
 	"github.com/golang/mock/gomock"
+	"github.com/kodefluence/altair/mock"
+	"github.com/kodefluence/altair/provider"
 	"github.com/stretchr/testify/assert"
 )
 

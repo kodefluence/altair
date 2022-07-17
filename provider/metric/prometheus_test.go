@@ -3,7 +3,7 @@ package metric_test
 import (
 	"testing"
 
-	"github.com/codefluence-x/altair/provider/metric"
+	"github.com/kodefluence/altair/provider/metric"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
-	"github.com/codefluence-x/altair/util"
-	"github.com/codefluence-x/monorepo/exception"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/provider/plugin/oauth/eobject"
+	"github.com/kodefluence/altair/util"
+	"github.com/kodefluence/monorepo/exception"
 )
 
 // Oauth validator validate all oauth business flow logic

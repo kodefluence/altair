@@ -3,12 +3,12 @@ package loader_test
 import (
 	"testing"
 
-	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/loader"
-	"github.com/codefluence-x/monorepo/db"
-	mockdb "github.com/codefluence-x/monorepo/db/mock"
 	"github.com/golang/mock/gomock"
+	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/entity"
+	"github.com/kodefluence/altair/loader"
+	"github.com/kodefluence/monorepo/db"
+	mockdb "github.com/kodefluence/monorepo/db/mock"
 	"github.com/stretchr/testify/assert"
 )
 

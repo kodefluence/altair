@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/model"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/query"
-	mockdb "github.com/codefluence-x/monorepo/db/mock"
-	"github.com/codefluence-x/monorepo/exception"
-	"github.com/codefluence-x/monorepo/kontext"
 	"github.com/golang/mock/gomock"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/provider/plugin/oauth/model"
+	"github.com/kodefluence/altair/provider/plugin/oauth/query"
+	mockdb "github.com/kodefluence/monorepo/db/mock"
+	"github.com/kodefluence/monorepo/exception"
+	"github.com/kodefluence/monorepo/kontext"
 	"github.com/stretchr/testify/assert"
 )
 

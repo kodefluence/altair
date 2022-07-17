@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/formatter"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/provider/plugin/oauth/formatter"
 
-	"github.com/codefluence-x/altair/util"
-	"github.com/codefluence-x/aurelia"
 	"github.com/go-sql-driver/mysql"
+	"github.com/kodefluence/altair/util"
+	"github.com/kodefluence/aurelia"
 	"github.com/stretchr/testify/assert"
 )
 

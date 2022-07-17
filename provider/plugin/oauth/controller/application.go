@@ -1,8 +1,8 @@
 package controller
 
 import (
-	app "github.com/codefluence-x/altair/provider/plugin/oauth/controller/application"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/interfaces"
+	app "github.com/kodefluence/altair/provider/plugin/oauth/controller/application"
+	"github.com/kodefluence/altair/provider/plugin/oauth/interfaces"
 )
 
 // Application dispatch oauth application related controller

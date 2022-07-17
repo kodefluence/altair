@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/formatter"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/provider/plugin/oauth/formatter"
 
 	"github.com/go-sql-driver/mysql"
 	"gotest.tools/assert"

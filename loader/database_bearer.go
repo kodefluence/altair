@@ -1,8 +1,8 @@
 package loader
 
 import (
-	"github.com/codefluence-x/altair/core"
-	"github.com/codefluence-x/monorepo/db"
+	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/monorepo/db"
 	"github.com/pkg/errors"
 )
 

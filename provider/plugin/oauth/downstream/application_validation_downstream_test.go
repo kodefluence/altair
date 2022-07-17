@@ -9,15 +9,15 @@ import (
 	"strings"
 	"testing"
 
-	coreEntity "github.com/codefluence-x/altair/entity"
-	coreMock "github.com/codefluence-x/altair/mock"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/downstream"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"
-	mockdb "github.com/codefluence-x/monorepo/db/mock"
-	"github.com/codefluence-x/monorepo/exception"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	coreEntity "github.com/kodefluence/altair/entity"
+	coreMock "github.com/kodefluence/altair/mock"
+	"github.com/kodefluence/altair/provider/plugin/oauth/downstream"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/provider/plugin/oauth/mock"
+	mockdb "github.com/kodefluence/monorepo/db/mock"
+	"github.com/kodefluence/monorepo/exception"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -50,7 +50,7 @@ func TestApplicationValidation(t *testing.T) {
 
 					reqBody := fmt.Sprintf(`{"client_uid":"%s","client_secret":"%s","username":"altair","password":"handsomeeagle"}`, clientUID, clientSecret)
 
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", strings.NewReader(reqBody))
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", strings.NewReader(reqBody))
 					routePath := coreEntity.RouterPath{Auth: "oauth_application"}
 
 					entityOauthApplication := entity.OauthApplication{
@@ -82,7 +82,7 @@ func TestApplicationValidation(t *testing.T) {
 
 					reqBody := fmt.Sprintf(`{"client_uid":"%s","client_secret":"%s","username":"altair","password":"handsomeeagle"}`, clientUID, clientSecret)
 
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", strings.NewReader(reqBody))
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", strings.NewReader(reqBody))
 					routePath := coreEntity.RouterPath{Auth: "none"}
 
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
@@ -115,7 +115,7 @@ func TestApplicationValidation(t *testing.T) {
 
 					reqBody := fmt.Sprintf(`{"client_uid":"%s","client_secret":"%s","username":"altair","password":"handsomeeagle"}`, clientUID, clientSecret)
 
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", strings.NewReader(reqBody))
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", strings.NewReader(reqBody))
 					routePath := coreEntity.RouterPath{Auth: "oauth_application"}
 
 					entityOauthApplication := entity.OauthApplication{}
@@ -150,7 +150,7 @@ func TestApplicationValidation(t *testing.T) {
 
 					reqBody := fmt.Sprintf(`{"client_uid":"%s","client_secret":"%s","username":"altair","password":"handsomeeagle"}`, clientUID, clientSecret)
 
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", strings.NewReader(reqBody))
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", strings.NewReader(reqBody))
 					routePath := coreEntity.RouterPath{Auth: "oauth_application"}
 
 					entityOauthApplication := entity.OauthApplication{}
@@ -184,7 +184,7 @@ func TestApplicationValidation(t *testing.T) {
 
 					reqBody := fmt.Sprintf(`{"client_secret":"%s","username":"altair","password":"handsomeeagle"}`, clientSecret)
 
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", strings.NewReader(reqBody))
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", strings.NewReader(reqBody))
 					routePath := coreEntity.RouterPath{Auth: "oauth_application"}
 
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
@@ -216,7 +216,7 @@ func TestApplicationValidation(t *testing.T) {
 
 					reqBody := fmt.Sprintf(`{"client_uid":"%s","username":"altair","password":"handsomeeagle"}`, clientUID)
 
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", strings.NewReader(reqBody))
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", strings.NewReader(reqBody))
 					routePath := coreEntity.RouterPath{Auth: "oauth_application"}
 
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
@@ -244,7 +244,7 @@ func TestApplicationValidation(t *testing.T) {
 
 					c.Writer = responseWritterMock
 
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", nil)
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 					routePath := coreEntity.RouterPath{Auth: "oauth_application"}
 
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)
@@ -276,7 +276,7 @@ func TestApplicationValidation(t *testing.T) {
 					clientSecret := "client_secret"
 
 					reqBody := fmt.Sprintf(`{"client_uid":"%s","client_secret":"%s","username":"altair","password":"handsomeeagle"}`, clientUID, clientSecret)
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", strings.NewReader(reqBody))
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", strings.NewReader(reqBody))
 					r.GetBody = func() (io.ReadCloser, error) {
 						return nil, errors.New("unexpected error")
 					}
@@ -313,7 +313,7 @@ func TestApplicationValidation(t *testing.T) {
 
 					reqBody := fmt.Sprintf(`client_uid=%s client_secrent=%s`, clientUID, clientSecret)
 
-					r, _ := http.NewRequest("GET", "https://github.com/codefluence-x/altair", strings.NewReader(reqBody))
+					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", strings.NewReader(reqBody))
 					routePath := coreEntity.RouterPath{Auth: "oauth_application"}
 
 					oauthApplicationModel := mock.NewMockOauthApplicationModel(mockCtrl)

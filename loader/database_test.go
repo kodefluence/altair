@@ -6,9 +6,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codefluence-x/altair/entity"
-	"github.com/codefluence-x/altair/loader"
-	"github.com/codefluence-x/altair/testhelper"
+	"github.com/kodefluence/altair/entity"
+	"github.com/kodefluence/altair/loader"
+	"github.com/kodefluence/altair/testhelper"
 	"github.com/stretchr/testify/assert"
 )
 

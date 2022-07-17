@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codefluence-x/altair/entity"
+	"github.com/kodefluence/altair/entity"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
 )

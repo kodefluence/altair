@@ -3,7 +3,7 @@ package core
 import (
 	"time"
 
-	"github.com/codefluence-x/monorepo/db"
+	"github.com/kodefluence/monorepo/db"
 )
 
 type AppLoader interface {

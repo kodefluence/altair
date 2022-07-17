@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
 	"github.com/google/uuid"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/provider/plugin/oauth/eobject"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +26,7 @@ func TestErrorObject(t *testing.T) {
 		errorObject := eobject.InternalServerError(ctx)
 		expectedErrorObject := entity.ErrorObject{
 			Code:    "ERR0500",
-			Message: fmt.Sprintf("Something is not right, help us fix this problem. Contribute to https://github.com/codefluence-x/altair. Or help us by give this code '%v' to the admin of this site.", ctx.Value("request_id")),
+			Message: fmt.Sprintf("Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Or help us by give this code '%v' to the admin of this site.", ctx.Value("request_id")),
 		}
 
 		assert.Equal(t, expectedErrorObject.Code, errorObject.Code)

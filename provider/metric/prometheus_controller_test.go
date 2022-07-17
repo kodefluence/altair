@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/codefluence-x/altair/provider/metric"
-	"github.com/codefluence-x/altair/testhelper"
 	"github.com/gin-gonic/gin"
+	"github.com/kodefluence/altair/provider/metric"
+	"github.com/kodefluence/altair/testhelper"
 	"gotest.tools/assert"
 )
 

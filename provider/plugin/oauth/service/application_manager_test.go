@@ -8,17 +8,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/entity"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/eobject"
-	mockdb "github.com/codefluence-x/monorepo/db/mock"
-	"github.com/codefluence-x/monorepo/exception"
+	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
+	"github.com/kodefluence/altair/provider/plugin/oauth/eobject"
+	mockdb "github.com/kodefluence/monorepo/db/mock"
+	"github.com/kodefluence/monorepo/exception"
 
-	"github.com/codefluence-x/altair/provider/plugin/oauth/formatter"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/mock"
-	"github.com/codefluence-x/altair/provider/plugin/oauth/service"
+	"github.com/kodefluence/altair/provider/plugin/oauth/formatter"
+	"github.com/kodefluence/altair/provider/plugin/oauth/mock"
+	"github.com/kodefluence/altair/provider/plugin/oauth/service"
 
-	"github.com/codefluence-x/altair/util"
 	"github.com/golang/mock/gomock"
+	"github.com/kodefluence/altair/util"
 	"github.com/stretchr/testify/assert"
 )
 
