@@ -18,3 +18,5 @@ deploy/_output
 vendor
 
 build_output/
+
+.vscode
