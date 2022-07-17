@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/kodefluence/altair/adapter"
+	"github.com/kodefluence/altair/cfg"
 	coreEntity "github.com/kodefluence/altair/entity"
-	"github.com/kodefluence/altair/loader"
 	"github.com/kodefluence/altair/mock"
 	"github.com/kodefluence/altair/provider/metric"
 	"github.com/kodefluence/altair/provider/plugin/oauth"
@@ -61,13 +61,13 @@ config:
 
 	t.Run("Provide", func(t *testing.T) {
 		t.Run("Run gracefully", func(t *testing.T) {
-			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
+			appBearer := cfg.AppBearer(apiEngine, adapter.AppConfig(appConfig))
 			appBearer.SetMetricProvider(metric.NewPrometheusMetric())
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(oauthDatabase).Return(sqldb, MYSQLConfig, nil)
 
-			pluginBearer := loader.PluginBearer(plugins)
+			pluginBearer := cfg.PluginBearer(plugins)
 
 			assert.Nil(t, oauth.Provide(appBearer, dbBearer, pluginBearer))
 		})
@@ -79,9 +79,9 @@ config:
 				Plugins:   []string{},
 			}
 			appConfig := coreEntity.NewAppConfig(appOption)
-			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
+			appBearer := cfg.AppBearer(apiEngine, adapter.AppConfig(appConfig))
 
-			pluginBearer := loader.PluginBearer(plugins)
+			pluginBearer := cfg.PluginBearer(plugins)
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(gomock.Any()).Times(0)
@@ -90,30 +90,30 @@ config:
 		})
 
 		t.Run("Compile plugin failed", func(t *testing.T) {
-			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
+			appBearer := cfg.AppBearer(apiEngine, adapter.AppConfig(appConfig))
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(gomock.Any()).Times(0)
 
 			plugins := map[string]coreEntity.Plugin{}
-			pluginBearer := loader.PluginBearer(plugins)
+			pluginBearer := cfg.PluginBearer(plugins)
 
 			assert.NotNil(t, oauth.Provide(appBearer, dbBearer, pluginBearer))
 		})
 
 		t.Run("Database instance is not exists", func(t *testing.T) {
-			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
+			appBearer := cfg.AppBearer(apiEngine, adapter.AppConfig(appConfig))
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(oauthDatabase).Return(nil, nil, errors.New("Database is not exists"))
 
-			pluginBearer := loader.PluginBearer(plugins)
+			pluginBearer := cfg.PluginBearer(plugins)
 
 			assert.NotNil(t, oauth.Provide(appBearer, dbBearer, pluginBearer))
 		})
 
 		t.Run("Access token timeout wrong format", func(t *testing.T) {
-			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
+			appBearer := cfg.AppBearer(apiEngine, adapter.AppConfig(appConfig))
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(oauthDatabase).Return(sqldb, MYSQLConfig, nil)
@@ -127,13 +127,13 @@ config:
   authorization_code_timeout: 24h
 `)},
 			}
-			pluginBearer := loader.PluginBearer(plugins)
+			pluginBearer := cfg.PluginBearer(plugins)
 
 			assert.NotNil(t, oauth.Provide(appBearer, dbBearer, pluginBearer))
 		})
 
 		t.Run("Authorization code timeout wrong format", func(t *testing.T) {
-			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
+			appBearer := cfg.AppBearer(apiEngine, adapter.AppConfig(appConfig))
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(oauthDatabase).Return(sqldb, MYSQLConfig, nil)
@@ -147,13 +147,13 @@ config:
   authorization_code_timeout: abc // this will make it fail
 `)},
 			}
-			pluginBearer := loader.PluginBearer(plugins)
+			pluginBearer := cfg.PluginBearer(plugins)
 
 			assert.NotNil(t, oauth.Provide(appBearer, dbBearer, pluginBearer))
 		})
 
 		t.Run("Refresh token timeout in wrong format", func(t *testing.T) {
-			appBearer := loader.AppBearer(apiEngine, adapter.AppConfig(appConfig))
+			appBearer := cfg.AppBearer(apiEngine, adapter.AppConfig(appConfig))
 			appBearer.SetMetricProvider(metric.NewPrometheusMetric())
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
@@ -172,7 +172,7 @@ config:
 `)},
 			}
 
-			pluginBearer := loader.PluginBearer(plugins)
+			pluginBearer := cfg.PluginBearer(plugins)
 
 			assert.NotNil(t, oauth.Provide(appBearer, dbBearer, pluginBearer))
 		})

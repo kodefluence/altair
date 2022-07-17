@@ -1,11 +1,11 @@
-package loader_test
+package cfg_test
 
 import (
 	"errors"
 	"testing"
 
+	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/entity"
-	"github.com/kodefluence/altair/loader"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -26,7 +26,7 @@ func TestPluginBearer(t *testing.T) {
 			plugins := map[string]entity.Plugin{
 				"oauth": {Plugin: "oauth"},
 			}
-			pluginBearer := loader.PluginBearer(plugins)
+			pluginBearer := cfg.PluginBearer(plugins)
 
 			t.Run("Plugin exists", func(t *testing.T) {
 				t.Run("Return true", func(t *testing.T) {
@@ -48,7 +48,7 @@ func TestPluginBearer(t *testing.T) {
 				"oauth": {Plugin: "oauth"},
 				"cache": {Plugin: "cache"},
 			}
-			pluginBearer := loader.PluginBearer(plugins)
+			pluginBearer := cfg.PluginBearer(plugins)
 
 			assert.Equal(t, len(plugins), pluginBearer.Length())
 		})
@@ -61,7 +61,7 @@ func TestPluginBearer(t *testing.T) {
 					plugins := map[string]entity.Plugin{
 						"oauth": {Plugin: "oauth", Raw: []byte(PluginConfigNormal1)},
 					}
-					pluginBearer := loader.PluginBearer(plugins)
+					pluginBearer := cfg.PluginBearer(plugins)
 
 					oauthPlugins := OauthPlugin{}
 
@@ -76,7 +76,7 @@ func TestPluginBearer(t *testing.T) {
 			t.Run("Plugin is not exists", func(t *testing.T) {
 				t.Run("Return error", func(t *testing.T) {
 					plugins := map[string]entity.Plugin{}
-					pluginBearer := loader.PluginBearer(plugins)
+					pluginBearer := cfg.PluginBearer(plugins)
 
 					oauthPlugins := OauthPlugin{}
 					err := pluginBearer.CompilePlugin("oauth", &oauthPlugins)
@@ -89,7 +89,7 @@ func TestPluginBearer(t *testing.T) {
 					plugins := map[string]entity.Plugin{
 						"oauth": {Plugin: "oauth", Raw: []byte(PluginConfigNormal1)},
 					}
-					pluginBearer := loader.PluginBearer(plugins)
+					pluginBearer := cfg.PluginBearer(plugins)
 
 					err := pluginBearer.CompilePlugin("oauth", "not struct, should be failed")
 					assert.NotNil(t, err)
@@ -106,7 +106,7 @@ func TestPluginBearer(t *testing.T) {
 					"cache": {Plugin: "cache"},
 				}
 
-				pluginBearer := loader.PluginBearer(plugins)
+				pluginBearer := cfg.PluginBearer(plugins)
 				count := 0
 				pluginBearer.ForEach(func(pluginName string) error {
 					count++
@@ -123,7 +123,7 @@ func TestPluginBearer(t *testing.T) {
 						"cache": {Plugin: "cache"},
 					}
 
-					pluginBearer := loader.PluginBearer(plugins)
+					pluginBearer := cfg.PluginBearer(plugins)
 					count := 0
 					pluginBearer.ForEach(func(pluginName string) error {
 						if count == 1 {

@@ -1,9 +1,9 @@
-package loader_test
+package cfg_test
 
 import (
 	"testing"
 
-	"github.com/kodefluence/altair/loader"
+	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/stretchr/testify/assert"
 )
@@ -19,7 +19,7 @@ func TestPlugin(t *testing.T) {
 					testhelper.GenerateTempTestFiles(pluginPath, PluginConfigNormal1, "oauth.yaml", 0666)
 					testhelper.GenerateTempTestFiles(pluginPath, PluginConfigNormal2, "cache.yaml", 0666)
 
-					pluginBearer, err := loader.Plugin().Compile(pluginPath)
+					pluginBearer, err := cfg.Plugin().Compile(pluginPath)
 
 					assert.Nil(t, err)
 					assert.Equal(t, 2, pluginBearer.Length())
@@ -37,7 +37,7 @@ func TestPlugin(t *testing.T) {
 					testhelper.GenerateTempTestFiles(pluginPath, PluginConfigNormal1, "oauth.yaml", 0666)
 					testhelper.GenerateTempTestFiles(pluginPath, PluginConfigNormal1, "oauth_2.yaml", 0666)
 
-					pluginBearer, err := loader.Plugin().Compile(pluginPath)
+					pluginBearer, err := cfg.Plugin().Compile(pluginPath)
 
 					assert.NotNil(t, err)
 					assert.Nil(t, pluginBearer)
@@ -52,7 +52,7 @@ func TestPlugin(t *testing.T) {
 
 					testhelper.GenerateTempTestFiles(pluginPath, PluginConfigYamlUnmarshalError, "oauth.yaml", 0666)
 
-					pluginBearer, err := loader.Plugin().Compile(pluginPath)
+					pluginBearer, err := cfg.Plugin().Compile(pluginPath)
 
 					assert.NotNil(t, err)
 					assert.Nil(t, pluginBearer)
@@ -67,7 +67,7 @@ func TestPlugin(t *testing.T) {
 
 					testhelper.GenerateTempTestFiles(pluginPath, PluginConfigTemplateParsingError, "oauth.yaml", 0666)
 
-					pluginBearer, err := loader.Plugin().Compile(pluginPath)
+					pluginBearer, err := cfg.Plugin().Compile(pluginPath)
 
 					assert.NotNil(t, err)
 					assert.Nil(t, pluginBearer)
@@ -80,7 +80,7 @@ func TestPlugin(t *testing.T) {
 				t.Run("Return error", func(t *testing.T) {
 					pluginPath := "./plugin_config_dir_not_exists/"
 
-					pluginBearer, err := loader.Plugin().Compile(pluginPath)
+					pluginBearer, err := cfg.Plugin().Compile(pluginPath)
 
 					assert.NotNil(t, err)
 					assert.Nil(t, pluginBearer)

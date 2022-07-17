@@ -1,4 +1,4 @@
-package loader_test
+package cfg_test
 
 import (
 	"fmt"
@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/entity"
-	"github.com/kodefluence/altair/loader"
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/stretchr/testify/assert"
 )
@@ -47,7 +47,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigNormalScenario, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.Nil(t, err)
 
 						c, ok := dbConfigs["oauth_database"]
@@ -114,7 +114,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigWithNotFoundENV, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.Nil(t, err)
 
 						c, ok := dbConfigs["oauth_database"]
@@ -204,7 +204,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigNormalScenarioWithTwoValue, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.Nil(t, err)
 
 						c1, ok := dbConfigs["oauth_database"]
@@ -278,7 +278,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigInvalidDriver, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
@@ -293,7 +293,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigEmptyMigrationSource, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
@@ -308,7 +308,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigInvalidDriver, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, "xxx.yml"))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, "xxx.yml"))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
@@ -323,7 +323,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigInvalidYaml, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
@@ -338,7 +338,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigInvalidTemplateFormatting, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
@@ -353,7 +353,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigMissingDriver, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
@@ -370,7 +370,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyDatabase, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
@@ -385,7 +385,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyHost, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
@@ -400,7 +400,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyUsername, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.NotNil(t, err)
 						assert.Nil(t, dbConfigs)
 
@@ -415,7 +415,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyPort, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.Nil(t, err)
 
 						config, ok := dbConfigs["oauth_database"]
@@ -436,7 +436,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyConnectionMaxLifetime, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.Nil(t, err)
 
 						config, ok := dbConfigs["oauth_database"]
@@ -457,7 +457,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyMaxIddleConnection, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.Nil(t, err)
 
 						config, ok := dbConfigs["oauth_database"]
@@ -478,7 +478,7 @@ func TestDatabase(t *testing.T) {
 
 						testhelper.GenerateTempTestFiles(configPath, DatabaseConfigMYSQLEmptyMaxOpenConnection, fileName, 0666)
 
-						dbConfigs, err := loader.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+						dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 						assert.Nil(t, err)
 
 						config, ok := dbConfigs["oauth_database"]

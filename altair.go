@@ -17,10 +17,10 @@ import (
 
 	"github.com/subosito/gotenv"
 
+	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/controller"
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/forwarder"
-	"github.com/kodefluence/altair/loader"
 	"github.com/kodefluence/altair/provider"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/spf13/cobra"
@@ -43,21 +43,21 @@ func main() {
 func loadConfig() {
 	var err error
 
-	loadedDBConfigs, err := loader.Database().Compile("./config/database.yml")
+	loadedDBConfigs, err := cfg.Database().Compile("./config/database.yml")
 	if err != nil {
 		log.Error().Err(err).Stack().Msg("Error loading databases config")
 		os.Exit(1)
 	}
 	dbConfigs = loadedDBConfigs
 
-	loadedAppConfig, err := loader.App().Compile("./config/app.yml")
+	loadedAppConfig, err := cfg.App().Compile("./config/app.yml")
 	if err != nil {
 		log.Error().Err(err).Stack().Msg("Error loading app config")
 		os.Exit(1)
 	}
 	appConfig = loadedAppConfig
 
-	loadedPluginBearer, err := loader.Plugin().Compile("./config/plugin/")
+	loadedPluginBearer, err := cfg.Plugin().Compile("./config/plugin/")
 	if err != nil {
 		log.Error().Err(err).Stack().Msg("Error loading plugin config")
 		os.Exit(1)
@@ -162,7 +162,7 @@ func executeCommand() {
 				return
 			}
 
-			dbBearer := loader.DatabaseBearer(databases, dbConfigs)
+			dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
 			_, config, err := dbBearer.Database(args[0])
 			if err != nil {
 				log.Error().
@@ -215,7 +215,7 @@ func executeCommand() {
 				return
 			}
 
-			dbBearer := loader.DatabaseBearer(databases, dbConfigs)
+			dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
 			_, config, err := dbBearer.Database(args[0])
 			if err != nil {
 				log.Error().
@@ -268,7 +268,7 @@ func executeCommand() {
 				return
 			}
 
-			dbBearer := loader.DatabaseBearer(databases, dbConfigs)
+			dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
 			_, config, err := dbBearer.Database(args[0])
 			if err != nil {
 				log.Error().
@@ -383,8 +383,8 @@ func runAPI() error {
 		appConfig.BasicAuthUsername(): appConfig.BasicAuthPassword(),
 	}))
 
-	appBearer := loader.AppBearer(pluginEngine, appConfig)
-	dbBearer := loader.DatabaseBearer(databases, dbConfigs)
+	appBearer := cfg.AppBearer(pluginEngine, appConfig)
+	dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
 
 	provider.Metric(appBearer)
 	provider.Plugin(appBearer, dbBearer, pluginBearer)

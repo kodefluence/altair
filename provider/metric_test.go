@@ -5,8 +5,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/kodefluence/altair/adapter"
+	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/entity"
-	"github.com/kodefluence/altair/loader"
 	"github.com/kodefluence/altair/provider"
 	"github.com/stretchr/testify/assert"
 )
@@ -21,7 +21,7 @@ func TestMetric(t *testing.T) {
 				Plugins:   []string{"oauth"},
 			}
 
-			provider.Metric(loader.AppBearer(gin.New(), adapter.AppConfig(entity.NewAppConfig(appOption))))
+			provider.Metric(cfg.AppBearer(gin.New(), adapter.AppConfig(entity.NewAppConfig(appOption))))
 		})
 	})
 }

@@ -1,4 +1,4 @@
-package loader_test
+package cfg_test
 
 var DatabaseConfigNormalScenario = `
 oauth_database:

@@ -1,12 +1,12 @@
-package loader_test
+package cfg_test
 
 import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/entity"
-	"github.com/kodefluence/altair/loader"
 	"github.com/kodefluence/monorepo/db"
 	mockdb "github.com/kodefluence/monorepo/db/mock"
 	"github.com/stretchr/testify/assert"
@@ -27,7 +27,7 @@ func TestDatabaseBearer(t *testing.T) {
 		"main_database": dbConfig,
 	}
 
-	dbBearer := loader.DatabaseBearer(databases, configs)
+	dbBearer := cfg.DatabaseBearer(databases, configs)
 
 	t.Run("Database", func(t *testing.T) {
 		t.Run("Given database name", func(t *testing.T) {
@@ -49,7 +49,7 @@ func TestDatabaseBearer(t *testing.T) {
 
 					loadedSQLDB, loadedDBConfig, err := dbBearer.Database(dbName)
 
-					assert.Equal(t, loader.ErrDatabasesIsNotExists, err)
+					assert.Equal(t, cfg.ErrDatabasesIsNotExists, err)
 					assert.Nil(t, loadedSQLDB)
 					assert.Nil(t, loadedDBConfig)
 				})
