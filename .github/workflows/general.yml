@@ -18,8 +18,8 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - name: Get goverall
-        run: go get -u github.com/mattn/goveralls
+      - name: Install goveralls
+        run: go install github.com/mattn/goveralls@latest
 
       - name: Go mod vendor
         run: go mod vendor
