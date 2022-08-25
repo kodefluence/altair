@@ -1,4 +1,4 @@
-package metric
+package http
 
 import (
 	"github.com/gin-gonic/gin"
@@ -6,20 +6,20 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-type prometheusController struct{}
+type PrometheusController struct{}
 
 func NewPrometheusController() core.Controller {
-	return &prometheusController{}
+	return &PrometheusController{}
 }
 
-func (*prometheusController) Path() string {
+func (*PrometheusController) Path() string {
 	return "/metrics"
 }
 
-func (*prometheusController) Method() string {
+func (*PrometheusController) Method() string {
 	return "GET"
 }
 
-func (*prometheusController) Control(c *gin.Context) {
+func (*PrometheusController) Control(c *gin.Context) {
 	promhttp.Handler().ServeHTTP(c.Writer, c.Request)
 }

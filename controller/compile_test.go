@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/kodefluence/altair/controller"
 	"github.com/kodefluence/altair/core"
-	"github.com/kodefluence/altair/provider/metric"
+	metricDummyUsecase "github.com/kodefluence/altair/plugin/metric/module/dummy/usecase"
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/stretchr/testify/assert"
 )
@@ -25,7 +25,7 @@ func TestCompile(t *testing.T) {
 				c.String(http.StatusOK, "%s", "OK")
 			})
 
-			controller.Compile(engine, metric.NewPrometheusMetric(), gracefullController)
+			controller.Compile(engine, metricDummyUsecase.NewDummy(), gracefullController)
 			w := testhelper.PerformRequest(engine, gracefullController.Method(), gracefullController.Path(), nil)
 
 			assert.Equal(t, http.StatusOK, w.Code)
@@ -38,7 +38,7 @@ func TestCompile(t *testing.T) {
 					c.String(http.StatusOK, "%s", "OK")
 				})
 
-				controller.Compile(engine, metric.NewPrometheusMetric(), gracefullPostController)
+				controller.Compile(engine, metricDummyUsecase.NewDummy(), gracefullPostController)
 				w := testhelper.PerformRequest(engine, gracefullPostController.Method(), gracefullPostController.Path(), strings.NewReader(`{"object":"testing"}`))
 
 				assert.Equal(t, http.StatusOK, w.Code)
@@ -50,7 +50,7 @@ func TestCompile(t *testing.T) {
 					c.String(http.StatusOK, "%s", "OK")
 				})
 
-				controller.Compile(engine, metric.NewPrometheusMetric(), gracefullPostBodyErrorController)
+				controller.Compile(engine, metricDummyUsecase.NewDummy(), gracefullPostBodyErrorController)
 				w := testhelper.PerformRequest(engine, gracefullPostBodyErrorController.Method(), gracefullPostBodyErrorController.Path(), errRequestReader{})
 
 				assert.Equal(t, http.StatusOK, w.Code)
@@ -65,7 +65,7 @@ func TestCompile(t *testing.T) {
 				c.String(http.StatusInternalServerError, "%s", "Are you kidding me? The server is just crash!")
 			})
 
-			controller.Compile(engine, metric.NewPrometheusMetric(), notGracefullController)
+			controller.Compile(engine, metricDummyUsecase.NewDummy(), notGracefullController)
 			w := testhelper.PerformRequest(engine, notGracefullController.Method(), notGracefullController.Path(), nil)
 
 			assert.Equal(t, http.StatusInternalServerError, w.Code)
@@ -78,7 +78,7 @@ func TestCompile(t *testing.T) {
 					panic("Panic with string")
 				})
 
-				controller.Compile(engine, metric.NewPrometheusMetric(), panicStringController)
+				controller.Compile(engine, metricDummyUsecase.NewDummy(), panicStringController)
 				w := testhelper.PerformRequest(engine, panicStringController.Method(), panicStringController.Path(), nil)
 
 				var response responseExample
@@ -94,7 +94,7 @@ func TestCompile(t *testing.T) {
 					panic(errors.New("Panic with an error"))
 				})
 
-				controller.Compile(engine, metric.NewPrometheusMetric(), panicErrorController)
+				controller.Compile(engine, metricDummyUsecase.NewDummy(), panicErrorController)
 				w := testhelper.PerformRequest(engine, panicErrorController.Method(), panicErrorController.Path(), nil)
 
 				var response responseExample
@@ -109,7 +109,7 @@ func TestCompile(t *testing.T) {
 					panic(responseExample{})
 				})
 
-				controller.Compile(engine, metric.NewPrometheusMetric(), panicOtherController)
+				controller.Compile(engine, metricDummyUsecase.NewDummy(), panicOtherController)
 				w := testhelper.PerformRequest(engine, panicOtherController.Method(), panicOtherController.Path(), nil)
 
 				var response responseExample

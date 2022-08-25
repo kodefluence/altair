@@ -10,7 +10,8 @@ import (
 	"github.com/kodefluence/altair/cfg"
 	coreEntity "github.com/kodefluence/altair/entity"
 	"github.com/kodefluence/altair/mock"
-	"github.com/kodefluence/altair/provider/metric"
+	metricDummyUsecase "github.com/kodefluence/altair/plugin/metric/module/dummy/usecase"
+
 	"github.com/kodefluence/altair/provider/plugin/oauth"
 	mockdb "github.com/kodefluence/monorepo/db/mock"
 	"github.com/stretchr/testify/assert"
@@ -62,7 +63,7 @@ config:
 	t.Run("Provide", func(t *testing.T) {
 		t.Run("Run gracefully", func(t *testing.T) {
 			appBearer := cfg.AppBearer(apiEngine, adapter.AppConfig(appConfig))
-			appBearer.SetMetricProvider(metric.NewPrometheusMetric())
+			appBearer.SetMetricProvider(metricDummyUsecase.NewDummy())
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(oauthDatabase).Return(sqldb, MYSQLConfig, nil)
@@ -154,7 +155,7 @@ config:
 
 		t.Run("Refresh token timeout in wrong format", func(t *testing.T) {
 			appBearer := cfg.AppBearer(apiEngine, adapter.AppConfig(appConfig))
-			appBearer.SetMetricProvider(metric.NewPrometheusMetric())
+			appBearer.SetMetricProvider(metricDummyUsecase.NewDummy())
 
 			dbBearer := mock.NewMockDatabaseBearer(mockCtrl)
 			dbBearer.EXPECT().Database(oauthDatabase).Return(sqldb, MYSQLConfig, nil)

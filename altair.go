@@ -21,6 +21,7 @@ import (
 	"github.com/kodefluence/altair/controller"
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/forwarder"
+	"github.com/kodefluence/altair/plugin"
 	"github.com/kodefluence/altair/provider"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/spf13/cobra"
@@ -386,7 +387,7 @@ func runAPI() error {
 	appBearer := cfg.AppBearer(pluginEngine, appConfig)
 	dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
 
-	provider.Metric(appBearer)
+	plugin.Fabricate(appBearer, pluginBearer)
 	provider.Plugin(appBearer, dbBearer, pluginBearer)
 
 	// Route Engine
