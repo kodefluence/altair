@@ -1,0 +1,9 @@
+# This is the sample of metric plugin config
+# plugin: string            - Plugins name
+# config: <array[hash]>     - List of configuration
+#   <example>
+#   provider: string  - Metric provider, currently only available for prometheus.
+
+plugin: metric
+config:
+  provider: prometheus

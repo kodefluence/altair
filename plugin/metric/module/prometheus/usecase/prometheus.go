@@ -1,4 +1,4 @@
-package metric
+package usecase
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-type prometheusMetric struct {
+type PrometheusMetric struct {
 	counterMetrics    map[string]*prometheus.CounterVec
 	counterMetricLock *sync.Mutex
 
@@ -16,8 +16,8 @@ type prometheusMetric struct {
 	histogramMetricLock *sync.Mutex
 }
 
-func NewPrometheusMetric() *prometheusMetric {
-	return &prometheusMetric{
+func NewPrometheus() *PrometheusMetric {
+	return &PrometheusMetric{
 		counterMetrics:    map[string]*prometheus.CounterVec{},
 		counterMetricLock: &sync.Mutex{},
 
@@ -26,7 +26,7 @@ func NewPrometheusMetric() *prometheusMetric {
 	}
 }
 
-func (p *prometheusMetric) InjectCounter(metricName string, labels ...string) {
+func (p *PrometheusMetric) InjectCounter(metricName string, labels ...string) {
 	if _, ok := p.counterMetrics[metricName]; ok {
 		return
 	}
@@ -40,7 +40,7 @@ func (p *prometheusMetric) InjectCounter(metricName string, labels ...string) {
 	p.counterMetricLock.Unlock()
 }
 
-func (p *prometheusMetric) InjectHistogram(metricName string, labels ...string) {
+func (p *PrometheusMetric) InjectHistogram(metricName string, labels ...string) {
 	if _, ok := p.histogramMetrics[metricName]; ok {
 		return
 	}
@@ -54,7 +54,7 @@ func (p *prometheusMetric) InjectHistogram(metricName string, labels ...string) 
 	p.histogramMetricLock.Unlock()
 }
 
-func (p *prometheusMetric) Inc(metricName string, labels map[string]string) error {
+func (p *PrometheusMetric) Inc(metricName string, labels map[string]string) error {
 	counterMetric, ok := p.counterMetrics[metricName]
 	if !ok {
 		return errors.New(fmt.Sprintf("Metric `%s` is not exists", metricName))
@@ -70,7 +70,7 @@ func (p *prometheusMetric) Inc(metricName string, labels map[string]string) erro
 	return nil
 }
 
-func (p *prometheusMetric) Observe(metricName string, value float64, labels map[string]string) error {
+func (p *PrometheusMetric) Observe(metricName string, value float64, labels map[string]string) error {
 	histogramMetric, ok := p.histogramMetrics[metricName]
 	if !ok {
 		return errors.New(fmt.Sprintf("Metric `%s` is not exists", metricName))

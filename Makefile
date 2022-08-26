@@ -11,7 +11,7 @@ mock_plugin:
 	mockgen -source core/plugin.go -destination mock/mock_plugin.go -package mock
 
 mock_loader:
-	mockgen -source core/loader.go -destination mock/mock_loader.go -package mock
+	mockgen -source core/cfg.go -destination mock/mock_cfg.go -package mock
 
 mock_routing:
 	mockgen -source core/routing.go -destination mock/mock_routing.go -package mock

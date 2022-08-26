@@ -1,4 +1,4 @@
-package loader_test
+package cfg_test
 
 import (
 	"net/http"
@@ -7,10 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/kodefluence/altair/adapter"
+	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/entity"
-	"github.com/kodefluence/altair/loader"
 	"github.com/kodefluence/altair/mock"
-	"github.com/kodefluence/altair/provider/metric"
+	metricDummyUsecase "github.com/kodefluence/altair/plugin/metric/module/dummy/usecase"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -54,8 +54,8 @@ func TestAppBearer(t *testing.T) {
 	appConfig := entity.NewAppConfig(appOption)
 	appEngine := gin.Default()
 
-	appBearer := loader.AppBearer(appEngine, adapter.AppConfig(appConfig))
-	appBearer.SetMetricProvider(metric.NewPrometheusMetric())
+	appBearer := cfg.AppBearer(appEngine, adapter.AppConfig(appConfig))
+	appBearer.SetMetricProvider(metricDummyUsecase.NewDummy())
 
 	t.Run("Config", func(t *testing.T) {
 		t.Run("Return AppConfig", func(t *testing.T) {
@@ -89,7 +89,7 @@ func TestAppBearer(t *testing.T) {
 			appConfig := entity.NewAppConfig(appOption)
 			appEngine := gin.Default()
 
-			appBearer := loader.AppBearer(appEngine, adapter.AppConfig(appConfig))
+			appBearer := cfg.AppBearer(appEngine, adapter.AppConfig(appConfig))
 
 			appBearer.InjectDownStreamPlugin(fakeDownStreamPlugin{})
 			appBearer.InjectDownStreamPlugin(fakeDownStreamPlugin{})
@@ -111,7 +111,7 @@ func TestAppBearer(t *testing.T) {
 		appConfig := entity.NewAppConfig(appOption)
 		appEngine := gin.Default()
 
-		appBearer := loader.AppBearer(appEngine, adapter.AppConfig(appConfig))
+		appBearer := cfg.AppBearer(appEngine, adapter.AppConfig(appConfig))
 
 		mockMetric := mock.NewMockMetric(mockCtrl)
 		assert.NotPanics(t, func() {
@@ -134,7 +134,7 @@ func TestAppBearer(t *testing.T) {
 				appConfig := entity.NewAppConfig(appOption)
 				appEngine := gin.Default()
 
-				appBearer := loader.AppBearer(appEngine, adapter.AppConfig(appConfig))
+				appBearer := cfg.AppBearer(appEngine, adapter.AppConfig(appConfig))
 
 				mockMetric := mock.NewMockMetric(mockCtrl)
 
@@ -159,7 +159,7 @@ func TestAppBearer(t *testing.T) {
 				appConfig := entity.NewAppConfig(appOption)
 				appEngine := gin.Default()
 
-				appBearer := loader.AppBearer(appEngine, adapter.AppConfig(appConfig))
+				appBearer := cfg.AppBearer(appEngine, adapter.AppConfig(appConfig))
 
 				metricProvider, err := appBearer.MetricProvider()
 				assert.Nil(t, metricProvider)

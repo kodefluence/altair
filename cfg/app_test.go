@@ -1,11 +1,11 @@
-package loader_test
+package cfg_test
 
 import (
 	"fmt"
 	"testing"
 
+	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/entity"
-	"github.com/kodefluence/altair/loader"
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/stretchr/testify/assert"
 )
@@ -32,7 +32,7 @@ func TestApp(t *testing.T) {
 
 					expectedAppConfig := entity.NewAppConfig(appConfigOption)
 
-					appConfig, err := loader.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+					appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 					assert.Nil(t, err)
 
 					assert.Equal(t, expectedAppConfig.Plugins(), appConfig.Plugins())
@@ -64,7 +64,7 @@ func TestApp(t *testing.T) {
 
 					expectedAppConfig := entity.NewAppConfig(appConfigOption)
 
-					appConfig, err := loader.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+					appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 					assert.Nil(t, err)
 
 					assert.Equal(t, expectedAppConfig.Plugins(), appConfig.Plugins())
@@ -95,7 +95,7 @@ func TestApp(t *testing.T) {
 
 					expectedAppConfig := entity.NewAppConfig(appConfigOption)
 
-					appConfig, err := loader.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+					appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 					assert.Nil(t, err)
 
 					assert.Equal(t, expectedAppConfig.Plugins(), appConfig.Plugins())
@@ -115,7 +115,7 @@ func TestApp(t *testing.T) {
 
 					testhelper.GenerateTempTestFiles(configPath, AppConfigAuthUsernameEmpty, fileName, 0666)
 
-					appConfig, err := loader.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+					appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 					assert.NotNil(t, err)
 					assert.Nil(t, appConfig)
 
@@ -130,7 +130,7 @@ func TestApp(t *testing.T) {
 
 					testhelper.GenerateTempTestFiles(configPath, AppConfigAuthPasswordEmpty, fileName, 0666)
 
-					appConfig, err := loader.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+					appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 					assert.NotNil(t, err)
 					assert.Nil(t, appConfig)
 
@@ -145,7 +145,7 @@ func TestApp(t *testing.T) {
 
 					testhelper.GenerateTempTestFiles(configPath, AppConfigWithInvalidCustomPort, fileName, 0666)
 
-					appConfig, err := loader.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+					appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 					assert.NotNil(t, err)
 					assert.Nil(t, appConfig)
 
@@ -160,7 +160,7 @@ func TestApp(t *testing.T) {
 
 					testhelper.GenerateTempTestFiles(configPath, AppConfigNormal, fileName, 0666)
 
-					appConfig, err := loader.App().Compile(fmt.Sprintf("%s%s", configPath, "should_be_not_found_yml"))
+					appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, "should_be_not_found_yml"))
 					assert.NotNil(t, err)
 					assert.Nil(t, appConfig)
 
@@ -175,7 +175,7 @@ func TestApp(t *testing.T) {
 
 					testhelper.GenerateTempTestFiles(configPath, AppConfigTemplateError, fileName, 0666)
 
-					appConfig, err := loader.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+					appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 					assert.NotNil(t, err)
 					assert.Nil(t, appConfig)
 
@@ -190,7 +190,7 @@ func TestApp(t *testing.T) {
 
 					testhelper.GenerateTempTestFiles(configPath, AppConfigUnmarshalError, fileName, 0666)
 
-					appConfig, err := loader.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+					appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 					assert.NotNil(t, err)
 					assert.Nil(t, appConfig)
 
