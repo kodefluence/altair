@@ -529,7 +529,7 @@ func TestGenerator(t *testing.T) {
 				downStreamPlugin = append(downStreamPlugin)
 
 				err := route.Generator().Generate(gatewayEngine, metricDummyUsecase.NewDummy(), routeObjects, downStreamPlugin)
-				assert.NotNil(t, err)
+				assert.Nil(t, err)
 			})
 		})
 
