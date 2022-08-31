@@ -769,6 +769,8 @@ github.com/kodefluence/aurelia v0.0.0-20220717092613-4dd6082f36c5 h1:FLBH+WApSIe
 github.com/kodefluence/aurelia v0.0.0-20220717092613-4dd6082f36c5/go.mod h1:I08pR350yj4atsic70MeG5KZYpzawVyYfmAoFIUDc8k=
 github.com/kodefluence/monorepo v0.0.0-20220717092652-76a76fa2dd17 h1:nNxJoqLHk15oa+0YE7E5Sp40d3irhKuFs7RzPwBZt0o=
 github.com/kodefluence/monorepo v0.0.0-20220717092652-76a76fa2dd17/go.mod h1:JLqa6J+YKSLPmxkfYQVCXKtB8Z9HgR/UKK0XWZQwb2w=
+github.com/kodefluence/monorepo v0.0.0-20220829185011-9e6b60a745e0 h1:fig7RrICILjDBrAG0l0CxreenNhiDIMFd7cmAa/69Zo=
+github.com/kodefluence/monorepo v0.0.0-20220829185011-9e6b60a745e0/go.mod h1:JLqa6J+YKSLPmxkfYQVCXKtB8Z9HgR/UKK0XWZQwb2w=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konsorten/go-windows-terminal-sequences v1.0.2/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konsorten/go-windows-terminal-sequences v1.0.3/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=

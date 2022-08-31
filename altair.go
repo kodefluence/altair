@@ -387,7 +387,14 @@ func runAPI() error {
 	appBearer := cfg.AppBearer(pluginEngine, appConfig)
 	dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
 
-	plugin.Fabricate(appBearer, pluginBearer)
+	if err := plugin.Fabricate(appBearer, pluginBearer); err != nil {
+		log.Error().
+			Err(err).
+			Stack().
+			Array("tags", zerolog.Arr().Str("altair").Str("main")).
+			Msg("Error generating plugins")
+		return err
+	}
 	provider.Plugin(appBearer, dbBearer, pluginBearer)
 
 	// Route Engine
