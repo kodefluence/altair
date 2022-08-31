@@ -3,6 +3,7 @@ package oauth
 import (
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
+	"github.com/kodefluence/altair/plugin/oauth/repository/mysql"
 )
 
 // Provide create new oauth plugin provider
@@ -42,10 +43,10 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 	}
 
 	// Model
-	// oauthApplicationModel := model.NewOauthApplication()
-	// oauthAccessTokenModel := model.NewOauthAccessToken()
-	// oauthAccessGrantModel := model.NewOauthAccessGrant()
-	// oauthRefreshTokenModel := model.NewOauthRefreshToken()
+	_ = mysql.NewOauthApplication()
+	_ = mysql.NewOauthAccessToken()
+	_ = mysql.NewOauthAccessGrant()
+	_ = mysql.NewOauthRefreshToken()
 
 	// Formatter
 	// oauthApplicationFormatter := formatter.OauthApplication()
