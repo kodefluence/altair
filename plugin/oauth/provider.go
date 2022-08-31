@@ -41,36 +41,36 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 		refreshTokenConfig.Timeout = refreshTokenTimeout
 	}
 
-	// // Model
+	// Model
 	// oauthApplicationModel := model.NewOauthApplication()
 	// oauthAccessTokenModel := model.NewOauthAccessToken()
 	// oauthAccessGrantModel := model.NewOauthAccessGrant()
 	// oauthRefreshTokenModel := model.NewOauthRefreshToken()
 
-	// // // Formatter
+	// Formatter
 	// oauthApplicationFormatter := formatter.OauthApplication()
 	// oauthModelFormatter := formatter.NewModel(accessTokenTimeout, authorizationCodeTimeout, refreshTokenConfig.Timeout)
 	// oauthFormatter := formatter.Oauth()
 
-	// // Validator
+	// Validator
 	// oauthValidator := validator.NewOauth(refreshTokenConfig.Active)
 
-	// // Service
+	// Service
 	// applicationManager := service.NewApplicationManager(oauthApplicationFormatter, oauthModelFormatter, oauthApplicationModel, oauthValidator, db)
 	// authorization := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, oauthModelFormatter, oauthValidator, oauthFormatter, refreshTokenConfig.Active, db)
 
-	// // DownStreamPlugin
+	// DownStreamPlugin
 	// oauthDownStream := downstream.NewOauth(oauthAccessTokenModel, db)
 	// applicationValidationDownStream := downstream.NewApplicationValidation(oauthApplicationModel, db)
 
-	// // Controller of /oauth/applications
+	// Controller of /oauth/applications
 	// applicationControllerDispatcher := controller.NewApplication()
 	// appBearer.InjectController(applicationControllerDispatcher.List(applicationManager))
 	// appBearer.InjectController(applicationControllerDispatcher.One(applicationManager))
 	// appBearer.InjectController(applicationControllerDispatcher.Create(applicationManager))
 	// appBearer.InjectController(applicationControllerDispatcher.Update(applicationManager))
 
-	// // Controller of /oauth/authorizations
+	// Controller of /oauth/authorizations
 	// authorizationControllerDispatcher := controller.NewAuthorization()
 	// appBearer.InjectController(authorizationControllerDispatcher.Grant(authorization))
 	// appBearer.InjectController(authorizationControllerDispatcher.Revoke(authorization))
