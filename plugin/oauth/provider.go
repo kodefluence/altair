@@ -42,7 +42,7 @@ func Provide(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBeare
 		refreshTokenConfig.Timeout = refreshTokenTimeout
 	}
 
-	// Model
+	// Repository
 	_ = mysql.NewOauthApplication()
 	_ = mysql.NewOauthAccessToken()
 	_ = mysql.NewOauthAccessGrant()
