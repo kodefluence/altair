@@ -9,9 +9,9 @@ import (
 	"github.com/kodefluence/altair/plugin/metric/module/prometheus"
 )
 
-func Provide(appBearer core.AppBearer, pluginBearer core.PluginBearer) error {
+func Load(appBearer core.AppBearer, pluginBearer core.PluginBearer) error {
 	if appBearer.Config().PluginExists("metric") == false {
-		dummy.Provide(appBearer)
+		dummy.Load(appBearer)
 		return nil
 	}
 
@@ -22,7 +22,7 @@ func Provide(appBearer core.AppBearer, pluginBearer core.PluginBearer) error {
 
 	switch metricPlugin.Config.Provider {
 	case "prometheus":
-		prometheus.Provide(appBearer)
+		prometheus.Load(appBearer)
 	default:
 		return fmt.Errorf("Metric plugin `%s` is currently not supported", metricPlugin.Config.Provider)
 	}

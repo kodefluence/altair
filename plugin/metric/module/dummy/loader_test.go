@@ -14,5 +14,5 @@ func TestProvider(t *testing.T) {
 	defer mockController.Finish()
 	appBearer := mock.NewMockAppBearer(mockController)
 	appBearer.EXPECT().SetMetricProvider(usecase.NewDummy())
-	dummy.Provide(appBearer)
+	dummy.Load(appBearer)
 }

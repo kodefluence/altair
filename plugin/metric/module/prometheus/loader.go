@@ -6,7 +6,7 @@ import (
 	"github.com/kodefluence/altair/plugin/metric/module/prometheus/usecase"
 )
 
-func Provide(appBearer core.AppBearer) {
+func Load(appBearer core.AppBearer) {
 	appBearer.SetMetricProvider(usecase.NewPrometheus())
 	appBearer.InjectController(http.NewPrometheusController())
 }

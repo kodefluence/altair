@@ -31,7 +31,7 @@ func TestProvider(t *testing.T) {
 			appBearer.EXPECT().SetMetricProvider(dummyUsecase.NewDummy()),
 		)
 
-		assert.Nil(t, metric.Provide(appBearer, pluginBearer))
+		assert.Nil(t, metric.Load(appBearer, pluginBearer))
 	})
 
 	t.Run("When plugin metric is set with prometheus, then it will return prometheus metric", func(t *testing.T) {
@@ -54,7 +54,7 @@ func TestProvider(t *testing.T) {
 			appBearer.EXPECT().InjectController(promHttp.NewPrometheusController()),
 		)
 
-		assert.Nil(t, metric.Provide(appBearer, pluginBearer))
+		assert.Nil(t, metric.Load(appBearer, pluginBearer))
 	})
 
 	t.Run("When plugin metric is set with prometheus but the plugin bearer return error when compiling, then it will return error", func(t *testing.T) {
@@ -74,7 +74,7 @@ func TestProvider(t *testing.T) {
 			}),
 		)
 
-		assert.Equal(t, expectedError, metric.Provide(appBearer, pluginBearer))
+		assert.Equal(t, expectedError, metric.Load(appBearer, pluginBearer))
 	})
 
 	t.Run("When plugin metric is set with unsupported provider, then it will return error", func(t *testing.T) {
@@ -95,7 +95,7 @@ func TestProvider(t *testing.T) {
 			}),
 		)
 
-		assert.Equal(t, fmt.Errorf("Metric plugin `%s` is currently not supported", "datadog"), metric.Provide(appBearer, pluginBearer))
+		assert.Equal(t, fmt.Errorf("Metric plugin `%s` is currently not supported", "datadog"), metric.Load(appBearer, pluginBearer))
 	})
 
 }

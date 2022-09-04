@@ -5,6 +5,6 @@ import (
 	"github.com/kodefluence/altair/plugin/metric/module/dummy/usecase"
 )
 
-func Provide(appBearer core.AppBearer) {
+func Load(appBearer core.AppBearer) {
 	appBearer.SetMetricProvider(usecase.NewDummy())
 }

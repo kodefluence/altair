@@ -16,5 +16,5 @@ func TestProvider(t *testing.T) {
 	appBearer := mock.NewMockAppBearer(mockController)
 	appBearer.EXPECT().SetMetricProvider(usecase.NewPrometheus())
 	appBearer.EXPECT().InjectController(http.NewPrometheusController())
-	prometheus.Provide(appBearer)
+	prometheus.Load(appBearer)
 }
