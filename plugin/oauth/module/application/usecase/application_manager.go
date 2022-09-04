@@ -51,26 +51,3 @@ func NewApplicationManager(sqldb db.DB, oauthApplicationRepo OauthApplicationRep
 		// applicationValidator:  applicationValidator,
 	}
 }
-
-// // Update oauth application
-// func (am *ApplicationManager) Update(ctx context.Context, ID int, e entity.OauthApplicationUpdateJSON) (entity.OauthApplicationJSON, *entity.Error) {
-
-// 	err := am.oauthApplicationModel.Update(kontext.Fabricate(kontext.WithDefaultContext(ctx)), ID, entity.OauthApplicationUpdateable{
-// 		Description: e.Description,
-// 		Scopes:      e.Scopes,
-// 	}, am.sqldb)
-// 	if err != nil {
-// 		log.Error().
-// 			Err(err).
-// 			Stack().
-// 			Interface("data", e).
-// 			Array("tags", zerolog.Arr().Str("service").Str("application_manager").Str("update").Str("model_update")).
-// 			Msg("Error when updating oauth application data")
-// 		return entity.OauthApplicationJSON{}, &entity.Error{
-// 			HttpStatus: http.StatusInternalServerError,
-// 			Errors:     eobject.Wrap(eobject.InternalServerError(ctx)),
-// 		}
-// 	}
-
-// 	return am.One(ctx, ID)
-// }
