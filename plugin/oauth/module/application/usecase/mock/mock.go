@@ -257,6 +257,20 @@ func (m *MockFormatter) EXPECT() *MockFormatterMockRecorder {
 	return m.recorder
 }
 
+// Application mocks base method.
+func (m *MockFormatter) Application(application entity.OauthApplication) entity.OauthApplicationJSON {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Application", application)
+	ret0, _ := ret[0].(entity.OauthApplicationJSON)
+	return ret0
+}
+
+// Application indicates an expected call of Application.
+func (mr *MockFormatterMockRecorder) Application(application interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Application", reflect.TypeOf((*MockFormatter)(nil).Application), application)
+}
+
 // ApplicationList mocks base method.
 func (m *MockFormatter) ApplicationList(applications []entity.OauthApplication) []entity.OauthApplicationJSON {
 	m.ctrl.T.Helper()
