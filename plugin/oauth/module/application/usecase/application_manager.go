@@ -31,6 +31,7 @@ type OauthApplicationRepository interface {
 type Formatter interface {
 	ApplicationList(applications []entity.OauthApplication) []entity.OauthApplicationJSON
 	Application(application entity.OauthApplication) entity.OauthApplicationJSON
+	OauthApplicationInsertable(r entity.OauthApplicationJSON) entity.OauthApplicationInsertable
 }
 
 // ApplicationManager manage all oauth_applications CRUD

@@ -284,3 +284,17 @@ func (mr *MockFormatterMockRecorder) ApplicationList(applications interface{}) *
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ApplicationList", reflect.TypeOf((*MockFormatter)(nil).ApplicationList), applications)
 }
+
+// OauthApplicationInsertable mocks base method.
+func (m *MockFormatter) OauthApplicationInsertable(r entity.OauthApplicationJSON) entity.OauthApplicationInsertable {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OauthApplicationInsertable", r)
+	ret0, _ := ret[0].(entity.OauthApplicationInsertable)
+	return ret0
+}
+
+// OauthApplicationInsertable indicates an expected call of OauthApplicationInsertable.
+func (mr *MockFormatterMockRecorder) OauthApplicationInsertable(r interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OauthApplicationInsertable", reflect.TypeOf((*MockFormatter)(nil).OauthApplicationInsertable), r)
+}
