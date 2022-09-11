@@ -1,158 +1,134 @@
 package http_test
 
-// import (
-// 	"context"
-// 	"encoding/json"
-// 	"net/http"
-// 	"testing"
+import (
+	"encoding/json"
+	"net/http"
+	"testing"
 
-// 	"github.com/gin-gonic/gin"
-// 	"github.com/golang/mock/gomock"
-// 	"github.com/kodefluence/altair/provider/plugin/oauth/controller"
-// 	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
-// 	"github.com/kodefluence/altair/provider/plugin/oauth/eobject"
-// 	"github.com/kodefluence/altair/provider/plugin/oauth/mock"
-// 	"github.com/kodefluence/altair/testhelper"
-// 	"github.com/kodefluence/altair/util"
-// 	"github.com/stretchr/testify/assert"
-// )
+	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
+	"github.com/kodefluence/altair/module/apierror"
+	"github.com/kodefluence/altair/plugin/oauth/entity"
+	applicationHttp "github.com/kodefluence/altair/plugin/oauth/module/application/controller/http"
+	"github.com/kodefluence/altair/plugin/oauth/module/application/controller/http/mock"
+	"github.com/kodefluence/altair/testhelper"
+	"github.com/kodefluence/altair/util"
+	"github.com/kodefluence/monorepo/jsonapi"
+	"github.com/kodefluence/monorepo/kontext"
+	"github.com/stretchr/testify/assert"
+)
 
-// type responseList struct {
-// 	Data []entity.OauthApplicationJSON `json:"data"`
-// 	Meta gin.H                         `json:"meta"`
-// }
+type responseList struct {
+	Data []entity.OauthApplicationJSON `json:"data"`
+	Meta jsonapi.Meta                  `json:"meta"`
+}
 
-// func TestList(t *testing.T) {
+func TestList(t *testing.T) {
 
-// 	mockCtrl := gomock.NewController(t)
-// 	defer mockCtrl.Finish()
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
 
-// 	t.Run("Method", func(t *testing.T) {
-// 		applicationManager := mock.NewMockApplicationManager(mockCtrl)
-// 		assert.Equal(t, "GET", controller.NewApplication().List(applicationManager).Method())
-// 	})
+	apierror := apierror.Provide()
 
-// 	t.Run("Path", func(t *testing.T) {
-// 		applicationManager := mock.NewMockApplicationManager(mockCtrl)
-// 		assert.Equal(t, "/oauth/applications", controller.NewApplication().List(applicationManager).Path())
-// 	})
+	t.Run("Method", func(t *testing.T) {
+		applicationManager := mock.NewMockApplicationManager(mockCtrl)
+		assert.Equal(t, "GET", applicationHttp.NewList(applicationManager, apierror).Method())
+	})
 
-// 	t.Run("Control", func(t *testing.T) {
-// 		t.Run("Given request with offset and limit", func(t *testing.T) {
-// 			t.Run("Return list of oauth application", func(t *testing.T) {
-// 				apiEngine := gin.Default()
+	t.Run("Path", func(t *testing.T) {
+		applicationManager := mock.NewMockApplicationManager(mockCtrl)
+		assert.Equal(t, "/oauth/applications", applicationHttp.NewList(applicationManager, apierror).Path())
+	})
 
-// 				oauthApplicationJSONs := []entity.OauthApplicationJSON{
-// 					entity.OauthApplicationJSON{
-// 						ID:           util.IntToPointer(1),
-// 						OwnerID:      util.IntToPointer(1),
-// 						Description:  util.StringToPointer("Application 1"),
-// 						Scopes:       util.StringToPointer("public user"),
-// 						ClientUID:    util.StringToPointer("clientuid01"),
-// 						ClientSecret: util.StringToPointer("clientsecret01"),
-// 					},
-// 					entity.OauthApplicationJSON{
-// 						ID:           util.IntToPointer(2),
-// 						OwnerID:      util.IntToPointer(2),
-// 						Description:  util.StringToPointer("Application 2"),
-// 						Scopes:       util.StringToPointer("public user"),
-// 						ClientUID:    util.StringToPointer("clientuid02"),
-// 						ClientSecret: util.StringToPointer("clientsecret02"),
-// 					},
-// 				}
+	t.Run("Control", func(t *testing.T) {
+		t.Run("Given request with offset and limit", func(t *testing.T) {
+			t.Run("Return list of oauth application", func(t *testing.T) {
+				apiEngine := gin.Default()
 
-// 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
-// 				applicationManager.EXPECT().List(gomock.Any(), 0, 10).Return(oauthApplicationJSONs, 10, nil)
+				oauthApplicationJSONs := []entity.OauthApplicationJSON{
+					{
+						ID:           util.IntToPointer(1),
+						OwnerID:      util.IntToPointer(1),
+						Description:  util.StringToPointer("Application 1"),
+						Scopes:       util.StringToPointer("public user"),
+						ClientUID:    util.StringToPointer("clientuid01"),
+						ClientSecret: util.StringToPointer("clientsecret01"),
+					},
+					{
+						ID:           util.IntToPointer(2),
+						OwnerID:      util.IntToPointer(2),
+						Description:  util.StringToPointer("Application 2"),
+						Scopes:       util.StringToPointer("public user"),
+						ClientUID:    util.StringToPointer("clientuid02"),
+						ClientSecret: util.StringToPointer("clientsecret02"),
+					},
+				}
 
-// 				ctrl := controller.NewApplication().List(applicationManager)
-// 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+				applicationManager := mock.NewMockApplicationManager(mockCtrl)
+				applicationManager.EXPECT().List(gomock.Any(), 0, 10).Return(oauthApplicationJSONs, 10, nil)
 
-// 				var response responseList
-// 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), nil)
+				ctrl := applicationHttp.NewList(applicationManager, apierror)
+				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
-// 				err := json.Unmarshal(w.Body.Bytes(), &response)
-// 				assert.Nil(t, err)
+				var response responseList
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), nil)
 
-// 				assert.Equal(t, http.StatusOK, w.Code)
-// 				assert.Equal(t, oauthApplicationJSONs, response.Data)
-// 			})
+				err := json.Unmarshal(w.Body.Bytes(), &response)
+				assert.Nil(t, err)
 
-// 			t.Run("Application manager error", func(t *testing.T) {
-// 				t.Run("Return internal server error", func(t *testing.T) {
-// 					apiEngine := gin.Default()
+				assert.Equal(t, http.StatusOK, w.Code)
+				assert.Equal(t, oauthApplicationJSONs, response.Data)
+			})
 
-// 					expectedError := &entity.Error{
-// 						HttpStatus: http.StatusInternalServerError,
-// 						Errors:     eobject.Wrap(eobject.InternalServerError(context.Background())),
-// 					}
-// 					applicationManager := mock.NewMockApplicationManager(mockCtrl)
-// 					applicationManager.EXPECT().List(gomock.Any(), 0, 10).Return([]entity.OauthApplicationJSON(nil), 0, expectedError)
+			t.Run("Application manager error", func(t *testing.T) {
+				t.Run("Return internal server error", func(t *testing.T) {
+					apiEngine := gin.Default()
 
-// 					ctrl := controller.NewApplication().List(applicationManager)
-// 					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+					applicationManager := mock.NewMockApplicationManager(mockCtrl)
+					applicationManager.EXPECT().List(gomock.Any(), 0, 10).Return([]entity.OauthApplicationJSON(nil), 0, jsonapi.BuildResponse(apierror.InternalServerError(kontext.Fabricate())).Errors)
 
-// 					var response ErrorResponse
-// 					w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), nil)
+					ctrl := applicationHttp.NewList(applicationManager, apierror)
+					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
-// 					err := json.Unmarshal(w.Body.Bytes(), &response)
-// 					assert.Nil(t, err)
+					w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), nil)
 
-// 					assert.Equal(t, expectedError.HttpStatus, w.Code)
-// 					assert.Equal(t, expectedError.Errors, response.Errors)
-// 				})
-// 			})
-// 		})
+					assert.Equal(t, http.StatusInternalServerError, w.Code)
+					assert.Equal(t, "{\"errors\":[{\"title\":\"Internal server error\",\"detail\":\"Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '\\u003cnil\\u003e'\",\"code\":\"ERR0500\",\"status\":500}]}", string(w.Body.Bytes()))
+				})
+			})
+		})
 
-// 		t.Run("Given request with invalid offset", func(t *testing.T) {
-// 			t.Run("Return bad request error", func(t *testing.T) {
-// 				apiEngine := gin.Default()
+		t.Run("Given request with invalid offset", func(t *testing.T) {
+			t.Run("Return bad request error", func(t *testing.T) {
+				apiEngine := gin.Default()
 
-// 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
-// 				applicationManager.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
+				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 
-// 				ctrl := controller.NewApplication().List(applicationManager)
-// 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+				ctrl := applicationHttp.NewList(applicationManager, apierror)
+				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
-// 				expectedError := &entity.Error{
-// 					HttpStatus: http.StatusBadRequest,
-// 					Errors:     eobject.Wrap(eobject.BadRequestError("query parameters: offset")),
-// 				}
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path()+"?offset=invalid", nil)
 
-// 				var response ErrorResponse
-// 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path()+"?offset=invalid", nil)
+				assert.Equal(t, http.StatusBadRequest, w.Code)
+				assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `query parameters: offset`\",\"code\":\"ERR0400\",\"status\":400}]}", string(w.Body.Bytes()))
 
-// 				err := json.Unmarshal(w.Body.Bytes(), &response)
-// 				assert.Nil(t, err)
+			})
+		})
 
-// 				assert.Equal(t, expectedError.HttpStatus, w.Code)
-// 				assert.Equal(t, expectedError.Errors, response.Errors)
-// 			})
-// 		})
+		t.Run("Given request with invalid limit", func(t *testing.T) {
+			t.Run("Return bad request error", func(t *testing.T) {
+				apiEngine := gin.Default()
 
-// 		t.Run("Given request with invalid limit", func(t *testing.T) {
-// 			t.Run("Return bad request error", func(t *testing.T) {
-// 				apiEngine := gin.Default()
+				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 
-// 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
-// 				applicationManager.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
+				ctrl := applicationHttp.NewList(applicationManager, apierror)
+				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
-// 				ctrl := controller.NewApplication().List(applicationManager)
-// 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path()+"?limit=invalid", nil)
 
-// 				expectedError := &entity.Error{
-// 					HttpStatus: http.StatusBadRequest,
-// 					Errors:     eobject.Wrap(eobject.BadRequestError("query parameters: limit")),
-// 				}
-
-// 				var response ErrorResponse
-// 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path()+"?limit=invalid", nil)
-
-// 				err := json.Unmarshal(w.Body.Bytes(), &response)
-// 				assert.Nil(t, err)
-
-// 				assert.Equal(t, expectedError.HttpStatus, w.Code)
-// 				assert.Equal(t, expectedError.Errors, response.Errors)
-// 			})
-// 		})
-// 	})
-// }
+				assert.Equal(t, http.StatusBadRequest, w.Code)
+				assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `query parameters: limit`\",\"code\":\"ERR0400\",\"status\":400}]}", string(w.Body.Bytes()))
+			})
+		})
+	})
+}

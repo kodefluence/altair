@@ -1,5 +1,14 @@
 package http
 
+import (
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"github.com/kodefluence/monorepo/jsonapi"
+	"github.com/kodefluence/monorepo/kontext"
+)
+
 // import (
 // 	"net/http"
 // 	"strconv"
@@ -9,63 +18,61 @@ package http
 // 	"github.com/kodefluence/altair/provider/plugin/oauth/interfaces"
 // )
 
-// // ListController show list of oauth applications
-// type ListController struct {
-// 	applicationManager interfaces.ApplicationManager
-// }
+// ListController show list of oauth applications
+type ListController struct {
+	applicationManager ApplicationManager
+	apiError           ApiError
+}
 
-// // NewList return struct of ListController
-// func NewList(applicationManager interfaces.ApplicationManager) *ListController {
-// 	return &ListController{
-// 		applicationManager: applicationManager,
-// 	}
-// }
+// NewList return struct of ListController
+func NewList(applicationManager ApplicationManager, apiError ApiError) *ListController {
+	return &ListController{
+		applicationManager: applicationManager,
+		apiError:           apiError,
+	}
+}
 
-// // Method GET
-// func (l *ListController) Method() string {
-// 	return "GET"
-// }
+// Method GET
+func (l *ListController) Method() string {
+	return "GET"
+}
 
-// // Path /oauth/applications
-// func (l *ListController) Path() string {
-// 	return "/oauth/applications"
-// }
+// Path /oauth/applications
+func (l *ListController) Path() string {
+	return "/oauth/applications"
+}
 
-// // Control list of oauth applications
-// func (l *ListController) Control(c *gin.Context) {
-// 	var offset, limit int
-// 	var err error
+// Control list of oauth applications
+func (l *ListController) Control(c *gin.Context) {
+	ktx := kontext.Fabricate(kontext.WithDefaultContext(c))
+	ktx.Set("request_id", c.GetString("request_id"))
 
-// 	offset, err = strconv.Atoi(c.DefaultQuery("offset", "0"))
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{
-// 			"errors": eobject.Wrap(eobject.BadRequestError("query parameters: offset")),
-// 		})
-// 		return
-// 	}
+	var offset, limit int
+	var err error
 
-// 	limit, err = strconv.Atoi(c.DefaultQuery("limit", "10"))
-// 	if err != nil {
-// 		c.JSON(http.StatusBadRequest, gin.H{
-// 			"errors": eobject.Wrap(eobject.BadRequestError("query parameters: limit")),
-// 		})
-// 		return
-// 	}
+	offset, err = strconv.Atoi(c.DefaultQuery("offset", "0"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, jsonapi.BuildResponse(l.apiError.BadRequestError("query parameters: offset")))
+		return
+	}
 
-// 	oauthApplicationJSON, total, entityError := l.applicationManager.List(c, offset, limit)
-// 	if entityError != nil {
-// 		c.JSON(entityError.HttpStatus, gin.H{
-// 			"errors": entityError.Errors,
-// 		})
-// 		return
-// 	}
+	limit, err = strconv.Atoi(c.DefaultQuery("limit", "10"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, jsonapi.BuildResponse(l.apiError.BadRequestError("query parameters: limit")))
+		return
 
-// 	c.JSON(http.StatusOK, gin.H{
-// 		"data": oauthApplicationJSON,
-// 		"meta": gin.H{
-// 			"offset": offset,
-// 			"limit":  limit,
-// 			"total":  total,
-// 		},
-// 	})
-// }
+	}
+
+	oauthApplicationJSON, total, jsonapiErr := l.applicationManager.List(ktx, offset, limit)
+	if jsonapiErr != nil {
+		c.JSON(jsonapiErr.HTTPStatus(), jsonapi.BuildResponse(jsonapi.WithErrors(jsonapiErr)))
+		return
+	}
+
+	c.JSON(http.StatusOK, jsonapi.BuildResponse(
+		jsonapi.WithData(oauthApplicationJSON),
+		jsonapi.WithMeta("offset", offset),
+		jsonapi.WithMeta("limit", limit),
+		jsonapi.WithMeta("total", total),
+	))
+}
