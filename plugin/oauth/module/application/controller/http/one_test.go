@@ -13,8 +13,6 @@ import (
 	"github.com/kodefluence/altair/plugin/oauth/module/application/controller/http/mock"
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/kodefluence/altair/util"
-	"github.com/kodefluence/monorepo/jsonapi"
-	"github.com/kodefluence/monorepo/kontext"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -75,7 +73,7 @@ func TestOne(t *testing.T) {
 					oauthApplicationJSON := entity.OauthApplicationJSON{}
 
 					applicationManager := mock.NewMockApplicationManager(mockCtrl)
-					applicationManager.EXPECT().One(gomock.Any(), 1).Return(oauthApplicationJSON, jsonapi.BuildResponse(apierror.InternalServerError(kontext.Fabricate())).Errors)
+					applicationManager.EXPECT().One(gomock.Any(), 1).Return(oauthApplicationJSON, testhelper.ErrInternalServer())
 
 					ctrl := applicationHttp.NewOne(applicationManager, apierror)
 					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)

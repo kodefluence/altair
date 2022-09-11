@@ -7,6 +7,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+
+	"github.com/kodefluence/altair/module/apierror"
+	"github.com/kodefluence/monorepo/jsonapi"
+	"github.com/kodefluence/monorepo/kontext"
 )
 
 type MockErrorIoReader struct {
@@ -50,4 +54,8 @@ func RemoveTempTestFiles(configPath string) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func ErrInternalServer() jsonapi.Errors {
+	return jsonapi.BuildResponse(apierror.Provide().InternalServerError(kontext.Fabricate())).Errors
 }

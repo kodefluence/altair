@@ -14,7 +14,6 @@ import (
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/kodefluence/altair/util"
 	"github.com/kodefluence/monorepo/jsonapi"
-	"github.com/kodefluence/monorepo/kontext"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -85,7 +84,7 @@ func TestList(t *testing.T) {
 					apiEngine := gin.Default()
 
 					applicationManager := mock.NewMockApplicationManager(mockCtrl)
-					applicationManager.EXPECT().List(gomock.Any(), 0, 10).Return([]entity.OauthApplicationJSON(nil), 0, jsonapi.BuildResponse(apierror.InternalServerError(kontext.Fabricate())).Errors)
+					applicationManager.EXPECT().List(gomock.Any(), 0, 10).Return([]entity.OauthApplicationJSON(nil), 0, testhelper.ErrInternalServer())
 
 					ctrl := applicationHttp.NewList(applicationManager, apierror)
 					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)

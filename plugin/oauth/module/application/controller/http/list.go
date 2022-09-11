@@ -9,15 +9,6 @@ import (
 	"github.com/kodefluence/monorepo/kontext"
 )
 
-// import (
-// 	"net/http"
-// 	"strconv"
-
-// 	"github.com/gin-gonic/gin"
-// 	"github.com/kodefluence/altair/provider/plugin/oauth/eobject"
-// 	"github.com/kodefluence/altair/provider/plugin/oauth/interfaces"
-// )
-
 // ListController show list of oauth applications
 type ListController struct {
 	applicationManager ApplicationManager
