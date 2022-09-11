@@ -49,6 +49,5 @@ func NewApplicationManager(sqldb db.DB, oauthApplicationRepo OauthApplicationRep
 		oauthApplicationRepo: oauthApplicationRepo,
 		apiError:             apiError,
 		formatter:            formatter,
-		// applicationValidator:  applicationValidator,
 	}
 }
