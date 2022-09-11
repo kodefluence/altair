@@ -52,3 +52,15 @@ push_docker: push_docker_latest
 
 push_docker_latest:
 	sudo docker push $(IMAGE):latest
+
+docker-compose-up:
+	docker-compose --env-file .env up -d
+
+docker-compose-start:
+	docker-compose --env-file .env start
+
+docker-compose-stop:
+	docker-compose stop
+
+docker-compose-down:
+	docker-compose down
