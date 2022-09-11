@@ -21,9 +21,6 @@ type appConfig struct {
 		Username string `yaml:"username"`
 		Password string `yaml:"password"`
 	} `yaml:"authorization"`
-	Metric struct {
-		Interface string `yaml:"interface"`
-	} `yaml:"metric"`
 }
 
 func App() core.AppLoader {
@@ -86,7 +83,6 @@ func (a *app) assignConfigOption(config appConfig) (entity.AppConfigOption, erro
 	appConfigOption.Plugins = config.Plugins
 	appConfigOption.Authorization.Username = config.Authorization.Username
 	appConfigOption.Authorization.Password = config.Authorization.Password
-	appConfigOption.Metric.Interface = config.Metric.Interface
 
 	return appConfigOption, nil
 }

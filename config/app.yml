@@ -5,8 +5,6 @@
 #   username: string          - Basic auth username for managing the application plugins, required.
 #   password: string          - Basic auth password for managing the application plugins, required.
 # plugins: <array[string]>    - List of active plugins. Available plugins: oauth
-# metric: <array[hash]>       - Metric config
-#   interface: string         - Metric interface. Available interface: prometheus
 
 
 port: 1304
@@ -16,5 +14,4 @@ authorization:
   password: {{ env "BASIC_AUTH_PASSWORD" }}
 plugins:
   - oauth
-metric:
-  interface: prometheus
+  - metric
