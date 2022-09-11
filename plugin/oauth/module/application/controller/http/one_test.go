@@ -18,11 +18,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestOne(t *testing.T) {
-	type responseOne struct {
-		Data entity.OauthApplicationJSON `json:"data"`
-	}
+type responseOne struct {
+	Data entity.OauthApplicationJSON `json:"data"`
+}
 
+func TestOne(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 

@@ -82,6 +82,21 @@ func (mr *MockApplicationManagerMockRecorder) One(ktx, ID interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "One", reflect.TypeOf((*MockApplicationManager)(nil).One), ktx, ID)
 }
 
+// Update mocks base method.
+func (m *MockApplicationManager) Update(ktx kontext.Context, ID int, e entity.OauthApplicationUpdateJSON) (entity.OauthApplicationJSON, jsonapi.Errors) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ktx, ID, e)
+	ret0, _ := ret[0].(entity.OauthApplicationJSON)
+	ret1, _ := ret[1].(jsonapi.Errors)
+	return ret0, ret1
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockApplicationManagerMockRecorder) Update(ktx, ID, e interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockApplicationManager)(nil).Update), ktx, ID, e)
+}
+
 // MockApiError is a mock of ApiError interface.
 type MockApiError struct {
 	ctrl     *gomock.Controller
