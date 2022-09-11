@@ -2,13 +2,19 @@ package plugin
 
 import (
 	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/metric"
+	"github.com/kodefluence/altair/plugin/oauth"
 )
 
 // Load plugin for altair
 // TODO: Unit test, open for contributions.
-func Load(appBearer core.AppBearer, pluginBearer core.PluginBearer) error {
+func Load(appBearer core.AppBearer, pluginBearer core.PluginBearer, dbBearer core.DatabaseBearer, apiError module.ApiError) error {
 	if err := metric.Load(appBearer, pluginBearer); err != nil {
+		return err
+	}
+
+	if err := oauth.Load(appBearer, dbBearer, pluginBearer, apiError); err != nil {
 		return err
 	}
 

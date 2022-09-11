@@ -2,12 +2,15 @@ package oauth
 
 import (
 	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
+	"github.com/kodefluence/altair/plugin/oauth/module/application"
+	"github.com/kodefluence/altair/plugin/oauth/module/formatter"
 	"github.com/kodefluence/altair/plugin/oauth/repository/mysql"
 )
 
 // Provide create new oauth plugin provider
-func Load(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer) error {
+func Load(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer, apiError module.ApiError) error {
 	if appBearer.Config().PluginExists("oauth") == false {
 		return nil
 	}
@@ -17,7 +20,7 @@ func Load(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer c
 		return err
 	}
 
-	_, _, err := dbBearer.Database(oauthPluginConfig.DatabaseInstance())
+	sqldb, _, err := dbBearer.Database(oauthPluginConfig.DatabaseInstance())
 	if err != nil {
 		return err
 	}
@@ -43,42 +46,17 @@ func Load(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer c
 	}
 
 	// Repository
-	_ = mysql.NewOauthApplication()
+	oauthApplicationRepo := mysql.NewOauthApplication()
 	_ = mysql.NewOauthAccessToken()
 	_ = mysql.NewOauthAccessGrant()
 	_ = mysql.NewOauthRefreshToken()
 
 	// Formatter
-	// oauthApplicationFormatter := formatter.OauthApplication()
-	// oauthModelFormatter := formatter.NewModel(accessTokenTimeout, authorizationCodeTimeout, refreshTokenConfig.Timeout)
-	// oauthFormatter := formatter.Oauth()
+	formatter := formatter.Provide()
 
-	// Validator
-	// oauthValidator := validator.NewOauth(refreshTokenConfig.Active)
-
-	// Service
-	// applicationManager := service.NewApplicationManager(oauthApplicationFormatter, oauthModelFormatter, oauthApplicationModel, oauthValidator, db)
-	// authorization := service.NewAuthorization(oauthApplicationModel, oauthAccessTokenModel, oauthAccessGrantModel, oauthRefreshTokenModel, oauthModelFormatter, oauthValidator, oauthFormatter, refreshTokenConfig.Active, db)
-
-	// DownStreamPlugin
-	// oauthDownStream := downstream.NewOauth(oauthAccessTokenModel, db)
-	// applicationValidationDownStream := downstream.NewApplicationValidation(oauthApplicationModel, db)
-
-	// Controller of /oauth/applications
-	// applicationControllerDispatcher := controller.NewApplication()
-	// appBearer.InjectController(applicationControllerDispatcher.List(applicationManager))
-	// appBearer.InjectController(applicationControllerDispatcher.One(applicationManager))
-	// appBearer.InjectController(applicationControllerDispatcher.Create(applicationManager))
-	// appBearer.InjectController(applicationControllerDispatcher.Update(applicationManager))
-
-	// Controller of /oauth/authorizations
-	// authorizationControllerDispatcher := controller.NewAuthorization()
-	// appBearer.InjectController(authorizationControllerDispatcher.Grant(authorization))
-	// appBearer.InjectController(authorizationControllerDispatcher.Revoke(authorization))
-	// appBearer.InjectController(authorizationControllerDispatcher.Token(authorization))
-
-	// appBearer.InjectDownStreamPlugin(oauthDownStream)
-	// appBearer.InjectDownStreamPlugin(applicationValidationDownStream)
+	// Application
+	// Loading controller for oauth applications
+	application.Load(appBearer, sqldb, oauthApplicationRepo, formatter, apiError)
 
 	return nil
 }

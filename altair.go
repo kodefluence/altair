@@ -21,6 +21,7 @@ import (
 	"github.com/kodefluence/altair/controller"
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/forwarder"
+	"github.com/kodefluence/altair/module/apierror"
 	"github.com/kodefluence/altair/plugin"
 	"github.com/kodefluence/altair/provider"
 	"github.com/kodefluence/monorepo/db"
@@ -385,9 +386,10 @@ func runAPI() error {
 	}))
 
 	appBearer := cfg.AppBearer(pluginEngine, appConfig)
-	// dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
+	dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
+	apiError := apierror.Provide()
 
-	if err := plugin.Load(appBearer, pluginBearer); err != nil {
+	if err := plugin.Load(appBearer, pluginBearer, dbBearer, apiError); err != nil {
 		log.Error().
 			Err(err).
 			Stack().
