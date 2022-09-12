@@ -1,6 +1,8 @@
 package oauth
 
 import (
+	"time"
+
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
@@ -25,12 +27,15 @@ func Load(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer c
 		return err
 	}
 
-	_, err = oauthPluginConfig.AccessTokenTimeout()
+	var accessTokenTimeout time.Duration
+	var authorizationCodeTimeout time.Duration
+
+	accessTokenTimeout, err = oauthPluginConfig.AccessTokenTimeout()
 	if err != nil {
 		return err
 	}
 
-	_, err = oauthPluginConfig.AuthorizationCodeTimeout()
+	authorizationCodeTimeout, err = oauthPluginConfig.AuthorizationCodeTimeout()
 	if err != nil {
 		return err
 	}
@@ -52,7 +57,7 @@ func Load(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer c
 	_ = mysql.NewOauthRefreshToken()
 
 	// Formatter
-	formatter := formatter.Provide()
+	formatter := formatter.Provide(accessTokenTimeout, authorizationCodeTimeout, refreshTokenConfig.Timeout)
 
 	// Application
 	// Loading controller for oauth applications

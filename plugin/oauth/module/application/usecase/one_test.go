@@ -10,7 +10,6 @@ import (
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/plugin/oauth/module/application/usecase"
 	"github.com/kodefluence/altair/plugin/oauth/module/application/usecase/mock"
-	"github.com/kodefluence/altair/plugin/oauth/module/formatter"
 	mockdb "github.com/kodefluence/monorepo/db/mock"
 	"github.com/kodefluence/monorepo/exception"
 	"github.com/kodefluence/monorepo/kontext"
@@ -30,7 +29,7 @@ func TestOne(t *testing.T) {
 				}
 
 				ktx := kontext.Fabricate()
-				formatterUsecase := formatter.Provide()
+				formatterUsecase := newFormatter()
 				apierrorUsecase := apierror.Provide()
 				oauthApplicationRepository := mock.NewMockOauthApplicationRepository(mockCtrl)
 
@@ -45,7 +44,7 @@ func TestOne(t *testing.T) {
 			t.Run("Oauth application is not found", func(t *testing.T) {
 				t.Run("Return 404", func(t *testing.T) {
 					ktx := kontext.Fabricate()
-					formatterUsecase := formatter.Provide()
+					formatterUsecase := newFormatter()
 					apierrorUsecase := apierror.Provide()
 					oauthApplicationRepository := mock.NewMockOauthApplicationRepository(mockCtrl)
 
@@ -61,7 +60,7 @@ func TestOne(t *testing.T) {
 			t.Run("Unexpected error", func(t *testing.T) {
 				t.Run("Return internal server error", func(t *testing.T) {
 					ktx := kontext.Fabricate()
-					formatterUsecase := formatter.Provide()
+					formatterUsecase := newFormatter()
 					apierrorUsecase := apierror.Provide()
 					oauthApplicationRepository := mock.NewMockOauthApplicationRepository(mockCtrl)
 

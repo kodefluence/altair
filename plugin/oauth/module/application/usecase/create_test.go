@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/kodefluence/altair/module/apierror"
@@ -27,7 +28,7 @@ func TestCreate(t *testing.T) {
 	t.Run("Given context and oauth application json data", func(t *testing.T) {
 		t.Run("Return last inserted id", func(t *testing.T) {
 			ktx := kontext.Fabricate()
-			formatterUsecase := formatter.Provide()
+			formatterUsecase := newFormatter()
 			apierrorUsecase := apierror.Provide()
 			oauthApplicationRepository := mock.NewMockOauthApplicationRepository(mockCtrl)
 
@@ -56,7 +57,7 @@ func TestCreate(t *testing.T) {
 		t.Run("Validation error", func(t *testing.T) {
 			t.Run("Return unprocessable entity", func(t *testing.T) {
 				ktx := kontext.Fabricate()
-				formatterUsecase := formatter.Provide()
+				formatterUsecase := newFormatter()
 				apierrorUsecase := apierror.Provide()
 				oauthApplicationRepository := mock.NewMockOauthApplicationRepository(mockCtrl)
 
@@ -78,7 +79,7 @@ func TestCreate(t *testing.T) {
 		t.Run("Unexpected error", func(t *testing.T) {
 			t.Run("Return internal server error", func(t *testing.T) {
 				ktx := kontext.Fabricate()
-				formatterUsecase := formatter.Provide()
+				formatterUsecase := newFormatter()
 				apierrorUsecase := apierror.Provide()
 				oauthApplicationRepository := mock.NewMockOauthApplicationRepository(mockCtrl)
 
@@ -104,4 +105,10 @@ func TestCreate(t *testing.T) {
 			})
 		})
 	})
+}
+
+func newFormatter() usecase.Formatter {
+	return formatter.Provide(
+		time.Hour, time.Hour, time.Hour,
+	)
 }

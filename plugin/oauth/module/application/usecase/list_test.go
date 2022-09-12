@@ -12,7 +12,6 @@ import (
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/plugin/oauth/module/application/usecase"
 	"github.com/kodefluence/altair/plugin/oauth/module/application/usecase/mock"
-	"github.com/kodefluence/altair/plugin/oauth/module/formatter"
 
 	mockdb "github.com/kodefluence/monorepo/db/mock"
 	"github.com/kodefluence/monorepo/exception"
@@ -34,7 +33,7 @@ func TestList(t *testing.T) {
 				}
 
 				ktx := kontext.Fabricate()
-				formatterUsecase := formatter.Provide()
+				formatterUsecase := newFormatter()
 				apierrorUsecase := apierror.Provide()
 				oauthApplicationRepository := mock.NewMockOauthApplicationRepository(mockCtrl)
 
@@ -53,7 +52,7 @@ func TestList(t *testing.T) {
 
 			t.Run("Error oauth application paginate return internal server error", func(t *testing.T) {
 				ktx := kontext.Fabricate()
-				formatterUsecase := formatter.Provide()
+				formatterUsecase := newFormatter()
 				apierrorUsecase := apierror.Provide()
 				oauthApplicationRepository := mock.NewMockOauthApplicationRepository(mockCtrl)
 
@@ -77,7 +76,7 @@ func TestList(t *testing.T) {
 				}
 
 				ktx := kontext.Fabricate()
-				formatterUsecase := formatter.Provide()
+				formatterUsecase := newFormatter()
 				apierrorUsecase := apierror.Provide()
 				oauthApplicationRepository := mock.NewMockOauthApplicationRepository(mockCtrl)
 

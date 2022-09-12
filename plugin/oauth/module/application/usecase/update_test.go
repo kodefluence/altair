@@ -10,7 +10,6 @@ import (
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/plugin/oauth/module/application/usecase"
 	"github.com/kodefluence/altair/plugin/oauth/module/application/usecase/mock"
-	"github.com/kodefluence/altair/plugin/oauth/module/formatter"
 	"github.com/kodefluence/altair/util"
 	mockdb "github.com/kodefluence/monorepo/db/mock"
 	"github.com/kodefluence/monorepo/exception"
@@ -33,7 +32,7 @@ func TestUpdate(t *testing.T) {
 					}
 
 					ktx := kontext.Fabricate()
-					formatterUsecase := formatter.Provide()
+					formatterUsecase := newFormatter()
 					apierrorUsecase := apierror.Provide()
 					oauthApplicationRepository := mock.NewMockOauthApplicationRepository(mockCtrl)
 
@@ -64,7 +63,7 @@ func TestUpdate(t *testing.T) {
 					}
 
 					ktx := kontext.Fabricate()
-					formatterUsecase := formatter.Provide()
+					formatterUsecase := newFormatter()
 					apierrorUsecase := apierror.Provide()
 					oauthApplicationRepository := mock.NewMockOauthApplicationRepository(mockCtrl)
 
