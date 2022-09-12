@@ -19,7 +19,6 @@ func TestApp(t *testing.T) {
 
 	appConfigOption.Authorization.Username = "altair"
 	appConfigOption.Authorization.Password = "secret"
-	appConfigOption.Metric.Interface = "prometheus"
 
 	t.Run("Compile", func(t *testing.T) {
 		t.Run("Given config path", func(t *testing.T) {
