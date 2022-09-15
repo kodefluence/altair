@@ -1,7 +1,6 @@
 # This database file represent any instance of database that can be connected and used in any plugin of Altair
 # This config is environment agnostic, so it can be used in any environment based on it's environment variables.
 # This is the sample of database config:
-# version: string                       - Template version of database.yaml.
 # <database_name>: string               - The database instance name
 #   <example>
 #   driver: string                            - Database driver used, required. Available: mysql
