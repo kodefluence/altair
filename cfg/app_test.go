@@ -12,7 +12,7 @@ import (
 
 func TestApp(t *testing.T) {
 	appConfigOption := entity.AppConfigOption{
-		Plugins:   []string{"oauth"},
+		Plugins:   []string{"oauth", "metric"},
 		Port:      1304,
 		ProxyHost: "www.local.host",
 	}
@@ -113,6 +113,21 @@ func TestApp(t *testing.T) {
 					fileName := "app.yml"
 
 					testhelper.GenerateTempTestFiles(configPath, AppConfigAuthUsernameEmpty, fileName, 0666)
+
+					appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+					assert.NotNil(t, err)
+					assert.Nil(t, appConfig)
+
+					testhelper.RemoveTempTestFiles(configPath)
+				})
+			})
+
+			t.Run("Invalid version", func(t *testing.T) {
+				t.Run("Return error", func(t *testing.T) {
+					configPath := "./app_invalid_version/"
+					fileName := "app.yml"
+
+					testhelper.GenerateTempTestFiles(configPath, AppConfigNormalWithoutVersion, fileName, 0666)
 
 					appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
 					assert.NotNil(t, err)
