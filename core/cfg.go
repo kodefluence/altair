@@ -20,6 +20,7 @@ type PluginLoader interface {
 
 type PluginBearer interface {
 	ConfigExists(pluginName string) bool
+	PluginVersion(pluginName string) (string, error)
 	CompilePlugin(pluginName string, injectedStruct interface{}) error
 	ForEach(callbackFunc func(pluginName string) error)
 	Length() int
@@ -51,7 +52,6 @@ type AppConfig interface {
 	PluginExists(pluginName string) bool
 	Plugins() []string
 	Dump() string
-	Metric() MetricConfig
 }
 
 type MetricConfig interface {

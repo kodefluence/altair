@@ -8,6 +8,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+var errPluginNotFound = errors.New("Plugin is not exists")
+
 type pluginBearer struct {
 	plugins map[string]entity.Plugin
 }
@@ -21,13 +23,21 @@ func (p *pluginBearer) Length() int {
 }
 
 func (p *pluginBearer) ConfigExists(pluginName string) bool {
-	_, ok := p.plugins[pluginName]
-	return ok
+	_, err := p.PluginVersion(pluginName)
+	return err == nil
+}
+
+func (p *pluginBearer) PluginVersion(pluginName string) (string, error) {
+	plugin, ok := p.plugins[pluginName]
+	if !ok {
+		return "", errPluginNotFound
+	}
+	return plugin.Version, nil
 }
 
 func (p *pluginBearer) CompilePlugin(pluginName string, injectedStruct interface{}) error {
 	if p.ConfigExists(pluginName) == false {
-		return errors.New("Plugin is not exists")
+		return errPluginNotFound
 	}
 
 	return yaml.Unmarshal(p.plugins[pluginName].Raw, injectedStruct)

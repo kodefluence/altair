@@ -39,8 +39,6 @@ func TestApp(t *testing.T) {
 					assert.Equal(t, expectedAppConfig.ProxyHost(), appConfig.ProxyHost())
 					assert.Equal(t, expectedAppConfig.BasicAuthPassword(), appConfig.BasicAuthPassword())
 					assert.Equal(t, expectedAppConfig.BasicAuthUsername(), appConfig.BasicAuthUsername())
-					assert.Equal(t, expectedAppConfig.Metric().Interface(), appConfig.Metric().Interface())
-
 					testhelper.RemoveTempTestFiles(configPath)
 				})
 			})
