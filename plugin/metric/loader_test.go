@@ -45,6 +45,7 @@ func TestProvider(t *testing.T) {
 		gomock.InOrder(
 			appBearer.EXPECT().Config().Return(appConfig),
 			appConfig.EXPECT().PluginExists("metric").Return(true),
+			pluginBearer.EXPECT().PluginVersion("metric").Return("1.0", nil),
 			pluginBearer.EXPECT().CompilePlugin("metric", gomock.Any()).DoAndReturn(func(pluginName string, injectedStruct interface{}) error {
 				v, _ := injectedStruct.(*entity.MetricPlugin)
 				v.Config.Provider = "prometheus"
@@ -55,6 +56,23 @@ func TestProvider(t *testing.T) {
 		)
 
 		assert.Nil(t, metric.Load(appBearer, pluginBearer))
+	})
+
+	t.Run("When plugin metric is set with prometheus but version is invalid, then it will error", func(t *testing.T) {
+		mockController := gomock.NewController(t)
+		defer mockController.Finish()
+
+		appBearer := mock.NewMockAppBearer(mockController)
+		appConfig := mock.NewMockAppConfig(mockController)
+		pluginBearer := mock.NewMockPluginBearer(mockController)
+
+		gomock.InOrder(
+			appBearer.EXPECT().Config().Return(appConfig),
+			appConfig.EXPECT().PluginExists("metric").Return(true),
+			pluginBearer.EXPECT().PluginVersion("metric").Return("0.1", nil),
+		)
+
+		assert.Equal(t, fmt.Errorf("undefined template version: %s for metric plugin", "0.1"), metric.Load(appBearer, pluginBearer))
 	})
 
 	t.Run("When plugin metric is set with prometheus but the plugin bearer return error when compiling, then it will return error", func(t *testing.T) {
@@ -69,6 +87,7 @@ func TestProvider(t *testing.T) {
 		gomock.InOrder(
 			appBearer.EXPECT().Config().Return(appConfig),
 			appConfig.EXPECT().PluginExists("metric").Return(true),
+			pluginBearer.EXPECT().PluginVersion("metric").Return("1.0", nil),
 			pluginBearer.EXPECT().CompilePlugin("metric", gomock.Any()).DoAndReturn(func(pluginName string, injectedStruct interface{}) error {
 				return expectedError
 			}),
@@ -88,6 +107,7 @@ func TestProvider(t *testing.T) {
 		gomock.InOrder(
 			appBearer.EXPECT().Config().Return(appConfig),
 			appConfig.EXPECT().PluginExists("metric").Return(true),
+			pluginBearer.EXPECT().PluginVersion("metric").Return("1.0", nil),
 			pluginBearer.EXPECT().CompilePlugin("metric", gomock.Any()).DoAndReturn(func(pluginName string, injectedStruct interface{}) error {
 				v, _ := injectedStruct.(*entity.MetricPlugin)
 				v.Config.Provider = "datadog"
