@@ -1,5 +1,6 @@
 # This is the sample of oauth plugin config
 # plugin: string            - Plugins name
+# version: string           - Template version of oauth plugin config
 # config: <array[hash]>     - List of configuration
 #   <example>
 #   database: string                    - Selected database object defined in database.yml
@@ -10,6 +11,7 @@
 #     - active: bool                          - Toggle to activate refresh token
 
 plugin: oauth
+version: "1.0"
 config:
   database: main_database
   access_token_timeout: 24h
