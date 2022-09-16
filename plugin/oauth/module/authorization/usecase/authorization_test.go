@@ -74,6 +74,6 @@ func (suite *AuthorizationBaseSuiteTest) TearDownTest() {
 
 func (suite *AuthorizationBaseSuiteTest) Subtest(testcase string, subtest func()) {
 	suite.SetupTest()
-	suite.Run("When all parameter is valid it would return nil", subtest)
+	suite.Run(testcase, subtest)
 	suite.TearDownTest()
 }

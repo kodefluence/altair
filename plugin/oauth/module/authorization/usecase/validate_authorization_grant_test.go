@@ -19,20 +19,23 @@ type ValidateAuthorizationGrantSuiteTest struct {
 
 func TestValidateAuthorizationGrant(t *testing.T) {
 	suite.Run(t, &ValidateAuthorizationGrantSuiteTest{
-		&AuthorizationBaseSuiteTest{},
-		entity.AuthorizationRequestJSON{
-			ResponseType:    util.StringToPointer("code"),
-			ResourceOwnerID: util.IntToPointer(1),
-			RedirectURI:     util.StringToPointer("www.github.com"),
-			Scopes:          util.StringToPointer(""),
-		},
-		entity.OauthApplication{
-			Scopes: sql.NullString{
-				String: "public users",
-				Valid:  true,
-			},
-		},
+		AuthorizationBaseSuiteTest: &AuthorizationBaseSuiteTest{},
 	})
+}
+
+func (suite *ValidateAuthorizationGrantSuiteTest) SetupTest() {
+	suite.authorizationRequestJSON = entity.AuthorizationRequestJSON{
+		ResponseType:    util.StringToPointer("code"),
+		ResourceOwnerID: util.IntToPointer(1),
+		RedirectURI:     util.StringToPointer("www.github.com"),
+		Scopes:          util.StringToPointer(""),
+	}
+	suite.oauthApplication = entity.OauthApplication{
+		Scopes: sql.NullString{
+			String: "public users",
+			Valid:  true,
+		},
+	}
 }
 
 func (suite *ValidateAuthorizationGrantSuiteTest) TestValidateAuthorizationGrant() {
