@@ -60,5 +60,11 @@ func (a *Authorization) ValidateAuthorizationGrant(ktx kontext.Context, r entity
 		).Errors
 	}
 
+	if *r.ResponseType == "token" && application.OwnerType != "confidential" {
+		return jsonapi.BuildResponse(
+			a.apiError.ForbiddenError(ktx, "access_token", "your response type is not allowed in this application"),
+		).Errors
+	}
+
 	return nil
 }

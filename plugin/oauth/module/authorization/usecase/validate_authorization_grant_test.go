@@ -74,5 +74,18 @@ func (suite *ValidateAuthorizationGrantSuiteTest) TestValidateAuthorizationGrant
 			suite.Assert().Equal("JSONAPI Error:\n[Validation error] Detail: Validation error because of: response_type can't be empty, Code: ERR1442\n[Validation error] Detail: Validation error because of: resource_owner_id can't be empty, Code: ERR1442\n[Validation error] Detail: Validation error because of: redirect_uri can't be empty, Code: ERR1442\n", err.Error())
 			suite.Assert().Equal(http.StatusUnprocessableEntity, err.HTTPStatus())
 		})
+		suite.Subtest("When response type is token but application is not confidential, then it would return error", func() {
+			suite.authorizationRequestJSON.ResponseType = util.StringToPointer("token")
+			suite.oauthApplication.OwnerType = "public"
+			err := suite.authorization.ValidateAuthorizationGrant(suite.ktx, suite.authorizationRequestJSON, suite.oauthApplication)
+			suite.Assert().Equal("JSONAPI Error:\n[Forbidden error] Detail: Resource of `access_token` is forbidden to be accessed, because of: your response type is not allowed in this application. Tracing code: `<nil>`, Code: ERR0403\n", err.Error())
+			suite.Assert().Equal(http.StatusForbidden, err.HTTPStatus())
+		})
 	})
+}
+
+func (suite *ValidateAuthorizationGrantSuiteTest) Subtest(testcase string, subtest func()) {
+	suite.SetupTest()
+	suite.AuthorizationBaseSuiteTest.Subtest(testcase, subtest)
+	suite.TearDownTest()
 }

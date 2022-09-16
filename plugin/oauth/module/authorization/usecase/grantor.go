@@ -15,13 +15,17 @@ func (a *Authorization) Grantor(ktx kontext.Context, authorizationReq entity.Aut
 
 	switch *authorizationReq.ResponseType {
 	case "token":
+		if a.config.Config.ImplicitGrant.Active == false {
+			break
+		}
+
 		return a.ImplicitGrant(ktx, authorizationReq)
 	case "code":
 		// Grant code in here
 		return nil, nil
-	default:
-		return nil, jsonapi.BuildResponse(
-			a.apiError.ValidationError("response_type is invalid. Should be either `token` or `code`"),
-		).Errors
 	}
+
+	return nil, jsonapi.BuildResponse(
+		a.apiError.ValidationError("response_type is invalid. Should be either `token` or `code`"),
+	).Errors
 }

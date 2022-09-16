@@ -9,6 +9,8 @@ import (
 	"github.com/rs/zerolog"
 )
 
+// ImplicitGrant implementation refer to this RFC 6749 Section 4.2 https://www.rfc-editor.org/rfc/rfc6749#section-4.2
+// In altair we implement only confidential oauth application that can request implicit grant
 func (a *Authorization) ImplicitGrant(ktx kontext.Context, authorizationReq entity.AuthorizationRequestJSON) (entity.OauthAccessTokenJSON, jsonapi.Errors) {
 	var finalOauthTokenJSON entity.OauthAccessTokenJSON
 
