@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/kodefluence/monorepo/exception"
@@ -53,34 +54,35 @@ type OauthRefreshTokenRepository interface {
 
 // Authorization struct handle all of things related to oauth2 authorization
 type Authorization struct {
-	oauthApplicationModel  OauthApplicationRepository
-	oauthAccessTokenModel  OauthAccessTokenRepository
-	oauthAccessGrantModel  OauthAccessGrantRepository
-	oauthRefreshTokenModel OauthRefreshTokenRepository
+	oauthApplicationRepo  OauthApplicationRepository
+	oauthAccessTokenRepo  OauthAccessTokenRepository
+	oauthAccessGrantRepo  OauthAccessGrantRepository
+	oauthRefreshTokenRepo OauthRefreshTokenRepository
 
 	formatter Formatter
-
-	refreshTokenToggle bool
-
-	sqldb db.DB
+	config    entity.OauthPlugin
+	sqldb     db.DB
+	apiError  module.ApiError
 }
 
 func NewAuthorization(
-	oauthApplicationModel OauthApplicationRepository,
-	oauthAccessTokenModel OauthAccessTokenRepository,
-	oauthAccessGrantModel OauthAccessGrantRepository,
-	oauthRefreshTokenModel OauthRefreshTokenRepository,
+	oauthApplicationRepo OauthApplicationRepository,
+	oauthAccessTokenRepo OauthAccessTokenRepository,
+	oauthAccessGrantRepo OauthAccessGrantRepository,
+	oauthRefreshTokenRepo OauthRefreshTokenRepository,
 	formatter Formatter,
-	refreshTokenToggle bool,
+	config entity.OauthPlugin,
 	sqldb db.DB,
+	apiError module.ApiError,
 ) *Authorization {
 	return &Authorization{
-		oauthApplicationModel:  oauthApplicationModel,
-		oauthAccessTokenModel:  oauthAccessTokenModel,
-		oauthAccessGrantModel:  oauthAccessGrantModel,
-		oauthRefreshTokenModel: oauthRefreshTokenModel,
-		formatter:              formatter,
-		refreshTokenToggle:     refreshTokenToggle,
-		sqldb:                  sqldb,
+		oauthApplicationRepo:  oauthApplicationRepo,
+		oauthAccessTokenRepo:  oauthAccessTokenRepo,
+		oauthAccessGrantRepo:  oauthAccessGrantRepo,
+		oauthRefreshTokenRepo: oauthRefreshTokenRepo,
+		formatter:             formatter,
+		config:                config,
+		sqldb:                 sqldb,
+		apiError:              apiError,
 	}
 }

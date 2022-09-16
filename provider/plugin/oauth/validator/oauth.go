@@ -25,26 +25,6 @@ func NewOauth(refreshTokenToggle bool) *Oauth {
 	}
 }
 
-// ValidateApplication will validate oauth application json
-func (a *Oauth) ValidateApplication(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error {
-	var entityError = &entity.Error{}
-
-	if data.OwnerType == nil {
-		entityError.Errors = append(entityError.Errors, eobject.ValidationError("object `owner_type` is nil or not exists"))
-	} else {
-		if *data.OwnerType != "confidential" && *data.OwnerType != "public" {
-			entityError.Errors = append(entityError.Errors, eobject.ValidationError("object `owner_type` must be either of `confidential` or `public`"))
-		}
-	}
-
-	if len(entityError.Errors) > 0 {
-		entityError.HttpStatus = http.StatusUnprocessableEntity
-		return entityError
-	}
-
-	return nil
-}
-
 // ValidateAuthorizationGrant will validate authorization grant request
 func (a *Oauth) ValidateAuthorizationGrant(ctx context.Context, r entity.AuthorizationRequestJSON, application entity.OauthApplication) *entity.Error {
 	var entityErr = &entity.Error{}

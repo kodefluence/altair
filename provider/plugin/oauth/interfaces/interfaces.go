@@ -85,7 +85,6 @@ type ModelFormater interface {
 
 // OauthValidator validate all oauth logic parameters are valid
 type OauthValidator interface {
-	ValidateApplication(ctx context.Context, data entity.OauthApplicationJSON) *entity.Error
 	ValidateAuthorizationGrant(ctx context.Context, r entity.AuthorizationRequestJSON, application entity.OauthApplication) *entity.Error
 	ValidateTokenGrant(ctx context.Context, r entity.AccessTokenRequestJSON) *entity.Error
 	ValidateTokenRefreshToken(ctx context.Context, data entity.OauthRefreshToken) exception.Exception

@@ -18,6 +18,10 @@ type PluginConfig struct {
 		Timeout string `yaml:"timeout"`
 		Active  bool   `yaml:"active"`
 	} `yaml:"refresh_token"`
+
+	ImplicitGrant struct {
+		Active bool `yaml:"active"`
+	} `yaml:"implicit_grant"`
 }
 
 type RefreshTokenConfig struct {
