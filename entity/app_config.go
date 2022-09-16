@@ -21,11 +21,6 @@ type AppConfig struct {
 	proxyHost         string
 	basicAuthUsername string
 	basicAuthPassword string
-	metricConfig      *MetricConfig
-}
-
-type MetricConfig struct {
-	metricInterface string
 }
 
 func NewAppConfig(option AppConfigOption) AppConfig {
@@ -82,12 +77,4 @@ func (a AppConfig) Dump() string {
 
 	encodedContent, _ := yaml.Marshal(appConfigOption)
 	return string(encodedContent)
-}
-
-func (a AppConfig) Metric() *MetricConfig {
-	return a.metricConfig
-}
-
-func (m *MetricConfig) Interface() string {
-	return m.metricInterface
 }
