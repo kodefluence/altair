@@ -23,7 +23,7 @@ func (a *Authorization) ImplicitGrant(ktx kontext.Context, authorizationReq enti
 		return entity.OauthAccessTokenJSON{}, err
 	}
 
-	exc := a.sqldb.Transaction(ktx, "authorization-grant-token", func(tx db.TX) exception.Exception {
+	exc := a.sqldb.Transaction(ktx, "authorization-implicit-grant", func(tx db.TX) exception.Exception {
 		id, err := a.oauthAccessTokenRepo.Create(ktx, a.formatter.AccessTokenFromAuthorizationRequestInsertable(authorizationReq, oauthApplication), tx)
 		if err != nil {
 			return exception.Throw(err, exception.WithDetail("error creating new oauth access token"), exception.WithType(exception.Unexpected), exception.WithTitle("access token creation error"))
@@ -34,25 +34,7 @@ func (a *Authorization) ImplicitGrant(ktx kontext.Context, authorizationReq enti
 			return exception.Throw(err, exception.WithDetail("error selecting newly created access token"), exception.WithType(exception.Unexpected), exception.WithTitle("access token creation error"))
 		}
 
-		var oauthRefreshTokenJSON *entity.OauthRefreshTokenJSON
-
-		if a.config.Config.RefreshToken.Active {
-			refreshTokenID, err := a.oauthRefreshTokenRepo.Create(ktx, a.formatter.RefreshTokenInsertable(oauthApplication, oauthAccessToken), tx)
-			if err != nil {
-				return exception.Throw(err, exception.WithDetail("error creating new oauth refresh token"), exception.WithType(exception.Unexpected), exception.WithTitle("access token creation error"))
-			}
-
-			oauthRefreshToken, err := a.oauthRefreshTokenRepo.One(ktx, refreshTokenID, tx)
-			if err != nil {
-				return exception.Throw(err, exception.WithDetail("error selecting newly created refresh token"), exception.WithType(exception.Unexpected), exception.WithTitle("access token creation error"))
-			}
-
-			newOauthRefreshTokenJSON := a.formatter.RefreshToken(oauthRefreshToken)
-			oauthRefreshTokenJSON = &newOauthRefreshTokenJSON
-		}
-
-		finalOauthTokenJSON = a.formatter.AccessToken(oauthAccessToken, *authorizationReq.RedirectURI, oauthRefreshTokenJSON)
-
+		finalOauthTokenJSON = a.formatter.AccessToken(oauthAccessToken, *authorizationReq.RedirectURI, nil)
 		return nil
 	})
 	if exc != nil {
