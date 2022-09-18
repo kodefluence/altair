@@ -14,7 +14,3 @@ type ApplicationManager interface {
 	One(ktx kontext.Context, ID int) (entity.OauthApplicationJSON, jsonapi.Errors)
 	Update(ktx kontext.Context, ID int, e entity.OauthApplicationUpdateJSON) (entity.OauthApplicationJSON, jsonapi.Errors)
 }
-
-type ApiError interface {
-	BadRequestError(in string) jsonapi.Option
-}

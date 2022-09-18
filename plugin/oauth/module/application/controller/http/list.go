@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
 )
@@ -12,11 +13,11 @@ import (
 // ListController show list of oauth applications
 type ListController struct {
 	applicationManager ApplicationManager
-	apiError           ApiError
+	apiError           module.ApiError
 }
 
 // NewList return struct of ListController
-func NewList(applicationManager ApplicationManager, apiError ApiError) *ListController {
+func NewList(applicationManager ApplicationManager, apiError module.ApiError) *ListController {
 	return &ListController{
 		applicationManager: applicationManager,
 		apiError:           apiError,

@@ -1,20 +1,14 @@
 package usecase
 
 import (
+	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/kodefluence/monorepo/exception"
-	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
 )
 
 //go:generate mockgen -destination ./mock/mock.go -package mock -source ./application_manager.go
-
-type ApiError interface {
-	InternalServerError(ktx kontext.Context) jsonapi.Option
-	NotFoundError(ktx kontext.Context, entityType string) jsonapi.Option
-	ValidationError(msg string) jsonapi.Option
-}
 
 type OauthApplicationRepository interface {
 	Paginate(ktx kontext.Context, offset, limit int, tx db.TX) ([]entity.OauthApplication, exception.Exception)
@@ -35,12 +29,12 @@ type Formatter interface {
 type ApplicationManager struct {
 	sqldb                db.DB
 	oauthApplicationRepo OauthApplicationRepository
-	apiError             ApiError
+	apiError             module.ApiError
 	formatter            Formatter
 }
 
 // NewApplicationManager manage all oauth application data business logic
-func NewApplicationManager(sqldb db.DB, oauthApplicationRepo OauthApplicationRepository, apiError ApiError, formatter Formatter) *ApplicationManager {
+func NewApplicationManager(sqldb db.DB, oauthApplicationRepo OauthApplicationRepository, apiError module.ApiError, formatter Formatter) *ApplicationManager {
 	return &ApplicationManager{
 		sqldb:                sqldb,
 		oauthApplicationRepo: oauthApplicationRepo,

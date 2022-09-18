@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
@@ -15,11 +16,11 @@ import (
 // CreateController control flow of oauth application creation
 type CreateController struct {
 	applicationManager ApplicationManager
-	apiError           ApiError
+	apiError           module.ApiError
 }
 
 // NewCreate return struct of CreateController
-func NewCreate(applicationManager ApplicationManager, apiError ApiError) *CreateController {
+func NewCreate(applicationManager ApplicationManager, apiError module.ApiError) *CreateController {
 	return &CreateController{
 		applicationManager: applicationManager,
 		apiError:           apiError,

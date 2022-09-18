@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
@@ -16,11 +17,11 @@ import (
 // UpdateController control flow of update oauth application
 type UpdateController struct {
 	applicationManager ApplicationManager
-	apiError           ApiError
+	apiError           module.ApiError
 }
 
 // NewUpdate create struct of UpdateController
-func NewUpdate(applicationManager ApplicationManager, apiError ApiError) *UpdateController {
+func NewUpdate(applicationManager ApplicationManager, apiError module.ApiError) *UpdateController {
 	return &UpdateController{
 		applicationManager: applicationManager,
 		apiError:           apiError,

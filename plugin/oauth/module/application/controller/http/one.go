@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
 	"github.com/rs/zerolog"
@@ -14,11 +15,11 @@ import (
 // OneController control flow of showing oauth applications detail
 type OneController struct {
 	applicationManager ApplicationManager
-	apiError           ApiError
+	apiError           module.ApiError
 }
 
 // NewOne return struct of OneController
-func NewOne(applicationManager ApplicationManager, apiError ApiError) *OneController {
+func NewOne(applicationManager ApplicationManager, apiError module.ApiError) *OneController {
 	return &OneController{
 		applicationManager: applicationManager,
 		apiError:           apiError,
