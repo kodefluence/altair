@@ -110,7 +110,7 @@ func (*OauthAccessToken) Revoke(ktx kontext.Context, token string, tx db.TX) exc
 	}
 
 	if rows == 0 {
-		return exception.Throw(errors.New("not found"), exception.WithType(exception.NotFound))
+		return exception.Throw(errors.New("not found"), exception.WithType(exception.NotFound), exception.WithDetail("oauth access token is not found"), exception.WithTitle("Not Found"))
 	}
 
 	return nil
