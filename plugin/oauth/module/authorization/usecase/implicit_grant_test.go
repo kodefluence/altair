@@ -33,7 +33,7 @@ func TestImplicitGrant(t *testing.T) {
 
 func (suite *ImplicitGrantSuiteTest) SetupTest() {
 	suite.authorizationRequestJSON = entity.AuthorizationRequestJSON{
-		ResponseType:    util.StringToPointer("code"),
+		ResponseType:    util.StringToPointer("token"),
 		ResourceOwnerID: util.IntToPointer(1),
 		RedirectURI:     util.StringToPointer("www.github.com"),
 		ClientUID:       util.StringToPointer("client_uid"),
@@ -46,6 +46,7 @@ func (suite *ImplicitGrantSuiteTest) SetupTest() {
 			String: "public users",
 			Valid:  true,
 		},
+		OwnerType: "confidential",
 	}
 	suite.accessToken = entity.OauthAccessToken{
 		ID:                 1,
