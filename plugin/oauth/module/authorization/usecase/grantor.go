@@ -21,8 +21,7 @@ func (a *Authorization) Grantor(ktx kontext.Context, authorizationReq entity.Aut
 
 		return a.ImplicitGrant(ktx, authorizationReq)
 	case "code":
-		// Grant code in here
-		return nil, nil
+		return a.Grant(ktx, authorizationReq)
 	}
 
 	return nil, jsonapi.BuildResponse(

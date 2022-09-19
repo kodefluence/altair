@@ -23,6 +23,7 @@ type GrantorSuiteTest struct {
 	authorizationRequestJSON entity.AuthorizationRequestJSON
 	oauthApplication         entity.OauthApplication
 	accessToken              entity.OauthAccessToken
+	accessGrant              entity.OauthAccessGrant
 }
 
 func TestGrantor(t *testing.T) {
@@ -58,6 +59,17 @@ func (suite *GrantorSuiteTest) SetupTest() {
 		CreatedAt:          time.Time{},
 		RevokedAT:          mysql.NullTime{},
 	}
+	suite.accessGrant = entity.OauthAccessGrant{
+		ID:                 1,
+		OauthApplicationID: 1,
+		ResourceOwnerID:    0,
+		Code:               "",
+		RedirectURI:        sql.NullString{},
+		Scopes:             sql.NullString{},
+		ExpiresIn:          time.Time{},
+		CreatedAt:          time.Time{},
+		RevokedAT:          mysql.NullTime{},
+	}
 }
 
 func (suite *GrantorSuiteTest) Subtest(testcase string, subtest func()) {
@@ -86,6 +98,27 @@ func (suite *GrantorSuiteTest) TestGrantor() {
 			finalJson, err := suite.authorization.Grantor(suite.ktx, suite.authorizationRequestJSON)
 			suite.Assert().Nil(err)
 			suite.Assert().Equal(suite.formatter.AccessToken(suite.accessToken, *suite.authorizationRequestJSON.RedirectURI, nil), finalJson)
+		})
+
+		suite.Subtest("When all parameters is valid and response type is code, it would return oauth access grant", func() {
+			suite.authorizationRequestJSON.ResponseType = util.StringToPointer("code")
+			gomock.InOrder(
+				suite.oauthApplicationRepo.EXPECT().OneByUIDandSecret(suite.ktx, *suite.authorizationRequestJSON.ClientUID, *suite.authorizationRequestJSON.ClientSecret, suite.sqldb).Return(suite.oauthApplication, nil),
+				suite.sqldb.EXPECT().Transaction(suite.ktx, "authorization-grant-authorization-code", gomock.Any()).DoAndReturn(func(ktx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
+					suite.oauthAccessGrantRepo.EXPECT().Create(ktx, gomock.Any(), suite.sqldb).DoAndReturn(func(ktx kontext.Context, data entity.OauthAccessGrantInsertable, tx db.TX) (int, exception.Exception) {
+						suite.Assert().Equal(suite.oauthApplication.ID, data.OauthApplicationID)
+						return suite.accessGrant.ID, nil
+					})
+					suite.oauthAccessGrantRepo.EXPECT().One(ktx, suite.accessGrant.ID, suite.sqldb).Return(suite.accessGrant, nil)
+
+					suite.Assert().Nil(f(suite.sqldb))
+					return nil
+				}),
+			)
+
+			finalJson, err := suite.authorization.Grantor(suite.ktx, suite.authorizationRequestJSON)
+			suite.Assert().Nil(err)
+			suite.Assert().Equal(suite.formatter.AccessGrant(suite.accessGrant), finalJson)
 		})
 	})
 
