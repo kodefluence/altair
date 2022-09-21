@@ -3,6 +3,8 @@ package usecase_test
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
+	"net/http"
 	"testing"
 	"time"
 
@@ -104,8 +106,7 @@ func (suite *GrantTokenFromAuthorizationCodeTest) TestValidateTokenGrantSuiteTes
 						return 1, nil
 					})
 					suite.oauthRefreshTokenRepo.EXPECT().One(suite.ktx, suite.refreshToken.ID, suite.sqldb).Return(suite.refreshToken, nil)
-					f(suite.sqldb)
-					return nil
+					return f(suite.sqldb)
 				}),
 			)
 
@@ -118,7 +119,151 @@ func (suite *GrantTokenFromAuthorizationCodeTest) TestValidateTokenGrantSuiteTes
 	})
 
 	suite.Run("Negative cases", func() {
+		suite.Subtest("When get grant token not found, then it would return error", func() {
+			suite.refreshTokenJSON = suite.formatter.RefreshToken(suite.refreshToken)
+			gomock.InOrder(
+				suite.oauthApplicationRepo.EXPECT().OneByUIDandSecret(suite.ktx, *suite.accessTokenRequestJSON.ClientUID, *suite.accessTokenRequestJSON.ClientSecret, suite.sqldb).Return(suite.oauthApplication, nil),
+				suite.sqldb.EXPECT().Transaction(suite.ktx, "authorization-grant-token-from-refresh-token", gomock.Any()).DoAndReturn(func(ctx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
+					suite.oauthAccessGrantRepo.EXPECT().OneByCode(suite.ktx, *suite.accessTokenRequestJSON.Code, suite.sqldb).Return(entity.OauthAccessGrant{}, exception.Throw(errors.New("not found"), exception.WithType(exception.NotFound)))
+					return f(suite.sqldb)
+				}),
+			)
 
+			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			suite.Assert().NotNil(err)
+			suite.Assert().Equal("JSONAPI Error:\n[Not found error] Detail: Resource of `authorization_code` is not found. Tracing code: `<nil>`, Code: ERR0404\n", err.Error())
+			suite.Assert().Equal(http.StatusNotFound, err.HTTPStatus())
+		})
+
+		suite.Subtest("When get grant token failure, then it would return error", func() {
+			suite.refreshTokenJSON = suite.formatter.RefreshToken(suite.refreshToken)
+			gomock.InOrder(
+				suite.oauthApplicationRepo.EXPECT().OneByUIDandSecret(suite.ktx, *suite.accessTokenRequestJSON.ClientUID, *suite.accessTokenRequestJSON.ClientSecret, suite.sqldb).Return(suite.oauthApplication, nil),
+				suite.sqldb.EXPECT().Transaction(suite.ktx, "authorization-grant-token-from-refresh-token", gomock.Any()).DoAndReturn(func(ctx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
+					suite.oauthAccessGrantRepo.EXPECT().OneByCode(suite.ktx, *suite.accessTokenRequestJSON.Code, suite.sqldb).Return(entity.OauthAccessGrant{}, exception.Throw(errors.New("unexpected")))
+					return f(suite.sqldb)
+				}),
+			)
+
+			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			suite.Assert().NotNil(err)
+			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
+			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())
+		})
+
+		suite.Subtest("When access grant validation failure, then it would return error", func() {
+			suite.accessGrant.RevokedAT = mysql.NullTime{
+				Time:  time.Now().Add(-1 * time.Hour),
+				Valid: true,
+			}
+			suite.refreshTokenJSON = suite.formatter.RefreshToken(suite.refreshToken)
+			gomock.InOrder(
+				suite.oauthApplicationRepo.EXPECT().OneByUIDandSecret(suite.ktx, *suite.accessTokenRequestJSON.ClientUID, *suite.accessTokenRequestJSON.ClientSecret, suite.sqldb).Return(suite.oauthApplication, nil),
+				suite.sqldb.EXPECT().Transaction(suite.ktx, "authorization-grant-token-from-refresh-token", gomock.Any()).DoAndReturn(func(ctx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
+					suite.oauthAccessGrantRepo.EXPECT().OneByCode(suite.ktx, *suite.accessTokenRequestJSON.Code, suite.sqldb).Return(suite.accessGrant, nil)
+					return f(suite.sqldb)
+				}),
+			)
+
+			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			suite.Assert().NotNil(err)
+			suite.Assert().Equal("JSONAPI Error:\n[Forbidden resource access] Detail: authorization code already used, Code: ERR0403\n", err.Error())
+			suite.Assert().Equal(http.StatusForbidden, err.HTTPStatus())
+		})
+
+		suite.Subtest("When access token creation failure, then it would return error", func() {
+			suite.refreshTokenJSON = suite.formatter.RefreshToken(suite.refreshToken)
+			gomock.InOrder(
+				suite.oauthApplicationRepo.EXPECT().OneByUIDandSecret(suite.ktx, *suite.accessTokenRequestJSON.ClientUID, *suite.accessTokenRequestJSON.ClientSecret, suite.sqldb).Return(suite.oauthApplication, nil),
+				suite.sqldb.EXPECT().Transaction(suite.ktx, "authorization-grant-token-from-refresh-token", gomock.Any()).DoAndReturn(func(ctx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
+					suite.oauthAccessGrantRepo.EXPECT().OneByCode(suite.ktx, *suite.accessTokenRequestJSON.Code, suite.sqldb).Return(suite.accessGrant, nil)
+					suite.oauthAccessTokenRepo.EXPECT().Create(suite.ktx, gomock.Any(), suite.sqldb).DoAndReturn(func(ktx kontext.Context, data entity.OauthAccessTokenInsertable, tx db.TX) (int, exception.Exception) {
+						suite.Assert().Equal(suite.accessGrant.Scopes.String, data.Scopes)
+						suite.Assert().Equal(suite.oauthApplication.ID, data.OauthApplicationID)
+						return 1, exception.Throw(errors.New("unexpected"))
+					})
+					return f(suite.sqldb)
+				}),
+			)
+
+			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			suite.Assert().NotNil(err)
+			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
+			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())
+		})
+
+		suite.Subtest("When find access token after creation failed, then it would return error", func() {
+			suite.refreshTokenJSON = suite.formatter.RefreshToken(suite.refreshToken)
+			gomock.InOrder(
+				suite.oauthApplicationRepo.EXPECT().OneByUIDandSecret(suite.ktx, *suite.accessTokenRequestJSON.ClientUID, *suite.accessTokenRequestJSON.ClientSecret, suite.sqldb).Return(suite.oauthApplication, nil),
+				suite.sqldb.EXPECT().Transaction(suite.ktx, "authorization-grant-token-from-refresh-token", gomock.Any()).DoAndReturn(func(ctx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
+					suite.oauthAccessGrantRepo.EXPECT().OneByCode(suite.ktx, *suite.accessTokenRequestJSON.Code, suite.sqldb).Return(suite.accessGrant, nil)
+					suite.oauthAccessTokenRepo.EXPECT().Create(suite.ktx, gomock.Any(), suite.sqldb).DoAndReturn(func(ktx kontext.Context, data entity.OauthAccessTokenInsertable, tx db.TX) (int, exception.Exception) {
+						suite.Assert().Equal(suite.accessGrant.Scopes.String, data.Scopes)
+						suite.Assert().Equal(suite.oauthApplication.ID, data.OauthApplicationID)
+						return 1, nil
+					})
+					suite.oauthAccessTokenRepo.EXPECT().One(suite.ktx, 1, suite.sqldb).Return(entity.OauthAccessToken{}, exception.Throw(errors.New("unexpected")))
+					return f(suite.sqldb)
+				}),
+			)
+
+			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			suite.Assert().NotNil(err)
+			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
+			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())
+		})
+
+		suite.Subtest("When revoke token error, then it would return error", func() {
+			suite.refreshTokenJSON = suite.formatter.RefreshToken(suite.refreshToken)
+			gomock.InOrder(
+				suite.oauthApplicationRepo.EXPECT().OneByUIDandSecret(suite.ktx, *suite.accessTokenRequestJSON.ClientUID, *suite.accessTokenRequestJSON.ClientSecret, suite.sqldb).Return(suite.oauthApplication, nil),
+				suite.sqldb.EXPECT().Transaction(suite.ktx, "authorization-grant-token-from-refresh-token", gomock.Any()).DoAndReturn(func(ctx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
+					suite.oauthAccessGrantRepo.EXPECT().OneByCode(suite.ktx, *suite.accessTokenRequestJSON.Code, suite.sqldb).Return(suite.accessGrant, nil)
+					suite.oauthAccessTokenRepo.EXPECT().Create(suite.ktx, gomock.Any(), suite.sqldb).DoAndReturn(func(ktx kontext.Context, data entity.OauthAccessTokenInsertable, tx db.TX) (int, exception.Exception) {
+						suite.Assert().Equal(suite.accessGrant.Scopes.String, data.Scopes)
+						suite.Assert().Equal(suite.oauthApplication.ID, data.OauthApplicationID)
+						return 1, nil
+					})
+					suite.oauthAccessTokenRepo.EXPECT().One(suite.ktx, 1, suite.sqldb).Return(suite.accessToken, nil)
+					suite.oauthAccessGrantRepo.EXPECT().Revoke(suite.ktx, *suite.accessTokenRequestJSON.Code, suite.sqldb).Return(exception.Throw(errors.New("unexpected")))
+					return f(suite.sqldb)
+				}),
+			)
+
+			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			suite.Assert().NotNil(err)
+			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
+			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())
+		})
+
+		suite.Subtest("When refresh token creation failure, then it would return error", func() {
+			suite.refreshTokenJSON = suite.formatter.RefreshToken(suite.refreshToken)
+			gomock.InOrder(
+				suite.oauthApplicationRepo.EXPECT().OneByUIDandSecret(suite.ktx, *suite.accessTokenRequestJSON.ClientUID, *suite.accessTokenRequestJSON.ClientSecret, suite.sqldb).Return(suite.oauthApplication, nil),
+				suite.sqldb.EXPECT().Transaction(suite.ktx, "authorization-grant-token-from-refresh-token", gomock.Any()).DoAndReturn(func(ctx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
+					suite.oauthAccessGrantRepo.EXPECT().OneByCode(suite.ktx, *suite.accessTokenRequestJSON.Code, suite.sqldb).Return(suite.accessGrant, nil)
+					suite.oauthAccessTokenRepo.EXPECT().Create(suite.ktx, gomock.Any(), suite.sqldb).DoAndReturn(func(ktx kontext.Context, data entity.OauthAccessTokenInsertable, tx db.TX) (int, exception.Exception) {
+						suite.Assert().Equal(suite.accessGrant.Scopes.String, data.Scopes)
+						suite.Assert().Equal(suite.oauthApplication.ID, data.OauthApplicationID)
+						return 1, nil
+					})
+					suite.oauthAccessTokenRepo.EXPECT().One(suite.ktx, 1, suite.sqldb).Return(suite.accessToken, nil)
+					suite.oauthAccessGrantRepo.EXPECT().Revoke(suite.ktx, *suite.accessTokenRequestJSON.Code, suite.sqldb).Return(nil)
+					suite.oauthRefreshTokenRepo.EXPECT().Create(suite.ktx, gomock.Any(), suite.sqldb).DoAndReturn(func(ktx kontext.Context, data entity.OauthRefreshTokenInsertable, tx db.TX) (int, exception.Exception) {
+						suite.Assert().Equal(suite.accessToken.ID, data.OauthAccessTokenID)
+						return 1, nil
+					})
+					suite.oauthRefreshTokenRepo.EXPECT().One(suite.ktx, suite.refreshToken.ID, suite.sqldb).Return(entity.OauthRefreshToken{}, exception.Throw(errors.New("unexpected")))
+					return f(suite.sqldb)
+				}),
+			)
+
+			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			suite.Assert().NotNil(err)
+			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
+			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())
+		})
 	})
 }
 
