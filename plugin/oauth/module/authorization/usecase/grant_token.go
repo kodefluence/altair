@@ -7,7 +7,7 @@ import (
 )
 
 func (a *Authorization) Token(ktx kontext.Context, accessTokenReq entity.AccessTokenRequestJSON) (entity.OauthAccessTokenJSON, jsonapi.Errors) {
-	_, jsonapiErr := a.FindAndValidateApplication(ktx, accessTokenReq.ClientUID, accessTokenReq.ClientSecret)
+	oauthApplication, jsonapiErr := a.FindAndValidateApplication(ktx, accessTokenReq.ClientUID, accessTokenReq.ClientSecret)
 	if jsonapiErr != nil {
 		return entity.OauthAccessTokenJSON{}, jsonapiErr
 	}
@@ -17,9 +17,13 @@ func (a *Authorization) Token(ktx kontext.Context, accessTokenReq entity.AccessT
 	}
 
 	switch *accessTokenReq.GrantType {
-
 	case "authorization_code":
-		// Grant authorization code here
+		oauthAccessToken, redirectURI, jsonapierr := a.GrantTokenFromAuthorizationCode(ktx, accessTokenReq, oauthApplication)
+		if jsonapierr != nil {
+			return entity.OauthAccessTokenJSON{}, jsonapierr
+		}
+
+		return a.formatter.AccessToken(oauthAccessToken, redirectURI, nil), nil
 	case "refresh_token":
 		if a.config.Config.RefreshToken.Active {
 			// Grant refresh token here
