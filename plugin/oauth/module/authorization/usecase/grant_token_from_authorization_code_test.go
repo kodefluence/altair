@@ -2,6 +2,7 @@ package usecase_test
 
 import (
 	"database/sql"
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -22,6 +23,8 @@ type GrantTokenFromAuthorizationCodeTest struct {
 	accessTokenRequestJSON entity.AccessTokenRequestJSON
 	accessGrant            entity.OauthAccessGrant
 	accessToken            entity.OauthAccessToken
+	refreshToken           entity.OauthRefreshToken
+	refreshTokenJSON       entity.OauthRefreshTokenJSON
 }
 
 func TestGrantTokenFromAuthorizationCode(t *testing.T) {
@@ -71,11 +74,20 @@ func (suite *GrantTokenFromAuthorizationCodeTest) SetupTest() {
 		CreatedAt:          time.Time{},
 		RevokedAT:          mysql.NullTime{},
 	}
+	suite.refreshToken = entity.OauthRefreshToken{
+		ID:                 1,
+		OauthAccessTokenID: 1,
+		Token:              "some token",
+		ExpiresIn:          time.Time{},
+		CreatedAt:          time.Time{},
+		RevokedAT:          mysql.NullTime{},
+	}
 }
 
 func (suite *GrantTokenFromAuthorizationCodeTest) TestValidateTokenGrantSuiteTest() {
 	suite.Run("Positive cases", func() {
 		suite.Subtest("When all parameters is valid, then it would return nil", func() {
+			suite.refreshTokenJSON = suite.formatter.RefreshToken(suite.refreshToken)
 			gomock.InOrder(
 				suite.oauthApplicationRepo.EXPECT().OneByUIDandSecret(suite.ktx, *suite.accessTokenRequestJSON.ClientUID, *suite.accessTokenRequestJSON.ClientSecret, suite.sqldb).Return(suite.oauthApplication, nil),
 				suite.sqldb.EXPECT().Transaction(suite.ktx, "authorization-grant-token-from-refresh-token", gomock.Any()).DoAndReturn(func(ctx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
@@ -87,14 +99,21 @@ func (suite *GrantTokenFromAuthorizationCodeTest) TestValidateTokenGrantSuiteTes
 					})
 					suite.oauthAccessTokenRepo.EXPECT().One(suite.ktx, 1, suite.sqldb).Return(suite.accessToken, nil)
 					suite.oauthAccessGrantRepo.EXPECT().Revoke(suite.ktx, *suite.accessTokenRequestJSON.Code, suite.sqldb).Return(nil)
+					suite.oauthRefreshTokenRepo.EXPECT().Create(suite.ktx, gomock.Any(), suite.sqldb).DoAndReturn(func(ktx kontext.Context, data entity.OauthRefreshTokenInsertable, tx db.TX) (int, exception.Exception) {
+						suite.Assert().Equal(suite.accessToken.ID, data.OauthAccessTokenID)
+						return 1, nil
+					})
+					suite.oauthRefreshTokenRepo.EXPECT().One(suite.ktx, suite.refreshToken.ID, suite.sqldb).Return(suite.refreshToken, nil)
 					f(suite.sqldb)
 					return nil
 				}),
 			)
 
 			accessTokenJSON, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			byteAccessToken, _ := json.Marshal(accessTokenJSON)
+			byteExpectedAccessToken, _ := json.Marshal(suite.formatter.AccessToken(suite.accessToken, suite.accessGrant.RedirectURI.String, &suite.refreshTokenJSON))
 			suite.Assert().Nil(err)
-			suite.Equal(suite.formatter.AccessToken(suite.accessToken, suite.accessGrant.RedirectURI.String, nil), accessTokenJSON)
+			suite.Equal(string(byteExpectedAccessToken), string(byteAccessToken))
 		})
 	})
 

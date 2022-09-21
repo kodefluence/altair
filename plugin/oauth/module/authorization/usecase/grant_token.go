@@ -18,12 +18,13 @@ func (a *Authorization) Token(ktx kontext.Context, accessTokenReq entity.AccessT
 
 	switch *accessTokenReq.GrantType {
 	case "authorization_code":
-		oauthAccessToken, redirectURI, jsonapierr := a.GrantTokenFromAuthorizationCode(ktx, accessTokenReq, oauthApplication)
+		oauthAccessToken, oauthRefreshToken, redirectURI, jsonapierr := a.GrantTokenFromAuthorizationCode(ktx, accessTokenReq, oauthApplication)
 		if jsonapierr != nil {
 			return entity.OauthAccessTokenJSON{}, jsonapierr
 		}
 
-		return a.formatter.AccessToken(oauthAccessToken, redirectURI, nil), nil
+		refreshTokenJSON := a.formatter.RefreshToken(oauthRefreshToken)
+		return a.formatter.AccessToken(oauthAccessToken, redirectURI, &refreshTokenJSON), nil
 	case "refresh_token":
 		if a.config.Config.RefreshToken.Active {
 			// Grant refresh token here
