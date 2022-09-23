@@ -118,6 +118,24 @@ func TestOauthApplication(t *testing.T) {
 		})
 	})
 
+	t.Run("AccessTokenClientCredentialInsertable", func(t *testing.T) {
+		t.Run("Given oauth application and scopes", func(t *testing.T) {
+			t.Run("Return oauth access token insertable", func(t *testing.T) {
+				application := entity.OauthApplication{
+					ID: 1,
+				}
+
+				scopes := util.StringToPointer("publc")
+
+				insertable := newFormatter().AccessTokenClientCredentialInsertable(application, scopes)
+
+				assert.Equal(t, application.ID, insertable.OauthApplicationID)
+				assert.Equal(t, 0, insertable.ResourceOwnerID)
+				assert.Equal(t, *scopes, insertable.Scopes)
+			})
+		})
+	})
+
 	t.Run("AccessGrantFromAuthorizationRequestInsertable", func(t *testing.T) {
 		t.Run("Given authorization request and oauth application", func(t *testing.T) {
 			t.Run("Return oauth access grant insertable", func(t *testing.T) {

@@ -23,14 +23,28 @@ func (a *Authorization) Token(ktx kontext.Context, accessTokenReq entity.AccessT
 			return entity.OauthAccessTokenJSON{}, jsonapierr
 		}
 
-		refreshTokenJSON := a.formatter.RefreshToken(oauthRefreshToken)
+		if oauthRefreshToken == nil {
+			return a.formatter.AccessToken(oauthAccessToken, redirectURI, nil), nil
+		}
+
+		refreshTokenJSON := a.formatter.RefreshToken(*oauthRefreshToken)
 		return a.formatter.AccessToken(oauthAccessToken, redirectURI, &refreshTokenJSON), nil
 	case "refresh_token":
 		if a.config.Config.RefreshToken.Active {
 			// Grant refresh token here
 		}
 	case "client_credentials":
-		// Grant client credentials here
+		oauthAccessToken, oauthRefreshToken, jsonapierr := a.ClientCredential(ktx, accessTokenReq, oauthApplication)
+		if jsonapierr != nil {
+			return entity.OauthAccessTokenJSON{}, jsonapierr
+		}
+
+		if oauthRefreshToken == nil {
+			return a.formatter.AccessToken(oauthAccessToken, "", nil), nil
+		}
+
+		refreshTokenJSON := a.formatter.RefreshToken(*oauthRefreshToken)
+		return a.formatter.AccessToken(oauthAccessToken, "", &refreshTokenJSON), nil
 	}
 
 	return entity.OauthAccessTokenJSON{}, jsonapi.BuildResponse(

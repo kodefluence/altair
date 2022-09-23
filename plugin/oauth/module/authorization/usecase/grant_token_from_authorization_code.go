@@ -9,10 +9,10 @@ import (
 	"github.com/rs/zerolog"
 )
 
-func (a *Authorization) GrantTokenFromAuthorizationCode(ktx kontext.Context, accessTokenReq entity.AccessTokenRequestJSON, oauthApplication entity.OauthApplication) (entity.OauthAccessToken, entity.OauthRefreshToken, string, jsonapi.Errors) {
+func (a *Authorization) GrantTokenFromAuthorizationCode(ktx kontext.Context, accessTokenReq entity.AccessTokenRequestJSON, oauthApplication entity.OauthApplication) (entity.OauthAccessToken, *entity.OauthRefreshToken, string, jsonapi.Errors) {
 	var finalOauthAccessToken entity.OauthAccessToken
 	var finalRedirectURI string
-	var finalRefreshToken entity.OauthRefreshToken
+	var finalRefreshToken *entity.OauthRefreshToken
 
 	exc := a.sqldb.Transaction(ktx, "authorization-grant-token-from-refresh-token", func(tx db.TX) exception.Exception {
 		oauthAccessGrant, err := a.oauthAccessGrantRepo.OneByCode(ktx, *accessTokenReq.Code, tx)
@@ -48,7 +48,7 @@ func (a *Authorization) GrantTokenFromAuthorizationCode(ktx kontext.Context, acc
 			if refreshToken, err := a.GrantRefreshToken(ktx, oauthAccessToken, oauthApplication, tx); err != nil {
 				return exception.Throw(err, exception.WithType(exception.Unexpected), exception.WithTitle("Internal Server Error"), exception.WithDetail("error creating refresh token data"))
 			} else {
-				finalRefreshToken = refreshToken
+				finalRefreshToken = &refreshToken
 			}
 		}
 
@@ -58,7 +58,7 @@ func (a *Authorization) GrantTokenFromAuthorizationCode(ktx kontext.Context, acc
 		return nil
 	})
 	if exc != nil {
-		return entity.OauthAccessToken{}, entity.OauthRefreshToken{}, "", a.exceptionMapping(ktx, exc, zerolog.Arr().Str("service").Str("authorization").Str("refresh_token"))
+		return entity.OauthAccessToken{}, nil, "", a.exceptionMapping(ktx, exc, zerolog.Arr().Str("service").Str("authorization").Str("refresh_token"))
 	}
 
 	return finalOauthAccessToken, finalRefreshToken, finalRedirectURI, nil

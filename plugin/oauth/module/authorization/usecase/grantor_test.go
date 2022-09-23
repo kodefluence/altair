@@ -149,7 +149,7 @@ func (suite *GrantorSuiteTest) TestGrantor() {
 
 		suite.Subtest("When response type is token but implicit grant feature is inactive, then it would return error", func() {
 			suite.config.Config.ImplicitGrant.Active = false
-			suite.authorization = *usecase.NewAuthorization(suite.oauthApplicationRepo, suite.oauthAccessTokenRepo, suite.oauthAccessGrantRepo, suite.oauthRefreshTokenRepo, suite.formatter, suite.config, suite.sqldb, suite.apiError)
+			suite.authorization = usecase.NewAuthorization(suite.oauthApplicationRepo, suite.oauthAccessTokenRepo, suite.oauthAccessGrantRepo, suite.oauthRefreshTokenRepo, suite.formatter, suite.config, suite.sqldb, suite.apiError)
 			finalJson, err := suite.authorization.Grantor(suite.ktx, suite.authorizationRequestJSON)
 			suite.Assert().Equal("JSONAPI Error:\n[Validation error] Detail: Validation error because of: response_type is invalid. Should be either `token` or `code`, Code: ERR1442\n", err.Error())
 			suite.Assert().Equal(http.StatusUnprocessableEntity, err.HTTPStatus())

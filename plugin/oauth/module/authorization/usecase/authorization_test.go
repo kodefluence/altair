@@ -27,7 +27,7 @@ type AuthorizationBaseSuiteTest struct {
 	formatter             usecase.Formatter
 	config                entity.OauthPlugin
 	apiError              module.ApiError
-	authorization         usecase.Authorization
+	authorization         *usecase.Authorization
 	sqldb                 *mockdb.MockDB
 
 	suite.Suite
@@ -65,7 +65,7 @@ func (suite *AuthorizationBaseSuiteTest) SetupTest() {
 	suite.formatter = formatter.Provide(24*time.Hour, 24*time.Hour, 24*time.Hour)
 	suite.sqldb = mockdb.NewMockDB(suite.mockCtrl)
 	suite.apiError = apierror.Provide()
-	suite.authorization = *usecase.NewAuthorization(suite.oauthApplicationRepo, suite.oauthAccessTokenRepo, suite.oauthAccessGrantRepo, suite.oauthRefreshTokenRepo, suite.formatter, suite.config, suite.sqldb, suite.apiError)
+	suite.authorization = usecase.NewAuthorization(suite.oauthApplicationRepo, suite.oauthAccessTokenRepo, suite.oauthAccessGrantRepo, suite.oauthRefreshTokenRepo, suite.formatter, suite.config, suite.sqldb, suite.apiError)
 }
 
 func (suite *AuthorizationBaseSuiteTest) TearDownTest() {

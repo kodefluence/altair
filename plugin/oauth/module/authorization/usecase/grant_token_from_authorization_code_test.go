@@ -11,6 +11,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/golang/mock/gomock"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
+	"github.com/kodefluence/altair/plugin/oauth/module/authorization/usecase"
 	"github.com/kodefluence/altair/util"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/kodefluence/monorepo/exception"
@@ -113,6 +114,32 @@ func (suite *GrantTokenFromAuthorizationCodeTest) TestValidateTokenGrantSuiteTes
 			accessTokenJSON, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
 			byteAccessToken, _ := json.Marshal(accessTokenJSON)
 			byteExpectedAccessToken, _ := json.Marshal(suite.formatter.AccessToken(suite.accessToken, suite.accessGrant.RedirectURI.String, &suite.refreshTokenJSON))
+			suite.Assert().Nil(err)
+			suite.Equal(string(byteExpectedAccessToken), string(byteAccessToken))
+		})
+
+		suite.Subtest("When all parameters is valid but refresh token is inactive, then it would return nil", func() {
+			suite.config.Config.RefreshToken.Active = false
+			suite.authorization = usecase.NewAuthorization(suite.oauthApplicationRepo, suite.oauthAccessTokenRepo, suite.oauthAccessGrantRepo, suite.oauthRefreshTokenRepo, suite.formatter, suite.config, suite.sqldb, suite.apiError)
+
+			gomock.InOrder(
+				suite.oauthApplicationRepo.EXPECT().OneByUIDandSecret(suite.ktx, *suite.accessTokenRequestJSON.ClientUID, *suite.accessTokenRequestJSON.ClientSecret, suite.sqldb).Return(suite.oauthApplication, nil),
+				suite.sqldb.EXPECT().Transaction(suite.ktx, "authorization-grant-token-from-refresh-token", gomock.Any()).DoAndReturn(func(ctx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
+					suite.oauthAccessGrantRepo.EXPECT().OneByCode(suite.ktx, *suite.accessTokenRequestJSON.Code, suite.sqldb).Return(suite.accessGrant, nil)
+					suite.oauthAccessTokenRepo.EXPECT().Create(suite.ktx, gomock.Any(), suite.sqldb).DoAndReturn(func(ktx kontext.Context, data entity.OauthAccessTokenInsertable, tx db.TX) (int, exception.Exception) {
+						suite.Assert().Equal(suite.accessGrant.Scopes.String, data.Scopes)
+						suite.Assert().Equal(suite.oauthApplication.ID, data.OauthApplicationID)
+						return 1, nil
+					})
+					suite.oauthAccessTokenRepo.EXPECT().One(suite.ktx, 1, suite.sqldb).Return(suite.accessToken, nil)
+					suite.oauthAccessGrantRepo.EXPECT().Revoke(suite.ktx, *suite.accessTokenRequestJSON.Code, suite.sqldb).Return(nil)
+					return f(suite.sqldb)
+				}),
+			)
+
+			accessTokenJSON, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			byteAccessToken, _ := json.Marshal(accessTokenJSON)
+			byteExpectedAccessToken, _ := json.Marshal(suite.formatter.AccessToken(suite.accessToken, suite.accessGrant.RedirectURI.String, nil))
 			suite.Assert().Nil(err)
 			suite.Equal(string(byteExpectedAccessToken), string(byteAccessToken))
 		})

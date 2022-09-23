@@ -14,6 +14,7 @@ type Formatter interface {
 	AccessTokenFromAuthorizationRequestInsertable(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessTokenInsertable
 	AccessTokenFromOauthAccessGrantInsertable(oauthAccessGrant entity.OauthAccessGrant, application entity.OauthApplication) entity.OauthAccessTokenInsertable
 	AccessGrantFromAuthorizationRequestInsertable(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessGrantInsertable
+	AccessTokenClientCredentialInsertable(application entity.OauthApplication, scope *string) entity.OauthAccessTokenInsertable
 	OauthApplicationInsertable(r entity.OauthApplicationJSON) entity.OauthApplicationInsertable
 	AccessTokenFromOauthRefreshTokenInsertable(application entity.OauthApplication, accessToken entity.OauthAccessToken) entity.OauthAccessTokenInsertable
 	RefreshTokenInsertable(application entity.OauthApplication, accessToken entity.OauthAccessToken) entity.OauthRefreshTokenInsertable
