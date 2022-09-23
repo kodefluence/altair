@@ -27,8 +27,6 @@ func (a *Authorization) exceptionMapping(ktx kontext.Context, exc exception.Exce
 				exc,
 			),
 		).Errors
-	case exception.Unauthorized:
-		return jsonapi.BuildResponse(a.apiError.UnauthorizedError()).Errors
 	case exception.Forbidden:
 		return jsonapi.BuildResponse(
 			jsonapi.WithException(

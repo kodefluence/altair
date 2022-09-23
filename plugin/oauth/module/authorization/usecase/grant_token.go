@@ -7,13 +7,18 @@ import (
 )
 
 func (a *Authorization) Token(ktx kontext.Context, accessTokenReq entity.AccessTokenRequestJSON) (entity.OauthAccessTokenJSON, jsonapi.Errors) {
-	oauthApplication, jsonapiErr := a.FindAndValidateApplication(ktx, accessTokenReq.ClientUID, accessTokenReq.ClientSecret)
-	if jsonapiErr != nil {
+	if jsonapiErr := a.ValidateTokenGrant(accessTokenReq); jsonapiErr != nil {
 		return entity.OauthAccessTokenJSON{}, jsonapiErr
 	}
 
-	if jsonapiErr := a.ValidateTokenGrant(accessTokenReq); jsonapiErr != nil {
-		return entity.OauthAccessTokenJSON{}, jsonapiErr
+	var oauthApplication entity.OauthApplication
+	var jsonapierr jsonapi.Errors
+
+	if *accessTokenReq.GrantType != "refresh_token" {
+		oauthApplication, jsonapierr = a.FindAndValidateApplication(ktx, accessTokenReq.ClientUID, accessTokenReq.ClientSecret)
+		if jsonapierr != nil {
+			return entity.OauthAccessTokenJSON{}, jsonapierr
+		}
 	}
 
 	switch *accessTokenReq.GrantType {
@@ -31,7 +36,13 @@ func (a *Authorization) Token(ktx kontext.Context, accessTokenReq entity.AccessT
 		return a.formatter.AccessToken(oauthAccessToken, redirectURI, &refreshTokenJSON), nil
 	case "refresh_token":
 		if a.config.Config.RefreshToken.Active {
-			// Grant refresh token here
+			oauthAccessToken, oauthRefreshToken, jsonapierr := a.GrantTokenFromRefreshToken(ktx, accessTokenReq)
+			if jsonapierr != nil {
+				return entity.OauthAccessTokenJSON{}, jsonapierr
+			}
+
+			refreshTokenJSON := a.formatter.RefreshToken(oauthRefreshToken)
+			return a.formatter.AccessToken(oauthAccessToken, "", &refreshTokenJSON), nil
 		}
 	case "client_credentials":
 		oauthAccessToken, oauthRefreshToken, jsonapierr := a.ClientCredential(ktx, accessTokenReq, oauthApplication)
