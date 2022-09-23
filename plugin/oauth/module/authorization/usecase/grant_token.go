@@ -6,7 +6,7 @@ import (
 	"github.com/kodefluence/monorepo/kontext"
 )
 
-func (a *Authorization) Token(ktx kontext.Context, accessTokenReq entity.AccessTokenRequestJSON) (entity.OauthAccessTokenJSON, jsonapi.Errors) {
+func (a *Authorization) GrantToken(ktx kontext.Context, accessTokenReq entity.AccessTokenRequestJSON) (entity.OauthAccessTokenJSON, jsonapi.Errors) {
 	if jsonapiErr := a.ValidateTokenGrant(accessTokenReq); jsonapiErr != nil {
 		return entity.OauthAccessTokenJSON{}, jsonapiErr
 	}

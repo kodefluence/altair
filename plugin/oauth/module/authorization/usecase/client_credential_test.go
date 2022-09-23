@@ -95,7 +95,7 @@ func (suite *ClientCredentialSuiteTest) TestValidateTokenGrantSuiteTest() {
 				}),
 			)
 
-			accessTokenJSON, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			accessTokenJSON, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			byteAccessToken, _ := json.Marshal(accessTokenJSON)
 			byteExpectedAccessToken, _ := json.Marshal(suite.formatter.AccessToken(suite.accessToken, "", &suite.refreshTokenJSON))
 			suite.Assert().Nil(err)
@@ -120,7 +120,7 @@ func (suite *ClientCredentialSuiteTest) TestValidateTokenGrantSuiteTest() {
 				}),
 			)
 
-			accessTokenJSON, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			accessTokenJSON, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			byteAccessToken, _ := json.Marshal(accessTokenJSON)
 			byteExpectedAccessToken, _ := json.Marshal(suite.formatter.AccessToken(suite.accessToken, "", nil))
 			suite.Assert().Nil(err)
@@ -143,7 +143,7 @@ func (suite *ClientCredentialSuiteTest) TestValidateTokenGrantSuiteTest() {
 				}),
 			)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
 			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())
@@ -164,7 +164,7 @@ func (suite *ClientCredentialSuiteTest) TestValidateTokenGrantSuiteTest() {
 				}),
 			)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
 			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())
@@ -190,7 +190,7 @@ func (suite *ClientCredentialSuiteTest) TestValidateTokenGrantSuiteTest() {
 				}),
 			)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
 			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())

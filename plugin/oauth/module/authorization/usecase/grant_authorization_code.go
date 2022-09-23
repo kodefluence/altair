@@ -6,7 +6,7 @@ import (
 	"github.com/kodefluence/monorepo/kontext"
 )
 
-func (a *Authorization) Grantor(ktx kontext.Context, authorizationReq entity.AuthorizationRequestJSON) (interface{}, jsonapi.Errors) {
+func (a *Authorization) GrantAuthorizationCode(ktx kontext.Context, authorizationReq entity.AuthorizationRequestJSON) (interface{}, jsonapi.Errors) {
 	if authorizationReq.ResponseType == nil {
 		return nil, jsonapi.BuildResponse(
 			a.apiError.ValidationError("response_type cannot be empty"),

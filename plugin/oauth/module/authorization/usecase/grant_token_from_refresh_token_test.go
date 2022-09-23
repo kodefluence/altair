@@ -121,7 +121,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) TestValidateTokenGrantSuiteTes
 				}),
 			)
 
-			accessTokenJSON, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			accessTokenJSON, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			byteAccessToken, _ := json.Marshal(accessTokenJSON)
 			byteExpectedAccessToken, _ := json.Marshal(suite.formatter.AccessToken(suite.accessToken, "", &suite.refreshTokenJSON))
 			suite.Assert().Nil(err)
@@ -139,7 +139,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) TestValidateTokenGrantSuiteTes
 				}),
 			)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Not found error] Detail: Resource of `refresh_token` is not found. Tracing code: `<nil>`, Code: ERR0404\n", err.Error())
 			suite.Assert().Equal(http.StatusNotFound, err.HTTPStatus())
@@ -154,7 +154,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) TestValidateTokenGrantSuiteTes
 				}),
 			)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
 			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())
@@ -171,7 +171,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) TestValidateTokenGrantSuiteTes
 				}),
 			)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Forbidden error] Detail: Resource of `access_token` is forbidden to be accessed, because of: refresh token already used. Tracing code: `<nil>`, Code: ERR0403\n", err.Error())
 			suite.Assert().Equal(http.StatusForbidden, err.HTTPStatus())
@@ -189,7 +189,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) TestValidateTokenGrantSuiteTes
 				}),
 			)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Forbidden error] Detail: Resource of `access_token` is forbidden to be accessed, because of: refresh token already used. Tracing code: `<nil>`, Code: ERR0403\n", err.Error())
 			suite.Assert().Equal(http.StatusForbidden, err.HTTPStatus())
@@ -205,7 +205,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) TestValidateTokenGrantSuiteTes
 				}),
 			)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
 			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())
@@ -222,7 +222,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) TestValidateTokenGrantSuiteTes
 				}),
 			)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
 			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())
@@ -244,7 +244,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) TestValidateTokenGrantSuiteTes
 				}),
 			)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
 			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())
@@ -267,7 +267,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) TestValidateTokenGrantSuiteTes
 				}),
 			)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
 			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())
@@ -291,7 +291,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) TestValidateTokenGrantSuiteTes
 				}),
 			)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
 			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())
@@ -319,7 +319,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) TestValidateTokenGrantSuiteTes
 				}),
 			)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
 			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())
@@ -348,7 +348,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) TestValidateTokenGrantSuiteTes
 				}),
 			)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
 			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())

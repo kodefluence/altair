@@ -57,7 +57,7 @@ func (suite *GrantTokenSuiteTest) TestGrantTokenSuiteTest() {
 				suite.oauthApplicationRepo.EXPECT().OneByUIDandSecret(suite.ktx, *suite.accessTokenRequestJSON.ClientUID, *suite.accessTokenRequestJSON.ClientSecret, suite.sqldb).Return(entity.OauthApplication{}, exception.Throw(errors.New("unexpected"))),
 			)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Internal server error] Detail: Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '<nil>', Code: ERR0500\n", err.Error())
 			suite.Assert().Equal(http.StatusInternalServerError, err.HTTPStatus())
@@ -66,7 +66,7 @@ func (suite *GrantTokenSuiteTest) TestGrantTokenSuiteTest() {
 		suite.Subtest("When grant type is empty, then it would return error", func() {
 			suite.accessTokenRequestJSON.GrantType = util.StringToPointer("")
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Validation error] Detail: Validation error because of: grant_type is not valid value, Code: ERR1442\n", err.Error())
 			suite.Assert().Equal(http.StatusUnprocessableEntity, err.HTTPStatus())
@@ -77,7 +77,7 @@ func (suite *GrantTokenSuiteTest) TestGrantTokenSuiteTest() {
 			suite.config.Config.RefreshToken.Active = false
 			suite.authorization = usecase.NewAuthorization(suite.oauthApplicationRepo, suite.oauthAccessTokenRepo, suite.oauthAccessGrantRepo, suite.oauthRefreshTokenRepo, suite.formatter, suite.config, suite.sqldb, suite.apiError)
 
-			_, err := suite.authorization.Token(suite.ktx, suite.accessTokenRequestJSON)
+			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
 			suite.Assert().Equal("JSONAPI Error:\n[Validation error] Detail: Validation error because of: refresh_token is not valid value, Code: ERR1442\n", err.Error())
 			suite.Assert().Equal(http.StatusUnprocessableEntity, err.HTTPStatus())

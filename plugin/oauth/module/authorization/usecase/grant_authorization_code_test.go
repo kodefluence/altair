@@ -95,7 +95,7 @@ func (suite *GrantorSuiteTest) TestGrantor() {
 				}),
 			)
 
-			finalJson, err := suite.authorization.Grantor(suite.ktx, suite.authorizationRequestJSON)
+			finalJson, err := suite.authorization.GrantAuthorizationCode(suite.ktx, suite.authorizationRequestJSON)
 			suite.Assert().Nil(err)
 			suite.Assert().Equal(suite.formatter.AccessToken(suite.accessToken, *suite.authorizationRequestJSON.RedirectURI, nil), finalJson)
 		})
@@ -116,7 +116,7 @@ func (suite *GrantorSuiteTest) TestGrantor() {
 				}),
 			)
 
-			finalJson, err := suite.authorization.Grantor(suite.ktx, suite.authorizationRequestJSON)
+			finalJson, err := suite.authorization.GrantAuthorizationCode(suite.ktx, suite.authorizationRequestJSON)
 			suite.Assert().Nil(err)
 			suite.Assert().Equal(suite.formatter.AccessGrant(suite.accessGrant), finalJson)
 		})
@@ -125,7 +125,7 @@ func (suite *GrantorSuiteTest) TestGrantor() {
 	suite.Run("Negative cases", func() {
 		suite.Subtest("When response type is nil, then it would return error", func() {
 			suite.authorizationRequestJSON.ResponseType = nil
-			finalJson, err := suite.authorization.Grantor(suite.ktx, suite.authorizationRequestJSON)
+			finalJson, err := suite.authorization.GrantAuthorizationCode(suite.ktx, suite.authorizationRequestJSON)
 			suite.Assert().Equal("JSONAPI Error:\n[Validation error] Detail: Validation error because of: response_type cannot be empty, Code: ERR1442\n", err.Error())
 			suite.Assert().Equal(http.StatusUnprocessableEntity, err.HTTPStatus())
 			suite.Assert().Equal(nil, finalJson)
@@ -133,7 +133,7 @@ func (suite *GrantorSuiteTest) TestGrantor() {
 
 		suite.Subtest("When response type is empty, then it would return error", func() {
 			suite.authorizationRequestJSON.ResponseType = util.StringToPointer("")
-			finalJson, err := suite.authorization.Grantor(suite.ktx, suite.authorizationRequestJSON)
+			finalJson, err := suite.authorization.GrantAuthorizationCode(suite.ktx, suite.authorizationRequestJSON)
 			suite.Assert().Equal("JSONAPI Error:\n[Validation error] Detail: Validation error because of: response_type is invalid. Should be either `token` or `code`, Code: ERR1442\n", err.Error())
 			suite.Assert().Equal(http.StatusUnprocessableEntity, err.HTTPStatus())
 			suite.Assert().Equal(nil, finalJson)
@@ -141,7 +141,7 @@ func (suite *GrantorSuiteTest) TestGrantor() {
 
 		suite.Subtest("When response type is invalid, then it would return error", func() {
 			suite.authorizationRequestJSON.ResponseType = util.StringToPointer("client_credentials")
-			finalJson, err := suite.authorization.Grantor(suite.ktx, suite.authorizationRequestJSON)
+			finalJson, err := suite.authorization.GrantAuthorizationCode(suite.ktx, suite.authorizationRequestJSON)
 			suite.Assert().Equal("JSONAPI Error:\n[Validation error] Detail: Validation error because of: response_type is invalid. Should be either `token` or `code`, Code: ERR1442\n", err.Error())
 			suite.Assert().Equal(http.StatusUnprocessableEntity, err.HTTPStatus())
 			suite.Assert().Equal(nil, finalJson)
@@ -150,7 +150,7 @@ func (suite *GrantorSuiteTest) TestGrantor() {
 		suite.Subtest("When response type is token but implicit grant feature is inactive, then it would return error", func() {
 			suite.config.Config.ImplicitGrant.Active = false
 			suite.authorization = usecase.NewAuthorization(suite.oauthApplicationRepo, suite.oauthAccessTokenRepo, suite.oauthAccessGrantRepo, suite.oauthRefreshTokenRepo, suite.formatter, suite.config, suite.sqldb, suite.apiError)
-			finalJson, err := suite.authorization.Grantor(suite.ktx, suite.authorizationRequestJSON)
+			finalJson, err := suite.authorization.GrantAuthorizationCode(suite.ktx, suite.authorizationRequestJSON)
 			suite.Assert().Equal("JSONAPI Error:\n[Validation error] Detail: Validation error because of: response_type is invalid. Should be either `token` or `code`, Code: ERR1442\n", err.Error())
 			suite.Assert().Equal(http.StatusUnprocessableEntity, err.HTTPStatus())
 			suite.Assert().Equal(nil, finalJson)
