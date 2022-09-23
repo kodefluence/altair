@@ -47,6 +47,8 @@ func (a *Authorization) Token(ktx kontext.Context, accessTokenReq entity.AccessT
 		return a.formatter.AccessToken(oauthAccessToken, "", &refreshTokenJSON), nil
 	}
 
+	// This code is actually unreachable since there are already validation put in place in ValidateTokenGrant lol
+	// But I'll keep here just in case
 	return entity.OauthAccessTokenJSON{}, jsonapi.BuildResponse(
 		a.apiError.ValidationError(`grant_type can't be empty`),
 	).Errors
