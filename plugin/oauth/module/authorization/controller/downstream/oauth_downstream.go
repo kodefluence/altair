@@ -9,24 +9,23 @@ import (
 	"time"
 
 	coreEntity "github.com/kodefluence/altair/entity"
+	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/kodefluence/monorepo/exception"
 	"github.com/kodefluence/monorepo/kontext"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
-	"github.com/kodefluence/altair/provider/plugin/oauth/interfaces"
 )
 
 // Oauth implement downstream plugin interface
 type Oauth struct {
-	oauthAccessTokenModel interfaces.OauthAccessTokenModel
-	sqldb                 db.DB
+	oauthAccessTokenRepo OauthAccessTokenRepository
+	sqldb                db.DB
 }
 
 // NewOauth create new downstream plugin to check the validity of access token given by the users
-func NewOauth(oauthAccessTokenModel interfaces.OauthAccessTokenModel, sqldb db.DB) *Oauth {
-	return &Oauth{oauthAccessTokenModel: oauthAccessTokenModel, sqldb: sqldb}
+func NewOauth(oauthAccessTokenRepo OauthAccessTokenRepository, sqldb db.DB) *Oauth {
+	return &Oauth{oauthAccessTokenRepo: oauthAccessTokenRepo, sqldb: sqldb}
 }
 
 // Name get the name of downstream plugin
@@ -45,7 +44,7 @@ func (o *Oauth) Intervene(c *gin.Context, proxyReq *http.Request, r coreEntity.R
 		return err
 	}
 
-	token, exc := o.oauthAccessTokenModel.OneByToken(kontext.Fabricate(kontext.WithDefaultContext(c)), accessToken, o.sqldb)
+	token, exc := o.oauthAccessTokenRepo.OneByToken(kontext.Fabricate(kontext.WithDefaultContext(c)), accessToken, o.sqldb)
 	if exc != nil {
 		if exc.Type() == exception.NotFound {
 			c.AbortWithStatus(http.StatusUnauthorized)
@@ -68,6 +67,7 @@ func (o *Oauth) Intervene(c *gin.Context, proxyReq *http.Request, r coreEntity.R
 
 	proxyReq.Header.Add("Resource-Owner-ID", strconv.Itoa(token.ResourceOwnerID))
 	proxyReq.Header.Add("Oauth-Application-ID", strconv.Itoa(token.OauthApplicationID))
+
 	return nil
 }
 

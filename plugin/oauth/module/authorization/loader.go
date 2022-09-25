@@ -4,6 +4,7 @@ import (
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
+	"github.com/kodefluence/altair/plugin/oauth/module/authorization/controller/downstream"
 	"github.com/kodefluence/altair/plugin/oauth/module/authorization/controller/http"
 	"github.com/kodefluence/altair/plugin/oauth/module/authorization/usecase"
 	"github.com/kodefluence/monorepo/db"
@@ -24,4 +25,5 @@ func Load(
 	appBearer.InjectController(http.NewGrant(authorizationUsecase, apiError))
 	appBearer.InjectController(http.NewToken(authorizationUsecase, apiError))
 	appBearer.InjectController(http.NewRevoke(authorizationUsecase, apiError))
+	appBearer.InjectDownStreamPlugin(downstream.NewOauth(oauthAccessTokenRepo, sqldb))
 }
