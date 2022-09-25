@@ -20,9 +20,10 @@ type RevokeController struct {
 }
 
 // NewRevoke create new revoke controller
-func NewRevoke(authService Authorization) *RevokeController {
+func NewRevoke(authService Authorization, apiError module.ApiError) *RevokeController {
 	return &RevokeController{
 		authService: authService,
+		apiError:    apiError,
 	}
 }
 

@@ -20,9 +20,10 @@ type TokenController struct {
 }
 
 // NewToken create new token controller
-func NewToken(authService Authorization) *TokenController {
+func NewToken(authService Authorization, apiError module.ApiError) *TokenController {
 	return &TokenController{
 		authService: authService,
+		apiError:    apiError,
 	}
 }
 

@@ -20,9 +20,10 @@ type GrantController struct {
 }
 
 // NewGrant return struct ob GrantController
-func NewGrant(authService Authorization) *GrantController {
+func NewGrant(authService Authorization, apiError module.ApiError) *GrantController {
 	return &GrantController{
 		authService: authService,
+		apiError:    apiError,
 	}
 }
 

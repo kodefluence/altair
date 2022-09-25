@@ -23,18 +23,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGrant(t *testing.T) {
+func TestToken(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
 	t.Run("Method", func(t *testing.T) {
 		authorizationService := mock.NewMockAuthorization(mockCtrl)
-		assert.Equal(t, "POST", authorizationHttp.NewGrant(authorizationService, apierror.Provide()).Method())
+		assert.Equal(t, "POST", authorizationHttp.NewToken(authorizationService, apierror.Provide()).Method())
 	})
 
 	t.Run("Path", func(t *testing.T) {
 		authorizationService := mock.NewMockAuthorization(mockCtrl)
-		assert.Equal(t, "/oauth/authorizations", authorizationHttp.NewGrant(authorizationService, apierror.Provide()).Path())
+		assert.Equal(t, "/oauth/authorizations/token", authorizationHttp.NewToken(authorizationService, apierror.Provide()).Path())
 	})
 
 	t.Run("Control", func(t *testing.T) {
@@ -42,40 +42,38 @@ func TestGrant(t *testing.T) {
 			t.Run("Return oauth application data with status 202", func(t *testing.T) {
 				apiEngine := gin.Default()
 
-				authorizationRequest := entity.AuthorizationRequestJSON{
-					ResponseType:    nil,
-					ResourceOwnerID: util.IntToPointer(1),
-					ClientUID:       util.StringToPointer(aurelia.Hash("x", "y")),
-					ClientSecret:    util.StringToPointer(aurelia.Hash("z", "a")),
-					RedirectURI:     util.StringToPointer("http://github.com"),
-					Scopes:          util.StringToPointer("public users"),
+				accessTokenRequest := entity.AccessTokenRequestJSON{
+					GrantType:    util.StringToPointer("authorization_code"),
+					ClientUID:    util.StringToPointer(aurelia.Hash("x", "y")),
+					ClientSecret: util.StringToPointer(aurelia.Hash("z", "a")),
+					RedirectURI:  util.StringToPointer("http://github.com"),
+					Code:         util.StringToPointer("authorization_code"),
 				}
-				encodedBytes, err := json.Marshal(authorizationRequest)
+				encodedBytes, err := json.Marshal(accessTokenRequest)
 				assert.Nil(t, err)
 
 				oauthAccessToken := entity.OauthAccessToken{
 					ID:                 1,
 					OauthApplicationID: 1,
-					ResourceOwnerID:    *authorizationRequest.ResourceOwnerID,
+					ResourceOwnerID:    1,
 					Token:              aurelia.Hash("x", "y"),
 					Scopes: sql.NullString{
-						String: *authorizationRequest.Scopes,
+						String: "user",
 						Valid:  true,
 					},
 					ExpiresIn: time.Now().Add(time.Hour * 4),
 					CreatedAt: time.Now().Truncate(time.Second),
 				}
-				oauthAccessTokenJSON := formatter.Provide(time.Hour, time.Hour, time.Hour).AccessToken(oauthAccessToken, *authorizationRequest.RedirectURI, nil)
+				oauthAccessTokenJSON := formatter.Provide(time.Hour, time.Hour, time.Hour).AccessToken(oauthAccessToken, *accessTokenRequest.RedirectURI, nil)
 				expectedReponseByte, _ := json.Marshal(jsonapi.BuildResponse(jsonapi.WithData(oauthAccessTokenJSON)))
 
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
-				authorizationService.EXPECT().GrantAuthorizationCode(gomock.Any(), authorizationRequest).Return(oauthAccessTokenJSON, nil)
+				authorizationService.EXPECT().GrantToken(gomock.Any(), accessTokenRequest).Return(oauthAccessTokenJSON, nil)
 
-				ctrl := authorizationHttp.NewGrant(authorizationService, apierror.Provide())
+				ctrl := authorizationHttp.NewToken(authorizationService, apierror.Provide())
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader(encodedBytes))
-
 				responseByte, err := io.ReadAll(w.Body)
 				assert.Nil(t, err)
 				assert.Equal(t, http.StatusOK, w.Code)
@@ -86,21 +84,20 @@ func TestGrant(t *testing.T) {
 				t.Run("Return entity error status", func(t *testing.T) {
 					apiEngine := gin.Default()
 
-					authorizationRequest := entity.AuthorizationRequestJSON{
-						ResponseType:    nil,
-						ResourceOwnerID: util.IntToPointer(1),
-						ClientUID:       util.StringToPointer(aurelia.Hash("x", "y")),
-						ClientSecret:    util.StringToPointer(aurelia.Hash("z", "a")),
-						RedirectURI:     util.StringToPointer("http://github.com"),
-						Scopes:          util.StringToPointer("public users"),
+					accessTokenRequest := entity.AccessTokenRequestJSON{
+						GrantType:    util.StringToPointer("authorization_code"),
+						ClientUID:    util.StringToPointer(aurelia.Hash("x", "y")),
+						ClientSecret: util.StringToPointer(aurelia.Hash("z", "a")),
+						RedirectURI:  util.StringToPointer("http://github.com"),
+						Code:         util.StringToPointer("authorization_code"),
 					}
-					encodedBytes, err := json.Marshal(authorizationRequest)
+					encodedBytes, err := json.Marshal(accessTokenRequest)
 					assert.Nil(t, err)
 
 					authorizationService := mock.NewMockAuthorization(mockCtrl)
-					authorizationService.EXPECT().GrantAuthorizationCode(gomock.Any(), authorizationRequest).Return(entity.OauthAccessTokenJSON{}, testhelper.ErrInternalServer())
+					authorizationService.EXPECT().GrantToken(gomock.Any(), accessTokenRequest).Return(entity.OauthAccessTokenJSON{}, testhelper.ErrInternalServer())
 
-					ctrl := authorizationHttp.NewGrant(authorizationService, apierror.Provide())
+					ctrl := authorizationHttp.NewToken(authorizationService, apierror.Provide())
 					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 					w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader(encodedBytes))
@@ -118,7 +115,7 @@ func TestGrant(t *testing.T) {
 
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
 
-				ctrl := authorizationHttp.NewGrant(authorizationService, apierror.Provide())
+				ctrl := authorizationHttp.NewToken(authorizationService, apierror.Provide())
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), testhelper.MockErrorIoReader{})
@@ -135,7 +132,7 @@ func TestGrant(t *testing.T) {
 
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
 
-				ctrl := authorizationHttp.NewGrant(authorizationService, apierror.Provide())
+				ctrl := authorizationHttp.NewToken(authorizationService, apierror.Provide())
 				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
 
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader([]byte(`this is gonna be error`)))
