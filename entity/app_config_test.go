@@ -17,7 +17,6 @@ func TestAppConfig(t *testing.T) {
 
 	appOption.Authorization.Username = "altair"
 	appOption.Authorization.Password = "secret"
-	appOption.Metric.Interface = "prometheus"
 
 	t.Run("Plugins", func(t *testing.T) {
 		appConfig := entity.NewAppConfig(appOption)
@@ -82,11 +81,5 @@ func TestAppConfig(t *testing.T) {
 		content, _ := yaml.Marshal(appOption)
 
 		assert.Equal(t, string(content), appConfig.Dump())
-	})
-
-	t.Run("Metric.Interface", func(t *testing.T) {
-		appConfig := entity.NewAppConfig(appOption)
-
-		assert.Equal(t, appOption.Metric.Interface, appConfig.Metric().Interface())
 	})
 }

@@ -10,7 +10,7 @@ require (
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/kodefluence/aurelia v0.0.0-20220717092613-4dd6082f36c5
-	github.com/kodefluence/monorepo v0.0.0-20220717092652-76a76fa2dd17
+	github.com/kodefluence/monorepo v1.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.12.2
 	github.com/rs/zerolog v1.27.0

@@ -2,6 +2,7 @@ package cfg
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"strconv"
 
@@ -13,7 +14,8 @@ import (
 
 type app struct{}
 
-type appConfig struct {
+type baseAppConfig struct {
+	Version       string   `yaml:"version"`
 	Plugins       []string `yaml:"plugins"`
 	Port          string   `yaml:"port"`
 	ProxyHost     string   `yaml:"proxy_host"`
@@ -21,9 +23,6 @@ type appConfig struct {
 		Username string `yaml:"username"`
 		Password string `yaml:"password"`
 	} `yaml:"authorization"`
-	Metric struct {
-		Interface string `yaml:"interface"`
-	} `yaml:"metric"`
 }
 
 func App() core.AppLoader {
@@ -41,52 +40,47 @@ func (a *app) Compile(configPath string) (core.AppConfig, error) {
 		return nil, err
 	}
 
-	var config appConfig
+	var config baseAppConfig
 
 	if err := yaml.Unmarshal(compiledContents, &config); err != nil {
 		return nil, err
 	}
 
-	appConfigOption, err := a.assignConfigOption(config)
-	if err != nil {
-		return nil, err
-	}
+	switch v := config.Version; v {
+	case "1.0":
+		var appConfigOption entity.AppConfigOption
 
-	return adapter.AppConfig(entity.NewAppConfig(appConfigOption)), nil
-}
-
-func (a *app) assignConfigOption(config appConfig) (entity.AppConfigOption, error) {
-	var appConfigOption entity.AppConfigOption
-
-	if config.Authorization.Username == "" {
-		return appConfigOption, errors.New("config authorization `username` cannot be empty")
-	}
-
-	if config.Authorization.Password == "" {
-		return appConfigOption, errors.New("config authorization `password` cannot be empty")
-	}
-
-	if config.Port == "" {
-		appConfigOption.Port = 1304
-	} else {
-		port, err := strconv.Atoi(config.Port)
-		if err != nil {
-			return appConfigOption, err
+		if config.Authorization.Username == "" {
+			return nil, errors.New("config authorization `username` cannot be empty")
 		}
 
-		appConfigOption.Port = port
+		if config.Authorization.Password == "" {
+			return nil, errors.New("config authorization `password` cannot be empty")
+		}
+
+		if config.Port == "" {
+			appConfigOption.Port = 1304
+		} else {
+			port, err := strconv.Atoi(config.Port)
+			if err != nil {
+				return nil, err
+			}
+
+			appConfigOption.Port = port
+		}
+
+		if config.ProxyHost == "" {
+			appConfigOption.ProxyHost = "www.local.host"
+		} else {
+			appConfigOption.ProxyHost = config.ProxyHost
+		}
+
+		appConfigOption.Plugins = config.Plugins
+		appConfigOption.Authorization.Username = config.Authorization.Username
+		appConfigOption.Authorization.Password = config.Authorization.Password
+
+		return adapter.AppConfig(entity.NewAppConfig(appConfigOption)), nil
+	default:
+		return nil, fmt.Errorf("undefined template version: %s for app.yaml", v)
 	}
-
-	if config.ProxyHost == "" {
-		appConfigOption.ProxyHost = "www.local.host"
-	} else {
-		appConfigOption.ProxyHost = config.ProxyHost
-	}
-
-	appConfigOption.Plugins = config.Plugins
-	appConfigOption.Authorization.Username = config.Authorization.Username
-	appConfigOption.Authorization.Password = config.Authorization.Password
-	appConfigOption.Metric.Interface = config.Metric.Interface
-
-	return appConfigOption, nil
 }

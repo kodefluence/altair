@@ -194,15 +194,25 @@ oauth_database:
   max_open_connection: 100`
 
 var AppConfigNormal = `
+version: 1.0
 authorization:
   username: altair
   password: secret
 plugins:
   - oauth
-metric:
-  interface: prometheus`
+  - metric`
+
+var AppConfigNormalWithoutVersion = `
+version:
+authorization:
+  username: altair
+  password: secret
+plugins:
+  - oauth
+  - metric`
 
 var AppConfigWithCustomProxyHost = `
+version: 1.0
 proxy_host: www.altair.id
 authorization:
   username: altair
@@ -211,6 +221,7 @@ plugins:
   - oauth`
 
 var AppConfigWithCustomPort = `
+version: 1.0
 port: 7001
 authorization:
   username: altair
@@ -219,18 +230,21 @@ plugins:
   - oauth`
 
 var AppConfigAuthUsernameEmpty = `
+version: 1.0
 authorization:
   password: secret
 plugins:
   - oauth`
 
 var AppConfigAuthPasswordEmpty = `
+version: 1.0
 authorization:
   username: altair
 plugins:
   - oauth`
 
 var AppConfigWithInvalidCustomPort = `
+version: 1.0
 port: asd
 authorization:
   username: altair

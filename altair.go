@@ -21,6 +21,7 @@ import (
 	"github.com/kodefluence/altair/controller"
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/forwarder"
+	"github.com/kodefluence/altair/module/apierror"
 	"github.com/kodefluence/altair/plugin"
 	"github.com/kodefluence/altair/provider"
 	"github.com/kodefluence/monorepo/db"
@@ -386,9 +387,16 @@ func runAPI() error {
 
 	appBearer := cfg.AppBearer(pluginEngine, appConfig)
 	dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
+	apiError := apierror.Provide()
 
-	plugin.Fabricate(appBearer, pluginBearer)
-	provider.Plugin(appBearer, dbBearer, pluginBearer)
+	if err := plugin.Load(appBearer, pluginBearer, dbBearer, apiError); err != nil {
+		log.Error().
+			Err(err).
+			Stack().
+			Array("tags", zerolog.Arr().Str("altair").Str("main")).
+			Msg("Error generating plugins")
+		return err
+	}
 
 	// Route Engine
 	routeCompiler := forwarder.Route().Compiler()

@@ -7,7 +7,6 @@ import (
 
 type (
 	appConfig struct{ c entity.AppConfig }
-	metric    struct{ m *entity.MetricConfig }
 )
 
 func AppConfig(c entity.AppConfig) core.AppConfig {
@@ -21,6 +20,3 @@ func (a *appConfig) ProxyHost() string                   { return a.c.ProxyHost(
 func (a *appConfig) PluginExists(pluginName string) bool { return a.c.PluginExists(pluginName) }
 func (a *appConfig) Plugins() []string                   { return a.c.Plugins() }
 func (a *appConfig) Dump() string                        { return a.c.Dump() }
-func (a *appConfig) Metric() core.MetricConfig           { return &metric{m: a.c.Metric()} }
-
-func (m *metric) Interface() string { return m.m.Interface() }
