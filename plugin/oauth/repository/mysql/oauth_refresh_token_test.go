@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/kodefluence/altair/plugin/oauth/entity"
 	repository "github.com/kodefluence/altair/plugin/oauth/repository/mysql"
-	"github.com/kodefluence/altair/provider/plugin/oauth/entity"
 	mockdb "github.com/kodefluence/monorepo/db/mock"
 	"github.com/kodefluence/monorepo/exception"
 	"github.com/kodefluence/monorepo/kontext"

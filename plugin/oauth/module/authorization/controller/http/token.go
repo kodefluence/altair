@@ -15,15 +15,15 @@ import (
 
 // TokenController control flow of creating access token
 type TokenController struct {
-	authService Authorization
-	apiError    module.ApiError
+	authorizationUsecase Authorization
+	apiError             module.ApiError
 }
 
 // NewToken create new token controller
-func NewToken(authService Authorization, apiError module.ApiError) *TokenController {
+func NewToken(authorizationUsecase Authorization, apiError module.ApiError) *TokenController {
 	return &TokenController{
-		authService: authService,
-		apiError:    apiError,
+		authorizationUsecase: authorizationUsecase,
+		apiError:             apiError,
 	}
 }
 
@@ -70,7 +70,7 @@ func (o *TokenController) Control(c *gin.Context) {
 		return
 	}
 
-	data, jsonapierr := o.authService.GrantToken(ktx, req)
+	data, jsonapierr := o.authorizationUsecase.GrantToken(ktx, req)
 	if jsonapierr != nil {
 		c.JSON(jsonapierr.HTTPStatus(), jsonapi.BuildResponse(jsonapi.WithErrors(jsonapierr)))
 		return

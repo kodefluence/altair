@@ -15,15 +15,15 @@ import (
 
 // RevokeController control flow of revoking access token
 type RevokeController struct {
-	authService Authorization
-	apiError    module.ApiError
+	authorizationUsecase Authorization
+	apiError             module.ApiError
 }
 
 // NewRevoke create new revoke controller
-func NewRevoke(authService Authorization, apiError module.ApiError) *RevokeController {
+func NewRevoke(authorizationUsecase Authorization, apiError module.ApiError) *RevokeController {
 	return &RevokeController{
-		authService: authService,
-		apiError:    apiError,
+		authorizationUsecase: authorizationUsecase,
+		apiError:             apiError,
 	}
 }
 
@@ -70,7 +70,7 @@ func (o *RevokeController) Control(c *gin.Context) {
 		return
 	}
 
-	jsonapierr := o.authService.RevokeToken(ktx, req)
+	jsonapierr := o.authorizationUsecase.RevokeToken(ktx, req)
 	if jsonapierr != nil {
 		c.JSON(jsonapierr.HTTPStatus(), jsonapi.BuildResponse(jsonapi.WithErrors(jsonapierr)))
 		return

@@ -7,6 +7,7 @@ import (
 	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/plugin/oauth/module/application"
+	"github.com/kodefluence/altair/plugin/oauth/module/authorization"
 	"github.com/kodefluence/altair/plugin/oauth/module/formatter"
 	"github.com/kodefluence/altair/plugin/oauth/repository/mysql"
 )
@@ -47,16 +48,20 @@ func version_1_0(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginB
 
 	// Repository
 	oauthApplicationRepo := mysql.NewOauthApplication()
-	_ = mysql.NewOauthAccessToken()
-	_ = mysql.NewOauthAccessGrant()
-	_ = mysql.NewOauthRefreshToken()
+	oauthAccessTokenRepo := mysql.NewOauthAccessToken()
+	oauthAccessGrantRepo := mysql.NewOauthAccessGrant()
+	oauthRefreshTokenRepo := mysql.NewOauthRefreshToken()
 
 	// Formatter
 	formatter := formatter.Provide(accessTokenTimeout, authorizationCodeTimeout, refreshTokenConfig.Timeout)
 
 	// Application
-	// Loading controller for oauth applications
+	// Loading controller for oauth applications and downstream
 	application.Load(appBearer, sqldb, oauthApplicationRepo, formatter, apiError)
+
+	// Authorization
+	// Loading controller for authorization and downstream
+	authorization.Load(appBearer, oauthApplicationRepo, oauthAccessTokenRepo, oauthAccessGrantRepo, oauthRefreshTokenRepo, formatter, oauthPluginConfig, sqldb, apiError)
 
 	return nil
 }

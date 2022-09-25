@@ -15,15 +15,15 @@ import (
 
 // GrantController control flow of grant access token / authorization code
 type GrantController struct {
-	authService Authorization
-	apiError    module.ApiError
+	authorizationUsecase Authorization
+	apiError             module.ApiError
 }
 
 // NewGrant return struct ob GrantController
-func NewGrant(authService Authorization, apiError module.ApiError) *GrantController {
+func NewGrant(authorizationUsecase Authorization, apiError module.ApiError) *GrantController {
 	return &GrantController{
-		authService: authService,
-		apiError:    apiError,
+		authorizationUsecase: authorizationUsecase,
+		apiError:             apiError,
 	}
 }
 
@@ -68,7 +68,7 @@ func (o *GrantController) Control(c *gin.Context) {
 		return
 	}
 
-	data, jsonapierr := o.authService.GrantAuthorizationCode(ktx, req)
+	data, jsonapierr := o.authorizationUsecase.GrantAuthorizationCode(ktx, req)
 	if jsonapierr != nil {
 		c.JSON(jsonapierr.HTTPStatus(), jsonapi.BuildResponse(jsonapi.WithErrors(jsonapierr)))
 		return
