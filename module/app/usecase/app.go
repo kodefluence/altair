@@ -12,14 +12,10 @@ func NewApp(controller module.Controller) *App {
 	}
 }
 
-func (a *App) Config() {
-
+func (a *App) Config() module.Config {
+	return nil
 }
 
 func (a *App) Controller() module.Controller {
 	return a.controller
-}
-
-func (a *App) Plugin() {
-
 }
