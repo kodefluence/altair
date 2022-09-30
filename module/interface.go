@@ -11,7 +11,8 @@ import (
 )
 
 type App interface {
-	Config() Config
+	// TODO: Enable config via module package instead of cfg
+	// Config() Config
 	Controller() Controller
 	// TODO: Enable plugin via module package instead of cfg
 	// Plugin() Plugin
