@@ -18,10 +18,12 @@ import (
 	"github.com/subosito/gotenv"
 
 	"github.com/kodefluence/altair/cfg"
-	"github.com/kodefluence/altair/controller"
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/forwarder"
+	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/module/apierror"
+	"github.com/kodefluence/altair/module/app"
+	"github.com/kodefluence/altair/module/controller"
 	"github.com/kodefluence/altair/plugin"
 	"github.com/kodefluence/altair/provider"
 	"github.com/kodefluence/monorepo/db"
@@ -34,11 +36,15 @@ var (
 	appConfig    core.AppConfig
 	pluginBearer core.PluginBearer
 	apiEngine    *gin.Engine
+
+	appModule module.App
+	apiError  module.ApiError
 )
 
 func main() {
 	_ = gotenv.Load()
 	loadConfig()
+	loadModule()
 	executeCommand()
 }
 
@@ -65,6 +71,15 @@ func loadConfig() {
 		os.Exit(1)
 	}
 	pluginBearer = loadedPluginBearer
+}
+
+func loadModule() {
+	gin.SetMode(gin.ReleaseMode)
+	apiEngine = gin.New()
+	apiError = apierror.Provide()
+
+	appController := controller.Provide(apiEngine.Handle, apiError, nil, nil)
+	appModule = app.Provide(appController)
 }
 
 func executeCommand() {
@@ -376,18 +391,12 @@ func closeConnection() {
 }
 
 func runAPI() error {
-	gin.SetMode(gin.ReleaseMode)
-
-	apiEngine = gin.New()
-	apiEngine.GET("/health", controller.Health)
-
 	pluginEngine := apiEngine.Group("/_plugins/", gin.BasicAuth(gin.Accounts{
 		appConfig.BasicAuthUsername(): appConfig.BasicAuthPassword(),
 	}))
 
 	appBearer := cfg.AppBearer(pluginEngine, appConfig)
 	dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
-	apiError := apierror.Provide()
 
 	if err := plugin.Load(appBearer, pluginBearer, dbBearer, apiError); err != nil {
 		log.Error().
