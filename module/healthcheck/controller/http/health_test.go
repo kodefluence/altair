@@ -8,7 +8,6 @@ import (
 	"github.com/kodefluence/altair/module/apierror"
 	"github.com/kodefluence/altair/module/controller"
 	healthcheckHttp "github.com/kodefluence/altair/module/healthcheck/controller/http"
-	"github.com/kodefluence/altair/plugin/metric/module/dummy/usecase"
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/spf13/cobra"
 	"gotest.tools/assert"
@@ -20,7 +19,7 @@ func TestHealth(t *testing.T) {
 			gin.SetMode(gin.ReleaseMode)
 			engine := gin.New()
 
-			controller.Provide(engine.Handle, apierror.Provide(), usecase.NewDummy(), &cobra.Command{}).InjectHTTP(healthcheckHttp.NewHealthController())
+			controller.Provide(engine.Handle, apierror.Provide(), &cobra.Command{}).InjectHTTP(healthcheckHttp.NewHealthController())
 			w := testhelper.PerformRequest(engine, "GET", "/health", nil)
 			assert.Equal(t, http.StatusOK, w.Code)
 		})

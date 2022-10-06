@@ -33,11 +33,20 @@ type Plugin interface {
 }
 
 type Controller interface {
+	InjectMetric(http ...MetricController)
 	InjectHTTP(http ...HttpController)
 	InjectCommand(command ...CommandController)
 	InjectDownstream(downstream ...DownstreamController)
 
 	ListDownstream() []DownstreamController
+	ListMetric() []MetricController
+}
+
+type MetricController interface {
+	InjectCounter(metricName string, labels ...string)
+	InjectHistogram(metricName string, labels ...string)
+	Inc(metricName string, labels map[string]string) error
+	Observe(metricName string, value float64, labels map[string]string) error
 }
 
 type HttpController interface {

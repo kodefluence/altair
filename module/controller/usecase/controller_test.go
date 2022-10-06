@@ -6,7 +6,6 @@ import (
 	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/module/apierror"
 	"github.com/kodefluence/altair/module/controller/usecase"
-	metricDummyUsecase "github.com/kodefluence/altair/plugin/metric/module/dummy/usecase"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/suite"
 )
@@ -14,7 +13,6 @@ import (
 type ControllerSuiteTest struct {
 	mockCtrl     *gomock.Controller
 	controller   *usecase.Controller
-	metric       usecase.Metric
 	httpInjector usecase.HttpInjector
 	apierror     module.ApiError
 	apiengine    *gin.Engine
@@ -25,14 +23,13 @@ type ControllerSuiteTest struct {
 func (suite *ControllerSuiteTest) SetupTest() {
 
 	suite.mockCtrl = gomock.NewController(suite.T())
-	suite.metric = metricDummyUsecase.NewDummy()
 	suite.apierror = apierror.Provide()
 
 	gin.SetMode(gin.ReleaseMode)
 	suite.apiengine = gin.New()
 	suite.httpInjector = suite.apiengine.Handle
 
-	suite.controller = usecase.NewController(suite.httpInjector, suite.apierror, suite.metric, &cobra.Command{})
+	suite.controller = usecase.NewController(suite.httpInjector, suite.apierror, &cobra.Command{})
 }
 
 func (suite *ControllerSuiteTest) TearDownTest() {

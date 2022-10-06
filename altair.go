@@ -78,7 +78,7 @@ func loadModule() {
 	apiEngine = gin.New()
 	apiError = apierror.Provide()
 
-	appController := controller.Provide(apiEngine.Handle, apiError, nil, nil)
+	appController := controller.Provide(apiEngine.Handle, apiError, nil)
 	appModule = app.Provide(appController)
 }
 

@@ -6,6 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func Provide(httpInjector usecase.HttpInjector, apiError module.ApiError, metric usecase.Metric, rootCommand *cobra.Command) module.Controller {
-	return usecase.NewController(httpInjector, apiError, metric, rootCommand)
+func Provide(httpInjector usecase.HttpInjector, apiError module.ApiError, rootCommand *cobra.Command) module.Controller {
+	return usecase.NewController(httpInjector, apiError, rootCommand)
 }

@@ -10,10 +10,12 @@ import (
 
 type fakeController struct{}
 
+func (*fakeController) InjectMetric(http ...module.MetricController)               {}
 func (*fakeController) InjectHTTP(http ...module.HttpController)                   {}
 func (*fakeController) InjectCommand(command ...module.CommandController)          {}
 func (*fakeController) InjectDownstream(downstream ...module.DownstreamController) {}
 func (*fakeController) ListDownstream() []module.DownstreamController              { return nil }
+func (*fakeController) ListMetric() []module.MetricController                      { return nil }
 
 func TestApp(t *testing.T) {
 	fakeCtrl := &fakeController{}

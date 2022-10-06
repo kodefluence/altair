@@ -19,8 +19,10 @@ import (
 )
 
 func (ctrl *Controller) InjectHTTP(httpControllers ...module.HttpController) {
-	ctrl.metric.InjectCounter("controller_hits", "method", "path", "status_code", "status_code_group")
-	ctrl.metric.InjectHistogram("controller_elapsed_time_seconds", "method", "path", "status_code", "status_code_group")
+	for _, metric := range ctrl.metricController {
+		metric.InjectCounter("controller_hits", "method", "path", "status_code", "status_code_group")
+		metric.InjectHistogram("controller_elapsed_time_seconds", "method", "path", "status_code", "status_code_group")
+	}
 
 	for _, httpController := range httpControllers {
 		log.Info().
@@ -130,19 +132,21 @@ func (ctrl *Controller) httpTrackRequest(httpController module.HttpController, e
 	statusCode := strconv.Itoa(writer.Status())
 	statusCodGroup := strconv.Itoa(((writer.Status() / 100) * 100))
 
-	ctrl.metric.Inc("controller_hits", map[string]string{
-		"method":            httpController.Method(),
-		"path":              httpController.Path(),
-		"status_code":       statusCode,
-		"status_code_group": statusCodGroup,
-	})
+	for _, metric := range ctrl.metricController {
+		metric.Inc("controller_hits", map[string]string{
+			"method":            httpController.Method(),
+			"path":              httpController.Path(),
+			"status_code":       statusCode,
+			"status_code_group": statusCodGroup,
+		})
 
-	ctrl.metric.Observe("controller_elapsed_time_seconds", float64(elapsedTime), map[string]string{
-		"method":            httpController.Method(),
-		"path":              httpController.Path(),
-		"status_code":       statusCode,
-		"status_code_group": statusCodGroup,
-	})
+		metric.Observe("controller_elapsed_time_seconds", float64(elapsedTime), map[string]string{
+			"method":            httpController.Method(),
+			"path":              httpController.Path(),
+			"status_code":       statusCode,
+			"status_code_group": statusCodGroup,
+		})
+	}
 }
 
 func (ctrl *Controller) httpInstrumentingLog(c *gin.Context, l *zerolog.Event, params string) {
