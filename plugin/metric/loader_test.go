@@ -9,9 +9,9 @@ import (
 	"github.com/kodefluence/altair/mock"
 	"github.com/kodefluence/altair/plugin/metric"
 	"github.com/kodefluence/altair/plugin/metric/entity"
-	dummyUsecase "github.com/kodefluence/altair/plugin/metric/module/dummy/usecase"
+	dummyMetric "github.com/kodefluence/altair/plugin/metric/module/dummy/controller/metric"
 	promHttp "github.com/kodefluence/altair/plugin/metric/module/prometheus/controller/http"
-	promUsecase "github.com/kodefluence/altair/plugin/metric/module/prometheus/usecase"
+	promMetric "github.com/kodefluence/altair/plugin/metric/module/prometheus/controller/metric"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,7 +28,7 @@ func TestProvider(t *testing.T) {
 		gomock.InOrder(
 			appBearer.EXPECT().Config().Return(appConfig),
 			appConfig.EXPECT().PluginExists("metric").Return(false),
-			appBearer.EXPECT().SetMetricProvider(dummyUsecase.NewDummy()),
+			appBearer.EXPECT().SetMetricProvider(dummyMetric.NewDummy()),
 		)
 
 		assert.Nil(t, metric.Load(appBearer, pluginBearer))
@@ -51,7 +51,7 @@ func TestProvider(t *testing.T) {
 				v.Config.Provider = "prometheus"
 				return nil
 			}),
-			appBearer.EXPECT().SetMetricProvider(promUsecase.NewPrometheus()),
+			appBearer.EXPECT().SetMetricProvider(promMetric.NewPrometheus()),
 			appBearer.EXPECT().InjectController(promHttp.NewPrometheusController()),
 		)
 

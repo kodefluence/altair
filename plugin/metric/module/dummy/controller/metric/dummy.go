@@ -1,4 +1,4 @@
-package usecase
+package metric
 
 // DummyMetric
 type DummyMetric struct{}

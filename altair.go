@@ -24,6 +24,7 @@ import (
 	"github.com/kodefluence/altair/module/apierror"
 	"github.com/kodefluence/altair/module/app"
 	"github.com/kodefluence/altair/module/controller"
+	"github.com/kodefluence/altair/module/healthcheck"
 	"github.com/kodefluence/altair/plugin"
 	"github.com/kodefluence/altair/provider"
 	"github.com/kodefluence/monorepo/db"
@@ -77,9 +78,9 @@ func loadModule() {
 	gin.SetMode(gin.ReleaseMode)
 	apiEngine = gin.New()
 	apiError = apierror.Provide()
-
 	appController := controller.Provide(apiEngine.Handle, apiError, nil)
 	appModule = app.Provide(appController)
+	healthcheck.Load(appModule)
 }
 
 func executeCommand() {

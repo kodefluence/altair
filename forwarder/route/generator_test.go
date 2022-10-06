@@ -14,7 +14,7 @@ import (
 	"github.com/kodefluence/altair/entity"
 	"github.com/kodefluence/altair/forwarder/route"
 	"github.com/kodefluence/altair/mock"
-	metricDummyUsecase "github.com/kodefluence/altair/plugin/metric/module/dummy/usecase"
+	"github.com/kodefluence/altair/plugin/metric/module/dummy/controller/metric"
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/stretchr/testify/assert"
 )
@@ -54,7 +54,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 				downStreamPlugin = append(downStreamPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, metricDummyUsecase.NewDummy(), routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewDummy(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -104,7 +104,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 				downStreamPlugin = append(downStreamPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, metricDummyUsecase.NewDummy(), routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewDummy(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -156,7 +156,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 				downStreamPlugin = append(downStreamPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, metricDummyUsecase.NewDummy(), routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewDummy(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -213,7 +213,7 @@ func TestGenerator(t *testing.T) {
 
 				downStreamPlugin = append(downStreamPlugin, oauthPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, metricDummyUsecase.NewDummy(), routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewDummy(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -269,7 +269,7 @@ func TestGenerator(t *testing.T) {
 
 				downStreamPlugin = append(downStreamPlugin, oauthPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, metricDummyUsecase.NewDummy(), routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewDummy(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -323,7 +323,7 @@ func TestGenerator(t *testing.T) {
 
 				downStreamPlugin = append(downStreamPlugin, oauthPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, metricDummyUsecase.NewDummy(), routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewDummy(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -378,7 +378,7 @@ func TestGenerator(t *testing.T) {
 
 				downStreamPlugin = append(downStreamPlugin, oauthPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, metricDummyUsecase.NewDummy(), routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewDummy(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -430,7 +430,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 				downStreamPlugin = append(downStreamPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, metricDummyUsecase.NewDummy(), routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewDummy(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -482,7 +482,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 				downStreamPlugin = append(downStreamPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, metricDummyUsecase.NewDummy(), routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewDummy(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
@@ -528,7 +528,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 				downStreamPlugin = append(downStreamPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, metricDummyUsecase.NewDummy(), routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewDummy(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 			})
 		})
@@ -561,7 +561,7 @@ func TestGenerator(t *testing.T) {
 				var downStreamPlugin []core.DownStreamPlugin
 				downStreamPlugin = append(downStreamPlugin)
 
-				err := route.Generator().Generate(gatewayEngine, metricDummyUsecase.NewDummy(), routeObjects, downStreamPlugin)
+				err := route.Generator().Generate(gatewayEngine, metric.NewDummy(), routeObjects, downStreamPlugin)
 				assert.Nil(t, err)
 
 				srvTarget := &http.Server{
