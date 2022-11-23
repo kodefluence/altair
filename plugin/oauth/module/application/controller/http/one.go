@@ -37,10 +37,7 @@ func (o *OneController) Path() string {
 }
 
 // Control find oauth application
-func (o *OneController) Control(c *gin.Context) {
-	ktx := kontext.Fabricate(kontext.WithDefaultContext(c))
-	ktx.Set("request_id", c.GetString("request_id"))
-
+func (o *OneController) Control(ktx kontext.Context, c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		log.Error().

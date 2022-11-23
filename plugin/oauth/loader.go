@@ -8,7 +8,7 @@ import (
 )
 
 // Provide create new oauth plugin provider
-func Load(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer, apiError module.ApiError) error {
+func Load(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer, apiError module.ApiError, appModule module.App) error {
 	if appBearer.Config().PluginExists("oauth") == false {
 		return nil
 	}
@@ -20,7 +20,7 @@ func Load(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer c
 
 	switch version {
 	case "1.0":
-		return version_1_0(appBearer, dbBearer, pluginBearer, apiError)
+		return version_1_0(dbBearer, pluginBearer, apiError, appModule)
 	default:
 		return fmt.Errorf("undefined template version: %s for metric plugin", version)
 	}

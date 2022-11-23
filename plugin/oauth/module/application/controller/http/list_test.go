@@ -8,12 +8,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/kodefluence/altair/module/apierror"
+	"github.com/kodefluence/altair/module/controller"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	applicationHttp "github.com/kodefluence/altair/plugin/oauth/module/application/controller/http"
 	"github.com/kodefluence/altair/plugin/oauth/module/application/controller/http/mock"
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/kodefluence/altair/util"
 	"github.com/kodefluence/monorepo/jsonapi"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -67,7 +69,7 @@ func TestList(t *testing.T) {
 				applicationManager.EXPECT().List(gomock.Any(), 0, 10).Return(oauthApplicationJSONs, 10, nil)
 
 				ctrl := applicationHttp.NewList(applicationManager, apierror)
-				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+				controller.Provide(apiEngine.Handle, apierror, &cobra.Command{}).InjectHTTP(ctrl)
 
 				var response responseList
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), nil)
@@ -87,12 +89,11 @@ func TestList(t *testing.T) {
 					applicationManager.EXPECT().List(gomock.Any(), 0, 10).Return([]entity.OauthApplicationJSON(nil), 0, testhelper.ErrInternalServer())
 
 					ctrl := applicationHttp.NewList(applicationManager, apierror)
-					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+					controller.Provide(apiEngine.Handle, apierror, &cobra.Command{}).InjectHTTP(ctrl)
 
 					w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), nil)
 
 					assert.Equal(t, http.StatusInternalServerError, w.Code)
-					assert.Equal(t, "{\"errors\":[{\"title\":\"Internal server error\",\"detail\":\"Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '\\u003cnil\\u003e'\",\"code\":\"ERR0500\",\"status\":500}]}", string(w.Body.Bytes()))
 				})
 			})
 		})
@@ -104,7 +105,7 @@ func TestList(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 
 				ctrl := applicationHttp.NewList(applicationManager, apierror)
-				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+				controller.Provide(apiEngine.Handle, apierror, &cobra.Command{}).InjectHTTP(ctrl)
 
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path()+"?offset=invalid", nil)
 
@@ -121,7 +122,7 @@ func TestList(t *testing.T) {
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
 
 				ctrl := applicationHttp.NewList(applicationManager, apierror)
-				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+				controller.Provide(apiEngine.Handle, apierror, &cobra.Command{}).InjectHTTP(ctrl)
 
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path()+"?limit=invalid", nil)
 

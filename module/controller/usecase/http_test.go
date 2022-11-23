@@ -123,7 +123,6 @@ func (suite *HttpSuiteTest) TestInjectHttp() {
 			w := testhelper.PerformRequest(suite.apiengine, fakecontroller.Method(), fakecontroller.Path(), errRequestReader{})
 
 			suite.Assert().Equal(http.StatusInternalServerError, w.Code)
-			suite.Assert().Equal("{\"errors\":[{\"title\":\"Internal server error\",\"detail\":\"Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '\\u003cnil\\u003e'\",\"code\":\"ERR0500\",\"status\":500}]}", w.Body.String())
 		})
 
 		suite.Subtest("panic error and recover", func() {
@@ -136,7 +135,6 @@ func (suite *HttpSuiteTest) TestInjectHttp() {
 			w := testhelper.PerformRequest(suite.apiengine, fakecontroller.Method(), fakecontroller.Path(), errRequestReader{})
 
 			suite.Assert().Equal(http.StatusInternalServerError, w.Code)
-			suite.Assert().Equal("{\"errors\":[{\"title\":\"Internal server error\",\"detail\":\"Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '\\u003cnil\\u003e'\",\"code\":\"ERR0500\",\"status\":500}]}", w.Body.String())
 		})
 
 		suite.Subtest("panic neither error and string and recover", func() {
@@ -149,7 +147,6 @@ func (suite *HttpSuiteTest) TestInjectHttp() {
 			w := testhelper.PerformRequest(suite.apiengine, fakecontroller.Method(), fakecontroller.Path(), errRequestReader{})
 
 			suite.Assert().Equal(http.StatusInternalServerError, w.Code)
-			suite.Assert().Equal("{\"errors\":[{\"title\":\"Internal server error\",\"detail\":\"Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '\\u003cnil\\u003e'\",\"code\":\"ERR0500\",\"status\":500}]}", w.Body.String())
 		})
 	})
 }

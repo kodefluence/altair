@@ -38,10 +38,7 @@ func (cr *CreateController) Path() string {
 }
 
 // Control creation of oauth application
-func (cr *CreateController) Control(c *gin.Context) {
-	ktx := kontext.Fabricate(kontext.WithDefaultContext(c))
-	ktx.Set("request_id", c.GetString("request_id"))
-
+func (cr *CreateController) Control(ktx kontext.Context, c *gin.Context) {
 	var oauthApplicationJSON entity.OauthApplicationJSON
 
 	rawData, err := c.GetRawData()

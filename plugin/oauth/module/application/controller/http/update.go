@@ -39,10 +39,7 @@ func (uc *UpdateController) Path() string {
 }
 
 // Control update oauth applications
-func (uc *UpdateController) Control(c *gin.Context) {
-	ktx := kontext.Fabricate(kontext.WithDefaultContext(c))
-	ktx.Set("request_id", c.GetString("request_id"))
-
+func (uc *UpdateController) Control(ktx kontext.Context, c *gin.Context) {
 	var oauthApplicationUpdateJSON entity.OauthApplicationUpdateJSON
 
 	rawData, err := c.GetRawData()

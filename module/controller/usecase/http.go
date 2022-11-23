@@ -39,6 +39,7 @@ func (ctrl *Controller) InjectHTTP(httpControllers ...module.HttpController) {
 			c.Set("request_id", requestID)
 			c.Set("start_time", startTime)
 			ktx := kontext.Fabricate(kontext.WithDefaultContext(c))
+			ktx.Set("request_id", requestID)
 
 			if requestBody := c.Request.Body; requestBody != nil {
 				bodyBytes, err := io.ReadAll(requestBody)

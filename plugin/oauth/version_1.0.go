@@ -12,7 +12,7 @@ import (
 	"github.com/kodefluence/altair/plugin/oauth/repository/mysql"
 )
 
-func version_1_0(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer, apiError module.ApiError) error {
+func version_1_0(dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer, apiError module.ApiError, appModule module.App) error {
 	var oauthPluginConfig entity.OauthPlugin
 	if err := pluginBearer.CompilePlugin("oauth", &oauthPluginConfig); err != nil {
 		return err
@@ -57,11 +57,11 @@ func version_1_0(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginB
 
 	// Application
 	// Loading controller for oauth applications and downstream
-	application.Load(appBearer, sqldb, oauthApplicationRepo, formatter, apiError)
+	application.Load(appModule, sqldb, oauthApplicationRepo, formatter, apiError)
 
 	// Authorization
 	// Loading controller for authorization and downstream
-	authorization.Load(appBearer, oauthApplicationRepo, oauthAccessTokenRepo, oauthAccessGrantRepo, oauthRefreshTokenRepo, formatter, oauthPluginConfig, sqldb, apiError)
+	authorization.Load(appModule, oauthApplicationRepo, oauthAccessTokenRepo, oauthAccessGrantRepo, oauthRefreshTokenRepo, formatter, oauthPluginConfig, sqldb, apiError)
 
 	return nil
 }

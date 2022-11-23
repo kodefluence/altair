@@ -14,7 +14,7 @@ func Load(appBearer core.AppBearer, pluginBearer core.PluginBearer, dbBearer cor
 		return err
 	}
 
-	if err := oauth.Load(appBearer, dbBearer, pluginBearer, apiError); err != nil {
+	if err := oauth.Load(appBearer, dbBearer, pluginBearer, apiError, appModule); err != nil {
 		return err
 	}
 

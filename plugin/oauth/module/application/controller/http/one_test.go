@@ -8,11 +8,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/kodefluence/altair/module/apierror"
+	"github.com/kodefluence/altair/module/controller"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	applicationHttp "github.com/kodefluence/altair/plugin/oauth/module/application/controller/http"
 	"github.com/kodefluence/altair/plugin/oauth/module/application/controller/http/mock"
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/kodefluence/altair/util"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -54,7 +56,7 @@ func TestOne(t *testing.T) {
 				applicationManager.EXPECT().One(gomock.Any(), 1).Return(oauthApplicationJSON, nil)
 
 				ctrl := applicationHttp.NewOne(applicationManager, apierror)
-				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+				controller.Provide(apiEngine.Handle, apierror, &cobra.Command{}).InjectHTTP(ctrl)
 
 				var response responseOne
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/1", nil)
@@ -76,11 +78,10 @@ func TestOne(t *testing.T) {
 					applicationManager.EXPECT().One(gomock.Any(), 1).Return(oauthApplicationJSON, testhelper.ErrInternalServer())
 
 					ctrl := applicationHttp.NewOne(applicationManager, apierror)
-					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+					controller.Provide(apiEngine.Handle, apierror, &cobra.Command{}).InjectHTTP(ctrl)
 
 					w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/1", nil)
 					assert.Equal(t, http.StatusInternalServerError, w.Code)
-					assert.Equal(t, "{\"errors\":[{\"title\":\"Internal server error\",\"detail\":\"Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '\\u003cnil\\u003e'\",\"code\":\"ERR0500\",\"status\":500}]}", string(w.Body.Bytes()))
 				})
 			})
 		})
@@ -92,7 +93,7 @@ func TestOne(t *testing.T) {
 
 			applicationManager := mock.NewMockApplicationManager(mockCtrl)
 			ctrl := applicationHttp.NewOne(applicationManager, apierror)
-			apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+			controller.Provide(apiEngine.Handle, apierror, &cobra.Command{}).InjectHTTP(ctrl)
 
 			w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/x", nil)
 			assert.Equal(t, http.StatusBadRequest, w.Code)

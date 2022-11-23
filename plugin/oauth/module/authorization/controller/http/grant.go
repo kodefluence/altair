@@ -38,10 +38,7 @@ func (o *GrantController) Path() string {
 }
 
 // Control granting access token / authorization code
-func (o *GrantController) Control(c *gin.Context) {
-	ktx := kontext.Fabricate(kontext.WithDefaultContext(c))
-	ktx.Set("request_id", c.GetString("request_id"))
-
+func (o *GrantController) Control(ktx kontext.Context, c *gin.Context) {
 	var req entity.AuthorizationRequestJSON
 
 	rawData, err := c.GetRawData()

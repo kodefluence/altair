@@ -20,7 +20,6 @@ import (
 	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/forwarder"
-	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/module/apierror"
 	"github.com/kodefluence/altair/module/app"
 	"github.com/kodefluence/altair/module/controller"
@@ -36,17 +35,11 @@ var (
 	databases    map[string]db.DB               = map[string]db.DB{}
 	appConfig    core.AppConfig
 	pluginBearer core.PluginBearer
-	apiEngine    *gin.Engine
-	pluginEngine *gin.RouterGroup
-
-	appModule module.App
-	apiError  module.ApiError
 )
 
 func main() {
 	_ = gotenv.Load()
 	loadConfig()
-	loadModule()
 	executeCommand()
 }
 
@@ -73,19 +66,6 @@ func loadConfig() {
 		os.Exit(1)
 	}
 	pluginBearer = loadedPluginBearer
-}
-
-func loadModule() {
-	gin.SetMode(gin.ReleaseMode)
-	apiEngine = gin.New()
-	apiError = apierror.Provide()
-	appController := controller.Provide(apiEngine.Handle, apiError, nil)
-	appModule = app.Provide(appController)
-	healthcheck.Load(appModule)
-
-	pluginEngine = apiEngine.Group("/_plugins/", gin.BasicAuth(gin.Accounts{
-		appConfig.BasicAuthUsername(): appConfig.BasicAuthPassword(),
-	}))
 }
 
 func executeCommand() {
@@ -397,10 +377,25 @@ func closeConnection() {
 }
 
 func runAPI() error {
+	gin.SetMode(gin.ReleaseMode)
+
+	apiEngine := gin.New()
+	apiError := apierror.Provide()
+
+	baseController := controller.Provide(apiEngine.Handle, apiError, nil)
+	baseModule := app.Provide(baseController)
+	healthcheck.Load(baseModule)
+
+	pluginEngine := apiEngine.Group("/_plugins/", gin.BasicAuth(gin.Accounts{
+		appConfig.BasicAuthUsername(): appConfig.BasicAuthPassword(),
+	}))
+	pluginController := controller.Provide(pluginEngine.Handle, apiError, nil)
+	pluginModule := app.Provide(pluginController)
+
 	appBearer := cfg.AppBearer(pluginEngine, appConfig)
 	dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
 
-	if err := plugin.Load(appBearer, pluginBearer, dbBearer, apiError, appModule); err != nil {
+	if err := plugin.Load(appBearer, pluginBearer, dbBearer, apiError, pluginModule); err != nil {
 		log.Error().
 			Err(err).
 			Stack().
@@ -421,8 +416,7 @@ func runAPI() error {
 		return err
 	}
 
-	metricProvider, _ := appBearer.MetricProvider()
-	err = forwarder.Route().Generator().Generate(apiEngine, metricProvider, routeObjects, appBearer.DownStreamPlugins())
+	err = forwarder.Route().Generator().Generate(apiEngine, pluginModule.Controller().ListMetric()[0], routeObjects, appBearer.DownStreamPlugins())
 	if err != nil {
 		log.Error().
 			Err(err).

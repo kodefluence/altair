@@ -38,10 +38,7 @@ func (o *RevokeController) Path() string {
 }
 
 // Control revoking access token
-func (o *RevokeController) Control(c *gin.Context) {
-	ktx := kontext.Fabricate(kontext.WithDefaultContext(c))
-	ktx.Set("request_id", c.GetString("request_id"))
-
+func (o *RevokeController) Control(ktx kontext.Context, c *gin.Context) {
 	var req entity.RevokeAccessTokenRequestJSON
 
 	rawData, err := c.GetRawData()
