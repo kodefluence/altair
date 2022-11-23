@@ -9,7 +9,7 @@ import (
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/entity"
 	"github.com/kodefluence/altair/forwarder/route"
-	metricDummyUsecase "github.com/kodefluence/altair/plugin/metric/module/dummy/usecase"
+	"github.com/kodefluence/altair/plugin/metric/module/dummy/controller/metric"
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/stretchr/testify/assert"
 )
@@ -38,7 +38,7 @@ func BenchmarkRoute(b *testing.B) {
 		buildTargetEngine(targetEngine, "GET", r)
 	}
 
-	err := route.Generator().Generate(gatewayEngine, metricDummyUsecase.NewDummy(), routeObjects, []core.DownStreamPlugin{})
+	err := route.Generator().Generate(gatewayEngine, metric.NewDummy(), routeObjects, []core.DownStreamPlugin{})
 	assert.Nil(b, err)
 
 	srvTarget := &http.Server{

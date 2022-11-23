@@ -35,10 +35,7 @@ func (l *ListController) Path() string {
 }
 
 // Control list of oauth applications
-func (l *ListController) Control(c *gin.Context) {
-	ktx := kontext.Fabricate(kontext.WithDefaultContext(c))
-	ktx.Set("request_id", c.GetString("request_id"))
-
+func (l *ListController) Control(ktx kontext.Context, c *gin.Context) {
 	var offset, limit int
 	var err error
 

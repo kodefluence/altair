@@ -38,10 +38,7 @@ func (o *TokenController) Path() string {
 }
 
 // Control creating access token based on access token request
-func (o *TokenController) Control(c *gin.Context) {
-	ktx := kontext.Fabricate(kontext.WithDefaultContext(c))
-	ktx.Set("request_id", c.GetString("request_id"))
-
+func (o *TokenController) Control(ktx kontext.Context, c *gin.Context) {
 	var req entity.AccessTokenRequestJSON
 
 	rawData, err := c.GetRawData()

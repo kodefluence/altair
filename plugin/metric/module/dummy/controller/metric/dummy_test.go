@@ -1,13 +1,13 @@
-package usecase_test
+package metric_test
 
 import (
 	"testing"
 
-	"github.com/kodefluence/altair/plugin/metric/module/dummy/usecase"
+	"github.com/kodefluence/altair/plugin/metric/module/dummy/controller/metric"
 )
 
 func TestPrometheus(t *testing.T) {
-	dummyMetric := usecase.NewDummy()
+	dummyMetric := metric.NewDummy()
 
 	t.Run("InjectCounter", func(t *testing.T) {
 		dummyMetric.InjectCounter("testing_metrics", "blablabla")

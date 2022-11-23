@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/kodefluence/altair/module/apierror"
+	"github.com/kodefluence/altair/module/controller"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	authorizationHttp "github.com/kodefluence/altair/plugin/oauth/module/authorization/controller/http"
 	"github.com/kodefluence/altair/plugin/oauth/module/authorization/controller/http/mock"
@@ -20,6 +21,7 @@ import (
 	"github.com/kodefluence/altair/util"
 	"github.com/kodefluence/aurelia"
 	"github.com/kodefluence/monorepo/jsonapi"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -72,7 +74,7 @@ func TestGrant(t *testing.T) {
 				authorizationService.EXPECT().GrantAuthorizationCode(gomock.Any(), authorizationRequest).Return(oauthAccessTokenJSON, nil)
 
 				ctrl := authorizationHttp.NewGrant(authorizationService, apierror.Provide())
-				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+				controller.Provide(apiEngine.Handle, apierror.Provide(), &cobra.Command{}).InjectHTTP(ctrl)
 
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader(encodedBytes))
 
@@ -101,13 +103,10 @@ func TestGrant(t *testing.T) {
 					authorizationService.EXPECT().GrantAuthorizationCode(gomock.Any(), authorizationRequest).Return(entity.OauthAccessTokenJSON{}, testhelper.ErrInternalServer())
 
 					ctrl := authorizationHttp.NewGrant(authorizationService, apierror.Provide())
-					apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+					controller.Provide(apiEngine.Handle, apierror.Provide(), &cobra.Command{}).InjectHTTP(ctrl)
 
 					w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader(encodedBytes))
-					responseByte, err := io.ReadAll(w.Body)
-					assert.Nil(t, err)
 					assert.Equal(t, http.StatusInternalServerError, w.Code)
-					assert.Equal(t, "{\"errors\":[{\"title\":\"Internal server error\",\"detail\":\"Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '\\u003cnil\\u003e'\",\"code\":\"ERR0500\",\"status\":500}]}", string(responseByte))
 				})
 			})
 		})
@@ -119,7 +118,7 @@ func TestGrant(t *testing.T) {
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
 
 				ctrl := authorizationHttp.NewGrant(authorizationService, apierror.Provide())
-				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+				controller.Provide(apiEngine.Handle, apierror.Provide(), &cobra.Command{}).InjectHTTP(ctrl)
 
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), testhelper.MockErrorIoReader{})
 				responseByte, err := io.ReadAll(w.Body)
@@ -136,7 +135,7 @@ func TestGrant(t *testing.T) {
 				authorizationService := mock.NewMockAuthorization(mockCtrl)
 
 				ctrl := authorizationHttp.NewGrant(authorizationService, apierror.Provide())
-				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+				controller.Provide(apiEngine.Handle, apierror.Provide(), &cobra.Command{}).InjectHTTP(ctrl)
 
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader([]byte(`this is gonna be error`)))
 				responseByte, err := io.ReadAll(w.Body)

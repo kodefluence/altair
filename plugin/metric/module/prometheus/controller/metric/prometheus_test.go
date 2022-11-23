@@ -1,14 +1,14 @@
-package usecase_test
+package metric_test
 
 import (
 	"testing"
 
-	"github.com/kodefluence/altair/plugin/metric/module/prometheus/usecase"
+	"github.com/kodefluence/altair/plugin/metric/module/prometheus/controller/metric"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPrometheus(t *testing.T) {
-	promMetric := usecase.NewPrometheus()
+	promMetric := metric.NewPrometheus()
 
 	t.Run("InjectCounter", func(t *testing.T) {
 		t.Run("Metric is not exists", func(t *testing.T) {

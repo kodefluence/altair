@@ -18,10 +18,12 @@ import (
 	"github.com/subosito/gotenv"
 
 	"github.com/kodefluence/altair/cfg"
-	"github.com/kodefluence/altair/controller"
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/forwarder"
 	"github.com/kodefluence/altair/module/apierror"
+	"github.com/kodefluence/altair/module/app"
+	"github.com/kodefluence/altair/module/controller"
+	"github.com/kodefluence/altair/module/healthcheck"
 	"github.com/kodefluence/altair/plugin"
 	"github.com/kodefluence/altair/provider"
 	"github.com/kodefluence/monorepo/db"
@@ -33,7 +35,6 @@ var (
 	databases    map[string]db.DB               = map[string]db.DB{}
 	appConfig    core.AppConfig
 	pluginBearer core.PluginBearer
-	apiEngine    *gin.Engine
 )
 
 func main() {
@@ -378,18 +379,23 @@ func closeConnection() {
 func runAPI() error {
 	gin.SetMode(gin.ReleaseMode)
 
-	apiEngine = gin.New()
-	apiEngine.GET("/health", controller.Health)
+	apiEngine := gin.New()
+	apiError := apierror.Provide()
+
+	baseController := controller.Provide(apiEngine.Handle, apiError, nil)
+	baseModule := app.Provide(baseController)
+	healthcheck.Load(baseModule)
 
 	pluginEngine := apiEngine.Group("/_plugins/", gin.BasicAuth(gin.Accounts{
 		appConfig.BasicAuthUsername(): appConfig.BasicAuthPassword(),
 	}))
+	pluginController := controller.Provide(pluginEngine.Handle, apiError, nil)
+	pluginModule := app.Provide(pluginController)
 
 	appBearer := cfg.AppBearer(pluginEngine, appConfig)
 	dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
-	apiError := apierror.Provide()
 
-	if err := plugin.Load(appBearer, pluginBearer, dbBearer, apiError); err != nil {
+	if err := plugin.Load(appBearer, pluginBearer, dbBearer, apiError, pluginModule); err != nil {
 		log.Error().
 			Err(err).
 			Stack().
@@ -410,8 +416,7 @@ func runAPI() error {
 		return err
 	}
 
-	metricProvider, _ := appBearer.MetricProvider()
-	err = forwarder.Route().Generator().Generate(apiEngine, metricProvider, routeObjects, appBearer.DownStreamPlugins())
+	err = forwarder.Route().Generator().Generate(apiEngine, pluginModule.Controller().ListMetric()[0], routeObjects, appBearer.DownStreamPlugins())
 	if err != nil {
 		log.Error().
 			Err(err).

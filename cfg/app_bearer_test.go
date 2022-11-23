@@ -10,7 +10,7 @@ import (
 	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/entity"
 	"github.com/kodefluence/altair/mock"
-	metricDummyUsecase "github.com/kodefluence/altair/plugin/metric/module/dummy/usecase"
+	"github.com/kodefluence/altair/plugin/metric/module/dummy/controller/metric"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -55,7 +55,7 @@ func TestAppBearer(t *testing.T) {
 	appEngine := gin.Default()
 
 	appBearer := cfg.AppBearer(appEngine, adapter.AppConfig(appConfig))
-	appBearer.SetMetricProvider(metricDummyUsecase.NewDummy())
+	appBearer.SetMetricProvider(metric.NewDummy())
 
 	t.Run("Config", func(t *testing.T) {
 		t.Run("Return AppConfig", func(t *testing.T) {

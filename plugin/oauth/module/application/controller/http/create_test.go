@@ -9,11 +9,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
 	"github.com/kodefluence/altair/module/apierror"
+	"github.com/kodefluence/altair/module/controller"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	applicationHttp "github.com/kodefluence/altair/plugin/oauth/module/application/controller/http"
 	"github.com/kodefluence/altair/plugin/oauth/module/application/controller/http/mock"
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/kodefluence/altair/util"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -52,7 +54,7 @@ func TestCreate(t *testing.T) {
 				applicationManager.EXPECT().Create(gomock.Any(), oauthApplicationJSON).Return(oauthApplicationJSON, nil)
 
 				ctrl := applicationHttp.NewCreate(applicationManager, apierror)
-				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+				controller.Provide(apiEngine.Handle, apierror, &cobra.Command{}).InjectHTTP(ctrl)
 
 				var response responseOne
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader(encodedBytes))
@@ -81,12 +83,11 @@ func TestCreate(t *testing.T) {
 				applicationManager.EXPECT().Create(gomock.Any(), oauthApplicationJSON).Return(entity.OauthApplicationJSON{}, testhelper.ErrInternalServer())
 
 				ctrl := applicationHttp.NewCreate(applicationManager, apierror)
-				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+				controller.Provide(apiEngine.Handle, apierror, &cobra.Command{}).InjectHTTP(ctrl)
 
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader(encodedBytes))
 
 				assert.Equal(t, http.StatusInternalServerError, w.Code)
-				assert.Equal(t, "{\"errors\":[{\"title\":\"Internal server error\",\"detail\":\"Something is not right, help us fix this problem. Contribute to https://github.com/kodefluence/altair. Tracing code: '\\u003cnil\\u003e'\",\"code\":\"ERR0500\",\"status\":500}]}", string(w.Body.Bytes()))
 			})
 		})
 
@@ -98,7 +99,7 @@ func TestCreate(t *testing.T) {
 				applicationManager.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0)
 
 				ctrl := applicationHttp.NewCreate(applicationManager, apierror)
-				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+				controller.Provide(apiEngine.Handle, apierror, &cobra.Command{}).InjectHTTP(ctrl)
 
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), testhelper.MockErrorIoReader{})
 
@@ -115,7 +116,7 @@ func TestCreate(t *testing.T) {
 				applicationManager.EXPECT().Create(gomock.Any(), gomock.Any()).Times(0)
 
 				ctrl := applicationHttp.NewCreate(applicationManager, apierror)
-				apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
+				controller.Provide(apiEngine.Handle, apierror, &cobra.Command{}).InjectHTTP(ctrl)
 
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader([]byte(`this is gonna be error`)))
 
