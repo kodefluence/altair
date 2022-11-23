@@ -50,7 +50,7 @@ func TestOauth(t *testing.T) {
 
 					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
-					routePath := coreEntity.RouterPath{Auth: "oauth"}
+					routePath := &coreEntity.RouterPath{Auth: "oauth"}
 
 					entityAccessToken := entity.OauthAccessToken{
 						ID:                 1,
@@ -90,7 +90,7 @@ func TestOauth(t *testing.T) {
 
 					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
-					routePath := coreEntity.RouterPath{Auth: "oauth", Scope: "public"}
+					routePath := &coreEntity.RouterPath{Auth: "oauth", Scope: "public"}
 
 					entityAccessToken := entity.OauthAccessToken{
 						ID:                 1,
@@ -130,7 +130,7 @@ func TestOauth(t *testing.T) {
 
 					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
-					routePath := coreEntity.RouterPath{Auth: "none"}
+					routePath := &coreEntity.RouterPath{Auth: "none"}
 
 					oauthAccessTokenRepo := mock.NewMockOauthAccessTokenRepository(mockCtrl)
 					oauthAccessTokenRepo.EXPECT().OneByToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
@@ -163,7 +163,7 @@ func TestOauth(t *testing.T) {
 
 						r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
-						routePath := coreEntity.RouterPath{Auth: "oauth"}
+						routePath := &coreEntity.RouterPath{Auth: "oauth"}
 
 						oauthAccessTokenRepo := mock.NewMockOauthAccessTokenRepository(mockCtrl)
 						oauthAccessTokenRepo.EXPECT().OneByToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
@@ -195,7 +195,7 @@ func TestOauth(t *testing.T) {
 
 						r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
-						routePath := coreEntity.RouterPath{Auth: "oauth"}
+						routePath := &coreEntity.RouterPath{Auth: "oauth"}
 
 						oauthAccessTokenRepo := mock.NewMockOauthAccessTokenRepository(mockCtrl)
 						oauthAccessTokenRepo.EXPECT().OneByToken(gomock.Any(), gomock.Any(), gomock.Any()).Times(0)
@@ -228,7 +228,7 @@ func TestOauth(t *testing.T) {
 
 					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
-					routePath := coreEntity.RouterPath{Auth: "oauth"}
+					routePath := &coreEntity.RouterPath{Auth: "oauth"}
 
 					oauthAccessTokenRepo := mock.NewMockOauthAccessTokenRepository(mockCtrl)
 					oauthAccessTokenRepo.EXPECT().OneByToken(gomock.Any(), token, sqldb).Return(entity.OauthAccessToken{}, exception.Throw(sql.ErrNoRows, exception.WithType(exception.NotFound)))
@@ -261,7 +261,7 @@ func TestOauth(t *testing.T) {
 
 					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
-					routePath := coreEntity.RouterPath{Auth: "oauth"}
+					routePath := &coreEntity.RouterPath{Auth: "oauth"}
 
 					oauthAccessTokenRepo := mock.NewMockOauthAccessTokenRepository(mockCtrl)
 					oauthAccessTokenRepo.EXPECT().OneByToken(gomock.Any(), token, sqldb).Return(entity.OauthAccessToken{}, exception.Throw(errors.New("unexpected error")))
@@ -294,7 +294,7 @@ func TestOauth(t *testing.T) {
 
 					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
-					routePath := coreEntity.RouterPath{Auth: "oauth", Scope: "user"}
+					routePath := &coreEntity.RouterPath{Auth: "oauth", Scope: "user"}
 
 					entityAccessToken := entity.OauthAccessToken{
 						ID:                 1,
@@ -340,7 +340,7 @@ func TestOauth(t *testing.T) {
 
 					r, _ := http.NewRequest("GET", "https://github.com/kodefluence/altair", nil)
 
-					routePath := coreEntity.RouterPath{Auth: "oauth", Scope: "user"}
+					routePath := &coreEntity.RouterPath{Auth: "oauth", Scope: "user"}
 
 					entityAccessToken := entity.OauthAccessToken{
 						ID:                 1,

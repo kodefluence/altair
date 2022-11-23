@@ -3,6 +3,7 @@ package authorization
 import (
 	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
+	"github.com/kodefluence/altair/plugin/oauth/module/authorization/controller/downstream"
 	"github.com/kodefluence/altair/plugin/oauth/module/authorization/controller/http"
 	"github.com/kodefluence/altair/plugin/oauth/module/authorization/usecase"
 	"github.com/kodefluence/monorepo/db"
@@ -27,5 +28,5 @@ func Load(
 		http.NewRevoke(authorizationUsecase, apiError),
 	)
 
-	// appModule.InjectDownStreamPlugin(downstream.NewOauth(oauthAccessTokenRepo, sqldb))
+	appModule.Controller().InjectDownstream(downstream.NewOauth(oauthAccessTokenRepo, sqldb))
 }

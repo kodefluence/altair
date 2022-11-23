@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	coreEntity "github.com/kodefluence/altair/entity"
+	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/kodefluence/monorepo/exception"
@@ -34,8 +34,8 @@ func (o *Oauth) Name() string {
 }
 
 // Intervene current request to check the bearer token validity
-func (o *Oauth) Intervene(c *gin.Context, proxyReq *http.Request, r coreEntity.RouterPath) error {
-	if r.Auth != "oauth" {
+func (o *Oauth) Intervene(c *gin.Context, proxyReq *http.Request, r module.RouterPath) error {
+	if r.GetAuth() != "oauth" {
 		return nil
 	}
 
@@ -71,14 +71,14 @@ func (o *Oauth) Intervene(c *gin.Context, proxyReq *http.Request, r coreEntity.R
 	return nil
 }
 
-func (o *Oauth) validTokenScope(token entity.OauthAccessToken, r coreEntity.RouterPath) bool {
-	if r.Scope == "" {
+func (o *Oauth) validTokenScope(token entity.OauthAccessToken, r module.RouterPath) bool {
+	if r.GetScope() == "" {
 		return true
 	}
 
 	if token.Scopes.Valid {
 		tokenScopes := strings.Split(token.Scopes.String, " ")
-		routeScopes := strings.Split(r.Scope, " ")
+		routeScopes := strings.Split(r.GetScope(), " ")
 
 		for _, routeScope := range routeScopes {
 			for _, tokenScope := range tokenScopes {

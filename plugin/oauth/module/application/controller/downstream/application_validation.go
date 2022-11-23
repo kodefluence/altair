@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/util"
 	"github.com/kodefluence/monorepo/db"
@@ -29,7 +30,7 @@ func (o *ApplicationValidation) Name() string {
 }
 
 // Intervene current request to check application_uid and application_secret
-func (o *ApplicationValidation) Intervene(c *gin.Context, proxyReq *http.Request, r RouterPath) error {
+func (o *ApplicationValidation) Intervene(c *gin.Context, proxyReq *http.Request, r module.RouterPath) error {
 	if r.GetAuth() != "oauth_application" {
 		return nil
 	}

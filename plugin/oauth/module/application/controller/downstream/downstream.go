@@ -12,7 +12,3 @@ import (
 type OauthApplicationRepository interface {
 	OneByUIDandSecret(ktx kontext.Context, clientUID, clientSecret string, tx db.TX) (entity.OauthApplication, exception.Exception)
 }
-
-type RouterPath interface {
-	GetAuth() string
-}

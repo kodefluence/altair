@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kodefluence/altair/entity"
+	"github.com/kodefluence/altair/module"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -19,7 +19,7 @@ func (*fakeDownstream) Name() string {
 	return "fake-downstream"
 }
 
-func (*fakeDownstream) Intervene(c *gin.Context, proxyReq *http.Request, r entity.RouterPath) error {
+func (*fakeDownstream) Intervene(c *gin.Context, proxyReq *http.Request, r module.RouterPath) error {
 	return nil
 }
 

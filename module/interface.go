@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kodefluence/altair/entity"
 	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
 	"github.com/spf13/cobra"
@@ -69,7 +68,7 @@ type CommandController interface {
 
 type DownstreamController interface {
 	Name() string
-	Intervene(c *gin.Context, proxyReq *http.Request, r entity.RouterPath) error
+	Intervene(c *gin.Context, proxyReq *http.Request, r RouterPath) error
 }
 
 type ApiError interface {
@@ -79,4 +78,9 @@ type ApiError interface {
 	UnauthorizedError() jsonapi.Option
 	ForbiddenError(ktx kontext.Context, entityType, reason string) jsonapi.Option
 	ValidationError(msg string) jsonapi.Option
+}
+
+type RouterPath interface {
+	GetAuth() string
+	GetScope() string
 }
