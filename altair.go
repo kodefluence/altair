@@ -37,6 +37,7 @@ var (
 	appConfig    core.AppConfig
 	pluginBearer core.PluginBearer
 	apiEngine    *gin.Engine
+	pluginEngine *gin.RouterGroup
 
 	appModule module.App
 	apiError  module.ApiError
@@ -81,6 +82,10 @@ func loadModule() {
 	appController := controller.Provide(apiEngine.Handle, apiError, nil)
 	appModule = app.Provide(appController)
 	healthcheck.Load(appModule)
+
+	pluginEngine = apiEngine.Group("/_plugins/", gin.BasicAuth(gin.Accounts{
+		appConfig.BasicAuthUsername(): appConfig.BasicAuthPassword(),
+	}))
 }
 
 func executeCommand() {
@@ -392,14 +397,10 @@ func closeConnection() {
 }
 
 func runAPI() error {
-	pluginEngine := apiEngine.Group("/_plugins/", gin.BasicAuth(gin.Accounts{
-		appConfig.BasicAuthUsername(): appConfig.BasicAuthPassword(),
-	}))
-
 	appBearer := cfg.AppBearer(pluginEngine, appConfig)
 	dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
 
-	if err := plugin.Load(appBearer, pluginBearer, dbBearer, apiError); err != nil {
+	if err := plugin.Load(appBearer, pluginBearer, dbBearer, apiError, appModule); err != nil {
 		log.Error().
 			Err(err).
 			Stack().

@@ -9,8 +9,8 @@ import (
 
 // Load plugin for altair
 // TODO: Unit test, open for contributions.
-func Load(appBearer core.AppBearer, pluginBearer core.PluginBearer, dbBearer core.DatabaseBearer, apiError module.ApiError) error {
-	if err := metric.Load(appBearer, pluginBearer); err != nil {
+func Load(appBearer core.AppBearer, pluginBearer core.PluginBearer, dbBearer core.DatabaseBearer, apiError module.ApiError, appModule module.App) error {
+	if err := metric.Load(appBearer, pluginBearer, appModule); err != nil {
 		return err
 	}
 

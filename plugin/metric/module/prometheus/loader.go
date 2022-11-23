@@ -1,12 +1,12 @@
 package prometheus
 
 import (
-	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/metric/module/prometheus/controller/http"
 	"github.com/kodefluence/altair/plugin/metric/module/prometheus/controller/metric"
 )
 
-func Load(appBearer core.AppBearer) {
-	appBearer.SetMetricProvider(metric.NewPrometheus())
-	appBearer.InjectController(http.NewPrometheusController())
+func Load(appModule module.App) {
+	appModule.Controller().InjectMetric(metric.NewPrometheus())
+	appModule.Controller().InjectHTTP(http.NewPrometheusController())
 }

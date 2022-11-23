@@ -4,12 +4,13 @@ import (
 	"fmt"
 
 	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/metric/module/dummy"
 )
 
-func Load(appBearer core.AppBearer, pluginBearer core.PluginBearer) error {
+func Load(appBearer core.AppBearer, pluginBearer core.PluginBearer, appModule module.App) error {
 	if appBearer.Config().PluginExists("metric") == false {
-		dummy.Load(appBearer)
+		dummy.Load(appModule)
 		return nil
 	}
 
@@ -20,7 +21,7 @@ func Load(appBearer core.AppBearer, pluginBearer core.PluginBearer) error {
 
 	switch version {
 	case "1.0":
-		return version_1_0(appBearer, pluginBearer)
+		return version_1_0(appModule, pluginBearer)
 	default:
 		return fmt.Errorf("undefined template version: %s for metric plugin", version)
 	}

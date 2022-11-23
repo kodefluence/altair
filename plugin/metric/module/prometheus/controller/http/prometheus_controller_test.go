@@ -5,8 +5,11 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kodefluence/altair/module/apierror"
+	"github.com/kodefluence/altair/module/controller"
 	prometheusHttp "github.com/kodefluence/altair/plugin/metric/module/prometheus/controller/http"
 	"github.com/kodefluence/altair/testhelper"
+	"github.com/spf13/cobra"
 	"gotest.tools/assert"
 )
 
@@ -25,8 +28,7 @@ func TestPrometheusController(t *testing.T) {
 			apiEngine := gin.Default()
 
 			ctrl := prometheusHttp.NewPrometheusController()
-			apiEngine.Handle(ctrl.Method(), ctrl.Path(), ctrl.Control)
-
+			controller.Provide(apiEngine.Handle, apierror.Provide(), &cobra.Command{}).InjectHTTP(ctrl)
 			w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), nil)
 
 			assert.Equal(t, http.StatusOK, w.Code)
