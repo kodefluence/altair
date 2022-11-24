@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Login to docker hub registry
-        run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login docker.io -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+        run: docker login docker.io -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build binary
         run: make build_linux
