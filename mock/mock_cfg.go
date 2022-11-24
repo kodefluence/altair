@@ -504,20 +504,6 @@ func (mr *MockAppConfigMockRecorder) Dump() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Dump", reflect.TypeOf((*MockAppConfig)(nil).Dump))
 }
 
-// Metric mocks base method.
-func (m *MockAppConfig) Metric() core.MetricConfig {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Metric")
-	ret0, _ := ret[0].(core.MetricConfig)
-	return ret0
-}
-
-// Metric indicates an expected call of Metric.
-func (mr *MockAppConfigMockRecorder) Metric() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Metric", reflect.TypeOf((*MockAppConfig)(nil).Metric))
-}
-
 // PluginExists mocks base method.
 func (m *MockAppConfig) PluginExists(pluginName string) bool {
 	m.ctrl.T.Helper()
@@ -660,18 +646,6 @@ func (m *MockAppBearer) DownStreamPlugins() []core.DownStreamPlugin {
 func (mr *MockAppBearerMockRecorder) DownStreamPlugins() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DownStreamPlugins", reflect.TypeOf((*MockAppBearer)(nil).DownStreamPlugins))
-}
-
-// InjectController mocks base method.
-func (m *MockAppBearer) InjectController(injectedController core.Controller) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "InjectController", injectedController)
-}
-
-// InjectController indicates an expected call of InjectController.
-func (mr *MockAppBearerMockRecorder) InjectController(injectedController interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InjectController", reflect.TypeOf((*MockAppBearer)(nil).InjectController), injectedController)
 }
 
 // InjectDownStreamPlugin mocks base method.

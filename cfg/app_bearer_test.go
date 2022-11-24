@@ -69,12 +69,6 @@ func TestAppBearer(t *testing.T) {
 		})
 	})
 
-	t.Run("InjectController", func(t *testing.T) {
-		assert.NotPanics(t, func() {
-			appBearer.InjectController(fakeController{})
-		})
-	})
-
 	t.Run("DownStreamPlugins", func(t *testing.T) {
 		t.Run("return DownStreamPlugins", func(t *testing.T) {
 			appOption := entity.AppConfigOption{

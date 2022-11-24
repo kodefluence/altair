@@ -3,7 +3,6 @@ package cfg
 import (
 	"errors"
 
-	"github.com/kodefluence/altair/controller"
 	"github.com/kodefluence/altair/core"
 )
 
@@ -35,10 +34,6 @@ func (a *appBearer) DownStreamPlugins() []core.DownStreamPlugin {
 
 func (a *appBearer) InjectDownStreamPlugin(InjectedDownStreamPlugin core.DownStreamPlugin) {
 	a.downStreamPlugins = append(a.downStreamPlugins, InjectedDownStreamPlugin)
-}
-
-func (a *appBearer) InjectController(injectedController core.Controller) {
-	controller.Compile(a.appEngine, a.metricProvider, injectedController)
 }
 
 func (a *appBearer) SetMetricProvider(metricProvider core.Metric) {
