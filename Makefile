@@ -50,6 +50,9 @@ build_docker_latest:
 push_docker: push_docker_latest
 	sudo docker push $(IMAGE):$(VERSION)
 
+tag_docker_latest:
+	sudo docker tag $(IMAGE):latest $(IMAGE):latest
+
 push_docker_latest:
 	sudo docker push $(IMAGE):latest
 

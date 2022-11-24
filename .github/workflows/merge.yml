@@ -20,5 +20,8 @@ jobs:
       - name: Build docker image
         run: make build_docker_latest
 
+      - name: Tag docker latest
+        run: make tag_docker_latest
+
       - name: Push docker image
         run: make push_docker_latest
