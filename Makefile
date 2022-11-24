@@ -1,5 +1,5 @@
 export VERSION 	?= $(shell git show -q --format=%h)
-export IMAGE 		?= codefluence/altair
+export IMAGE 		?= kodefluence/altair
 
 test:
 	go test -race -cover -coverprofile=cover.out $$(go list ./... | grep -Ev "altair$$|core|mock|interfaces|testhelper")
