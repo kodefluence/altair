@@ -42,19 +42,19 @@ build_windows:
 build: build_linux build_darwin build_windows
 
 build_docker: build_docker_latest
-	sudo docker build -t $(IMAGE):$(VERSION) -f ./Dockerfile .
+	docker build -t $(IMAGE):$(VERSION) -f ./Dockerfile .
 
 build_docker_latest:
-	sudo docker build -t $(IMAGE):latest -f ./Dockerfile .
+	docker build -t $(IMAGE):latest -f ./Dockerfile .
 
 push_docker: push_docker_latest
-	sudo docker push $(IMAGE):$(VERSION)
+	docker push $(IMAGE):$(VERSION)
 
 tag_docker_latest:
-	sudo docker tag $(IMAGE):latest $(IMAGE):latest
+	docker tag $(IMAGE):latest $(IMAGE):latest
 
 push_docker_latest:
-	sudo docker push $(IMAGE):latest
+	docker push $(IMAGE):latest
 
 docker-compose-up:
 	docker-compose --env-file .env up -d

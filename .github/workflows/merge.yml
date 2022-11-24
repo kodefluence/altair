@@ -11,6 +11,9 @@ jobs:
       - name: Check out the repo
         uses: actions/checkout@v2
 
+      - name: Logout first
+        run: docker logout
+
       - name: Login to docker hub registry
         run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login docker.io -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
