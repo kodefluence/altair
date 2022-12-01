@@ -9,6 +9,7 @@ import (
 	"github.com/kodefluence/altair/plugin/oauth/module/application"
 	"github.com/kodefluence/altair/plugin/oauth/module/authorization"
 	"github.com/kodefluence/altair/plugin/oauth/module/formatter"
+	"github.com/kodefluence/altair/plugin/oauth/module/migration"
 	"github.com/kodefluence/altair/plugin/oauth/repository/mysql"
 )
 
@@ -62,6 +63,24 @@ func version_1_0(dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer, a
 	// Authorization
 	// Loading controller for authorization and downstream
 	authorization.Load(appModule, oauthApplicationRepo, oauthAccessTokenRepo, oauthAccessGrantRepo, oauthRefreshTokenRepo, formatter, oauthPluginConfig, sqldb, apiError)
+
+	return nil
+}
+
+func version_1_0_command(dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer, appModule module.App) error {
+	var oauthPluginConfig entity.OauthPlugin
+	if err := pluginBearer.CompilePlugin("oauth", &oauthPluginConfig); err != nil {
+		return err
+	}
+
+	sqldb, sqldbconfig, err := dbBearer.Database(oauthPluginConfig.DatabaseInstance())
+	if err != nil {
+		return err
+	}
+
+	// Migration
+	// Set up migration for oauth plugin
+	migration.LoadCommand(sqldb, sqldbconfig, appModule)
 
 	return nil
 }

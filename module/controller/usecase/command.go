@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TODO: Return error when command already registered
 func (c *Controller) InjectCommand(commands ...module.CommandController) {
 	for _, command := range commands {
 		c.rootCommand.AddCommand(

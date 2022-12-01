@@ -95,12 +95,6 @@ func (d *database) assignMysqlConfig(config map[string]string) (core.DatabaseCon
 		mysqlConfig.Password = password
 	}
 
-	if migrationSource, ok := config["migration_source"]; ok && migrationSource != "" {
-		mysqlConfig.MigrationSource = migrationSource
-	} else {
-		return nil, errors.New("Config `migration_source` cannot be empty for mysql driver")
-	}
-
 	if host, ok := config["host"]; ok && host != "" {
 		mysqlConfig.Host = host
 	} else {

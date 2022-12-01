@@ -16,15 +16,10 @@ type MYSQLDatabaseConfig struct {
 	ConnectionMaxLifetime string `yaml:"connection_max_lifetime"`
 	MaxIddleConnection    string `yaml:"max_iddle_connection"`
 	MaxOpenConnection     string `yaml:"max_open_connection"`
-	MigrationSource       string `yaml:"migration_source"`
 }
 
 func (m MYSQLDatabaseConfig) Driver() string {
 	return "mysql"
-}
-
-func (m MYSQLDatabaseConfig) DBMigrationSource() string {
-	return m.MigrationSource
 }
 
 func (m MYSQLDatabaseConfig) DBHost() string {
