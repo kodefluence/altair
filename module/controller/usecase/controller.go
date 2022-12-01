@@ -16,7 +16,9 @@ type Controller struct {
 
 	httpInjector HttpInjector
 	apiError     module.ApiError
-	rootCommand  *cobra.Command
+
+	rootCommand *cobra.Command
+	commandList map[string]*cobra.Command
 }
 
 func NewController(httpInjector HttpInjector, apiError module.ApiError, rootCommand *cobra.Command) *Controller {
@@ -29,5 +31,6 @@ func NewController(httpInjector HttpInjector, apiError module.ApiError, rootComm
 		httpInjector: httpInjector,
 		apiError:     apiError,
 		rootCommand:  rootCommand,
+		commandList:  map[string]*cobra.Command{},
 	}
 }

@@ -21,7 +21,6 @@ main_database:
   password: {{ env "DATABASE_PASSWORD" }}
   host:     {{ env "DATABASE_HOST" }}
   port:     {{ env "DATABASE_PORT" }}
-  migration_source: "file://migration"
   connection_max_lifetime: 120s
   max_iddle_connection: 100
   max_open_connection: 100

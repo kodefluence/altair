@@ -28,7 +28,6 @@ type PluginBearer interface {
 
 type DatabaseConfig interface {
 	Driver() string
-	DBMigrationSource() string
 	DBHost() string
 	DBPort() (int, error)
 	DBUsername() string

@@ -18,6 +18,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// TODO: Return error when controller already registered
 func (ctrl *Controller) InjectHTTP(httpControllers ...module.HttpController) {
 	for _, metric := range ctrl.metricController {
 		metric.InjectCounter("controller_hits", "method", "path", "status_code", "status_code_group")
