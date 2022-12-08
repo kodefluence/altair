@@ -22,21 +22,18 @@ build_linux:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s" -o ./build_output/linux/altair
 	upx -9 -k ./build_output/linux/altair
 	cp -r config/ ./build_output/linux/config/
-	cp -r migration/ ./build_output/linux/migration/
 	cp -r routes/ ./build_output/linux/routes/
 
 build_darwin:
 	GOOS=darwin GOARCH=386 CGO_ENABLED=0 go build -ldflags="-s" -o ./build_output/darwin/altair
 	upx -9 -k ./build_output/darwin/altair
 	cp -r config/ ./build_output/darwin/config/
-	cp -r migration/ ./build_output/darwin/migration/
 	cp -r routes/ ./build_output/darwin/routes/
 
 build_windows:
 	GOOS=windows GOARCH=386 CGO_ENABLED=0 go build -ldflags="-s" -o ./build_output/windows/altair
 	upx -9 -k ./build_output/windows/altair
 	cp -r config/ ./build_output/windows/config/
-	cp -r migration/ ./build_output/windows/migration/
 	cp -r routes/ ./build_output/windows/routes/
 
 build: build_linux build_darwin build_windows
