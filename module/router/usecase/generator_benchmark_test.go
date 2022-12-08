@@ -1,4 +1,4 @@
-package route_test
+package usecase_test
 
 import (
 	"net/http"
@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/entity"
-	"github.com/kodefluence/altair/forwarder/route"
+	"github.com/kodefluence/altair/module"
+	"github.com/kodefluence/altair/module/router/usecase"
 	"github.com/kodefluence/altair/plugin/metric/module/dummy/controller/metric"
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/stretchr/testify/assert"
@@ -38,7 +38,8 @@ func BenchmarkRoute(b *testing.B) {
 		buildTargetEngine(targetEngine, "GET", r)
 	}
 
-	err := route.Generator().Generate(gatewayEngine, metric.NewDummy(), routeObjects, []core.DownStreamPlugin{})
+	var downStreamController []module.DownstreamController
+	err := usecase.NewGenerator(downStreamController, []module.MetricController{metric.NewDummy()}).Generate(gatewayEngine, routeObjects)
 	assert.Nil(b, err)
 
 	srvTarget := &http.Server{

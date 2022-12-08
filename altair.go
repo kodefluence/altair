@@ -19,11 +19,12 @@ import (
 
 	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/core"
-	"github.com/kodefluence/altair/forwarder"
+
 	"github.com/kodefluence/altair/module/apierror"
 	"github.com/kodefluence/altair/module/app"
 	"github.com/kodefluence/altair/module/controller"
 	"github.com/kodefluence/altair/module/healthcheck"
+	"github.com/kodefluence/altair/module/router"
 	"github.com/kodefluence/altair/plugin"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/spf13/cobra"
@@ -283,9 +284,8 @@ func runAPI() error {
 		return err
 	}
 
-	// Route Engine
-	routeCompiler := forwarder.Route().Compiler()
-	routeObjects, err := routeCompiler.Compile("./routes")
+	compiler, forwarder := router.Provide(pluginModule.Controller().ListDownstream(), pluginModule.Controller().ListMetric())
+	routeObjects, err := compiler.Compile("./routes")
 	if err != nil {
 		log.Error().
 			Err(err).
@@ -295,7 +295,7 @@ func runAPI() error {
 		return err
 	}
 
-	err = forwarder.Route().Generator().Generate(apiEngine, pluginModule.Controller().ListMetric()[0], routeObjects, appBearer.DownStreamPlugins())
+	err = forwarder.Generate(apiEngine, routeObjects)
 	if err != nil {
 		log.Error().
 			Err(err).

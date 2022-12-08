@@ -1,4 +1,4 @@
-package route_test
+package usecase_test
 
 var ExampleRoutesGracefully = `
 name: users

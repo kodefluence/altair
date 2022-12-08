@@ -1,4 +1,4 @@
-package route
+package usecase
 
 import (
 	"bytes"
@@ -11,30 +11,32 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/entity"
+	"github.com/kodefluence/altair/module"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
-type generator struct {
-	routerPath       map[string]entity.RouterPath
-	downStreamPlugin []core.DownStreamPlugin
-	metric           core.Metric
+type Generator struct {
+	routerPath       map[string]module.RouterPath
+	downStreamPlugin []module.DownstreamController
+	metrics          []module.MetricController
 }
 
-// Generator create route generator
-func Generator() core.RouteGenerator {
-	return &generator{}
+func NewGenerator(downStreamPlugin []module.DownstreamController, metric []module.MetricController) *Generator {
+	return &Generator{
+		routerPath:       map[string]module.RouterPath{},
+		downStreamPlugin: downStreamPlugin,
+		metrics:          metric,
+	}
 }
 
-func (g *generator) Generate(engine *gin.Engine, metric core.Metric, routeObjects []entity.RouteObject, downStreamPlugin []core.DownStreamPlugin) (errVariable error) {
-	g.downStreamPlugin = downStreamPlugin
-
-	g.metric = metric
-	g.metric.InjectCounter("routes_downstream_hits", "route_name", "method", "path", "status_code", "status_code_group")
-	g.metric.InjectHistogram("routes_downstream_latency_seconds", "route_name", "method", "path", "status_code", "status_code_group")
-	g.metric.InjectHistogram("routes_downstream_plugin_latency_seconds", "route_name", "plugin_name", "method", "path", "status_code", "status_code_group")
+func (g *Generator) Generate(engine *gin.Engine, routeObjects []entity.RouteObject) (errVariable error) {
+	for _, m := range g.metrics {
+		m.InjectCounter("routes_downstream_hits", "route_name", "method", "path", "status_code", "status_code_group")
+		m.InjectHistogram("routes_downstream_latency_seconds", "route_name", "method", "path", "status_code", "status_code_group")
+		m.InjectHistogram("routes_downstream_plugin_latency_seconds", "route_name", "plugin_name", "method", "path", "status_code", "status_code_group")
+	}
 
 	defer func() {
 		if r := recover(); r != nil {
@@ -42,8 +44,6 @@ func (g *generator) Generate(engine *gin.Engine, metric core.Metric, routeObject
 			log.Error().Err(fmt.Errorf("Error generating route because of %v", r)).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("defer").Str("panic")).Msg("Panic error when generating routes")
 		}
 	}()
-
-	g.routerPath = map[string]entity.RouterPath{}
 
 	for _, routeObject := range routeObjects {
 		for r, routePath := range routeObject.Path {
@@ -69,7 +69,7 @@ func (g *generator) Generate(engine *gin.Engine, metric core.Metric, routeObject
 	return errVariable
 }
 
-func (g *generator) do(c *gin.Context, urlPath, requestID string, routeObject entity.RouteObject) {
+func (g *Generator) do(c *gin.Context, urlPath, requestID string, routeObject entity.RouteObject) {
 	proxyReq, err := g.decorateProxyRequest(c, urlPath, requestID, routeObject)
 	if err != nil {
 		return
@@ -87,7 +87,7 @@ func (g *generator) do(c *gin.Context, urlPath, requestID string, routeObject en
 
 }
 
-func (g *generator) decorateProxyRequest(c *gin.Context, urlPath, requestID string, routeObject entity.RouteObject) (*http.Request, error) {
+func (g *Generator) decorateProxyRequest(c *gin.Context, urlPath, requestID string, routeObject entity.RouteObject) (*http.Request, error) {
 	var proxyReq *http.Request
 
 	if c.Request.Body != nil {
@@ -132,7 +132,7 @@ func (g *generator) decorateProxyRequest(c *gin.Context, urlPath, requestID stri
 	return proxyReq, nil
 }
 
-func (g *generator) decorateHeader(c *gin.Context, requestID string, proxyReq *http.Request) {
+func (g *Generator) decorateHeader(c *gin.Context, requestID string, proxyReq *http.Request) {
 	for header, values := range c.Request.Header {
 		for _, value := range values {
 			proxyReq.Header.Add(header, value)
@@ -145,7 +145,7 @@ func (g *generator) decorateHeader(c *gin.Context, requestID string, proxyReq *h
 	proxyReq.Header.Set("X-Forwarded-For", c.Request.RemoteAddr)
 }
 
-func (g *generator) downStreamPluginCallback(c *gin.Context, proxyReq *http.Request, urlPath, requestID string, routeObject entity.RouteObject) error {
+func (g *Generator) downStreamPluginCallback(c *gin.Context, proxyReq *http.Request, urlPath, requestID string, routeObject entity.RouteObject) error {
 	for _, plugin := range g.downStreamPlugin {
 		startTimePlugin := time.Now()
 		if err := plugin.Intervene(c, proxyReq, g.routerPath[urlPath]); err != nil {
@@ -166,7 +166,7 @@ func (g *generator) downStreamPluginCallback(c *gin.Context, proxyReq *http.Requ
 	return nil
 }
 
-func (g *generator) callDownStreamService(c *gin.Context, proxyReq *http.Request, urlPath, requestID string, routeObject entity.RouteObject) error {
+func (g *Generator) callDownStreamService(c *gin.Context, proxyReq *http.Request, urlPath, requestID string, routeObject entity.RouteObject) error {
 	defer g.downStreamMetric(c, routeObject.Name, urlPath, time.Now())
 
 	client := http.Client{}
@@ -211,7 +211,7 @@ func (g *generator) callDownStreamService(c *gin.Context, proxyReq *http.Request
 	return nil
 }
 
-func (g *generator) downStreamPluginMetric(c *gin.Context, routeName, pluginName, path string, startTime time.Time) {
+func (g *Generator) downStreamPluginMetric(c *gin.Context, routeName, pluginName, path string, startTime time.Time) {
 	labels := map[string]string{
 		"route_name":        routeName,
 		"plugin_name":       pluginName,
@@ -221,10 +221,12 @@ func (g *generator) downStreamPluginMetric(c *gin.Context, routeName, pluginName
 		"status_code_group": strconv.Itoa(((c.Writer.Status() / 100) * 100)),
 	}
 
-	g.metric.Observe("routes_downstream_plugin_latency_seconds", float64(time.Since(startTime).Milliseconds()), labels)
+	for _, m := range g.metrics {
+		m.Observe("routes_downstream_plugin_latency_seconds", float64(time.Since(startTime).Milliseconds()), labels)
+	}
 }
 
-func (g *generator) downStreamMetric(c *gin.Context, routeName, path string, startTime time.Time) {
+func (g *Generator) downStreamMetric(c *gin.Context, routeName, path string, startTime time.Time) {
 	labels := map[string]string{
 		"route_name":        routeName,
 		"method":            c.Request.Method,
@@ -233,11 +235,13 @@ func (g *generator) downStreamMetric(c *gin.Context, routeName, path string, sta
 		"status_code_group": strconv.Itoa(((c.Writer.Status() / 100) * 100)),
 	}
 
-	g.metric.Inc("routes_downstream_hits", labels)
-	g.metric.Observe("routes_downstream_latency_seconds", float64(time.Since(startTime).Milliseconds()), labels)
+	for _, m := range g.metrics {
+		m.Inc("routes_downstream_hits", labels)
+		m.Observe("routes_downstream_latency_seconds", float64(time.Since(startTime).Milliseconds()), labels)
+	}
 }
 
-func (g *generator) inheritRouterObject(routeObject entity.RouteObject, routePath *entity.RouterPath) {
+func (g *Generator) inheritRouterObject(routeObject entity.RouteObject, routePath *entity.RouterPath) {
 	if routePath.Auth == "" {
 		routePath.Auth = routeObject.Auth
 	}
