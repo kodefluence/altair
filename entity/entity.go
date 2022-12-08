@@ -13,10 +13,10 @@ type RouterPath struct {
 	Scope string `yaml:"scope"`
 }
 
-func (r *RouterPath) GetAuth() string {
+func (r RouterPath) GetAuth() string {
 	return r.Auth
 }
 
-func (r *RouterPath) GetScope() string {
+func (r RouterPath) GetScope() string {
 	return r.Scope
 }

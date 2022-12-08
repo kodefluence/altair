@@ -1,4 +1,4 @@
-package route_test
+package usecase_test
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/kodefluence/altair/entity"
-	"github.com/kodefluence/altair/forwarder/route"
+	"github.com/kodefluence/altair/module/router/usecase"
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
@@ -24,7 +24,7 @@ func TestCompiler(t *testing.T) {
 				generateAllTempTestFiles(routesPath, ExampleRoutesGracefully)
 
 				t.Run("Return []entity.RouteObject and nil", func(t *testing.T) {
-					c := route.Compiler()
+					c := usecase.NewCompiler()
 					routeObjects, err := c.Compile(routesPath)
 
 					var expectedRouteObject entity.RouteObject
@@ -46,7 +46,7 @@ func TestCompiler(t *testing.T) {
 				testhelper.GenerateTempTestFiles(routesPath, "", "not_included.txt", 0666)
 
 				t.Run("Return []entity.RouteObject and nil", func(t *testing.T) {
-					c := route.Compiler()
+					c := usecase.NewCompiler()
 					routeObjects, err := c.Compile(routesPath)
 
 					var expectedRouteObject entity.RouteObject
@@ -67,7 +67,7 @@ func TestCompiler(t *testing.T) {
 				generateAllTempTestFiles(routesPath, ExampleRoutesYamlError)
 
 				t.Run("Return error", func(t *testing.T) {
-					c := route.Compiler()
+					c := usecase.NewCompiler()
 					routeObjects, err := c.Compile(routesPath)
 
 					assert.NotNil(t, err)
@@ -83,7 +83,7 @@ func TestCompiler(t *testing.T) {
 				generateAllTempTestFiles(routesPath, ExampleRoutesWithNoAuth)
 
 				t.Run("Return nil and auth will set to none", func(t *testing.T) {
-					c := route.Compiler()
+					c := usecase.NewCompiler()
 					routeObjects, err := c.Compile(routesPath)
 
 					assert.Nil(t, err)
@@ -100,7 +100,7 @@ func TestCompiler(t *testing.T) {
 				generateAllTempTestFiles(routesPath, ExampleTemplateParsingError)
 
 				t.Run("Return error", func(t *testing.T) {
-					c := route.Compiler()
+					c := usecase.NewCompiler()
 					routeObjects, err := c.Compile(routesPath)
 
 					assert.NotNil(t, err)
@@ -113,7 +113,7 @@ func TestCompiler(t *testing.T) {
 			t.Run("Dir is not exists", func(t *testing.T) {
 				routesPath := "./routes_dir_not_exists/"
 				t.Run("Return error", func(t *testing.T) {
-					c := route.Compiler()
+					c := usecase.NewCompiler()
 					routeObjects, err := c.Compile(routesPath)
 
 					assert.NotNil(t, err)

@@ -1,26 +1,24 @@
-package route
+package usecase
 
 import (
 	"bytes"
+	"html/template"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"text/template"
 
 	"github.com/google/uuid"
-	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/entity"
 	"gopkg.in/yaml.v2"
 )
 
-type compiler struct{}
+type Compiler struct{}
 
-// Compiler for all routes yaml file
-func Compiler() core.RouteCompiler {
-	return &compiler{}
+func NewCompiler() *Compiler {
+	return &Compiler{}
 }
 
-func (c *compiler) Compile(routesPath string) ([]entity.RouteObject, error) {
+func (c *Compiler) Compile(routesPath string) ([]entity.RouteObject, error) {
 	var routeObjects []entity.RouteObject
 
 	listOfBytes, err := c.walkAllFiles(routesPath)
@@ -50,7 +48,7 @@ func (c *compiler) Compile(routesPath string) ([]entity.RouteObject, error) {
 	return routeObjects, nil
 }
 
-func (c *compiler) compileTemplate(b []byte) ([]byte, error) {
+func (c *Compiler) compileTemplate(b []byte) ([]byte, error) {
 	tpl, err := template.New(uuid.New().String()).Funcs(template.FuncMap{
 		"env": os.Getenv,
 	}).Parse(string(b))
@@ -63,7 +61,7 @@ func (c *compiler) compileTemplate(b []byte) ([]byte, error) {
 	return buf.Bytes(), err
 }
 
-func (c *compiler) walkAllFiles(routesPath string) ([][]byte, error) {
+func (c *Compiler) walkAllFiles(routesPath string) ([][]byte, error) {
 	var files []string
 	var routeFiles [][]byte
 

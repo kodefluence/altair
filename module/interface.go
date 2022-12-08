@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// go:generate mockgen -source interface.go -destination mock/interface.go -package mock
+
 type App interface {
 	// TODO: Enable config via module package instead of cfg
 	// Config() Config
@@ -84,3 +86,11 @@ type RouterPath interface {
 	GetAuth() string
 	GetScope() string
 }
+
+// type RouterCompiler interface {
+// 	Compile(routesPath string) ([]entity.RouteObject, error)
+// }
+
+// type RouterForwarder interface {
+// 	Generate(engine *gin.Engine, metric MetricController, routeObjects []entity.RouteObject, downStreamPlugin []DownstreamController) error
+// }
