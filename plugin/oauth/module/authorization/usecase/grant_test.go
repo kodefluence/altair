@@ -32,12 +32,12 @@ func TestGrant(t *testing.T) {
 
 func (suite *GrantSuiteTest) SetupTest() {
 	suite.authorizationRequestJSON = entity.AuthorizationRequestJSON{
-		ResponseType:    util.StringToPointer("code"),
-		ResourceOwnerID: util.IntToPointer(1),
-		RedirectURI:     util.StringToPointer("www.github.com"),
-		ClientUID:       util.StringToPointer("client_uid"),
-		ClientSecret:    util.StringToPointer("client_secret"),
-		Scopes:          util.StringToPointer(""),
+		ResponseType:    util.ValueToPointer("code"),
+		ResourceOwnerID: util.ValueToPointer(1),
+		RedirectURI:     util.ValueToPointer("www.github.com"),
+		ClientUID:       util.ValueToPointer("client_uid"),
+		ClientSecret:    util.ValueToPointer("client_secret"),
+		Scopes:          util.ValueToPointer(""),
 	}
 	suite.oauthApplication = entity.OauthApplication{
 		ID: 1,
@@ -99,7 +99,7 @@ func (suite *GrantSuiteTest) TestGrant() {
 		})
 
 		suite.Subtest("When all parameter is valid, but scope is available in oauth application then it would return error", func() {
-			suite.authorizationRequestJSON.Scopes = util.StringToPointer("public users admin")
+			suite.authorizationRequestJSON.Scopes = util.ValueToPointer("public users admin")
 			suite.oauthApplicationRepo.EXPECT().OneByUIDandSecret(suite.ktx, *suite.authorizationRequestJSON.ClientUID, *suite.authorizationRequestJSON.ClientSecret, suite.sqldb).Return(suite.oauthApplication, nil)
 			finalJson, err := suite.authorization.Grant(suite.ktx, suite.authorizationRequestJSON)
 			suite.Assert().Equal("JSONAPI Error:\n[Forbidden error] Detail: Resource of `application` is forbidden to be accessed, because of: your requested scopes `([admin])` is not exists in application. Tracing code: `<nil>`, Code: ERR0403\n", err.Error())

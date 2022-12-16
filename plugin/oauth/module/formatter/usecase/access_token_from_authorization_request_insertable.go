@@ -15,7 +15,7 @@ func (f *Formatter) AccessTokenFromAuthorizationRequestInsertable(r entity.Autho
 	accessTokenInsertable.OauthApplicationID = application.ID
 	accessTokenInsertable.ResourceOwnerID = *r.ResourceOwnerID
 	accessTokenInsertable.Token = aurelia.Hash(application.ClientUID, application.ClientSecret+strconv.Itoa(*r.ResourceOwnerID))
-	accessTokenInsertable.Scopes = util.PointerToString(r.Scopes)
+	accessTokenInsertable.Scopes = util.PointerToValue(r.Scopes)
 	accessTokenInsertable.ExpiresIn = time.Now().Add(f.tokenExpiresIn)
 
 	return accessTokenInsertable

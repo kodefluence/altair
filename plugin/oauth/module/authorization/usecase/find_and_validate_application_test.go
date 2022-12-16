@@ -34,8 +34,8 @@ func (suite *FindAndValidateApplicationSuiteTest) SetupTest() {
 		},
 	}
 
-	suite.clientUID = util.StringToPointer("client_uid")
-	suite.clientSecret = util.StringToPointer("client_secret")
+	suite.clientUID = util.ValueToPointer("client_uid")
+	suite.clientSecret = util.ValueToPointer("client_secret")
 }
 
 func (suite *FindAndValidateApplicationSuiteTest) TestFindAndValidateApplication() {

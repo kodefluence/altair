@@ -25,7 +25,7 @@ func TestRevokeToken(t *testing.T) {
 
 func (suite *RevokeTokenSuiteTest) SetupTest() {
 	suite.revokeRequest = entity.RevokeAccessTokenRequestJSON{
-		Token: util.StringToPointer("some-token"),
+		Token: util.ValueToPointer("some-token"),
 	}
 }
 

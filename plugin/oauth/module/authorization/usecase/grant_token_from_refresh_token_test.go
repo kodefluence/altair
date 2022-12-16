@@ -45,9 +45,9 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) SetupTest() {
 		OwnerType: "confidential",
 	}
 	suite.accessTokenRequestJSON = entity.AccessTokenRequestJSON{
-		GrantType:    util.StringToPointer("refresh_token"),
-		RefreshToken: util.StringToPointer("some refresh token"),
-		Scope:        util.StringToPointer("public"),
+		GrantType:    util.ValueToPointer("refresh_token"),
+		RefreshToken: util.ValueToPointer("some refresh token"),
+		Scope:        util.ValueToPointer("public"),
 	}
 	suite.oldaccessToken = entity.OauthAccessToken{
 		ID:                 1,

@@ -10,8 +10,20 @@ import (
 	"github.com/google/uuid"
 )
 
-func IntToPointer(i int) *int {
-	return &i
+type Value interface {
+	int | string | time.Time
+}
+
+type Pointer interface {
+	*int | *string | *time.Time
+}
+
+func ValueToPointer[V Value](v V) *V {
+	return &v
+}
+
+func PointerToValue[V Value](v *V) V {
+	return *v
 }
 
 func ReadFileContent(path string) ([]byte, error) {
@@ -26,38 +38,6 @@ func ReadFileContent(path string) ([]byte, error) {
 	}
 
 	return contents, nil
-}
-
-func PointerToInt(i *int) interface{} {
-	if i == nil {
-		return nil
-	}
-
-	return *i
-}
-
-func TimeToPointer(t time.Time) *time.Time {
-	return &t
-}
-
-func PointerToTime(t *time.Time) interface{} {
-	if t == nil {
-		return nil
-	}
-
-	return *t
-}
-
-func StringToPointer(s string) *string {
-	return &s
-}
-
-func PointerToString(s *string) interface{} {
-	if s == nil {
-		return nil
-	}
-
-	return *s
 }
 
 func SHA1() string {

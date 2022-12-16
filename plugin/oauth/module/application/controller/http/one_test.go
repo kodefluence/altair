@@ -44,12 +44,12 @@ func TestOne(t *testing.T) {
 				apiEngine := gin.New()
 
 				oauthApplicationJSON := entity.OauthApplicationJSON{
-					ID:           util.IntToPointer(1),
-					OwnerID:      util.IntToPointer(1),
-					Description:  util.StringToPointer("Application 1"),
-					Scopes:       util.StringToPointer("public user"),
-					ClientUID:    util.StringToPointer("clientuid01"),
-					ClientSecret: util.StringToPointer("clientsecret01"),
+					ID:           util.ValueToPointer(1),
+					OwnerID:      util.ValueToPointer(1),
+					Description:  util.ValueToPointer("Application 1"),
+					Scopes:       util.ValueToPointer("public user"),
+					ClientUID:    util.ValueToPointer("clientuid01"),
+					ClientSecret: util.ValueToPointer("clientsecret01"),
 				}
 
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)

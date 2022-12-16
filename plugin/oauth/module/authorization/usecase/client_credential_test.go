@@ -44,10 +44,10 @@ func (suite *ClientCredentialSuiteTest) SetupTest() {
 		OwnerType: "confidential",
 	}
 	suite.accessTokenRequestJSON = entity.AccessTokenRequestJSON{
-		GrantType:    util.StringToPointer("client_credentials"),
-		ClientUID:    util.StringToPointer("client_uid"),
-		ClientSecret: util.StringToPointer("client_secret"),
-		Scope:        util.StringToPointer("public"),
+		GrantType:    util.ValueToPointer("client_credentials"),
+		ClientUID:    util.ValueToPointer("client_uid"),
+		ClientSecret: util.ValueToPointer("client_secret"),
+		Scope:        util.ValueToPointer("public"),
 	}
 	suite.accessToken = entity.OauthAccessToken{
 		ID:                 1,

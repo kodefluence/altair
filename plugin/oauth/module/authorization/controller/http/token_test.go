@@ -45,11 +45,11 @@ func TestToken(t *testing.T) {
 				apiEngine := gin.Default()
 
 				accessTokenRequest := entity.AccessTokenRequestJSON{
-					GrantType:    util.StringToPointer("authorization_code"),
-					ClientUID:    util.StringToPointer(aurelia.Hash("x", "y")),
-					ClientSecret: util.StringToPointer(aurelia.Hash("z", "a")),
-					RedirectURI:  util.StringToPointer("http://github.com"),
-					Code:         util.StringToPointer("authorization_code"),
+					GrantType:    util.ValueToPointer("authorization_code"),
+					ClientUID:    util.ValueToPointer(aurelia.Hash("x", "y")),
+					ClientSecret: util.ValueToPointer(aurelia.Hash("z", "a")),
+					RedirectURI:  util.ValueToPointer("http://github.com"),
+					Code:         util.ValueToPointer("authorization_code"),
 				}
 				encodedBytes, err := json.Marshal(accessTokenRequest)
 				assert.Nil(t, err)
@@ -87,11 +87,11 @@ func TestToken(t *testing.T) {
 					apiEngine := gin.Default()
 
 					accessTokenRequest := entity.AccessTokenRequestJSON{
-						GrantType:    util.StringToPointer("authorization_code"),
-						ClientUID:    util.StringToPointer(aurelia.Hash("x", "y")),
-						ClientSecret: util.StringToPointer(aurelia.Hash("z", "a")),
-						RedirectURI:  util.StringToPointer("http://github.com"),
-						Code:         util.StringToPointer("authorization_code"),
+						GrantType:    util.ValueToPointer("authorization_code"),
+						ClientUID:    util.ValueToPointer(aurelia.Hash("x", "y")),
+						ClientSecret: util.ValueToPointer(aurelia.Hash("z", "a")),
+						RedirectURI:  util.ValueToPointer("http://github.com"),
+						Code:         util.ValueToPointer("authorization_code"),
 					}
 					encodedBytes, err := json.Marshal(accessTokenRequest)
 					assert.Nil(t, err)

@@ -40,7 +40,7 @@ func TestRevoke(t *testing.T) {
 				apiEngine := gin.Default()
 
 				revokeTokenRequest := entity.RevokeAccessTokenRequestJSON{
-					Token: util.StringToPointer("some-cool-token"),
+					Token: util.ValueToPointer("some-cool-token"),
 				}
 				encodedBytes, err := json.Marshal(revokeTokenRequest)
 				assert.Nil(t, err)

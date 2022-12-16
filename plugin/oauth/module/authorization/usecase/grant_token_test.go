@@ -37,10 +37,10 @@ func (suite *GrantTokenSuiteTest) SetupTest() {
 		OwnerType: "confidential",
 	}
 	suite.accessTokenRequestJSON = entity.AccessTokenRequestJSON{
-		GrantType:    util.StringToPointer("client_credentials"),
-		ClientUID:    util.StringToPointer("client_uid"),
-		ClientSecret: util.StringToPointer("client_secret"),
-		Scope:        util.StringToPointer("public"),
+		GrantType:    util.ValueToPointer("client_credentials"),
+		ClientUID:    util.ValueToPointer("client_uid"),
+		ClientSecret: util.ValueToPointer("client_secret"),
+		Scope:        util.ValueToPointer("public"),
 	}
 }
 
@@ -64,7 +64,7 @@ func (suite *GrantTokenSuiteTest) TestGrantTokenSuiteTest() {
 		})
 
 		suite.Subtest("When grant type is empty, then it would return error", func() {
-			suite.accessTokenRequestJSON.GrantType = util.StringToPointer("")
+			suite.accessTokenRequestJSON.GrantType = util.ValueToPointer("")
 
 			_, err := suite.authorization.GrantToken(suite.ktx, suite.accessTokenRequestJSON)
 			suite.Assert().NotNil(err)
@@ -73,7 +73,7 @@ func (suite *GrantTokenSuiteTest) TestGrantTokenSuiteTest() {
 		})
 
 		suite.Subtest("When grant type is refresh token but refresh token config is inactive, then it would return error", func() {
-			suite.accessTokenRequestJSON.GrantType = util.StringToPointer("refresh_token")
+			suite.accessTokenRequestJSON.GrantType = util.ValueToPointer("refresh_token")
 			suite.config.Config.RefreshToken.Active = false
 			suite.authorization = usecase.NewAuthorization(suite.oauthApplicationRepo, suite.oauthAccessTokenRepo, suite.oauthAccessGrantRepo, suite.oauthRefreshTokenRepo, suite.formatter, suite.config, suite.sqldb, suite.apiError)
 

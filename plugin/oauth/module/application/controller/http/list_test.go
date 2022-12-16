@@ -48,20 +48,20 @@ func TestList(t *testing.T) {
 
 				oauthApplicationJSONs := []entity.OauthApplicationJSON{
 					{
-						ID:           util.IntToPointer(1),
-						OwnerID:      util.IntToPointer(1),
-						Description:  util.StringToPointer("Application 1"),
-						Scopes:       util.StringToPointer("public user"),
-						ClientUID:    util.StringToPointer("clientuid01"),
-						ClientSecret: util.StringToPointer("clientsecret01"),
+						ID:           util.ValueToPointer(1),
+						OwnerID:      util.ValueToPointer(1),
+						Description:  util.ValueToPointer("Application 1"),
+						Scopes:       util.ValueToPointer("public user"),
+						ClientUID:    util.ValueToPointer("clientuid01"),
+						ClientSecret: util.ValueToPointer("clientsecret01"),
 					},
 					{
-						ID:           util.IntToPointer(2),
-						OwnerID:      util.IntToPointer(2),
-						Description:  util.StringToPointer("Application 2"),
-						Scopes:       util.StringToPointer("public user"),
-						ClientUID:    util.StringToPointer("clientuid02"),
-						ClientSecret: util.StringToPointer("clientsecret02"),
+						ID:           util.ValueToPointer(2),
+						OwnerID:      util.ValueToPointer(2),
+						Description:  util.ValueToPointer("Application 2"),
+						Scopes:       util.ValueToPointer("public user"),
+						ClientUID:    util.ValueToPointer("clientuid02"),
+						ClientSecret: util.ValueToPointer("clientsecret02"),
 					},
 				}
 

@@ -19,9 +19,9 @@ func (*Formatter) AccessToken(e entity.OauthAccessToken, redirectURI string, ref
 	data.CreatedAt = &e.CreatedAt
 
 	if time.Now().Before(e.ExpiresIn) {
-		data.ExpiresIn = util.IntToPointer(int(time.Until(e.ExpiresIn).Seconds()))
+		data.ExpiresIn = util.ValueToPointer(int(time.Until(e.ExpiresIn).Seconds()))
 	} else {
-		data.ExpiresIn = util.IntToPointer(0)
+		data.ExpiresIn = util.ValueToPointer(0)
 	}
 
 	if e.RevokedAT.Valid {

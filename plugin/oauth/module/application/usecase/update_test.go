@@ -37,8 +37,8 @@ func TestUpdate(t *testing.T) {
 					oauthApplicationRepository := mock.NewMockOauthApplicationRepository(mockCtrl)
 
 					data := entity.OauthApplicationUpdateJSON{
-						Description: util.StringToPointer("New description"),
-						Scopes:      util.StringToPointer("users public"),
+						Description: util.ValueToPointer("New description"),
+						Scopes:      util.ValueToPointer("users public"),
 					}
 
 					gomock.InOrder(
@@ -68,8 +68,8 @@ func TestUpdate(t *testing.T) {
 					oauthApplicationRepository := mock.NewMockOauthApplicationRepository(mockCtrl)
 
 					data := entity.OauthApplicationUpdateJSON{
-						Description: util.StringToPointer("New description"),
-						Scopes:      util.StringToPointer("users public"),
+						Description: util.ValueToPointer("New description"),
+						Scopes:      util.ValueToPointer("users public"),
 					}
 
 					gomock.InOrder(

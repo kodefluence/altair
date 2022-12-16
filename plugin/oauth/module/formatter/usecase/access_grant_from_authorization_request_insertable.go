@@ -12,9 +12,9 @@ func (f *Formatter) AccessGrantFromAuthorizationRequestInsertable(r entity.Autho
 
 	accessGrantInsertable.OauthApplicationID = application.ID
 	accessGrantInsertable.ResourceOwnerID = *r.ResourceOwnerID
-	accessGrantInsertable.Scopes = util.PointerToString(r.Scopes)
+	accessGrantInsertable.Scopes = util.PointerToValue(r.Scopes)
 	accessGrantInsertable.Code = util.SHA1()
-	accessGrantInsertable.RedirectURI = util.PointerToString(r.RedirectURI)
+	accessGrantInsertable.RedirectURI = util.PointerToValue(r.RedirectURI)
 	accessGrantInsertable.ExpiresIn = time.Now().Add(f.codeExpiresIn)
 
 	return accessGrantInsertable

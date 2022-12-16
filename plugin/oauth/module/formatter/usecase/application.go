@@ -16,7 +16,7 @@ func (f *Formatter) Application(application entity.OauthApplication) entity.Oaut
 	}
 
 	if application.OwnerID.Valid {
-		oauthApplicationJSON.OwnerID = util.IntToPointer(int(application.OwnerID.Int64))
+		oauthApplicationJSON.OwnerID = util.ValueToPointer(int(application.OwnerID.Int64))
 	}
 
 	if application.RevokedAt.Valid {

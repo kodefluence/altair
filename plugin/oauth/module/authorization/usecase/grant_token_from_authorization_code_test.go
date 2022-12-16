@@ -45,12 +45,12 @@ func (suite *GrantTokenFromAuthorizationCodeTest) SetupTest() {
 		OwnerType: "confidential",
 	}
 	suite.accessTokenRequestJSON = entity.AccessTokenRequestJSON{
-		GrantType:    util.StringToPointer("authorization_code"),
-		ClientUID:    util.StringToPointer("client_uid"),
-		ClientSecret: util.StringToPointer("client_secret"),
-		RefreshToken: util.StringToPointer("some-refresh-token"),
-		Code:         util.StringToPointer("some-code"),
-		RedirectURI:  util.StringToPointer("https://github.com/kodefluence/altair"),
+		GrantType:    util.ValueToPointer("authorization_code"),
+		ClientUID:    util.ValueToPointer("client_uid"),
+		ClientSecret: util.ValueToPointer("client_secret"),
+		RefreshToken: util.ValueToPointer("some-refresh-token"),
+		Code:         util.ValueToPointer("some-code"),
+		RedirectURI:  util.ValueToPointer("https://github.com/kodefluence/altair"),
 	}
 	suite.accessGrant = entity.OauthAccessGrant{
 		ID:                 1,

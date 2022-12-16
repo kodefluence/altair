@@ -41,18 +41,18 @@ func TestUpdate(t *testing.T) {
 				apiEngine := gin.Default()
 
 				oauthApplicationUpdateJSON := entity.OauthApplicationUpdateJSON{
-					Description: util.StringToPointer("Application 1"),
-					Scopes:      util.StringToPointer("public user"),
+					Description: util.ValueToPointer("Application 1"),
+					Scopes:      util.ValueToPointer("public user"),
 				}
 				encodedBytes, err := json.Marshal(oauthApplicationUpdateJSON)
 				assert.Nil(t, err)
 
 				oauthApplicationJSON := entity.OauthApplicationJSON{
-					OwnerID:      util.IntToPointer(1),
-					Description:  util.StringToPointer("Application 1"),
-					Scopes:       util.StringToPointer("public user"),
-					ClientUID:    util.StringToPointer("clientuid01"),
-					ClientSecret: util.StringToPointer("clientsecret01"),
+					OwnerID:      util.ValueToPointer(1),
+					Description:  util.ValueToPointer("Application 1"),
+					Scopes:       util.ValueToPointer("public user"),
+					ClientUID:    util.ValueToPointer("clientuid01"),
+					ClientSecret: util.ValueToPointer("clientsecret01"),
 				}
 
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
@@ -75,8 +75,8 @@ func TestUpdate(t *testing.T) {
 				apiEngine := gin.Default()
 
 				oauthApplicationUpdateJSON := entity.OauthApplicationUpdateJSON{
-					Description: util.StringToPointer("Application 1"),
-					Scopes:      util.StringToPointer("public user"),
+					Description: util.ValueToPointer("Application 1"),
+					Scopes:      util.ValueToPointer("public user"),
 				}
 				encodedBytes, err := json.Marshal(oauthApplicationUpdateJSON)
 				assert.Nil(t, err)
@@ -119,8 +119,8 @@ func TestUpdate(t *testing.T) {
 				t.Run("Return bad request", func(t *testing.T) {
 
 					oauthApplicationUpdateJSON := entity.OauthApplicationUpdateJSON{
-						Description: util.StringToPointer("Application 1"),
-						Scopes:      util.StringToPointer("public user"),
+						Description: util.ValueToPointer("Application 1"),
+						Scopes:      util.ValueToPointer("public user"),
 					}
 					encodedBytes, err := json.Marshal(oauthApplicationUpdateJSON)
 					assert.Nil(t, err)

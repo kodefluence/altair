@@ -14,9 +14,9 @@ func (*Formatter) RefreshToken(e entity.OauthRefreshToken) entity.OauthRefreshTo
 	data.Token = &e.Token
 
 	if time.Now().Before(e.ExpiresIn) {
-		data.ExpiresIn = util.IntToPointer(int(time.Until(e.ExpiresIn).Seconds()))
+		data.ExpiresIn = util.ValueToPointer(int(time.Until(e.ExpiresIn).Seconds()))
 	} else {
-		data.ExpiresIn = util.IntToPointer(0)
+		data.ExpiresIn = util.ValueToPointer(0)
 	}
 
 	if e.RevokedAT.Valid {

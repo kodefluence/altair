@@ -22,12 +22,12 @@ func TestValidateTokenGrant(t *testing.T) {
 
 func (suite *ValidateTokenGrantSuiteTest) SetupTest() {
 	suite.accessTokenRequestJSON = entity.AccessTokenRequestJSON{
-		GrantType:    util.StringToPointer("authorization_code"),
-		ClientUID:    util.StringToPointer("client_uid"),
-		ClientSecret: util.StringToPointer("client_secret"),
-		RefreshToken: util.StringToPointer("some-refresh-token"),
-		Code:         util.StringToPointer("some-code"),
-		RedirectURI:  util.StringToPointer("https://github.com/kodefluence/altair"),
+		GrantType:    util.ValueToPointer("authorization_code"),
+		ClientUID:    util.ValueToPointer("client_uid"),
+		ClientSecret: util.ValueToPointer("client_secret"),
+		RefreshToken: util.ValueToPointer("some-refresh-token"),
+		Code:         util.ValueToPointer("some-code"),
+		RedirectURI:  util.ValueToPointer("https://github.com/kodefluence/altair"),
 	}
 }
 
@@ -39,7 +39,7 @@ func (suite *ValidateTokenGrantSuiteTest) TestValidateTokenGrantSuiteTest() {
 		})
 
 		suite.Subtest("When request param is valid and grant_type is client_credentials, then it would return nil", func() {
-			suite.accessTokenRequestJSON.GrantType = util.StringToPointer("client_credentials")
+			suite.accessTokenRequestJSON.GrantType = util.ValueToPointer("client_credentials")
 			err := suite.authorization.ValidateTokenGrant(suite.accessTokenRequestJSON)
 			suite.Nil(err)
 		})
@@ -53,13 +53,13 @@ func (suite *ValidateTokenGrantSuiteTest) TestValidateTokenGrantSuiteTest() {
 		})
 
 		suite.Subtest("When grant type is empty, then it would return error", func() {
-			suite.accessTokenRequestJSON.GrantType = util.StringToPointer("")
+			suite.accessTokenRequestJSON.GrantType = util.ValueToPointer("")
 			err := suite.authorization.ValidateTokenGrant(suite.accessTokenRequestJSON)
 			suite.Equal("JSONAPI Error:\n[Validation error] Detail: Validation error because of: grant_type is not valid value, Code: ERR1442\n", err.Error())
 		})
 
 		suite.Subtest("When grant type is invalid value, then it would return error", func() {
-			suite.accessTokenRequestJSON.GrantType = util.StringToPointer("invalid value")
+			suite.accessTokenRequestJSON.GrantType = util.ValueToPointer("invalid value")
 			err := suite.authorization.ValidateTokenGrant(suite.accessTokenRequestJSON)
 			suite.Equal("JSONAPI Error:\n[Validation error] Detail: Validation error because of: grant_type is not valid value, Code: ERR1442\n", err.Error())
 		})
@@ -84,7 +84,7 @@ func (suite *ValidateTokenGrantSuiteTest) TestValidateTokenGrantSuiteTest() {
 		})
 
 		suite.Subtest("When grant_type is refresh_token with nil refresh_token, then it would return error", func() {
-			suite.accessTokenRequestJSON.GrantType = util.StringToPointer("refresh_token")
+			suite.accessTokenRequestJSON.GrantType = util.ValueToPointer("refresh_token")
 			suite.accessTokenRequestJSON.RefreshToken = nil
 			err := suite.authorization.ValidateTokenGrant(suite.accessTokenRequestJSON)
 			suite.Equal("JSONAPI Error:\n[Validation error] Detail: Validation error because of: refresh_token is not valid value, Code: ERR1442\n", err.Error())

@@ -76,10 +76,10 @@ func TestOauthApplication(t *testing.T) {
 			t.Run("Return oauth access grant insertable", func(t *testing.T) {
 
 				oauthApplicationJSON := entity.OauthApplicationJSON{
-					OwnerID:     util.IntToPointer(1),
-					OwnerType:   util.StringToPointer("confidential"),
-					Description: util.StringToPointer("Application 1"),
-					Scopes:      util.StringToPointer("public user"),
+					OwnerID:     util.ValueToPointer(1),
+					OwnerType:   util.ValueToPointer("confidential"),
+					Description: util.ValueToPointer("Application 1"),
+					Scopes:      util.ValueToPointer("public user"),
 				}
 
 				insertable := newFormatter().OauthApplicationInsertable(oauthApplicationJSON)
@@ -98,8 +98,8 @@ func TestOauthApplication(t *testing.T) {
 		t.Run("Given authorization request and oauth application", func(t *testing.T) {
 			t.Run("Return oauth access token insertable", func(t *testing.T) {
 				authorizationRequest := entity.AuthorizationRequestJSON{
-					ResourceOwnerID: util.IntToPointer(1),
-					Scopes:          util.StringToPointer("users public"),
+					ResourceOwnerID: util.ValueToPointer(1),
+					Scopes:          util.ValueToPointer("users public"),
 				}
 
 				application := entity.OauthApplication{
@@ -124,7 +124,7 @@ func TestOauthApplication(t *testing.T) {
 					ID: 1,
 				}
 
-				scopes := util.StringToPointer("publc")
+				scopes := util.ValueToPointer("publc")
 
 				insertable := newFormatter().AccessTokenClientCredentialInsertable(application, scopes)
 
@@ -139,9 +139,9 @@ func TestOauthApplication(t *testing.T) {
 		t.Run("Given authorization request and oauth application", func(t *testing.T) {
 			t.Run("Return oauth access grant insertable", func(t *testing.T) {
 				authorizationRequest := entity.AuthorizationRequestJSON{
-					ResourceOwnerID: util.IntToPointer(1),
-					Scopes:          util.StringToPointer("users public"),
-					RedirectURI:     util.StringToPointer("https://github.com"),
+					ResourceOwnerID: util.ValueToPointer(1),
+					Scopes:          util.ValueToPointer("users public"),
+					RedirectURI:     util.ValueToPointer("https://github.com"),
 				}
 
 				application := entity.OauthApplication{
@@ -335,12 +335,12 @@ func TestOauthApplication(t *testing.T) {
 			t.Run("Token not revoked", func(t *testing.T) {
 				t.Run("Return oauth access token json", func(t *testing.T) {
 					authorizationReq := entity.AuthorizationRequestJSON{
-						ResponseType:    util.StringToPointer("token"),
-						ResourceOwnerID: util.IntToPointer(1),
-						ClientUID:       util.StringToPointer(aurelia.Hash("", "")),
-						ClientSecret:    util.StringToPointer(aurelia.Hash("", "")),
-						RedirectURI:     util.StringToPointer("http://github.com"),
-						Scopes:          util.StringToPointer("public users"),
+						ResponseType:    util.ValueToPointer("token"),
+						ResourceOwnerID: util.ValueToPointer(1),
+						ClientUID:       util.ValueToPointer(aurelia.Hash("", "")),
+						ClientSecret:    util.ValueToPointer(aurelia.Hash("", "")),
+						RedirectURI:     util.ValueToPointer("http://github.com"),
+						Scopes:          util.ValueToPointer("public users"),
 					}
 
 					oauthAccessToken := entity.OauthAccessToken{
@@ -377,12 +377,12 @@ func TestOauthApplication(t *testing.T) {
 			t.Run("Token not revoked with refresh token", func(t *testing.T) {
 				t.Run("Return oauth access token json", func(t *testing.T) {
 					authorizationReq := entity.AuthorizationRequestJSON{
-						ResponseType:    util.StringToPointer("token"),
-						ResourceOwnerID: util.IntToPointer(1),
-						ClientUID:       util.StringToPointer(aurelia.Hash("", "")),
-						ClientSecret:    util.StringToPointer(aurelia.Hash("", "")),
-						RedirectURI:     util.StringToPointer("http://github.com"),
-						Scopes:          util.StringToPointer("public users"),
+						ResponseType:    util.ValueToPointer("token"),
+						ResourceOwnerID: util.ValueToPointer(1),
+						ClientUID:       util.ValueToPointer(aurelia.Hash("", "")),
+						ClientSecret:    util.ValueToPointer(aurelia.Hash("", "")),
+						RedirectURI:     util.ValueToPointer("http://github.com"),
+						Scopes:          util.ValueToPointer("public users"),
 					}
 
 					oauthAccessToken := entity.OauthAccessToken{
@@ -418,12 +418,12 @@ func TestOauthApplication(t *testing.T) {
 
 			t.Run("Token already revoked", func(t *testing.T) {
 				authorizationReq := entity.AuthorizationRequestJSON{
-					ResponseType:    util.StringToPointer("token"),
-					ResourceOwnerID: util.IntToPointer(1),
-					ClientUID:       util.StringToPointer(aurelia.Hash("", "")),
-					ClientSecret:    util.StringToPointer(aurelia.Hash("", "")),
-					RedirectURI:     util.StringToPointer("http://github.com"),
-					Scopes:          util.StringToPointer("public users"),
+					ResponseType:    util.ValueToPointer("token"),
+					ResourceOwnerID: util.ValueToPointer(1),
+					ClientUID:       util.ValueToPointer(aurelia.Hash("", "")),
+					ClientSecret:    util.ValueToPointer(aurelia.Hash("", "")),
+					RedirectURI:     util.ValueToPointer("http://github.com"),
+					Scopes:          util.ValueToPointer("public users"),
 				}
 
 				oauthAccessToken := entity.OauthAccessToken{
