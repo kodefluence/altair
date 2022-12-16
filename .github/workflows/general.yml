@@ -21,9 +21,6 @@ jobs:
       - name: Install goveralls
         run: go install github.com/mattn/goveralls@latest
 
-      - name: Go mod vendor
-        run: go mod vendor
-
       - name: Lint
         uses: golangci/golangci-lint-action@v3
         with:
