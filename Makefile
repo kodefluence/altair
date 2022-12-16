@@ -4,8 +4,6 @@ export IMAGE 		?= kodefluence/altair
 test:
 	go test -race -cover -coverprofile=cover.out $$(go list ./... | grep -Ev "altair$$|core|mock|interfaces|testhelper")
 
-lint: golangci-lint run
-
 mock_metric:
 	mockgen -source core/metric.go -destination mock/mock_metric.go -package mock
 
