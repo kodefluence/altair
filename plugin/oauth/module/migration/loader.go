@@ -12,11 +12,10 @@ import (
 //go:embed mysql/*.sql
 var fs embed.FS
 
-func LoadCommand(sqldb db.DB, sqldbconfig core.DatabaseConfig, appModule module.App) error {
+func LoadCommand(sqldb db.DB, sqldbconfig core.DatabaseConfig, appModule module.App) {
 	appModule.Controller().InjectCommand(
 		command.NewMigrateUp(sqldb, sqldbconfig, fs),
 		command.NewMigrateDown(sqldb, sqldbconfig, fs),
 		command.NewMigrateRollback(sqldb, sqldbconfig, fs),
 	)
-	return nil
 }

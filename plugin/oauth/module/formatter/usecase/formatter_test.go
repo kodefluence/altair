@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/plugin/oauth/module/formatter/usecase"
 	"github.com/kodefluence/altair/util"
@@ -34,7 +33,7 @@ func TestOauthApplication(t *testing.T) {
 						},
 						ClientUID:    "clientuid01",
 						ClientSecret: "clientsecret01",
-						RevokedAt: mysql.NullTime{
+						RevokedAt: sql.NullTime{
 							Time:  time.Now(),
 							Valid: true,
 						},
@@ -57,7 +56,7 @@ func TestOauthApplication(t *testing.T) {
 						},
 						ClientUID:    "clientuid02",
 						ClientSecret: "clientsecret02",
-						RevokedAt: mysql.NullTime{
+						RevokedAt: sql.NullTime{
 							Time:  time.Now(),
 							Valid: true,
 						},
@@ -175,7 +174,7 @@ func TestOauthApplication(t *testing.T) {
 						Valid:  true,
 					},
 					ResourceOwnerID: 1,
-					RevokedAT: mysql.NullTime{
+					RevokedAT: sql.NullTime{
 						Valid: false,
 					},
 					Scopes: sql.NullString{
@@ -256,7 +255,7 @@ func TestOauthApplication(t *testing.T) {
 					OauthApplicationID: 1,
 					ResourceOwnerID:    1,
 					Code:               util.SHA1(),
-					RevokedAT: mysql.NullTime{
+					RevokedAT: sql.NullTime{
 						Time:  time.Time{},
 						Valid: false,
 					},
@@ -280,7 +279,7 @@ func TestOauthApplication(t *testing.T) {
 				assert.Equal(t, &oauthAccessGrant.Code, output.Code)
 				assert.Equal(t, &oauthAccessGrant.RedirectURI.String, output.RedirectURI)
 				assert.Equal(t, &oauthAccessGrant.CreatedAt, output.CreatedAt)
-				assert.LessOrEqual(t, *output.ExpiresIn, int(oauthAccessGrant.ExpiresIn.Sub(time.Now()).Seconds()))
+				assert.LessOrEqual(t, *output.ExpiresIn, int(time.Until(oauthAccessGrant.ExpiresIn).Seconds()))
 				assert.Greater(t, *output.ExpiresIn, 3500)
 				assert.Nil(t, output.RevokedAT)
 
@@ -306,7 +305,7 @@ func TestOauthApplication(t *testing.T) {
 					},
 					ExpiresIn: time.Now().Add(-time.Hour),
 					CreatedAt: time.Now().Add(-time.Hour * 2),
-					RevokedAT: mysql.NullTime{
+					RevokedAT: sql.NullTime{
 						Valid: true,
 						Time:  time.Now(),
 					},
@@ -365,7 +364,7 @@ func TestOauthApplication(t *testing.T) {
 					assert.Equal(t, &oauthAccessToken.Token, output.Token)
 					assert.Equal(t, &oauthAccessToken.CreatedAt, output.CreatedAt)
 					assert.Equal(t, &oauthAccessToken.Scopes.String, output.Scopes)
-					assert.LessOrEqual(t, *output.ExpiresIn, int(oauthAccessToken.ExpiresIn.Sub(time.Now()).Seconds()))
+					assert.LessOrEqual(t, *output.ExpiresIn, int(time.Until(oauthAccessToken.ExpiresIn).Seconds()))
 					assert.Greater(t, *output.ExpiresIn, 3500)
 					assert.Nil(t, output.RevokedAT)
 
@@ -407,7 +406,7 @@ func TestOauthApplication(t *testing.T) {
 					assert.Equal(t, &oauthAccessToken.Token, output.Token)
 					assert.Equal(t, &oauthAccessToken.CreatedAt, output.CreatedAt)
 					assert.Equal(t, &oauthAccessToken.Scopes.String, output.Scopes)
-					assert.LessOrEqual(t, *output.ExpiresIn, int(oauthAccessToken.ExpiresIn.Sub(time.Now()).Seconds()))
+					assert.LessOrEqual(t, *output.ExpiresIn, int(time.Until(oauthAccessToken.ExpiresIn).Seconds()))
 					assert.Greater(t, *output.ExpiresIn, 3500)
 					assert.Nil(t, output.RevokedAT)
 
@@ -438,7 +437,7 @@ func TestOauthApplication(t *testing.T) {
 					},
 					ExpiresIn: time.Now().Add(-time.Hour),
 					CreatedAt: time.Now().Add(-time.Hour * 2),
-					RevokedAT: mysql.NullTime{
+					RevokedAT: sql.NullTime{
 						Valid: true,
 						Time:  time.Now(),
 					},
@@ -450,7 +449,7 @@ func TestOauthApplication(t *testing.T) {
 					Token:              "token",
 					ExpiresIn:          time.Now().Add(time.Hour),
 					CreatedAt:          time.Now(),
-					RevokedAT: mysql.NullTime{
+					RevokedAT: sql.NullTime{
 						Valid: false,
 					},
 				}
@@ -485,7 +484,7 @@ func TestOauthApplication(t *testing.T) {
 						Token:              "token",
 						ExpiresIn:          time.Now().Add(time.Hour),
 						CreatedAt:          time.Now(),
-						RevokedAT: mysql.NullTime{
+						RevokedAT: sql.NullTime{
 							Valid: false,
 						},
 					}
@@ -494,7 +493,7 @@ func TestOauthApplication(t *testing.T) {
 
 					assert.Equal(t, &oauthRefreshToken.CreatedAt, output.CreatedAt)
 					assert.Equal(t, &oauthRefreshToken.Token, output.Token)
-					assert.LessOrEqual(t, *output.ExpiresIn, int(oauthRefreshToken.ExpiresIn.Sub(time.Now()).Seconds()))
+					assert.LessOrEqual(t, *output.ExpiresIn, int(time.Until(oauthRefreshToken.ExpiresIn).Seconds()))
 					assert.Nil(t, output.RevokedAT)
 				})
 			})
@@ -506,7 +505,7 @@ func TestOauthApplication(t *testing.T) {
 					Token:              "token",
 					ExpiresIn:          time.Now().Add(-time.Hour),
 					CreatedAt:          time.Now().Add(-time.Hour * 2),
-					RevokedAT: mysql.NullTime{
+					RevokedAT: sql.NullTime{
 						Time:  time.Now().Add(-time.Hour),
 						Valid: true,
 					},

@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/golang/mock/gomock"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/plugin/oauth/module/authorization/usecase"
@@ -65,7 +64,7 @@ func (suite *GrantTokenFromAuthorizationCodeTest) SetupTest() {
 		Scopes:    sql.NullString{},
 		ExpiresIn: time.Now().Add(time.Hour),
 		CreatedAt: time.Now().Add(-24 * time.Hour),
-		RevokedAT: mysql.NullTime{},
+		RevokedAT: sql.NullTime{},
 	}
 	suite.accessToken = entity.OauthAccessToken{
 		ID:                 1,
@@ -75,7 +74,7 @@ func (suite *GrantTokenFromAuthorizationCodeTest) SetupTest() {
 		Scopes:             sql.NullString{},
 		ExpiresIn:          time.Time{},
 		CreatedAt:          time.Time{},
-		RevokedAT:          mysql.NullTime{},
+		RevokedAT:          sql.NullTime{},
 	}
 	suite.refreshToken = entity.OauthRefreshToken{
 		ID:                 1,
@@ -83,7 +82,7 @@ func (suite *GrantTokenFromAuthorizationCodeTest) SetupTest() {
 		Token:              "some token",
 		ExpiresIn:          time.Time{},
 		CreatedAt:          time.Time{},
-		RevokedAT:          mysql.NullTime{},
+		RevokedAT:          sql.NullTime{},
 	}
 }
 
@@ -179,7 +178,7 @@ func (suite *GrantTokenFromAuthorizationCodeTest) TestValidateTokenGrantSuiteTes
 		})
 
 		suite.Subtest("When access grant validation failure, then it would return error", func() {
-			suite.accessGrant.RevokedAT = mysql.NullTime{
+			suite.accessGrant.RevokedAT = sql.NullTime{
 				Time:  time.Now().Add(-1 * time.Hour),
 				Valid: true,
 			}

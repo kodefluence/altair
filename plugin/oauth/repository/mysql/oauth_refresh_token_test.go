@@ -14,15 +14,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var oauthRefreshTokenRows = []string{
-	"id",
-	"oauth_access_token_id",
-	"token",
-	"expires_in",
-	"created_at",
-	"revoked_at",
-}
-
 func TestOauthRefreshToken(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()

@@ -67,7 +67,7 @@ func TestDatabase(t *testing.T) {
 
 						expectedMaxConnLifetime, _ := expectedMYSQLConfig.DBConnectionMaxLifetime()
 						actualMaxConnLifetime, err := c.DBConnectionMaxLifetime()
-
+						assert.Nil(t, err)
 						assert.Equal(t, expectedMaxConnLifetime, actualMaxConnLifetime)
 
 						expectedMaxIddleConn, _ := expectedMYSQLConfig.DBMaxIddleConn()
@@ -134,7 +134,7 @@ func TestDatabase(t *testing.T) {
 
 						expectedMaxConnLifetime, _ := expectedMYSQLConfig.DBConnectionMaxLifetime()
 						actualMaxConnLifetime, err := c.DBConnectionMaxLifetime()
-
+						assert.Nil(t, err)
 						assert.Equal(t, expectedMaxConnLifetime, actualMaxConnLifetime)
 
 						expectedMaxIddleConn, _ := expectedMYSQLConfig.DBMaxIddleConn()
@@ -224,7 +224,7 @@ func TestDatabase(t *testing.T) {
 
 						expectedMaxConnLifetime1, _ := expectedMYSQLConfig1.DBConnectionMaxLifetime()
 						actualMaxConnLifetime1, err := c1.DBConnectionMaxLifetime()
-
+						assert.Nil(t, err)
 						assert.Equal(t, expectedMaxConnLifetime1, actualMaxConnLifetime1)
 
 						expectedMaxIddleConn1, _ := expectedMYSQLConfig1.DBMaxIddleConn()
@@ -254,7 +254,7 @@ func TestDatabase(t *testing.T) {
 
 						expectedMaxConnLifetime2, _ := expectedMYSQLConfig2.DBConnectionMaxLifetime()
 						actualMaxConnLifetime2, err := c2.DBConnectionMaxLifetime()
-
+						assert.Nil(t, err)
 						assert.Equal(t, expectedMaxConnLifetime2, actualMaxConnLifetime2)
 
 						expectedMaxIddleConn2, _ := expectedMYSQLConfig2.DBMaxIddleConn()

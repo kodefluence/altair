@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/golang/mock/gomock"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/util"
@@ -57,7 +56,7 @@ func (suite *GrantSuiteTest) SetupTest() {
 		Scopes:             sql.NullString{},
 		ExpiresIn:          time.Time{},
 		CreatedAt:          time.Time{},
-		RevokedAT:          mysql.NullTime{},
+		RevokedAT:          sql.NullTime{},
 	}
 }
 

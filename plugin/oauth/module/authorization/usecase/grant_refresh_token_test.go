@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/golang/mock/gomock"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/monorepo/db"
@@ -47,7 +46,7 @@ func (suite *GrantRefreshTokenSuiteTest) SetupTest() {
 		Scopes:             sql.NullString{},
 		ExpiresIn:          time.Time{},
 		CreatedAt:          time.Time{},
-		RevokedAT:          mysql.NullTime{},
+		RevokedAT:          sql.NullTime{},
 	}
 	suite.refreshToken = entity.OauthRefreshToken{
 		ID:                 1,
@@ -55,7 +54,7 @@ func (suite *GrantRefreshTokenSuiteTest) SetupTest() {
 		Token:              "",
 		ExpiresIn:          time.Time{},
 		CreatedAt:          time.Time{},
-		RevokedAT:          mysql.NullTime{},
+		RevokedAT:          sql.NullTime{},
 	}
 }
 

@@ -3,12 +3,12 @@ package usecase
 import (
 	"bytes"
 	"html/template"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
 	"github.com/google/uuid"
 	"github.com/kodefluence/altair/entity"
+	"github.com/kodefluence/altair/util"
 	"gopkg.in/yaml.v2"
 )
 
@@ -81,7 +81,7 @@ func (c *Compiler) walkAllFiles(routesPath string) ([][]byte, error) {
 	}
 
 	for _, path := range files {
-		f, _ := ioutil.ReadFile(path)
+		f, _ := util.ReadFileContent(path)
 		routeFiles = append(routeFiles, f)
 	}
 

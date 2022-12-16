@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/golang/mock/gomock"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/plugin/oauth/module/authorization/usecase"
@@ -57,7 +56,7 @@ func (suite *GrantorSuiteTest) SetupTest() {
 		Scopes:             sql.NullString{},
 		ExpiresIn:          time.Time{},
 		CreatedAt:          time.Time{},
-		RevokedAT:          mysql.NullTime{},
+		RevokedAT:          sql.NullTime{},
 	}
 	suite.accessGrant = entity.OauthAccessGrant{
 		ID:                 1,
@@ -68,7 +67,7 @@ func (suite *GrantorSuiteTest) SetupTest() {
 		Scopes:             sql.NullString{},
 		ExpiresIn:          time.Time{},
 		CreatedAt:          time.Time{},
-		RevokedAT:          mysql.NullTime{},
+		RevokedAT:          sql.NullTime{},
 	}
 }
 

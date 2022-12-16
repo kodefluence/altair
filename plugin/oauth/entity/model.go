@@ -3,8 +3,6 @@ package entity
 import (
 	"database/sql"
 	"time"
-
-	"github.com/go-sql-driver/mysql"
 )
 
 //
@@ -22,7 +20,7 @@ type OauthApplication struct {
 	Scopes       sql.NullString
 	ClientUID    string
 	ClientSecret string
-	RevokedAt    mysql.NullTime
+	RevokedAt    sql.NullTime
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
@@ -37,7 +35,7 @@ type OauthAccessGrant struct {
 	Scopes             sql.NullString
 	ExpiresIn          time.Time
 	CreatedAt          time.Time
-	RevokedAT          mysql.NullTime
+	RevokedAT          sql.NullTime
 }
 
 // OauthAccessToken is a struct returned from interfaces.OauthAccessTokenModel
@@ -49,7 +47,7 @@ type OauthAccessToken struct {
 	Scopes             sql.NullString
 	ExpiresIn          time.Time
 	CreatedAt          time.Time
-	RevokedAT          mysql.NullTime
+	RevokedAT          sql.NullTime
 }
 
 // OauthRefreshToken is a struct returned from interfaces.OauthRefreshTokenModel
@@ -59,5 +57,5 @@ type OauthRefreshToken struct {
 	Token              string
 	ExpiresIn          time.Time
 	CreatedAt          time.Time
-	RevokedAT          mysql.NullTime
+	RevokedAT          sql.NullTime
 }

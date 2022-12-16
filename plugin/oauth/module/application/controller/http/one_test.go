@@ -97,7 +97,7 @@ func TestOne(t *testing.T) {
 
 			w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/x", nil)
 			assert.Equal(t, http.StatusBadRequest, w.Code)
-			assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `url parameters: id is not integer`\",\"code\":\"ERR0400\",\"status\":400}]}", string(w.Body.Bytes()))
+			assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `url parameters: id is not integer`\",\"code\":\"ERR0400\",\"status\":400}]}", w.Body.String())
 		})
 	})
 }

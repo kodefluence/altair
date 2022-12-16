@@ -116,22 +116,22 @@ func executeCommand() {
 			}
 
 			app := func() {
-				fmt.Printf("app config:\n")
-				fmt.Printf("====================\n")
-				fmt.Printf(appConfig.Dump())
-				fmt.Printf("--------------------\n")
+				fmt.Println("app config:")
+				fmt.Println("====================")
+				fmt.Print(appConfig.Dump())
+				fmt.Println("--------------------")
 			}
 
 			db := func() {
-				fmt.Printf("db config:\n")
-				fmt.Printf("====================\n")
+				fmt.Println("db config:")
+				fmt.Println("====================")
 				for key, config := range dbConfigs {
 					fmt.Printf("instance: %s\n", key)
 					fmt.Printf("driver: %s\n", config.Driver())
-					fmt.Printf("--------------------\n")
-					fmt.Printf(config.Dump())
+					fmt.Println("--------------------")
+					fmt.Print(config.Dump())
 				}
-				fmt.Printf("--------------------\n")
+				fmt.Println("--------------------")
 			}
 
 			switch args[0] {
@@ -182,7 +182,7 @@ func executeCommand() {
 
 			childCmd, _, err := cmd.Find(args)
 			if err != nil || childCmd.Use == cmd.Use {
-				cmd.Help()
+				_ = cmd.Help()
 			} else {
 				_ = childCmd.Execute()
 			}

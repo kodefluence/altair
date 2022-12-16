@@ -14,7 +14,7 @@ func (*Formatter) RefreshToken(e entity.OauthRefreshToken) entity.OauthRefreshTo
 	data.Token = &e.Token
 
 	if time.Now().Before(e.ExpiresIn) {
-		data.ExpiresIn = util.IntToPointer(int(e.ExpiresIn.Sub(time.Now()).Seconds()))
+		data.ExpiresIn = util.IntToPointer(int(time.Until(e.ExpiresIn).Seconds()))
 	} else {
 		data.ExpiresIn = util.IntToPointer(0)
 	}

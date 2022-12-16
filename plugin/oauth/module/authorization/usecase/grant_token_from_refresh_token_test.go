@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/golang/mock/gomock"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/util"
@@ -61,7 +60,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) SetupTest() {
 		},
 		ExpiresIn: time.Time{},
 		CreatedAt: time.Time{},
-		RevokedAT: mysql.NullTime{},
+		RevokedAT: sql.NullTime{},
 	}
 	suite.accessToken = entity.OauthAccessToken{
 		ID:                 2,
@@ -74,7 +73,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) SetupTest() {
 		},
 		ExpiresIn: time.Time{},
 		CreatedAt: time.Time{},
-		RevokedAT: mysql.NullTime{},
+		RevokedAT: sql.NullTime{},
 	}
 
 	suite.oldrefreshToken = entity.OauthRefreshToken{
@@ -83,7 +82,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) SetupTest() {
 		Token:              "some token",
 		ExpiresIn:          time.Now().Add(time.Hour),
 		CreatedAt:          time.Time{},
-		RevokedAT:          mysql.NullTime{},
+		RevokedAT:          sql.NullTime{},
 	}
 
 	suite.refreshToken = entity.OauthRefreshToken{
@@ -92,7 +91,7 @@ func (suite *GrantTokenFromRefreshTokenSuiteTest) SetupTest() {
 		Token:              "some token",
 		ExpiresIn:          time.Time{},
 		CreatedAt:          time.Time{},
-		RevokedAT:          mysql.NullTime{},
+		RevokedAT:          sql.NullTime{},
 	}
 }
 

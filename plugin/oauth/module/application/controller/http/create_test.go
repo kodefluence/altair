@@ -104,7 +104,7 @@ func TestCreate(t *testing.T) {
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), testhelper.MockErrorIoReader{})
 
 				assert.Equal(t, http.StatusBadRequest, w.Code)
-				assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `request body`\",\"code\":\"ERR0400\",\"status\":400}]}", string(w.Body.Bytes()))
+				assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `request body`\",\"code\":\"ERR0400\",\"status\":400}]}", w.Body.String())
 			})
 		})
 
@@ -121,7 +121,7 @@ func TestCreate(t *testing.T) {
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader([]byte(`this is gonna be error`)))
 
 				assert.Equal(t, http.StatusBadRequest, w.Code)
-				assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `invalid json format`\",\"code\":\"ERR0400\",\"status\":400}]}", string(w.Body.Bytes()))
+				assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `invalid json format`\",\"code\":\"ERR0400\",\"status\":400}]}", w.Body.String())
 			})
 		})
 	})

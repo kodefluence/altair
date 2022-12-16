@@ -1,9 +1,8 @@
 package cfg
 
 import (
-	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -40,7 +39,7 @@ func (p *plugin) Compile(pluginPath string) (core.PluginBearer, error) {
 		}
 
 		if _, ok := pluginList[plugin.Plugin]; ok {
-			return nil, errors.New(fmt.Sprintf("Plugin `%s` already defined", plugin.Plugin))
+			return nil, fmt.Errorf("Plugin `%s` already defined", plugin.Plugin)
 		}
 
 		plugin.Raw = compiledBytes
@@ -70,8 +69,9 @@ func (p *plugin) walkAllFiles(pluginPath string) ([][]byte, error) {
 	}
 
 	for _, path := range files {
-		f, _ := ioutil.ReadFile(path)
-		routeFiles = append(routeFiles, f)
+		f, _ := os.Open(path)
+		content, _ := io.ReadAll(f)
+		routeFiles = append(routeFiles, content)
 	}
 
 	return routeFiles, nil

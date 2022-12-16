@@ -3,6 +3,8 @@ package util
 import (
 	"crypto/sha1"
 	"fmt"
+	"io"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -10,6 +12,20 @@ import (
 
 func IntToPointer(i int) *int {
 	return &i
+}
+
+func ReadFileContent(path string) ([]byte, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+
+	contents, err := io.ReadAll(f)
+	if err != nil {
+		return nil, err
+	}
+
+	return contents, nil
 }
 
 func PointerToInt(i *int) interface{} {

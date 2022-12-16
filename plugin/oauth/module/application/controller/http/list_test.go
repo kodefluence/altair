@@ -110,7 +110,7 @@ func TestList(t *testing.T) {
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path()+"?offset=invalid", nil)
 
 				assert.Equal(t, http.StatusBadRequest, w.Code)
-				assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `query parameters: offset`\",\"code\":\"ERR0400\",\"status\":400}]}", string(w.Body.Bytes()))
+				assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `query parameters: offset`\",\"code\":\"ERR0400\",\"status\":400}]}", w.Body.String())
 
 			})
 		})
@@ -127,7 +127,7 @@ func TestList(t *testing.T) {
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path()+"?limit=invalid", nil)
 
 				assert.Equal(t, http.StatusBadRequest, w.Code)
-				assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `query parameters: limit`\",\"code\":\"ERR0400\",\"status\":400}]}", string(w.Body.Bytes()))
+				assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `query parameters: limit`\",\"code\":\"ERR0400\",\"status\":400}]}", w.Body.String())
 			})
 		})
 	})

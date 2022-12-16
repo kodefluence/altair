@@ -112,7 +112,7 @@ func TestUpdate(t *testing.T) {
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/1", testhelper.MockErrorIoReader{})
 
 				assert.Equal(t, http.StatusBadRequest, w.Code)
-				assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `request body`\",\"code\":\"ERR0400\",\"status\":400}]}", string(w.Body.Bytes()))
+				assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `request body`\",\"code\":\"ERR0400\",\"status\":400}]}", w.Body.String())
 			})
 
 			t.Run("Given invalid url params", func(t *testing.T) {
@@ -136,7 +136,7 @@ func TestUpdate(t *testing.T) {
 					w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/s", bytes.NewReader(encodedBytes))
 
 					assert.Equal(t, http.StatusBadRequest, w.Code)
-					assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `url parameters: id is not integer`\",\"code\":\"ERR0400\",\"status\":400}]}", string(w.Body.Bytes()))
+					assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `url parameters: id is not integer`\",\"code\":\"ERR0400\",\"status\":400}]}", w.Body.String())
 				})
 			})
 
@@ -153,7 +153,7 @@ func TestUpdate(t *testing.T) {
 					w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/1", bytes.NewReader([]byte(`this is gonna be error`)))
 
 					assert.Equal(t, http.StatusBadRequest, w.Code)
-					assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `invalid json format`\",\"code\":\"ERR0400\",\"status\":400}]}", string(w.Body.Bytes()))
+					assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `invalid json format`\",\"code\":\"ERR0400\",\"status\":400}]}", w.Body.String())
 				})
 			})
 		})

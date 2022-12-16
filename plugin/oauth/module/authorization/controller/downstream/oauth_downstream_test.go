@@ -152,7 +152,7 @@ func TestOauth(t *testing.T) {
 						c.Request = &http.Request{
 							Header: http.Header{},
 						}
-						c.Request.Header.Add("Authorization", fmt.Sprintf("%s", token))
+						c.Request.Header.Add("Authorization", token)
 
 						responseWritterMock := coreMock.NewMockResponseWriter(mockCtrl)
 						responseWritterMock.EXPECT().WriteHeaderNow().AnyTimes()
