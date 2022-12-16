@@ -18,9 +18,9 @@ func (*Formatter) AccessGrant(e entity.OauthAccessGrant) entity.OauthAccessGrant
 	data.Scopes = &e.Scopes.String
 
 	if time.Now().Before(e.ExpiresIn) {
-		data.ExpiresIn = util.IntToPointer(int(e.ExpiresIn.Sub(time.Now()).Seconds()))
+		data.ExpiresIn = util.ValueToPointer(int(time.Until(e.ExpiresIn).Seconds()))
 	} else {
-		data.ExpiresIn = util.IntToPointer(0)
+		data.ExpiresIn = util.ValueToPointer(0)
 	}
 
 	data.CreatedAt = &e.CreatedAt

@@ -72,11 +72,11 @@ func (ctrl *Controller) httpRecoverFunc(ktx kontext.Context, c *gin.Context, htt
 
 		var convertedErr error
 
-		switch err.(type) {
+		switch err := err.(type) {
 		case error:
-			convertedErr = err.(error)
+			convertedErr = err
 		case string:
-			convertedErr = errors.New(err.(string))
+			convertedErr = errors.New(err)
 		default:
 			convertedErr = fmt.Errorf("undefined error: %v", err)
 		}
@@ -135,14 +135,14 @@ func (ctrl *Controller) httpTrackRequest(httpController module.HttpController, e
 	statusCodGroup := strconv.Itoa(((writer.Status() / 100) * 100))
 
 	for _, metric := range ctrl.metricController {
-		metric.Inc("controller_hits", map[string]string{
+		_ = metric.Inc("controller_hits", map[string]string{
 			"method":            httpController.Method(),
 			"path":              httpController.Path(),
 			"status_code":       statusCode,
 			"status_code_group": statusCodGroup,
 		})
 
-		metric.Observe("controller_elapsed_time_seconds", float64(elapsedTime), map[string]string{
+		_ = metric.Observe("controller_elapsed_time_seconds", float64(elapsedTime), map[string]string{
 			"method":            httpController.Method(),
 			"path":              httpController.Path(),
 			"status_code":       statusCode,

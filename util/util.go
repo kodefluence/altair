@@ -3,45 +3,40 @@ package util
 import (
 	"crypto/sha1"
 	"fmt"
+	"io"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-func IntToPointer(i int) *int {
-	return &i
+type Value interface {
+	int | string | time.Time
 }
 
-func PointerToInt(i *int) interface{} {
-	if i == nil {
-		return nil
+func ValueToPointer[V Value](v V) *V {
+	return &v
+}
+
+func PointerToValue[V Value](v *V) V {
+	if v == nil {
+		return *new(V)
+	}
+	return *v
+}
+
+func ReadFileContent(path string) ([]byte, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
 	}
 
-	return *i
-}
-
-func TimeToPointer(t time.Time) *time.Time {
-	return &t
-}
-
-func PointerToTime(t *time.Time) interface{} {
-	if t == nil {
-		return nil
+	contents, err := io.ReadAll(f)
+	if err != nil {
+		return nil, err
 	}
 
-	return *t
-}
-
-func StringToPointer(s string) *string {
-	return &s
-}
-
-func PointerToString(s *string) interface{} {
-	if s == nil {
-		return nil
-	}
-
-	return *s
+	return contents, nil
 }
 
 func SHA1() string {

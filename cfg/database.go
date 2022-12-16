@@ -3,7 +3,8 @@ package cfg
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"os"
 
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/entity"
@@ -17,8 +18,12 @@ func Database() core.DatabaseLoader {
 }
 
 func (d *database) Compile(configPath string) (map[string]core.DatabaseConfig, error) {
+	f, err := os.Open(configPath)
+	if err != nil {
+		return nil, err
+	}
 
-	contents, err := ioutil.ReadFile(configPath)
+	contents, err := io.ReadAll(f)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +62,7 @@ func (d *database) assignConfig(driverConfigs map[string]map[string]string) (map
 
 	for key, config := range driverConfigs {
 		driver, ok := config["driver"]
-		if ok == false {
+		if !ok {
 			return nil, errors.New("database driver is not specified")
 		}
 
@@ -69,7 +74,7 @@ func (d *database) assignConfig(driverConfigs map[string]map[string]string) (map
 			}
 			databaseConfigs[key] = c
 		default:
-			return nil, errors.New(fmt.Sprintf("database driver:  `%s` is not supported", driver))
+			return nil, fmt.Errorf("database driver:  `%s` is not supported", driver)
 		}
 	}
 

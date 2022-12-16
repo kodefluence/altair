@@ -30,15 +30,15 @@ func PerformRequest(r http.Handler, method, path string, body io.Reader, reqModi
 	return w
 }
 
-func GenerateTempTestFiles(configPath, content, fileName string, mode os.FileMode) {
-	err := os.Mkdir(configPath, os.ModePerm)
+func GenerateTempTestFiles(path, content, fileName string, mode os.FileMode) {
+	err := os.Mkdir(path, os.ModePerm)
 	if err != nil {
 		if pathError, ok := err.(*os.PathError); ok && pathError.Err.Error() != "file exists" {
 			panic(err)
 		}
 	}
 
-	f, err := os.OpenFile(fmt.Sprintf("%s%s", configPath, fileName), os.O_RDWR|os.O_CREATE|os.O_TRUNC, mode)
+	f, err := os.OpenFile(fmt.Sprintf("%s%s", path, fileName), os.O_RDWR|os.O_CREATE|os.O_TRUNC, mode)
 	if err != nil {
 		panic(err)
 	}
@@ -49,8 +49,8 @@ func GenerateTempTestFiles(configPath, content, fileName string, mode os.FileMod
 	}
 }
 
-func RemoveTempTestFiles(configPath string) {
-	err := os.RemoveAll(configPath)
+func RemoveTempTestFiles(path string) {
+	err := os.RemoveAll(path)
 	if err != nil {
 		panic(err)
 	}

@@ -15,7 +15,7 @@ func (a *Authorization) GrantAuthorizationCode(ktx kontext.Context, authorizatio
 
 	switch *authorizationReq.ResponseType {
 	case "token":
-		if a.config.Config.ImplicitGrant.Active == false {
+		if !a.config.Config.ImplicitGrant.Active {
 			break
 		}
 

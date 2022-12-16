@@ -3,7 +3,8 @@ package cfg
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"os"
 	"strconv"
 
 	"github.com/kodefluence/altair/adapter"
@@ -30,7 +31,13 @@ func App() core.AppLoader {
 }
 
 func (a *app) Compile(configPath string) (core.AppConfig, error) {
-	contents, err := ioutil.ReadFile(configPath)
+	f, err := os.Open(configPath)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	contents, err := io.ReadAll(f)
 	if err != nil {
 		return nil, err
 	}

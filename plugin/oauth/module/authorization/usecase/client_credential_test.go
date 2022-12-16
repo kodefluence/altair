@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/golang/mock/gomock"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/plugin/oauth/module/authorization/usecase"
@@ -45,10 +44,10 @@ func (suite *ClientCredentialSuiteTest) SetupTest() {
 		OwnerType: "confidential",
 	}
 	suite.accessTokenRequestJSON = entity.AccessTokenRequestJSON{
-		GrantType:    util.StringToPointer("client_credentials"),
-		ClientUID:    util.StringToPointer("client_uid"),
-		ClientSecret: util.StringToPointer("client_secret"),
-		Scope:        util.StringToPointer("public"),
+		GrantType:    util.ValueToPointer("client_credentials"),
+		ClientUID:    util.ValueToPointer("client_uid"),
+		ClientSecret: util.ValueToPointer("client_secret"),
+		Scope:        util.ValueToPointer("public"),
 	}
 	suite.accessToken = entity.OauthAccessToken{
 		ID:                 1,
@@ -61,7 +60,7 @@ func (suite *ClientCredentialSuiteTest) SetupTest() {
 		},
 		ExpiresIn: time.Time{},
 		CreatedAt: time.Time{},
-		RevokedAT: mysql.NullTime{},
+		RevokedAT: sql.NullTime{},
 	}
 	suite.refreshToken = entity.OauthRefreshToken{
 		ID:                 1,
@@ -69,7 +68,7 @@ func (suite *ClientCredentialSuiteTest) SetupTest() {
 		Token:              "some token",
 		ExpiresIn:          time.Time{},
 		CreatedAt:          time.Time{},
-		RevokedAT:          mysql.NullTime{},
+		RevokedAT:          sql.NullTime{},
 	}
 }
 

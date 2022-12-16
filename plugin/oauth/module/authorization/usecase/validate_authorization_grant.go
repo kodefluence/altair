@@ -30,7 +30,7 @@ func (a *Authorization) ValidateAuthorizationGrant(ktx kontext.Context, r entity
 	}
 
 	if r.Scopes == nil {
-		r.Scopes = util.StringToPointer("")
+		r.Scopes = util.ValueToPointer("")
 	}
 
 	requestScopes := strings.Fields(*r.Scopes)

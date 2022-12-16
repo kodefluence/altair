@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/util"
 	"github.com/stretchr/testify/suite"
@@ -26,12 +25,12 @@ func TestValidateTokenAuthorizationCode(t *testing.T) {
 
 func (suite *ValidateTokenAuthorizationCodeSuiteTest) SetupTest() {
 	suite.accessTokenRequestJSON = entity.AccessTokenRequestJSON{
-		GrantType:    util.StringToPointer("authorization_code"),
-		ClientUID:    util.StringToPointer("client_uid"),
-		ClientSecret: util.StringToPointer("client_secret"),
-		RefreshToken: util.StringToPointer("some-refresh-token"),
-		Code:         util.StringToPointer("some-code"),
-		RedirectURI:  util.StringToPointer("https://github.com/kodefluence/altair"),
+		GrantType:    util.ValueToPointer("authorization_code"),
+		ClientUID:    util.ValueToPointer("client_uid"),
+		ClientSecret: util.ValueToPointer("client_secret"),
+		RefreshToken: util.ValueToPointer("some-refresh-token"),
+		Code:         util.ValueToPointer("some-code"),
+		RedirectURI:  util.ValueToPointer("https://github.com/kodefluence/altair"),
 	}
 	suite.accessGrant = entity.OauthAccessGrant{
 		ID:                 1,
@@ -45,7 +44,7 @@ func (suite *ValidateTokenAuthorizationCodeSuiteTest) SetupTest() {
 		Scopes:    sql.NullString{},
 		ExpiresIn: time.Now().Add(time.Hour),
 		CreatedAt: time.Now().Add(-24 * time.Hour),
-		RevokedAT: mysql.NullTime{},
+		RevokedAT: sql.NullTime{},
 	}
 }
 
@@ -59,7 +58,7 @@ func (suite *ValidateTokenAuthorizationCodeSuiteTest) TestValidateTokenGrantSuit
 
 	suite.Run("Negative cases", func() {
 		suite.Subtest("When access grant is already revoked, then it would return jsonapi option", func() {
-			suite.accessGrant.RevokedAT = mysql.NullTime{
+			suite.accessGrant.RevokedAT = sql.NullTime{
 				Time:  time.Now().Add(-1 * time.Hour),
 				Valid: true,
 			}

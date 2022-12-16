@@ -41,18 +41,18 @@ func TestUpdate(t *testing.T) {
 				apiEngine := gin.Default()
 
 				oauthApplicationUpdateJSON := entity.OauthApplicationUpdateJSON{
-					Description: util.StringToPointer("Application 1"),
-					Scopes:      util.StringToPointer("public user"),
+					Description: util.ValueToPointer("Application 1"),
+					Scopes:      util.ValueToPointer("public user"),
 				}
 				encodedBytes, err := json.Marshal(oauthApplicationUpdateJSON)
 				assert.Nil(t, err)
 
 				oauthApplicationJSON := entity.OauthApplicationJSON{
-					OwnerID:      util.IntToPointer(1),
-					Description:  util.StringToPointer("Application 1"),
-					Scopes:       util.StringToPointer("public user"),
-					ClientUID:    util.StringToPointer("clientuid01"),
-					ClientSecret: util.StringToPointer("clientsecret01"),
+					OwnerID:      util.ValueToPointer(1),
+					Description:  util.ValueToPointer("Application 1"),
+					Scopes:       util.ValueToPointer("public user"),
+					ClientUID:    util.ValueToPointer("clientuid01"),
+					ClientSecret: util.ValueToPointer("clientsecret01"),
 				}
 
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
@@ -75,8 +75,8 @@ func TestUpdate(t *testing.T) {
 				apiEngine := gin.Default()
 
 				oauthApplicationUpdateJSON := entity.OauthApplicationUpdateJSON{
-					Description: util.StringToPointer("Application 1"),
-					Scopes:      util.StringToPointer("public user"),
+					Description: util.ValueToPointer("Application 1"),
+					Scopes:      util.ValueToPointer("public user"),
 				}
 				encodedBytes, err := json.Marshal(oauthApplicationUpdateJSON)
 				assert.Nil(t, err)
@@ -112,15 +112,15 @@ func TestUpdate(t *testing.T) {
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/1", testhelper.MockErrorIoReader{})
 
 				assert.Equal(t, http.StatusBadRequest, w.Code)
-				assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `request body`\",\"code\":\"ERR0400\",\"status\":400}]}", string(w.Body.Bytes()))
+				assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `request body`\",\"code\":\"ERR0400\",\"status\":400}]}", w.Body.String())
 			})
 
 			t.Run("Given invalid url params", func(t *testing.T) {
 				t.Run("Return bad request", func(t *testing.T) {
 
 					oauthApplicationUpdateJSON := entity.OauthApplicationUpdateJSON{
-						Description: util.StringToPointer("Application 1"),
-						Scopes:      util.StringToPointer("public user"),
+						Description: util.ValueToPointer("Application 1"),
+						Scopes:      util.ValueToPointer("public user"),
 					}
 					encodedBytes, err := json.Marshal(oauthApplicationUpdateJSON)
 					assert.Nil(t, err)
@@ -136,7 +136,7 @@ func TestUpdate(t *testing.T) {
 					w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/s", bytes.NewReader(encodedBytes))
 
 					assert.Equal(t, http.StatusBadRequest, w.Code)
-					assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `url parameters: id is not integer`\",\"code\":\"ERR0400\",\"status\":400}]}", string(w.Body.Bytes()))
+					assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `url parameters: id is not integer`\",\"code\":\"ERR0400\",\"status\":400}]}", w.Body.String())
 				})
 			})
 
@@ -153,7 +153,7 @@ func TestUpdate(t *testing.T) {
 					w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/1", bytes.NewReader([]byte(`this is gonna be error`)))
 
 					assert.Equal(t, http.StatusBadRequest, w.Code)
-					assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `invalid json format`\",\"code\":\"ERR0400\",\"status\":400}]}", string(w.Body.Bytes()))
+					assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `invalid json format`\",\"code\":\"ERR0400\",\"status\":400}]}", w.Body.String())
 				})
 			})
 		})

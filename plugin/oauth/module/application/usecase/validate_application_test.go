@@ -24,10 +24,10 @@ func TestValidateApplication(t *testing.T) {
 		t.Run("Given context and oauth application json data", func(t *testing.T) {
 			t.Run("Return nil", func(t *testing.T) {
 				data := entity.OauthApplicationJSON{
-					OwnerID:     util.IntToPointer(1),
-					OwnerType:   util.StringToPointer("confidential"),
-					Description: util.StringToPointer("This is description"),
-					Scopes:      util.StringToPointer("public users"),
+					OwnerID:     util.ValueToPointer(1),
+					OwnerType:   util.ValueToPointer("confidential"),
+					Description: util.ValueToPointer("This is description"),
+					Scopes:      util.ValueToPointer("public users"),
 				}
 
 				formatterUsecase := newFormatter()
@@ -42,10 +42,10 @@ func TestValidateApplication(t *testing.T) {
 		t.Run("Given context and oauth application json data with empty owner_type", func(t *testing.T) {
 			t.Run("Return validation error", func(t *testing.T) {
 				data := entity.OauthApplicationJSON{
-					OwnerID:     util.IntToPointer(1),
+					OwnerID:     util.ValueToPointer(1),
 					OwnerType:   nil,
-					Description: util.StringToPointer("This is description"),
-					Scopes:      util.StringToPointer("public users"),
+					Description: util.ValueToPointer("This is description"),
+					Scopes:      util.ValueToPointer("public users"),
 				}
 
 				formatterUsecase := newFormatter()
@@ -64,10 +64,10 @@ func TestValidateApplication(t *testing.T) {
 		t.Run("Given context and oauth application json data with invalid owner_type", func(t *testing.T) {
 			t.Run("Return validation error", func(t *testing.T) {
 				data := entity.OauthApplicationJSON{
-					OwnerID:     util.IntToPointer(1),
-					OwnerType:   util.StringToPointer("external"),
-					Description: util.StringToPointer("This is description"),
-					Scopes:      util.StringToPointer("public users"),
+					OwnerID:     util.ValueToPointer(1),
+					OwnerType:   util.ValueToPointer("external"),
+					Description: util.ValueToPointer("This is description"),
+					Scopes:      util.ValueToPointer("public users"),
 				}
 
 				formatterUsecase := newFormatter()

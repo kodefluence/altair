@@ -44,12 +44,12 @@ func TestOne(t *testing.T) {
 				apiEngine := gin.New()
 
 				oauthApplicationJSON := entity.OauthApplicationJSON{
-					ID:           util.IntToPointer(1),
-					OwnerID:      util.IntToPointer(1),
-					Description:  util.StringToPointer("Application 1"),
-					Scopes:       util.StringToPointer("public user"),
-					ClientUID:    util.StringToPointer("clientuid01"),
-					ClientSecret: util.StringToPointer("clientsecret01"),
+					ID:           util.ValueToPointer(1),
+					OwnerID:      util.ValueToPointer(1),
+					Description:  util.ValueToPointer("Application 1"),
+					Scopes:       util.ValueToPointer("public user"),
+					ClientUID:    util.ValueToPointer("clientuid01"),
+					ClientSecret: util.ValueToPointer("clientsecret01"),
 				}
 
 				applicationManager := mock.NewMockApplicationManager(mockCtrl)
@@ -97,7 +97,7 @@ func TestOne(t *testing.T) {
 
 			w := testhelper.PerformRequest(apiEngine, ctrl.Method(), "/oauth/applications/x", nil)
 			assert.Equal(t, http.StatusBadRequest, w.Code)
-			assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `url parameters: id is not integer`\",\"code\":\"ERR0400\",\"status\":400}]}", string(w.Body.Bytes()))
+			assert.Equal(t, "{\"errors\":[{\"title\":\"Bad request error\",\"detail\":\"You've send malformed request in your `url parameters: id is not integer`\",\"code\":\"ERR0400\",\"status\":400}]}", w.Body.String())
 		})
 	})
 }

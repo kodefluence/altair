@@ -3,7 +3,7 @@ package usecase
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -91,7 +91,7 @@ func (g *Generator) decorateProxyRequest(c *gin.Context, urlPath, requestID stri
 	var proxyReq *http.Request
 
 	if c.Request.Body != nil {
-		body, err := ioutil.ReadAll(c.Request.Body)
+		body, err := io.ReadAll(c.Request.Body)
 		if err != nil {
 			log.Error().Err(err).Stack().Str("host", routeObject.Host).Str("request_id", requestID).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("full_path", c.Request.URL.String()).Str("client_ip", c.ClientIP()).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("read_all_request")).Msg("Error reading incoming request body")
 			c.JSON(http.StatusBadRequest, gin.H{
@@ -181,7 +181,7 @@ func (g *Generator) callDownStreamService(c *gin.Context, proxyReq *http.Request
 	}
 	defer proxyRes.Body.Close()
 
-	resp, err := ioutil.ReadAll(proxyRes.Body)
+	resp, err := io.ReadAll(proxyRes.Body)
 	if err != nil {
 		log.Error().Err(err).Stack().Str("host", routeObject.Host).Str("request_id", requestID).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("full_path", c.Request.URL.String()).Str("client_ip", c.ClientIP()).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("read_all_response")).Msg("Error reading the response")
 		c.JSON(http.StatusBadGateway, gin.H{
@@ -222,7 +222,7 @@ func (g *Generator) downStreamPluginMetric(c *gin.Context, routeName, pluginName
 	}
 
 	for _, m := range g.metrics {
-		m.Observe("routes_downstream_plugin_latency_seconds", float64(time.Since(startTime).Milliseconds()), labels)
+		_ = m.Observe("routes_downstream_plugin_latency_seconds", float64(time.Since(startTime).Milliseconds()), labels)
 	}
 }
 
@@ -236,8 +236,8 @@ func (g *Generator) downStreamMetric(c *gin.Context, routeName, path string, sta
 	}
 
 	for _, m := range g.metrics {
-		m.Inc("routes_downstream_hits", labels)
-		m.Observe("routes_downstream_latency_seconds", float64(time.Since(startTime).Milliseconds()), labels)
+		_ = m.Inc("routes_downstream_hits", labels)
+		_ = m.Observe("routes_downstream_latency_seconds", float64(time.Since(startTime).Milliseconds()), labels)
 	}
 }
 

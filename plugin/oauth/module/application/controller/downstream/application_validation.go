@@ -39,11 +39,11 @@ func (o *ApplicationValidation) Intervene(c *gin.Context, proxyReq *http.Request
 
 	if proxyReq.Body == nil {
 		if clientUID := c.GetHeader("CLIENT_UID"); clientUID != "" {
-			applicationJSON.ClientUID = util.StringToPointer(clientUID)
+			applicationJSON.ClientUID = util.ValueToPointer(clientUID)
 		}
 
 		if clientSecret := c.GetHeader("CLIENT_SECRET"); clientSecret != "" {
-			applicationJSON.ClientSecret = util.StringToPointer(clientSecret)
+			applicationJSON.ClientSecret = util.ValueToPointer(clientSecret)
 		}
 
 	} else {

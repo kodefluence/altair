@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"testing"
 
@@ -41,7 +40,7 @@ func TestRevoke(t *testing.T) {
 				apiEngine := gin.Default()
 
 				revokeTokenRequest := entity.RevokeAccessTokenRequestJSON{
-					Token: util.StringToPointer("some-cool-token"),
+					Token: util.ValueToPointer("some-cool-token"),
 				}
 				encodedBytes, err := json.Marshal(revokeTokenRequest)
 				assert.Nil(t, err)
@@ -53,7 +52,7 @@ func TestRevoke(t *testing.T) {
 				controller.Provide(apiEngine.Handle, apierror.Provide(), &cobra.Command{}).InjectHTTP(ctrl)
 
 				w := testhelper.PerformRequest(apiEngine, ctrl.Method(), ctrl.Path(), bytes.NewReader(encodedBytes))
-				responseByte, err := ioutil.ReadAll(w.Body)
+				responseByte, err := io.ReadAll(w.Body)
 				assert.Nil(t, err)
 				assert.Equal(t, http.StatusOK, w.Code)
 				assert.Equal(t, "{}", string(responseByte))

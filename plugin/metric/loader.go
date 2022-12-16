@@ -9,7 +9,7 @@ import (
 )
 
 func Load(appBearer core.AppBearer, pluginBearer core.PluginBearer, appModule module.App) error {
-	if appBearer.Config().PluginExists("metric") == false {
+	if !appBearer.Config().PluginExists("metric") {
 		dummy.Load(appModule)
 		return nil
 	}

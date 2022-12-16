@@ -9,7 +9,7 @@ import (
 
 // Provide create new oauth plugin provider
 func Load(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer, apiError module.ApiError, appModule module.App) error {
-	if appBearer.Config().PluginExists("oauth") == false {
+	if !appBearer.Config().PluginExists("oauth") {
 		return nil
 	}
 
@@ -28,7 +28,7 @@ func Load(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer c
 
 // Provide create new oauth plugin provider
 func LoadCommand(appBearer core.AppBearer, dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer, appModule module.App) error {
-	if appBearer.Config().PluginExists("oauth") == false {
+	if !appBearer.Config().PluginExists("oauth") {
 		return nil
 	}
 

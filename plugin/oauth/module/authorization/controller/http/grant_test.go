@@ -46,11 +46,11 @@ func TestGrant(t *testing.T) {
 
 				authorizationRequest := entity.AuthorizationRequestJSON{
 					ResponseType:    nil,
-					ResourceOwnerID: util.IntToPointer(1),
-					ClientUID:       util.StringToPointer(aurelia.Hash("x", "y")),
-					ClientSecret:    util.StringToPointer(aurelia.Hash("z", "a")),
-					RedirectURI:     util.StringToPointer("http://github.com"),
-					Scopes:          util.StringToPointer("public users"),
+					ResourceOwnerID: util.ValueToPointer(1),
+					ClientUID:       util.ValueToPointer(aurelia.Hash("x", "y")),
+					ClientSecret:    util.ValueToPointer(aurelia.Hash("z", "a")),
+					RedirectURI:     util.ValueToPointer("http://github.com"),
+					Scopes:          util.ValueToPointer("public users"),
 				}
 				encodedBytes, err := json.Marshal(authorizationRequest)
 				assert.Nil(t, err)
@@ -90,11 +90,11 @@ func TestGrant(t *testing.T) {
 
 					authorizationRequest := entity.AuthorizationRequestJSON{
 						ResponseType:    nil,
-						ResourceOwnerID: util.IntToPointer(1),
-						ClientUID:       util.StringToPointer(aurelia.Hash("x", "y")),
-						ClientSecret:    util.StringToPointer(aurelia.Hash("z", "a")),
-						RedirectURI:     util.StringToPointer("http://github.com"),
-						Scopes:          util.StringToPointer("public users"),
+						ResourceOwnerID: util.ValueToPointer(1),
+						ClientUID:       util.ValueToPointer(aurelia.Hash("x", "y")),
+						ClientSecret:    util.ValueToPointer(aurelia.Hash("z", "a")),
+						RedirectURI:     util.ValueToPointer("http://github.com"),
+						Scopes:          util.ValueToPointer("public users"),
 					}
 					encodedBytes, err := json.Marshal(authorizationRequest)
 					assert.Nil(t, err)

@@ -36,7 +36,7 @@ func (p *pluginBearer) PluginVersion(pluginName string) (string, error) {
 }
 
 func (p *pluginBearer) CompilePlugin(pluginName string, injectedStruct interface{}) error {
-	if p.ConfigExists(pluginName) == false {
+	if !p.ConfigExists(pluginName) {
 		return errPluginNotFound
 	}
 

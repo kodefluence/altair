@@ -60,7 +60,7 @@ func (o *Oauth) Intervene(c *gin.Context, proxyReq *http.Request, r module.Route
 		return fmt.Errorf("Token already expired: %s", token.ExpiresIn.String())
 	}
 
-	if o.validTokenScope(token, r) == false {
+	if !o.validTokenScope(token, r) {
 		c.AbortWithStatus(http.StatusForbidden)
 		return fmt.Errorf("Invalid token scope: %v", token.Scopes.String)
 	}

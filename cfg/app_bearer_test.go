@@ -13,20 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type fakeController struct{}
-
-func (f fakeController) Control(c *gin.Context) {
-
-}
-
-func (f fakeController) Path() string {
-	return "/"
-}
-
-func (f fakeController) Method() string {
-	return "GET"
-}
-
 type fakeDownStreamPlugin struct{}
 
 func (fakeDownStreamPlugin) Name() string {

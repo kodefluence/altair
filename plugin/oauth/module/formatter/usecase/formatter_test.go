@@ -5,7 +5,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/plugin/oauth/module/formatter/usecase"
 	"github.com/kodefluence/altair/util"
@@ -34,7 +33,7 @@ func TestOauthApplication(t *testing.T) {
 						},
 						ClientUID:    "clientuid01",
 						ClientSecret: "clientsecret01",
-						RevokedAt: mysql.NullTime{
+						RevokedAt: sql.NullTime{
 							Time:  time.Now(),
 							Valid: true,
 						},
@@ -57,7 +56,7 @@ func TestOauthApplication(t *testing.T) {
 						},
 						ClientUID:    "clientuid02",
 						ClientSecret: "clientsecret02",
-						RevokedAt: mysql.NullTime{
+						RevokedAt: sql.NullTime{
 							Time:  time.Now(),
 							Valid: true,
 						},
@@ -77,10 +76,10 @@ func TestOauthApplication(t *testing.T) {
 			t.Run("Return oauth access grant insertable", func(t *testing.T) {
 
 				oauthApplicationJSON := entity.OauthApplicationJSON{
-					OwnerID:     util.IntToPointer(1),
-					OwnerType:   util.StringToPointer("confidential"),
-					Description: util.StringToPointer("Application 1"),
-					Scopes:      util.StringToPointer("public user"),
+					OwnerID:     util.ValueToPointer(1),
+					OwnerType:   util.ValueToPointer("confidential"),
+					Description: util.ValueToPointer("Application 1"),
+					Scopes:      util.ValueToPointer("public user"),
 				}
 
 				insertable := newFormatter().OauthApplicationInsertable(oauthApplicationJSON)
@@ -99,8 +98,8 @@ func TestOauthApplication(t *testing.T) {
 		t.Run("Given authorization request and oauth application", func(t *testing.T) {
 			t.Run("Return oauth access token insertable", func(t *testing.T) {
 				authorizationRequest := entity.AuthorizationRequestJSON{
-					ResourceOwnerID: util.IntToPointer(1),
-					Scopes:          util.StringToPointer("users public"),
+					ResourceOwnerID: util.ValueToPointer(1),
+					Scopes:          util.ValueToPointer("users public"),
 				}
 
 				application := entity.OauthApplication{
@@ -125,7 +124,7 @@ func TestOauthApplication(t *testing.T) {
 					ID: 1,
 				}
 
-				scopes := util.StringToPointer("publc")
+				scopes := util.ValueToPointer("publc")
 
 				insertable := newFormatter().AccessTokenClientCredentialInsertable(application, scopes)
 
@@ -140,9 +139,9 @@ func TestOauthApplication(t *testing.T) {
 		t.Run("Given authorization request and oauth application", func(t *testing.T) {
 			t.Run("Return oauth access grant insertable", func(t *testing.T) {
 				authorizationRequest := entity.AuthorizationRequestJSON{
-					ResourceOwnerID: util.IntToPointer(1),
-					Scopes:          util.StringToPointer("users public"),
-					RedirectURI:     util.StringToPointer("https://github.com"),
+					ResourceOwnerID: util.ValueToPointer(1),
+					Scopes:          util.ValueToPointer("users public"),
+					RedirectURI:     util.ValueToPointer("https://github.com"),
 				}
 
 				application := entity.OauthApplication{
@@ -175,7 +174,7 @@ func TestOauthApplication(t *testing.T) {
 						Valid:  true,
 					},
 					ResourceOwnerID: 1,
-					RevokedAT: mysql.NullTime{
+					RevokedAT: sql.NullTime{
 						Valid: false,
 					},
 					Scopes: sql.NullString{
@@ -256,7 +255,7 @@ func TestOauthApplication(t *testing.T) {
 					OauthApplicationID: 1,
 					ResourceOwnerID:    1,
 					Code:               util.SHA1(),
-					RevokedAT: mysql.NullTime{
+					RevokedAT: sql.NullTime{
 						Time:  time.Time{},
 						Valid: false,
 					},
@@ -280,7 +279,7 @@ func TestOauthApplication(t *testing.T) {
 				assert.Equal(t, &oauthAccessGrant.Code, output.Code)
 				assert.Equal(t, &oauthAccessGrant.RedirectURI.String, output.RedirectURI)
 				assert.Equal(t, &oauthAccessGrant.CreatedAt, output.CreatedAt)
-				assert.LessOrEqual(t, *output.ExpiresIn, int(oauthAccessGrant.ExpiresIn.Sub(time.Now()).Seconds()))
+				assert.LessOrEqual(t, *output.ExpiresIn, int(time.Until(oauthAccessGrant.ExpiresIn).Seconds()))
 				assert.Greater(t, *output.ExpiresIn, 3500)
 				assert.Nil(t, output.RevokedAT)
 
@@ -306,7 +305,7 @@ func TestOauthApplication(t *testing.T) {
 					},
 					ExpiresIn: time.Now().Add(-time.Hour),
 					CreatedAt: time.Now().Add(-time.Hour * 2),
-					RevokedAT: mysql.NullTime{
+					RevokedAT: sql.NullTime{
 						Valid: true,
 						Time:  time.Now(),
 					},
@@ -336,12 +335,12 @@ func TestOauthApplication(t *testing.T) {
 			t.Run("Token not revoked", func(t *testing.T) {
 				t.Run("Return oauth access token json", func(t *testing.T) {
 					authorizationReq := entity.AuthorizationRequestJSON{
-						ResponseType:    util.StringToPointer("token"),
-						ResourceOwnerID: util.IntToPointer(1),
-						ClientUID:       util.StringToPointer(aurelia.Hash("", "")),
-						ClientSecret:    util.StringToPointer(aurelia.Hash("", "")),
-						RedirectURI:     util.StringToPointer("http://github.com"),
-						Scopes:          util.StringToPointer("public users"),
+						ResponseType:    util.ValueToPointer("token"),
+						ResourceOwnerID: util.ValueToPointer(1),
+						ClientUID:       util.ValueToPointer(aurelia.Hash("", "")),
+						ClientSecret:    util.ValueToPointer(aurelia.Hash("", "")),
+						RedirectURI:     util.ValueToPointer("http://github.com"),
+						Scopes:          util.ValueToPointer("public users"),
 					}
 
 					oauthAccessToken := entity.OauthAccessToken{
@@ -365,7 +364,7 @@ func TestOauthApplication(t *testing.T) {
 					assert.Equal(t, &oauthAccessToken.Token, output.Token)
 					assert.Equal(t, &oauthAccessToken.CreatedAt, output.CreatedAt)
 					assert.Equal(t, &oauthAccessToken.Scopes.String, output.Scopes)
-					assert.LessOrEqual(t, *output.ExpiresIn, int(oauthAccessToken.ExpiresIn.Sub(time.Now()).Seconds()))
+					assert.LessOrEqual(t, *output.ExpiresIn, int(time.Until(oauthAccessToken.ExpiresIn).Seconds()))
 					assert.Greater(t, *output.ExpiresIn, 3500)
 					assert.Nil(t, output.RevokedAT)
 
@@ -378,12 +377,12 @@ func TestOauthApplication(t *testing.T) {
 			t.Run("Token not revoked with refresh token", func(t *testing.T) {
 				t.Run("Return oauth access token json", func(t *testing.T) {
 					authorizationReq := entity.AuthorizationRequestJSON{
-						ResponseType:    util.StringToPointer("token"),
-						ResourceOwnerID: util.IntToPointer(1),
-						ClientUID:       util.StringToPointer(aurelia.Hash("", "")),
-						ClientSecret:    util.StringToPointer(aurelia.Hash("", "")),
-						RedirectURI:     util.StringToPointer("http://github.com"),
-						Scopes:          util.StringToPointer("public users"),
+						ResponseType:    util.ValueToPointer("token"),
+						ResourceOwnerID: util.ValueToPointer(1),
+						ClientUID:       util.ValueToPointer(aurelia.Hash("", "")),
+						ClientSecret:    util.ValueToPointer(aurelia.Hash("", "")),
+						RedirectURI:     util.ValueToPointer("http://github.com"),
+						Scopes:          util.ValueToPointer("public users"),
 					}
 
 					oauthAccessToken := entity.OauthAccessToken{
@@ -407,7 +406,7 @@ func TestOauthApplication(t *testing.T) {
 					assert.Equal(t, &oauthAccessToken.Token, output.Token)
 					assert.Equal(t, &oauthAccessToken.CreatedAt, output.CreatedAt)
 					assert.Equal(t, &oauthAccessToken.Scopes.String, output.Scopes)
-					assert.LessOrEqual(t, *output.ExpiresIn, int(oauthAccessToken.ExpiresIn.Sub(time.Now()).Seconds()))
+					assert.LessOrEqual(t, *output.ExpiresIn, int(time.Until(oauthAccessToken.ExpiresIn).Seconds()))
 					assert.Greater(t, *output.ExpiresIn, 3500)
 					assert.Nil(t, output.RevokedAT)
 
@@ -419,12 +418,12 @@ func TestOauthApplication(t *testing.T) {
 
 			t.Run("Token already revoked", func(t *testing.T) {
 				authorizationReq := entity.AuthorizationRequestJSON{
-					ResponseType:    util.StringToPointer("token"),
-					ResourceOwnerID: util.IntToPointer(1),
-					ClientUID:       util.StringToPointer(aurelia.Hash("", "")),
-					ClientSecret:    util.StringToPointer(aurelia.Hash("", "")),
-					RedirectURI:     util.StringToPointer("http://github.com"),
-					Scopes:          util.StringToPointer("public users"),
+					ResponseType:    util.ValueToPointer("token"),
+					ResourceOwnerID: util.ValueToPointer(1),
+					ClientUID:       util.ValueToPointer(aurelia.Hash("", "")),
+					ClientSecret:    util.ValueToPointer(aurelia.Hash("", "")),
+					RedirectURI:     util.ValueToPointer("http://github.com"),
+					Scopes:          util.ValueToPointer("public users"),
 				}
 
 				oauthAccessToken := entity.OauthAccessToken{
@@ -438,7 +437,7 @@ func TestOauthApplication(t *testing.T) {
 					},
 					ExpiresIn: time.Now().Add(-time.Hour),
 					CreatedAt: time.Now().Add(-time.Hour * 2),
-					RevokedAT: mysql.NullTime{
+					RevokedAT: sql.NullTime{
 						Valid: true,
 						Time:  time.Now(),
 					},
@@ -450,7 +449,7 @@ func TestOauthApplication(t *testing.T) {
 					Token:              "token",
 					ExpiresIn:          time.Now().Add(time.Hour),
 					CreatedAt:          time.Now(),
-					RevokedAT: mysql.NullTime{
+					RevokedAT: sql.NullTime{
 						Valid: false,
 					},
 				}
@@ -485,7 +484,7 @@ func TestOauthApplication(t *testing.T) {
 						Token:              "token",
 						ExpiresIn:          time.Now().Add(time.Hour),
 						CreatedAt:          time.Now(),
-						RevokedAT: mysql.NullTime{
+						RevokedAT: sql.NullTime{
 							Valid: false,
 						},
 					}
@@ -494,7 +493,7 @@ func TestOauthApplication(t *testing.T) {
 
 					assert.Equal(t, &oauthRefreshToken.CreatedAt, output.CreatedAt)
 					assert.Equal(t, &oauthRefreshToken.Token, output.Token)
-					assert.LessOrEqual(t, *output.ExpiresIn, int(oauthRefreshToken.ExpiresIn.Sub(time.Now()).Seconds()))
+					assert.LessOrEqual(t, *output.ExpiresIn, int(time.Until(oauthRefreshToken.ExpiresIn).Seconds()))
 					assert.Nil(t, output.RevokedAT)
 				})
 			})
@@ -506,7 +505,7 @@ func TestOauthApplication(t *testing.T) {
 					Token:              "token",
 					ExpiresIn:          time.Now().Add(-time.Hour),
 					CreatedAt:          time.Now().Add(-time.Hour * 2),
-					RevokedAT: mysql.NullTime{
+					RevokedAT: sql.NullTime{
 						Time:  time.Now().Add(-time.Hour),
 						Valid: true,
 					},

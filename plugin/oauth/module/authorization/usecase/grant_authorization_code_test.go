@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-sql-driver/mysql"
 	"github.com/golang/mock/gomock"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/plugin/oauth/module/authorization/usecase"
@@ -34,12 +33,12 @@ func TestGrantor(t *testing.T) {
 
 func (suite *GrantorSuiteTest) SetupTest() {
 	suite.authorizationRequestJSON = entity.AuthorizationRequestJSON{
-		ResponseType:    util.StringToPointer("token"),
-		ResourceOwnerID: util.IntToPointer(1),
-		RedirectURI:     util.StringToPointer("www.github.com"),
-		ClientUID:       util.StringToPointer("client_uid"),
-		ClientSecret:    util.StringToPointer("client_secret"),
-		Scopes:          util.StringToPointer(""),
+		ResponseType:    util.ValueToPointer("token"),
+		ResourceOwnerID: util.ValueToPointer(1),
+		RedirectURI:     util.ValueToPointer("www.github.com"),
+		ClientUID:       util.ValueToPointer("client_uid"),
+		ClientSecret:    util.ValueToPointer("client_secret"),
+		Scopes:          util.ValueToPointer(""),
 	}
 	suite.oauthApplication = entity.OauthApplication{
 		ID: 1,
@@ -57,7 +56,7 @@ func (suite *GrantorSuiteTest) SetupTest() {
 		Scopes:             sql.NullString{},
 		ExpiresIn:          time.Time{},
 		CreatedAt:          time.Time{},
-		RevokedAT:          mysql.NullTime{},
+		RevokedAT:          sql.NullTime{},
 	}
 	suite.accessGrant = entity.OauthAccessGrant{
 		ID:                 1,
@@ -68,7 +67,7 @@ func (suite *GrantorSuiteTest) SetupTest() {
 		Scopes:             sql.NullString{},
 		ExpiresIn:          time.Time{},
 		CreatedAt:          time.Time{},
-		RevokedAT:          mysql.NullTime{},
+		RevokedAT:          sql.NullTime{},
 	}
 }
 
@@ -101,7 +100,7 @@ func (suite *GrantorSuiteTest) TestGrantor() {
 		})
 
 		suite.Subtest("When all parameters is valid and response type is code, it would return oauth access grant", func() {
-			suite.authorizationRequestJSON.ResponseType = util.StringToPointer("code")
+			suite.authorizationRequestJSON.ResponseType = util.ValueToPointer("code")
 			gomock.InOrder(
 				suite.oauthApplicationRepo.EXPECT().OneByUIDandSecret(suite.ktx, *suite.authorizationRequestJSON.ClientUID, *suite.authorizationRequestJSON.ClientSecret, suite.sqldb).Return(suite.oauthApplication, nil),
 				suite.sqldb.EXPECT().Transaction(suite.ktx, "authorization-grant-authorization-code", gomock.Any()).DoAndReturn(func(ktx kontext.Context, transactionKey string, f func(tx db.TX) exception.Exception) exception.Exception {
@@ -132,7 +131,7 @@ func (suite *GrantorSuiteTest) TestGrantor() {
 		})
 
 		suite.Subtest("When response type is empty, then it would return error", func() {
-			suite.authorizationRequestJSON.ResponseType = util.StringToPointer("")
+			suite.authorizationRequestJSON.ResponseType = util.ValueToPointer("")
 			finalJson, err := suite.authorization.GrantAuthorizationCode(suite.ktx, suite.authorizationRequestJSON)
 			suite.Assert().Equal("JSONAPI Error:\n[Validation error] Detail: Validation error because of: response_type is invalid. Should be either `token` or `code`, Code: ERR1442\n", err.Error())
 			suite.Assert().Equal(http.StatusUnprocessableEntity, err.HTTPStatus())
@@ -140,7 +139,7 @@ func (suite *GrantorSuiteTest) TestGrantor() {
 		})
 
 		suite.Subtest("When response type is invalid, then it would return error", func() {
-			suite.authorizationRequestJSON.ResponseType = util.StringToPointer("client_credentials")
+			suite.authorizationRequestJSON.ResponseType = util.ValueToPointer("client_credentials")
 			finalJson, err := suite.authorization.GrantAuthorizationCode(suite.ktx, suite.authorizationRequestJSON)
 			suite.Assert().Equal("JSONAPI Error:\n[Validation error] Detail: Validation error because of: response_type is invalid. Should be either `token` or `code`, Code: ERR1442\n", err.Error())
 			suite.Assert().Equal(http.StatusUnprocessableEntity, err.HTTPStatus())
