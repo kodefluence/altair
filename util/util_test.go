@@ -37,4 +37,7 @@ func TestUtil(t *testing.T) {
 	timeValue := time.Now()
 	assert.Equal(t, &timeValue, util.ValueToPointer(timeValue))
 	assert.Equal(t, timeValue, util.PointerToValue(&timeValue))
+
+	var intNil *int
+	assert.Equal(t, 0, util.PointerToValue(intNil))
 }
