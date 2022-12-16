@@ -14,15 +14,14 @@ type Value interface {
 	int | string | time.Time
 }
 
-type Pointer interface {
-	*int | *string | *time.Time
-}
-
 func ValueToPointer[V Value](v V) *V {
 	return &v
 }
 
 func PointerToValue[V Value](v *V) V {
+	if v == nil {
+		return *new(V)
+	}
 	return *v
 }
 
