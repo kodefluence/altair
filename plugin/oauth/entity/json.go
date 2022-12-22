@@ -60,20 +60,6 @@ type OauthApplicationUpdateJSON struct {
 	Scopes      *string `json:"scopes"`
 }
 
-type OauthApplicationInsertable struct {
-	OwnerID      interface{}
-	OwnerType    string
-	Description  interface{}
-	Scopes       interface{}
-	ClientUID    string
-	ClientSecret string
-}
-
-type OauthApplicationUpdateable struct {
-	Description interface{}
-	Scopes      interface{}
-}
-
 type AuthorizationRequestJSON struct {
 	ResponseType *string `json:"response_type"`
 

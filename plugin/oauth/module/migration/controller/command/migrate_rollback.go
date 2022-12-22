@@ -10,6 +10,7 @@ import (
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 type MigrateRollback struct {
@@ -61,3 +62,5 @@ func (m *MigrateRollback) Run(cmd *cobra.Command, args []string) {
 		return
 	}
 }
+
+func (m *MigrateRollback) ModifyFlags(flags *pflag.FlagSet) {}

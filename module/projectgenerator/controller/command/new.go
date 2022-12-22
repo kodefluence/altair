@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 type New struct {
@@ -107,5 +108,9 @@ func (n *New) Run(cmd *cobra.Command, args []string) {
 		fmt.Println(err)
 		return
 	}
+
+}
+
+func (n *New) ModifyFlags(flags *pflag.FlagSet) {
 
 }

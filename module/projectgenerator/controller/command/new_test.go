@@ -21,9 +21,8 @@ func TestCommandNew(t *testing.T) {
 	projectgenerator.Load(appModule)
 
 	t.Run("Given embed file system, when command is executed then it would create a new folder contain all of altair config", func(t *testing.T) {
-		newCmd, _, _ := cmd.Traverse([]string{"new"})
 		os.Args = []string{"test", "new", "kuma"}
-		err := newCmd.Execute()
+		err := cmd.Execute()
 		assert.Nil(t, err)
 		testhelper.RemoveTempTestFiles("kuma")
 	})
