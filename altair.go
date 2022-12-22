@@ -45,28 +45,9 @@ func main() {
 }
 
 func loadConfig() {
-	var err error
-
-	loadedDBConfigs, err := cfg.Database().Compile("./config/database.yml")
-	if err != nil {
-		log.Error().Err(err).Stack().Msg("Error loading databases config")
-		os.Exit(1)
-	}
-	dbConfigs = loadedDBConfigs
-
-	loadedAppConfig, err := cfg.App().Compile("./config/app.yml")
-	if err != nil {
-		log.Error().Err(err).Stack().Msg("Error loading app config")
-		os.Exit(1)
-	}
-	appConfig = loadedAppConfig
-
-	loadedPluginBearer, err := cfg.Plugin().Compile("./config/plugin/")
-	if err != nil {
-		log.Error().Err(err).Stack().Msg("Error loading plugin config")
-		os.Exit(1)
-	}
-	pluginBearer = loadedPluginBearer
+	dbConfigs, _ = cfg.Database().Compile("./config/database.yml")
+	appConfig, _ = cfg.App().Compile("./config/app.yml")
+	pluginBearer, _ = cfg.Plugin().Compile("./config/plugin/")
 }
 
 func executeCommand() {
@@ -82,6 +63,11 @@ func executeCommand() {
 		Use:   "run",
 		Short: "Run API gateway services.",
 		Run: func(cmd *cobra.Command, args []string) {
+			if appConfig == nil {
+				fmt.Println("App config is not loaded, only run command in altair working directory")
+				return
+			}
+
 			defer closeConnection()
 			if err := fabricateConnection(); err != nil {
 				log.Error().
@@ -107,6 +93,11 @@ func executeCommand() {
 		Short:   "See list of configs",
 		Example: "altair config app",
 		Run: func(cmd *cobra.Command, args []string) {
+			if appConfig == nil {
+				fmt.Println("App config is not loaded, only run command in altair working directory")
+				return
+			}
+
 			if len(args) < 1 {
 				fmt.Println("Invalid number of arguments, expected 1. Example `altair config [config_name]`.")
 				fmt.Println("Available option:")
@@ -159,6 +150,11 @@ func executeCommand() {
 		Use:   "plugin",
 		Short: "List of plugin commands",
 		Run: func(cmd *cobra.Command, args []string) {
+			if appConfig == nil {
+				fmt.Println("App config is not loaded, only run command in altair working directory")
+				return
+			}
+
 			defer closeConnection()
 			if err := fabricateConnection(); err != nil {
 				log.Error().

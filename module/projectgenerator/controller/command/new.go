@@ -67,7 +67,7 @@ func (n *New) Run(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	for _, dir := range []string{path, fmt.Sprintf("%s/routes", path), fmt.Sprintf("%s/plugin", path)} {
+	for _, dir := range []string{path, fmt.Sprintf("%s/routes", path), fmt.Sprintf("%s/config", path), fmt.Sprintf("%s/config/plugin", path)} {
 		if _, err := os.Stat(dir); errors.Is(err, os.ErrNotExist) {
 			fmt.Println("Directory does not exist, creating directory...")
 			err = os.Mkdir(dir, 0755)
@@ -78,12 +78,13 @@ func (n *New) Run(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	err = os.WriteFile(fmt.Sprintf("%s/app.yml", path), appYml, 0644)
+	err = os.WriteFile(fmt.Sprintf("%s/config/app.yml", path), appYml, 0644)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	err = os.WriteFile(fmt.Sprintf("%s/database.yml", path), databaseYml, 0644)
+
+	err = os.WriteFile(fmt.Sprintf("%s/config/database.yml", path), databaseYml, 0644)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -95,13 +96,13 @@ func (n *New) Run(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	err = os.WriteFile(fmt.Sprintf("%s/plugin/metric.yml", path), metricYml, 0644)
+	err = os.WriteFile(fmt.Sprintf("%s/config/plugin/metric.yml", path), metricYml, 0644)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	err = os.WriteFile(fmt.Sprintf("%s/plugin/oauth.yml", path), oauthYml, 0644)
+	err = os.WriteFile(fmt.Sprintf("%s/config/plugin/oauth.yml", path), oauthYml, 0644)
 	if err != nil {
 		fmt.Println(err)
 		return
