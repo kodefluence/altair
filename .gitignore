@@ -20,3 +20,5 @@ vendor
 build_output/
 
 .vscode
+routes/
+config/
