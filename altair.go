@@ -24,6 +24,7 @@ import (
 	"github.com/kodefluence/altair/module/app"
 	"github.com/kodefluence/altair/module/controller"
 	"github.com/kodefluence/altair/module/healthcheck"
+	"github.com/kodefluence/altair/module/projectgenerator"
 	"github.com/kodefluence/altair/module/router"
 	"github.com/kodefluence/altair/plugin"
 	"github.com/kodefluence/monorepo/db"
@@ -150,7 +151,11 @@ func executeCommand() {
 		},
 	}
 
-	pluginCMD := &cobra.Command{
+	appController := controller.Provide(nil, nil, rootCmd)
+	appModule := app.Provide(appController)
+	projectgenerator.Load(appModule)
+
+	pluginCmd := &cobra.Command{
 		Use:   "plugin",
 		Short: "List of plugin commands",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -189,7 +194,7 @@ func executeCommand() {
 		},
 	}
 
-	rootCmd.AddCommand(runCmd, pluginCMD, configCmd)
+	rootCmd.AddCommand(runCmd, pluginCmd, configCmd)
 
 	_ = rootCmd.Execute()
 }

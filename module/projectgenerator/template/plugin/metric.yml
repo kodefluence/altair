@@ -1,0 +1,11 @@
+# This is the sample of metric plugin config
+# plugin: string            - Plugins name
+# version: string           - Template version of metric plugin config
+# config: <array[hash]>     - List of configuration
+#   <example>
+#   provider: string  - Metric provider, currently only available for prometheus.
+
+plugin: metric
+version: "1.0"
+config:
+  provider: prometheus

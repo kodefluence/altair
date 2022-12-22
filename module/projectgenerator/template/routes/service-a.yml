@@ -1,0 +1,23 @@
+# This is the sample of route config for port forwarding
+# name: <string>                      - The name of the service to be addressed
+# auth: <string>                      - Authentication method. Available: oauth, none. Default: none
+# prefix: <string> [format: ^\/.+]    - The prefix of the services routes. Example: /users, /products & /stores
+# host: <string>                      - The host of the services to be addressed. Example: localhost:3000
+# path: <array[hash]>                 - The list of path in users services
+#   <routes>
+#     scope:  <string>                - Plugin dependency: oauth. It will filter the current acces token with defined scope of a routes
+#     auth:   <string>                - Plugin dependency: oauth. Each route can have different auth method. If its not set then it will be following the parent configuration.s
+#   <example>
+#     /me: {}                         - Then altair will be forwarding the request into example.com/users/me with any method
+
+name: users
+auth: oauth
+prefix: /users
+host: {{ env "EXAMPLE_USERS_SERVICE_HOST" }}
+path:
+  /me:
+    scope: "users"
+  /profiles/:id:
+    scope: "users"
+    auth: "none"
+
