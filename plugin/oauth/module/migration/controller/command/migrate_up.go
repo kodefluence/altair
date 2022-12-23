@@ -11,6 +11,7 @@ import (
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 type MigrateUp struct {
@@ -62,3 +63,5 @@ func (m *MigrateUp) Run(cmd *cobra.Command, args []string) {
 		return
 	}
 }
+
+func (m *MigrateUp) ModifyFlags(flags *pflag.FlagSet) {}

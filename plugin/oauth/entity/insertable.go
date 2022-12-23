@@ -27,3 +27,19 @@ type OauthRefreshTokenInsertable struct {
 	Token              string
 	OauthAccessTokenID int
 }
+
+// OauthApplicationInsertable use for creating new application data
+type OauthApplicationInsertable struct {
+	OwnerID      interface{}
+	OwnerType    string
+	Description  interface{}
+	Scopes       interface{}
+	ClientUID    string
+	ClientSecret string
+}
+
+// OauthApplicationUpdateable use for updating application data
+type OauthApplicationUpdateable struct {
+	Description interface{}
+	Scopes      interface{}
+}

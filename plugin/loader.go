@@ -23,8 +23,8 @@ func Load(appBearer core.AppBearer, pluginBearer core.PluginBearer, dbBearer cor
 
 // Load plugin for altair command
 // TODO: Unit test, open for contributions.
-func LoadCommand(appBearer core.AppBearer, pluginBearer core.PluginBearer, dbBearer core.DatabaseBearer, appModule module.App) error {
-	if err := oauth.LoadCommand(appBearer, dbBearer, pluginBearer, appModule); err != nil {
+func LoadCommand(appBearer core.AppBearer, pluginBearer core.PluginBearer, dbBearer core.DatabaseBearer, apiError module.ApiError, appModule module.App) error {
+	if err := oauth.LoadCommand(appBearer, dbBearer, pluginBearer, apiError, appModule); err != nil {
 		return err
 	}
 

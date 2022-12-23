@@ -147,8 +147,9 @@ func executeCommand() {
 	projectgenerator.Load(appModule)
 
 	pluginCmd := &cobra.Command{
-		Use:   "plugin",
-		Short: "List of plugin commands",
+		Use:                "plugin",
+		Short:              "List of plugin commands",
+		DisableFlagParsing: true,
 		Run: func(cmd *cobra.Command, args []string) {
 			if appConfig == nil {
 				fmt.Println("App config is not loaded, only run command in altair working directory")
@@ -173,7 +174,7 @@ func executeCommand() {
 			appBearer := cfg.AppBearer(nil, appConfig)
 			dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
 
-			if err := plugin.LoadCommand(appBearer, pluginBearer, dbBearer, pluginModule); err != nil {
+			if err := plugin.LoadCommand(appBearer, pluginBearer, dbBearer, apiError, pluginModule); err != nil {
 				log.Error().
 					Err(err).
 					Stack().

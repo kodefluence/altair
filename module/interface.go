@@ -7,6 +7,7 @@ import (
 	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // go:generate mockgen -source interface.go -destination mock/interface.go -package mock
@@ -66,6 +67,7 @@ type CommandController interface {
 	Short() string
 	Example() string
 	Run(cmd *cobra.Command, args []string)
+	ModifyFlags(flags *pflag.FlagSet)
 }
 
 type DownstreamController interface {
