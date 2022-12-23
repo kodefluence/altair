@@ -7,7 +7,6 @@ import (
 	"github.com/kodefluence/altair/module/app"
 	"github.com/kodefluence/altair/module/controller"
 	"github.com/kodefluence/altair/module/projectgenerator"
-	"github.com/kodefluence/altair/testhelper"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
@@ -24,6 +23,6 @@ func TestCommandNew(t *testing.T) {
 		os.Args = []string{"test", "new", "kuma"}
 		err := cmd.Execute()
 		assert.Nil(t, err)
-		testhelper.RemoveTempTestFiles("kuma")
+		// testhelper.RemoveTempTestFiles("kuma")
 	})
 }

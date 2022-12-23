@@ -68,6 +68,12 @@ func (n *New) Run(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	dotEnv, err := n.fs.ReadFile("template/env.sample")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	for _, dir := range []string{path, fmt.Sprintf("%s/routes", path), fmt.Sprintf("%s/config", path), fmt.Sprintf("%s/config/plugin", path)} {
 		if _, err := os.Stat(dir); errors.Is(err, os.ErrNotExist) {
 			fmt.Println("Directory does not exist, creating directory...")
@@ -104,6 +110,12 @@ func (n *New) Run(cmd *cobra.Command, args []string) {
 	}
 
 	err = os.WriteFile(fmt.Sprintf("%s/config/plugin/oauth.yml", path), oauthYml, 0644)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	err = os.WriteFile(fmt.Sprintf("%s/.env", path), dotEnv, 0644)
 	if err != nil {
 		fmt.Println(err)
 		return
