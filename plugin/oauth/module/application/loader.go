@@ -24,7 +24,6 @@ func Load(
 		http.NewUpdate(applicationManager, apiError),
 	)
 	appModule.Controller().InjectDownstream(downstream.NewApplicationValidation(oauthApplicationRepo, sqldb))
-	appModule.Controller().InjectCommand(command.NewCreateOauthApplication(applicationManager))
 }
 
 func LoadCommand(
