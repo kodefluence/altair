@@ -186,7 +186,7 @@ func executeCommand() {
 			if err != nil || childCmd.Use == cmd.Use {
 				_ = cmd.Help()
 			} else {
-				err = childCmd.Execute()
+				_ = childCmd.Execute()
 			}
 		},
 	}
