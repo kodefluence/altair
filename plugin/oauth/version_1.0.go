@@ -110,7 +110,7 @@ func version_1_0_command(dbBearer core.DatabaseBearer, pluginBearer core.PluginB
 	// Migration
 	// Set up migration for oauth plugin
 	migration.LoadCommand(sqldb, sqldbconfig, appModule)
-	application.LoadCommand(appModule, sqldb, oauthApplicationRepo, formatter, nil)
+	application.LoadCommand(appModule, sqldb, oauthApplicationRepo, formatter, apiError)
 
 	return nil
 }

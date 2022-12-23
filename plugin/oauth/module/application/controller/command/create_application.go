@@ -77,7 +77,7 @@ func (m *CreateOauthApplication) Run(cmd *cobra.Command, args []string) {
 	fmt.Println("Success creating oauth application:", string(content))
 }
 
-// Run run command
+// ModifyFlags modify flags of command
 func (m *CreateOauthApplication) ModifyFlags(flags *pflag.FlagSet) {
 	flags.IntVar(&m.flagOwnerID, "owner-id", 0, "Owner ID, can be nil")
 	flags.StringVar(&m.flagOwnerType, "owner-type", "", "Owner Type. Enum: confidential, public")

@@ -147,8 +147,9 @@ func executeCommand() {
 	projectgenerator.Load(appModule)
 
 	pluginCmd := &cobra.Command{
-		Use:   "plugin",
-		Short: "List of plugin commands",
+		Use:                "plugin",
+		Short:              "List of plugin commands",
+		DisableFlagParsing: true,
 		Run: func(cmd *cobra.Command, args []string) {
 			if appConfig == nil {
 				fmt.Println("App config is not loaded, only run command in altair working directory")
@@ -185,7 +186,7 @@ func executeCommand() {
 			if err != nil || childCmd.Use == cmd.Use {
 				_ = cmd.Help()
 			} else {
-				_ = childCmd.Execute()
+				err = childCmd.Execute()
 			}
 		},
 	}
