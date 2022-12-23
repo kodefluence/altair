@@ -45,9 +45,9 @@ func main() {
 }
 
 func loadConfig() {
-	dbConfigs, _ = cfg.Database().Compile("./config/database.yml")
-	appConfig, _ = cfg.App().Compile("./config/app.yml")
-	pluginBearer, _ = cfg.Plugin().Compile("./config/plugin/")
+	dbConfigs, _ = cfg.Database().Compile("config/database.yml")
+	appConfig, _ = cfg.App().Compile("config/app.yml")
+	pluginBearer, _ = cfg.Plugin().Compile("config/plugin/")
 }
 
 func executeCommand() {
