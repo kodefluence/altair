@@ -67,7 +67,7 @@ func version_1_0(dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer, a
 	return nil
 }
 
-func version_1_0_command(dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer, appModule module.App) error {
+func version_1_0_command(dbBearer core.DatabaseBearer, pluginBearer core.PluginBearer, apiError module.ApiError, appModule module.App) error {
 	var oauthPluginConfig entity.OauthPlugin
 	if err := pluginBearer.CompilePlugin("oauth", &oauthPluginConfig); err != nil {
 		return err
@@ -78,9 +78,39 @@ func version_1_0_command(dbBearer core.DatabaseBearer, pluginBearer core.PluginB
 		return err
 	}
 
+	var accessTokenTimeout time.Duration
+	var authorizationCodeTimeout time.Duration
+
+	accessTokenTimeout, err = oauthPluginConfig.AccessTokenTimeout()
+	if err != nil {
+		return err
+	}
+
+	authorizationCodeTimeout, err = oauthPluginConfig.AuthorizationCodeTimeout()
+	if err != nil {
+		return err
+	}
+
+	var refreshTokenConfig entity.RefreshTokenConfig
+	refreshTokenConfig.Active = oauthPluginConfig.Config.RefreshToken.Active
+	if refreshTokenConfig.Active {
+		refreshTokenTimeout, err := oauthPluginConfig.RefreshTokenTimeout()
+		if err != nil {
+			return err
+		}
+		refreshTokenConfig.Timeout = refreshTokenTimeout
+	}
+
+	// Repository
+	oauthApplicationRepo := mysql.NewOauthApplication()
+
+	// Formatter
+	formatter := formatter.Provide(accessTokenTimeout, authorizationCodeTimeout, refreshTokenConfig.Timeout)
+
 	// Migration
 	// Set up migration for oauth plugin
 	migration.LoadCommand(sqldb, sqldbconfig, appModule)
+	application.LoadCommand(appModule, sqldb, oauthApplicationRepo, formatter, nil)
 
 	return nil
 }

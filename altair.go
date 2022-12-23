@@ -173,7 +173,7 @@ func executeCommand() {
 			appBearer := cfg.AppBearer(nil, appConfig)
 			dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
 
-			if err := plugin.LoadCommand(appBearer, pluginBearer, dbBearer, pluginModule); err != nil {
+			if err := plugin.LoadCommand(appBearer, pluginBearer, dbBearer, apiError, pluginModule); err != nil {
 				log.Error().
 					Err(err).
 					Stack().

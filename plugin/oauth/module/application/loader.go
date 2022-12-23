@@ -26,3 +26,14 @@ func Load(
 	appModule.Controller().InjectDownstream(downstream.NewApplicationValidation(oauthApplicationRepo, sqldb))
 	appModule.Controller().InjectCommand(command.NewCreateOauthApplication(applicationManager))
 }
+
+func LoadCommand(
+	appModule module.App,
+	sqldb db.DB,
+	oauthApplicationRepo usecase.OauthApplicationRepository,
+	formatter usecase.Formatter,
+	apiError module.ApiError,
+) {
+	applicationManager := usecase.NewApplicationManager(sqldb, oauthApplicationRepo, apiError, formatter)
+	appModule.Controller().InjectCommand(command.NewCreateOauthApplication(applicationManager))
+}
