@@ -24,7 +24,7 @@ Read [CONTRIBUTING.md](https://github.com/kodefluence/altair/blob/master/CONTRIB
 
 ### Community
 
-Join our discord channel [here](https://discord.gg/jK5TS8X8).
+Join our discord channel [here](https://discord.gg/Wps4YrQ3SA).
 
 ### Dependency
 
