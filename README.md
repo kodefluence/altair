@@ -1,27 +1,10 @@
-<p align="center">
-  <img src="https://altair.codefluence.org/altair.png" alt="Distributed, Lightweight and Robust API Gateway"></img>
-</p>
+![Coverage Status](https://coveralls.io/repos/github/kodefluence/altair/badge.svg?branch=master) ![Go Report Card](https://goreportcard.com/badge/github.com/kodefluence/altair) ![GitHub Issues](https://img.shields.io/github/issues/kodefluence/altair) ![GitHub Forks](https://img.shields.io/github/forks/kodefluence/altair) ![GitHub Stars](https://img.shields.io/github/stars/kodefluence/altair) ![GitHub License](https://img.shields.io/github/license/kodefluence/altair)
 
-<p align="center">
-  <a href="https://coveralls.io/github/kodefluence/altair?branch=master"><img src="https://coveralls.io/repos/github/kodefluence/altair/badge.svg?branch=master" alt="Coverage Status"></a>
-  <a href="https://goreportcard.com/report/github.com/kodefluence/altair"><img src="https://goreportcard.com/badge/github.com/kodefluence/altair" alt="Go Report Card"></a>
-  <a href="https://github.com/kodefluence/altair/issues"><img src="https://img.shields.io/github/issues/kodefluence/altair" alt="GitHub Issues"></a>
-  <a href="https://github.com/kodefluence/altair/network"><img src="https://img.shields.io/github/forks/kodefluence/altair" alt="GitHub Forks"></a>
-  <a href="https://github.com/kodefluence/altair/stargazers"><img src="https://img.shields.io/github/stars/kodefluence/altair" alt="GitHub Stars"></a>
-  <a href="https://github.com/kodefluence/altair/blob/master/LICENSE"><img src="https://img.shields.io/github/license/kodefluence/altair" alt="GitHub License"></a>
-</p>
+## Concept
 
-<br><br>
+Altair is an open source API gateway written in Go - designed to be distributed, lightweight, simple, fast, reliable, cross platform, programming language agnostic and robust - by default, for maximum efficiency, reliability and adaptability!
 
-## Introduction
-
-Open source API gateway written in Go. Designed to be distributed, lightweight, simple, fast, reliable, cross platform, programming language agnostic and robust - by default.
-
-## Architecture Diagram
-
-<br>
-
-![Altair Architecture Diagram](https://user-images.githubusercontent.com/20650401/79699757-a2337d00-82bb-11ea-8103-25e6917545bd.png)
+![Concept of Altair](https://user-images.githubusercontent.com/20650401/209427000-87ce8199-0a14-4e10-94ae-32f27ceca8b0.png)
 
 ## Documentation
 
