@@ -13,12 +13,12 @@ type stubPlugin struct {
 	deps []string
 }
 
-func (s *stubPlugin) Name() string                                       { return s.name }
-func (s *stubPlugin) DependsOn() []string                                { return s.deps }
+func (s *stubPlugin) Name() string                                          { return s.name }
+func (s *stubPlugin) DependsOn() []string                                   { return s.deps }
 func (s *stubPlugin) Migrations(module.PluginContext) []module.MigrationSet { return nil }
-func (s *stubPlugin) Load(module.PluginContext) error                    { return nil }
-func (s *stubPlugin) LoadCommand(module.PluginContext) error             { return nil }
-func (s *stubPlugin) SampleConfig() []byte                               { return nil }
+func (s *stubPlugin) Load(module.PluginContext) error                       { return nil }
+func (s *stubPlugin) LoadCommand(module.PluginContext) error                { return nil }
+func (s *stubPlugin) SampleConfig() []byte                                  { return nil }
 
 func names(plugins []module.Plugin) []string {
 	out := make([]string, len(plugins))

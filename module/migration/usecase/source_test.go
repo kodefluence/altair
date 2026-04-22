@@ -17,11 +17,11 @@ func TestMaxSourceVersion(t *testing.T) {
 		{
 			name: "finds the highest numeric prefix in a standard migration set",
 			fs: fstest.MapFS{
-				"migrations/mysql/1_create_users.up.sql":  {Data: []byte("")},
+				"migrations/mysql/1_create_users.up.sql":   {Data: []byte("")},
 				"migrations/mysql/1_create_users.down.sql": {Data: []byte("")},
-				"migrations/mysql/7_add_index.up.sql":     {Data: []byte("")},
-				"migrations/mysql/7_add_index.down.sql":   {Data: []byte("")},
-				"migrations/mysql/3_alter_table.up.sql":   {Data: []byte("")},
+				"migrations/mysql/7_add_index.up.sql":      {Data: []byte("")},
+				"migrations/mysql/7_add_index.down.sql":    {Data: []byte("")},
+				"migrations/mysql/3_alter_table.up.sql":    {Data: []byte("")},
 			},
 			path: "migrations/mysql",
 			want: 7,

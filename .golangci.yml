@@ -1,0 +1,50 @@
+# golangci-lint configuration for altair.
+# Docs: https://golangci-lint.run/usage/configuration/
+# Keep this file conservative: enable what catches real bugs, avoid style
+# nitpicks that churn diffs without catching defects.
+
+run:
+  timeout: 5m
+
+linters:
+  # Start from the default set, then add a handful that have paid for
+  # themselves in real Go codebases.
+  disable-all: false
+  enable:
+    - errcheck      # unchecked errors
+    - gosimple      # simplifiable expressions
+    - govet         # go vet, also runs in CI but belt-and-suspenders
+    - ineffassign   # useless assignments
+    - staticcheck   # wide-ranging static analysis
+    - unused        # unused code
+    - misspell      # English typos (e.g. the max_iddle_connection story)
+    - unconvert     # unnecessary type conversions
+    - gofmt         # formatting
+    - goimports     # import grouping/sorting
+
+linters-settings:
+  misspell:
+    locale: US
+  goimports:
+    local-prefixes: github.com/kodefluence/altair
+
+issues:
+  # Default is 50; raise so we see the full failure list in CI rather than
+  # a truncated sample.
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+  # Exclude generated code.
+  exclude-dirs:
+    - mock
+  exclude-files:
+    - ".*\\.pb\\.go$"
+    - ".*_mock\\.go$"
+
+  # Don't fail builds on lint issues in test files that use fixture structs
+  # whose fields aren't all exercised — common in table-driven tests.
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+        - unused

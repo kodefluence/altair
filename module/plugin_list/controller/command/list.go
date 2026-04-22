@@ -27,8 +27,10 @@ func NewList(registry []module.Plugin, appBearer core.AppBearer, pluginBearer co
 	return &List{registry: registry, appBearer: appBearer, pluginBearer: pluginBearer, runner: runner}
 }
 
-func (*List) Use() string     { return "list" }
-func (*List) Short() string   { return "List every plugin compiled into the binary and its activation state" }
+func (*List) Use() string { return "list" }
+func (*List) Short() string {
+	return "List every plugin compiled into the binary and its activation state"
+}
 func (*List) Example() string { return "altair plugin list" }
 
 func (*List) ModifyFlags(flags *pflag.FlagSet) {}

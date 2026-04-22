@@ -1,0 +1,27 @@
+version: 2
+
+updates:
+  # Keep GitHub Actions pinned to latest stable releases.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
+
+  # Go module updates. Group patch-level upgrades so the queue stays sane;
+  # reserve individual PRs for minor/major where review is warranted.
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - go
+    groups:
+      go-patch-updates:
+        update-types:
+          - patch

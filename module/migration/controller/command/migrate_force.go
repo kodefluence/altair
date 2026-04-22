@@ -21,9 +21,13 @@ func NewMigrateForce(runner *usecase.Runner) *MigrateForce {
 	return &MigrateForce{runner: runner, version: -1}
 }
 
-func (*MigrateForce) Use() string     { return "migrate:force" }
-func (*MigrateForce) Short() string   { return "Force-set a plugin's migration version (clears dirty state)" }
-func (*MigrateForce) Example() string { return "altair plugin migrate:force --plugin oauth --version 3" }
+func (*MigrateForce) Use() string { return "migrate:force" }
+func (*MigrateForce) Short() string {
+	return "Force-set a plugin's migration version (clears dirty state)"
+}
+func (*MigrateForce) Example() string {
+	return "altair plugin migrate:force --plugin oauth --version 3"
+}
 
 func (m *MigrateForce) ModifyFlags(flags *pflag.FlagSet) {
 	flags.StringVar(&m.plugin, "plugin", "", "Plugin whose schema_version to force")
