@@ -13,25 +13,7 @@ import (
 // go:generate mockgen -source interface.go -destination mock/interface.go -package mock
 
 type App interface {
-	// TODO: Enable config via module package instead of cfg
-	// Config() Config
 	Controller() Controller
-	// TODO: Enable plugin via module package instead of cfg
-	// Plugin() Plugin
-}
-type Config interface {
-	Port() int
-	BasicAuthUsername() string
-	BasicAuthPassword() string
-	ProxyHost() string
-	Dump() string
-}
-
-type Plugin interface {
-	List() []string
-	Exist(plugin string) bool
-	Plugin(plugin string)
-	Dump() string
 }
 
 type Controller interface {

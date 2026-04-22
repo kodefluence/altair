@@ -477,6 +477,79 @@ func TestDatabase(t *testing.T) {
 					})
 				})
 			})
+
+			t.Run("Versioned envelope", func(t *testing.T) {
+				t.Run("v1.0 envelope compiles like the legacy layout", func(t *testing.T) {
+					os.Setenv("DATABASE_NAME_V1_ENVELOPE", "db_v1")
+					os.Setenv("DATABASE_USERNAME_V1_ENVELOPE", "user_v1")
+					os.Setenv("DATABASE_PASSWORD_V1_ENVELOPE", "pass_v1")
+					os.Setenv("DATABASE_HOST_V1_ENVELOPE", "127.0.0.1")
+					os.Setenv("DATABASE_PORT_V1_ENVELOPE", "3306")
+
+					configPath := "./db_v1_envelope/"
+					fileName := "database.yml"
+
+					testhelper.GenerateTempTestFiles(configPath, DatabaseConfigV1Envelope, fileName, 0666)
+
+					dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+					assert.Nil(t, err)
+					assert.NotNil(t, dbConfigs)
+
+					c, ok := dbConfigs["oauth_database"]
+					assert.True(t, ok)
+					assert.Equal(t, "mysql", c.Driver())
+					assert.Equal(t, "db_v1", c.DBDatabase())
+
+					testhelper.RemoveTempTestFiles(configPath)
+				})
+
+				t.Run("v1.0 envelope with missing instances returns error", func(t *testing.T) {
+					configPath := "./db_v1_envelope_missing_instances/"
+					fileName := "database.yml"
+
+					testhelper.GenerateTempTestFiles(configPath, DatabaseConfigV1EnvelopeMissingInstances, fileName, 0666)
+
+					dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+					assert.NotNil(t, err)
+					assert.Nil(t, dbConfigs)
+
+					testhelper.RemoveTempTestFiles(configPath)
+				})
+
+				t.Run("Unsupported version returns error", func(t *testing.T) {
+					configPath := "./db_unsupported_version/"
+					fileName := "database.yml"
+
+					testhelper.GenerateTempTestFiles(configPath, DatabaseConfigUnsupportedVersion, fileName, 0666)
+
+					dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+					assert.NotNil(t, err)
+					assert.Nil(t, dbConfigs)
+
+					testhelper.RemoveTempTestFiles(configPath)
+				})
+			})
+
+			t.Run("Idle connection key", func(t *testing.T) {
+				t.Run("New spelling max_idle_connection is honoured", func(t *testing.T) {
+					configPath := "./db_idle_new_spelling/"
+					fileName := "database.yml"
+
+					testhelper.GenerateTempTestFiles(configPath, DatabaseConfigIdleConnectionNewSpelling, fileName, 0666)
+
+					dbConfigs, err := cfg.Database().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+					assert.Nil(t, err)
+
+					config, ok := dbConfigs["oauth_database"]
+					assert.True(t, ok)
+
+					maxIdle, err := config.DBMaxIddleConn()
+					assert.Nil(t, err)
+					assert.Equal(t, 42, maxIdle)
+
+					testhelper.RemoveTempTestFiles(configPath)
+				})
+			})
 		})
 	})
 }

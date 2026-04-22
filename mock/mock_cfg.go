@@ -150,18 +150,18 @@ func (m *MockPluginBearer) EXPECT() *MockPluginBearerMockRecorder {
 	return m.recorder
 }
 
-// CompilePlugin mocks base method.
-func (m *MockPluginBearer) CompilePlugin(pluginName string, injectedStruct interface{}) error {
+// DecodeConfig mocks base method.
+func (m *MockPluginBearer) DecodeConfig(pluginName string, injectedStruct interface{}) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CompilePlugin", pluginName, injectedStruct)
+	ret := m.ctrl.Call(m, "DecodeConfig", pluginName, injectedStruct)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// CompilePlugin indicates an expected call of CompilePlugin.
-func (mr *MockPluginBearerMockRecorder) CompilePlugin(pluginName, injectedStruct interface{}) *gomock.Call {
+// DecodeConfig indicates an expected call of DecodeConfig.
+func (mr *MockPluginBearerMockRecorder) DecodeConfig(pluginName, injectedStruct interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CompilePlugin", reflect.TypeOf((*MockPluginBearer)(nil).CompilePlugin), pluginName, injectedStruct)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DecodeConfig", reflect.TypeOf((*MockPluginBearer)(nil).DecodeConfig), pluginName, injectedStruct)
 }
 
 // ConfigExists mocks base method.

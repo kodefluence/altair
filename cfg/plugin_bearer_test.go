@@ -54,7 +54,7 @@ func TestPluginBearer(t *testing.T) {
 		})
 	})
 
-	t.Run("CompilePlugin", func(t *testing.T) {
+	t.Run("DecodeConfig", func(t *testing.T) {
 		t.Run("Given Plugin and Injected Struct", func(t *testing.T) {
 			t.Run("Injected struct has been injected with yaml value", func(t *testing.T) {
 				t.Run("Return nil", func(t *testing.T) {
@@ -65,7 +65,7 @@ func TestPluginBearer(t *testing.T) {
 
 					oauthPlugins := OauthPlugin{}
 
-					err := pluginBearer.CompilePlugin("oauth", &oauthPlugins)
+					err := pluginBearer.DecodeConfig("oauth", &oauthPlugins)
 					assert.Nil(t, err)
 					assert.NotEqual(t, "", oauthPlugins.Config.Database)
 					assert.NotEqual(t, "", oauthPlugins.Config.AccessTokenTimeoutRaw)
@@ -79,7 +79,7 @@ func TestPluginBearer(t *testing.T) {
 					pluginBearer := cfg.PluginBearer(plugins)
 
 					oauthPlugins := OauthPlugin{}
-					err := pluginBearer.CompilePlugin("oauth", &oauthPlugins)
+					err := pluginBearer.DecodeConfig("oauth", &oauthPlugins)
 					assert.NotNil(t, err)
 				})
 			})
@@ -91,7 +91,7 @@ func TestPluginBearer(t *testing.T) {
 					}
 					pluginBearer := cfg.PluginBearer(plugins)
 
-					err := pluginBearer.CompilePlugin("oauth", "not struct, should be failed")
+					err := pluginBearer.DecodeConfig("oauth", "not struct, should be failed")
 					assert.NotNil(t, err)
 				})
 			})

@@ -9,7 +9,7 @@
 #   refresh_token: <array[hash]>        - Refresh token configuration
 #     - timeout: string                       - Expired duration of refresh token
 #     - active: bool                          - Toggle to activate refresh token
-#   refresh_token: <array[hash]>        - Implicit grant configurationn
+#   implicit_grant: <array[hash]>       - Implicit grant configuration
 #     - active: bool                          - Toggle to activate implicit grant. If this is activated, then access token would not return refresh_token in it's response
 
 plugin: oauth

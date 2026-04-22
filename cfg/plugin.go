@@ -1,6 +1,7 @@
 package cfg
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -38,6 +39,13 @@ func (p *plugin) Compile(pluginPath string) (core.PluginBearer, error) {
 			return nil, err
 		}
 
+		if plugin.Plugin == "" {
+			return nil, errors.New("plugin config missing required `plugin` field")
+		}
+		if plugin.Version == "" {
+			return nil, fmt.Errorf("plugin `%s` config missing required `version` field", plugin.Plugin)
+		}
+
 		if _, ok := pluginList[plugin.Plugin]; ok {
 			return nil, fmt.Errorf("Plugin `%s` already defined", plugin.Plugin)
 		}
@@ -69,10 +77,22 @@ func (p *plugin) walkAllFiles(pluginPath string) ([][]byte, error) {
 	}
 
 	for _, path := range files {
-		f, _ := os.Open(path)
-		content, _ := io.ReadAll(f)
+		content, err := readPluginFile(path)
+		if err != nil {
+			return nil, err
+		}
 		routeFiles = append(routeFiles, content)
 	}
 
 	return routeFiles, nil
+}
+
+func readPluginFile(path string) ([]byte, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	return io.ReadAll(f)
 }

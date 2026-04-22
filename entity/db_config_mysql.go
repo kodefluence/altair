@@ -14,7 +14,7 @@ type MYSQLDatabaseConfig struct {
 	Host                  string `yaml:"host"`
 	Port                  string `yaml:"port"`
 	ConnectionMaxLifetime string `yaml:"connection_max_lifetime"`
-	MaxIddleConnection    string `yaml:"max_iddle_connection"`
+	MaxIddleConnection    string `yaml:"max_idle_connection"`
 	MaxOpenConnection     string `yaml:"max_open_connection"`
 }
 

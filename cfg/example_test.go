@@ -6,7 +6,6 @@ oauth_database:
   database: {{ env "DATABASE_NAME_DB_CONFIG_NORMAL_SCENARIO" }}
   username: {{ env "DATABASE_USERNAME_DB_CONFIG_NORMAL_SCENARIO" }}
   password: {{ env "DATABASE_PASSWORD_DB_CONFIG_NORMAL_SCENARIO" }}
-  migration_source: "file://migration"
   host:     {{ env "DATABASE_HOST_DB_CONFIG_NORMAL_SCENARIO" }}
   port:     {{ env "DATABASE_PORT_DB_CONFIG_NORMAL_SCENARIO" }}
   connection_max_lifetime: 120s
@@ -19,7 +18,6 @@ var DatabaseConfigWithNotFoundENV = `
     database: {{ env "DATABASE_NAME_DB_CONFIG_ENV_CONFIG_NOT_FOUND" }}
     username: {{ env "DATABASE_USERNAME_DB_CONFIG_ENV_CONFIG_NOT_FOUND" }}
     password: {{ env "DATABASE_PASSWORD_DB_CONFIG_ENV_CONFIG_NOT_FOUND" }}
-    migration_source: "file://migration"
     host:     {{ env "DATABASE_HOST_DB_CONFIG_ENV_CONFIG_NOT_FOUND" }}
     port:     {{ env "DATABASE_PORT_DB_CONFIG_ENV_CONFIG_NOT_FOUND" }}
     connection_max_lifetime: {{ env "NOT_FOUND_ENV" }}
@@ -32,7 +30,6 @@ oauth_database:
   database: {{ env "DATABASE_NAME_TWO_SCENARIO_1" }}
   username: {{ env "DATABASE_USERNAME_TWO_SCENARIO_1" }}
   password: {{ env "DATABASE_PASSWORD_TWO_SCENARIO_1" }}
-  migration_source: "file://migration"
   host:     {{ env "DATABASE_HOST_TWO_SCENARIO_1" }}
   port:     {{ env "DATABASE_PORT_TWO_SCENARIO_1" }}
   connection_max_lifetime: 120s
@@ -44,7 +41,6 @@ other_database:
   database: {{ env "DATABASE_NAME_TWO_SCENARIO_2" }}
   username: {{ env "DATABASE_USERNAME_TWO_SCENARIO_2" }}
   password: {{ env "DATABASE_PASSWORD_TWO_SCENARIO_2" }}
-  migration_source: "file://migration"
   host:     {{ env "DATABASE_HOST_TWO_SCENARIO_2" }}
   port:     {{ env "DATABASE_PORT_TWO_SCENARIO_2" }}
   connection_max_lifetime: 120s
@@ -56,7 +52,6 @@ oauth_database:
   database: some_database
   username: some_username
   password: some_password
-  migration_source: "file://migration"
   host:     localhost
   port:     3306
   connection_max_lifetime: 120s
@@ -66,19 +61,6 @@ oauth_database:
 var DatabaseConfigInvalidDriver = `
 oauth_database:
   driver: postgre
-  database: some_database
-  username: some_username
-  password: some_password
-  migration_source: "file://migration"
-  host:     localhost
-  port:     3306
-  connection_max_lifetime: 120s
-  max_iddle_connection: 100
-  max_open_connection: 100`
-
-var DatabaseConfigEmptyMigrationSource = `
-oauth_database:
-  driver: mysql
   database: some_database
   username: some_username
   password: some_password
@@ -94,7 +76,6 @@ oauth_database:
   database: ""
   username: some_username
   password: some_password
-  migration_source: "file://migration"
   host:     localhost
   port:     3306
   connection_max_lifetime: 120s
@@ -107,7 +88,6 @@ oauth_database:
   database: some_database
   username: ""
   password: some_password
-  migration_source: "file://migration"
   host:     localhost
   port:     3306
   connection_max_lifetime: 120s
@@ -120,7 +100,6 @@ oauth_database:
   database: some_database
   username: some_username
   password: some_password
-  migration_source: "file://migration"
   host:     ""
   port:     3306
   connection_max_lifetime: 120s
@@ -133,7 +112,6 @@ oauth_database:
   database: some_database
   username: some_username
   password: some_password
-  migration_source: "file://migration"
   host:     localhost
   connection_max_lifetime: 120s
   max_iddle_connection: 100
@@ -145,7 +123,6 @@ oauth_database:
   database: some_database
   username: some_username
   password: some_password
-  migration_source: "file://migration"
   host:     localhost
   port:     3306
   max_iddle_connection: 100
@@ -157,7 +134,6 @@ oauth_database:
   database: some_database
   username: some_username
   password: some_password
-  migration_source: "file://migration"
   host:     localhost
   port:     3306
   connection_max_lifetime: 120s
@@ -169,7 +145,6 @@ oauth_database:
   database: some_database
   username: some_username
   password: some_password
-  migration_source: "file://migration"
   host:     localhost
   port:     3306
   connection_max_lifetime: 120s
@@ -180,13 +155,52 @@ asdasd asda
 a  asaa
 -12 -2`
 
+var DatabaseConfigV1Envelope = `
+version: "1.0"
+instances:
+  oauth_database:
+    driver: mysql
+    database: {{ env "DATABASE_NAME_V1_ENVELOPE" }}
+    username: {{ env "DATABASE_USERNAME_V1_ENVELOPE" }}
+    password: {{ env "DATABASE_PASSWORD_V1_ENVELOPE" }}
+    host:     {{ env "DATABASE_HOST_V1_ENVELOPE" }}
+    port:     {{ env "DATABASE_PORT_V1_ENVELOPE" }}
+    connection_max_lifetime: 120s
+    max_idle_connection: 100
+    max_open_connection: 100`
+
+var DatabaseConfigV1EnvelopeMissingInstances = `
+version: "1.0"`
+
+var DatabaseConfigUnsupportedVersion = `
+version: "9.9"
+instances:
+  oauth_database:
+    driver: mysql
+    database: x
+    username: y
+    host: z`
+
+var DatabaseConfigIdleConnectionNewSpelling = `
+version: "1.0"
+instances:
+  oauth_database:
+    driver: mysql
+    database: x
+    username: y
+    password: p
+    host:     localhost
+    port:     3306
+    connection_max_lifetime: 120s
+    max_idle_connection: 42
+    max_open_connection: 100`
+
 var DatabaseConfigInvalidTemplateFormatting = `
 oauth_database:
   driver: mysql
   database: some_database
   username: some_username
   password: some_password
-  migration_source: "file://migration"
   host:     localhost
   port:     3306
   connection_max_lifetime: {}}}{}{{}}A{!@}
@@ -271,13 +285,21 @@ plugins:
 
 var PluginConfigNormal1 = `
 plugin: oauth
+version: "1.0"
 config:
   database: main_database
   access_token_timeout: 24h
   authorization_code_timeout: 24h`
 
 var PluginConfigNormal2 = `
-  plugin: cache`
+plugin: cache
+version: "1.0"`
+
+var PluginConfigMissingVersion = `
+plugin: cache`
+
+var PluginConfigMissingName = `
+version: "1.0"`
 
 var PluginConfigYamlUnmarshalError = `
 asda
@@ -290,6 +312,7 @@ asd
 
 var PluginConfigTemplateParsingError = `
 plugin: oauth
+version: "1.0"
 config:
   database: {}}{}{{}{}}{}{}{{{{{}{}{}}}}}
   access_token_timeout: 24h

@@ -9,7 +9,7 @@ import (
 	"github.com/kodefluence/altair/adapter"
 	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/entity"
-	"github.com/kodefluence/altair/plugin/metric/module/dummy/controller/metric"
+	"github.com/kodefluence/altair/testhelper"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -40,7 +40,7 @@ func TestAppBearer(t *testing.T) {
 	appEngine := gin.Default()
 
 	appBearer := cfg.AppBearer(appEngine, adapter.AppConfig(appConfig))
-	appBearer.SetMetricProvider(metric.NewDummy())
+	appBearer.SetMetricProvider(testhelper.NewDummyMetric())
 
 	t.Run("Config", func(t *testing.T) {
 		t.Run("Return AppConfig", func(t *testing.T) {
@@ -92,7 +92,7 @@ func TestAppBearer(t *testing.T) {
 
 		appBearer := cfg.AppBearer(appEngine, adapter.AppConfig(appConfig))
 
-		mockMetric := metric.NewDummy()
+		mockMetric := testhelper.NewDummyMetric()
 		assert.NotPanics(t, func() {
 			appBearer.SetMetricProvider(mockMetric)
 		})
@@ -115,7 +115,7 @@ func TestAppBearer(t *testing.T) {
 
 				appBearer := cfg.AppBearer(appEngine, adapter.AppConfig(appConfig))
 
-				mockMetric := metric.NewDummy()
+				mockMetric := testhelper.NewDummyMetric()
 
 				appBearer.SetMetricProvider(mockMetric)
 				metricProvider, err := appBearer.MetricProvider()

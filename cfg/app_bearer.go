@@ -13,9 +13,6 @@ type appBearer struct {
 	metricProvider    core.Metric
 }
 
-// TODO:
-// Differentiate engine with baseAPIEngine and pluginAPIEngine
-// Also create injector for both baseAPIEngine and pluginAPIEngine
 func AppBearer(appEngine core.APIEngine, config core.AppConfig) core.AppBearer {
 	return &appBearer{
 		appEngine:         appEngine,

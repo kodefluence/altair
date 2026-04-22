@@ -8,10 +8,20 @@ import (
 
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/entity"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v2"
 )
 
 type database struct{}
+
+// baseDatabaseConfig wraps the v1.0 envelope. Both Version and Instances are
+// empty for legacy (pre-version) files; the loader detects that and falls
+// back to the flat map shape below.
+type baseDatabaseConfig struct {
+	Version   string                       `yaml:"version"`
+	Instances map[string]map[string]string `yaml:"instances"`
+}
 
 func Database() core.DatabaseLoader {
 	return &database{}
@@ -22,6 +32,7 @@ func (d *database) Compile(configPath string) (map[string]core.DatabaseConfig, e
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
 
 	contents, err := io.ReadAll(f)
 	if err != nil {
@@ -33,28 +44,54 @@ func (d *database) Compile(configPath string) (map[string]core.DatabaseConfig, e
 		return nil, err
 	}
 
-	driverConfigs, err := d.unmarshalDriver(compiledContents)
+	driverConfigs, err := d.selectDriverConfigs(compiledContents)
 	if err != nil {
 		return nil, err
 	}
 
-	databaseConfigs, err := d.assignConfig(driverConfigs)
-	if err != nil {
-		return nil, err
-	}
-
-	return databaseConfigs, nil
+	return d.assignConfig(driverConfigs)
 }
 
-func (d *database) unmarshalDriver(compiledContents []byte) (map[string]map[string]string, error) {
-	var driverConfigs map[string]map[string]string
+// selectDriverConfigs returns the flat driver-config map for either envelope.
+//
+// v1.0:
+//
+//	version: "1.0"
+//	instances:
+//	  main_database: {driver: mysql, ...}
+//
+// legacy (no version field):
+//
+//	main_database: {driver: mysql, ...}
+//
+// Legacy emits a one-shot deprecation warning so deployments keep working
+// while operators migrate.
+func (d *database) selectDriverConfigs(compiledContents []byte) (map[string]map[string]string, error) {
+	var envelope baseDatabaseConfig
+	if err := yaml.Unmarshal(compiledContents, &envelope); err == nil && envelope.Version != "" {
+		switch envelope.Version {
+		case "1.0":
+			if envelope.Instances == nil {
+				return nil, errors.New("database config version `1.0` requires an `instances` map")
+			}
+			return envelope.Instances, nil
+		default:
+			return nil, fmt.Errorf("undefined template version: %s for database.yml", envelope.Version)
+		}
+	}
 
-	err := yaml.Unmarshal(compiledContents, &driverConfigs)
-	if err != nil {
+	var legacy map[string]map[string]string
+	if err := yaml.Unmarshal(compiledContents, &legacy); err != nil {
 		return nil, err
 	}
 
-	return driverConfigs, nil
+	if legacy != nil {
+		log.Warn().
+			Array("tags", zerolog.Arr().Str("altair").Str("cfg").Str("database").Str("deprecation")).
+			Msg("database.yml is missing a `version` field; add `version: \"1.0\"` and wrap instances under `instances:`. Legacy format will be removed in a future release.")
+	}
+
+	return legacy, nil
 }
 
 func (d *database) assignConfig(driverConfigs map[string]map[string]string) (map[string]core.DatabaseConfig, error) {
@@ -118,8 +155,16 @@ func (d *database) assignMysqlConfig(config map[string]string) (core.DatabaseCon
 		mysqlConfig.ConnectionMaxLifetime = "0"
 	}
 
-	if max_iddle_connection, ok := config["max_iddle_connection"]; ok && max_iddle_connection != "" {
-		mysqlConfig.MaxIddleConnection = max_iddle_connection
+	// Accept both the canonical `max_idle_connection` and the legacy typo
+	// `max_iddle_connection`. Prefer the canonical spelling when both are set;
+	// emit a one-shot deprecation warning when only the legacy key is present.
+	if maxIdle, ok := config["max_idle_connection"]; ok && maxIdle != "" {
+		mysqlConfig.MaxIddleConnection = maxIdle
+	} else if maxIdleLegacy, ok := config["max_iddle_connection"]; ok && maxIdleLegacy != "" {
+		log.Warn().
+			Array("tags", zerolog.Arr().Str("altair").Str("cfg").Str("database").Str("deprecation")).
+			Msg("`max_iddle_connection` is a misspelling; use `max_idle_connection` instead. The legacy key will be removed in a future release.")
+		mysqlConfig.MaxIddleConnection = maxIdleLegacy
 	} else {
 		mysqlConfig.MaxIddleConnection = "0"
 	}

@@ -5,17 +5,23 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
+	"github.com/kodefluence/altair/module"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
 
 type New struct {
-	fs embed.FS
+	fs      embed.FS
+	plugins []module.Plugin
 }
 
-func NewNew(fs embed.FS) *New {
-	return &New{fs: fs}
+// NewNew builds the `altair new` command. plugins is the compiled-in plugin
+// registry; the command writes one config/plugin/<name>.yml per plugin via
+// its SampleConfig() method.
+func NewNew(fs embed.FS, plugins []module.Plugin) *New {
+	return &New{fs: fs, plugins: plugins}
 }
 
 func (n *New) Use() string {
@@ -56,73 +62,53 @@ func (n *New) Run(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	metricYml, err := n.fs.ReadFile("template/plugin/metric.yml")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	oauthYml, err := n.fs.ReadFile("template/plugin/oauth.yml")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
 	dotEnv, err := n.fs.ReadFile("template/env.sample")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	for _, dir := range []string{path, fmt.Sprintf("%s/routes", path), fmt.Sprintf("%s/config", path), fmt.Sprintf("%s/config/plugin", path)} {
+	for _, dir := range []string{path, filepath.Join(path, "routes"), filepath.Join(path, "config"), filepath.Join(path, "config", "plugin")} {
 		if _, err := os.Stat(dir); errors.Is(err, os.ErrNotExist) {
 			fmt.Println("Directory does not exist, creating directory...")
-			err = os.Mkdir(dir, 0755)
-			if err != nil {
+			if err := os.MkdirAll(dir, 0755); err != nil {
 				fmt.Println(err)
 				return
 			}
 		}
 	}
 
-	err = os.WriteFile(fmt.Sprintf("%s/config/app.yml", path), appYml, 0644)
-	if err != nil {
+	if err := os.WriteFile(filepath.Join(path, "config", "app.yml"), appYml, 0644); err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	err = os.WriteFile(fmt.Sprintf("%s/config/database.yml", path), databaseYml, 0644)
-	if err != nil {
+	if err := os.WriteFile(filepath.Join(path, "config", "database.yml"), databaseYml, 0644); err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	err = os.WriteFile(fmt.Sprintf("%s/routes/service-a.yml", path), serviceYml, 0644)
-	if err != nil {
+	if err := os.WriteFile(filepath.Join(path, "routes", "service-a.yml"), serviceYml, 0644); err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	err = os.WriteFile(fmt.Sprintf("%s/config/plugin/metric.yml", path), metricYml, 0644)
-	if err != nil {
+	for _, p := range n.plugins {
+		sample := p.SampleConfig()
+		if len(sample) == 0 {
+			continue
+		}
+		target := filepath.Join(path, "config", "plugin", p.Name()+".yml")
+		if err := os.WriteFile(target, sample, 0644); err != nil {
+			fmt.Println(err)
+			return
+		}
+	}
+
+	if err := os.WriteFile(filepath.Join(path, ".env"), dotEnv, 0644); err != nil {
 		fmt.Println(err)
 		return
 	}
-
-	err = os.WriteFile(fmt.Sprintf("%s/config/plugin/oauth.yml", path), oauthYml, 0644)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	err = os.WriteFile(fmt.Sprintf("%s/.env", path), dotEnv, 0644)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
 }
 
-func (n *New) ModifyFlags(flags *pflag.FlagSet) {
-
-}
+func (n *New) ModifyFlags(flags *pflag.FlagSet) {}

@@ -35,12 +35,16 @@ func (p *pluginBearer) PluginVersion(pluginName string) (string, error) {
 	return plugin.Version, nil
 }
 
-func (p *pluginBearer) CompilePlugin(pluginName string, injectedStruct interface{}) error {
+// DecodeConfig unmarshals the plugin's raw YAML into target. Plugin config
+// structs typically wrap their fields under `Config yaml:"config"`, so the
+// same raw bytes populate the inner struct while ignoring the top-level
+// `plugin:`/`version:` keys.
+func (p *pluginBearer) DecodeConfig(pluginName string, target interface{}) error {
 	if !p.ConfigExists(pluginName) {
 		return errPluginNotFound
 	}
 
-	return yaml.Unmarshal(p.plugins[pluginName].Raw, injectedStruct)
+	return yaml.Unmarshal(p.plugins[pluginName].Raw, target)
 }
 
 func (p *pluginBearer) ForEach(callbackFunc func(pluginName string) error) {

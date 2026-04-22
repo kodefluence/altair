@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kodefluence/altair/plugin/metric/module/dummy/controller/metric"
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/kodefluence/monorepo/kontext"
 	"github.com/stretchr/testify/suite"
@@ -46,7 +45,7 @@ func (suite *HttpSuiteTest) TestInjectHttp() {
 					c.String(http.StatusOK, "%s", "OK")
 				}}
 
-			suite.controller.InjectMetric(metric.NewDummy())
+			suite.controller.InjectMetric(testhelper.NewDummyMetric())
 			suite.controller.InjectHTTP(fakecontroller)
 			w := testhelper.PerformRequest(suite.apiengine, fakecontroller.Method(), fakecontroller.Path(), nil)
 

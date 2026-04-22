@@ -86,6 +86,36 @@ func TestPlugin(t *testing.T) {
 					assert.Nil(t, pluginBearer)
 				})
 			})
+
+			t.Run("Plugin config missing version", func(t *testing.T) {
+				t.Run("Return error", func(t *testing.T) {
+					pluginPath := "./plugin_config_missing_version/"
+
+					testhelper.GenerateTempTestFiles(pluginPath, PluginConfigMissingVersion, "cache.yaml", 0666)
+
+					pluginBearer, err := cfg.Plugin().Compile(pluginPath)
+
+					assert.NotNil(t, err)
+					assert.Nil(t, pluginBearer)
+
+					testhelper.RemoveTempTestFiles(pluginPath)
+				})
+			})
+
+			t.Run("Plugin config missing name", func(t *testing.T) {
+				t.Run("Return error", func(t *testing.T) {
+					pluginPath := "./plugin_config_missing_name/"
+
+					testhelper.GenerateTempTestFiles(pluginPath, PluginConfigMissingName, "unknown.yaml", 0666)
+
+					pluginBearer, err := cfg.Plugin().Compile(pluginPath)
+
+					assert.NotNil(t, err)
+					assert.Nil(t, pluginBearer)
+
+					testhelper.RemoveTempTestFiles(pluginPath)
+				})
+			})
 		})
 	})
 }

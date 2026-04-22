@@ -1,19 +1,19 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/golang-migrate/migrate/v4"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-
-	_ "github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
 
 	"github.com/subosito/gotenv"
 
@@ -24,6 +24,8 @@ import (
 	"github.com/kodefluence/altair/module/app"
 	"github.com/kodefluence/altair/module/controller"
 	"github.com/kodefluence/altair/module/healthcheck"
+	"github.com/kodefluence/altair/module/migration"
+	pluginlist "github.com/kodefluence/altair/module/plugin_list"
 	"github.com/kodefluence/altair/module/projectgenerator"
 	"github.com/kodefluence/altair/module/router"
 	"github.com/kodefluence/altair/plugin"
@@ -45,9 +47,16 @@ func main() {
 }
 
 func loadConfig() {
-	dbConfigs, _ = cfg.Database().Compile("config/database.yml")
-	appConfig, _ = cfg.App().Compile("config/app.yml")
-	pluginBearer, _ = cfg.Plugin().Compile("config/plugin/")
+	var err error
+	if dbConfigs, err = cfg.Database().Compile("config/database.yml"); err != nil {
+		fmt.Fprintf(os.Stderr, "altair: skipped loading config/database.yml: %v\n", err)
+	}
+	if appConfig, err = cfg.App().Compile("config/app.yml"); err != nil {
+		fmt.Fprintf(os.Stderr, "altair: skipped loading config/app.yml: %v\n", err)
+	}
+	if pluginBearer, err = cfg.Plugin().Compile("config/plugin/"); err != nil {
+		fmt.Fprintf(os.Stderr, "altair: skipped loading config/plugin/: %v\n", err)
+	}
 }
 
 func executeCommand() {
@@ -59,6 +68,10 @@ func executeCommand() {
 		},
 	}
 
+	var (
+		autoMigrateFlag    bool
+		autoMigrateTimeout time.Duration
+	)
 	runCmd := &cobra.Command{
 		Use:   "run",
 		Short: "Run API gateway services.",
@@ -78,6 +91,17 @@ func executeCommand() {
 				return
 			}
 
+			if autoMigrateFlag || appConfig.AutoMigrate() {
+				if err := applyAutoMigrate(autoMigrateTimeout); err != nil {
+					log.Error().
+						Err(err).
+						Stack().
+						Array("tags", zerolog.Arr().Str("altair").Str("main").Str("auto-migrate")).
+						Msg("Auto-migrate failed; refusing to start API server.")
+					return
+				}
+			}
+
 			if err := runAPI(); err != nil {
 				log.Error().
 					Err(err).
@@ -87,6 +111,8 @@ func executeCommand() {
 			}
 		},
 	}
+	runCmd.Flags().BoolVar(&autoMigrateFlag, "auto-migrate", false, "Apply pending plugin migrations before the API server starts. Equivalent to setting app.yml `auto_migrate: true`.")
+	runCmd.Flags().DurationVar(&autoMigrateTimeout, "auto-migrate-timeout", 60*time.Second, "Maximum wall time for auto-migrate to complete before aborting boot. golang-migrate's advisory lock is released on process exit.")
 
 	configCmd := &cobra.Command{
 		Use:     "config",
@@ -144,7 +170,7 @@ func executeCommand() {
 
 	appController := controller.Provide(nil, nil, rootCmd)
 	appModule := app.Provide(appController)
-	projectgenerator.Load(appModule)
+	projectgenerator.Load(appModule, plugin.Registry())
 
 	pluginCmd := &cobra.Command{
 		Use:                "plugin",
@@ -181,6 +207,9 @@ func executeCommand() {
 					Array("tags", zerolog.Arr().Str("altair").Str("main")).
 					Msg("Error generating plugins")
 			}
+
+			migrationRunner := migration.Provide(pluginModule, plugin.Registry(), pluginBearer, dbBearer)
+			pluginlist.Provide(pluginModule, plugin.Registry(), appBearer, pluginBearer, migrationRunner)
 
 			childCmd, _, err := cmd.Find(args)
 			if err != nil || childCmd.Use == cmd.Use {
@@ -286,6 +315,8 @@ func runAPI() error {
 		return err
 	}
 
+	reportMigrationDrift(pluginBearer, dbBearer)
+
 	compiler, forwarder := router.Provide(pluginModule.Controller().ListDownstream(), pluginModule.Controller().ListMetric())
 	routeObjects, err := compiler.Compile("./routes")
 	if err != nil {
@@ -330,4 +361,71 @@ func runAPI() error {
 	closeSignal := <-gracefulSignal
 	log.Info().Array("tags", zerolog.Arr().Str("altair").Str("main")).Msg(fmt.Sprintf("Receiving %s signal.... Cleaning up processes.", closeSignal.String()))
 	return nil
+}
+
+// applyAutoMigrate runs UpAll through the migration runner, bounded by
+// timeout. If the timeout fires we abort boot rather than start an API server
+// against a partially-migrated schema; golang-migrate's MySQL advisory lock
+// releases when the process exits.
+func applyAutoMigrate(timeout time.Duration) error {
+	if len(databases) == 0 {
+		return nil
+	}
+
+	dbBearer := cfg.DatabaseBearer(databases, dbConfigs)
+	runner := migration.Runner(plugin.Registry(), pluginBearer, dbBearer)
+
+	log.Info().
+		Dur("timeout", timeout).
+		Array("tags", zerolog.Arr().Str("altair").Str("main").Str("auto-migrate")).
+		Msg("Auto-migrate: applying pending migrations for every configured plugin.")
+
+	done := make(chan error, 1)
+	go func() { done <- runner.UpAll() }()
+
+	select {
+	case err := <-done:
+		if err != nil {
+			var dirty migrate.ErrDirty
+			if errors.As(err, &dirty) {
+				return fmt.Errorf("auto-migrate refused to run because a plugin's schema is dirty at version %d. Repair the SQL, then run `altair plugin migrate:force --plugin <name> --version <n>` and retry: %w", dirty.Version, err)
+			}
+			return err
+		}
+		log.Info().
+			Array("tags", zerolog.Arr().Str("altair").Str("main").Str("auto-migrate")).
+			Msg("Auto-migrate: complete.")
+		return nil
+	case <-time.After(timeout):
+		return fmt.Errorf("auto-migrate timed out after %s; inspect `altair plugin migrate:status`", timeout)
+	}
+}
+
+// reportMigrationDrift emits warnings for plugins whose embedded migrations
+// are ahead of the DB. Non-blocking — the server still starts; operators
+// pair this with `altair plugin migrate:up` or the auto-migrate flag.
+func reportMigrationDrift(pluginBearer core.PluginBearer, dbBearer core.DatabaseBearer) {
+	runner := migration.Runner(plugin.Registry(), pluginBearer, dbBearer)
+	reports, err := runner.Drift()
+	if err != nil {
+		log.Warn().
+			Err(err).
+			Array("tags", zerolog.Arr().Str("altair").Str("main").Str("drift")).
+			Msg("Unable to evaluate migration drift")
+		return
+	}
+	for _, r := range reports {
+		evt := log.Warn().
+			Str("plugin", r.Plugin).
+			Str("database", r.DatabaseInstance).
+			Uint("current_version", r.CurrentVersion).
+			Uint("target_version", r.TargetVersion).
+			Bool("dirty", r.Dirty).
+			Array("tags", zerolog.Arr().Str("altair").Str("main").Str("drift"))
+		if r.Dirty {
+			evt.Msg("Plugin schema is dirty — run `altair plugin migrate:force` after repairing.")
+			continue
+		}
+		evt.Msg("Plugin migrations are ahead of the DB — run `altair plugin migrate:up --plugin " + r.Plugin + "` or enable --auto-migrate.")
+	}
 }

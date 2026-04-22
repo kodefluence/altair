@@ -7,6 +7,7 @@ import (
 	"github.com/kodefluence/altair/module/app"
 	"github.com/kodefluence/altair/module/controller"
 	"github.com/kodefluence/altair/module/projectgenerator"
+	"github.com/kodefluence/altair/plugin"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
@@ -17,7 +18,7 @@ func TestCommandNew(t *testing.T) {
 	}
 	appController := controller.Provide(nil, nil, cmd)
 	appModule := app.Provide(appController)
-	projectgenerator.Load(appModule)
+	projectgenerator.Load(appModule, plugin.Registry())
 
 	t.Run("Given embed file system, when command is executed then it would create a new folder contain all of altair config", func(t *testing.T) {
 		os.Args = []string{"test", "new", "kuma"}

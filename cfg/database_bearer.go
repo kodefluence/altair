@@ -1,9 +1,11 @@
 package cfg
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/monorepo/db"
-	"github.com/pkg/errors"
 )
 
 // ErrDatabasesIsNotExists thrown when database is not exists or not initialized yet in database bearer
@@ -20,10 +22,15 @@ func DatabaseBearer(databases map[string]db.DB, configs map[string]core.Database
 }
 
 func (d *databaseBearer) Database(dbName string) (db.DB, core.DatabaseConfig, error) {
-	db, ok := d.databases[dbName]
+	sqldb, ok := d.databases[dbName]
 	if !ok {
 		return nil, nil, ErrDatabasesIsNotExists
 	}
 
-	return db, d.configs[dbName], nil
+	config, ok := d.configs[dbName]
+	if !ok {
+		return nil, nil, fmt.Errorf("database `%s` is connected but has no matching config entry", dbName)
+	}
+
+	return sqldb, config, nil
 }

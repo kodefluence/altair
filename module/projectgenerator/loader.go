@@ -10,6 +10,9 @@ import (
 //go:embed template
 var fs embed.FS
 
-func Load(app module.App) {
-	app.Controller().InjectCommand(command.NewNew(fs))
+// Load wires the `altair new` command with the plugin registry so the
+// generated config/plugin/*.yml files always match the plugins compiled into
+// the binary.
+func Load(app module.App, plugins []module.Plugin) {
+	app.Controller().InjectCommand(command.NewNew(fs, plugins))
 }

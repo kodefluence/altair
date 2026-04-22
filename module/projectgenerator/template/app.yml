@@ -5,7 +5,10 @@
 # authorization: <hash>
 #   username: string          - Basic auth username for managing the application plugins, required.
 #   password: string          - Basic auth password for managing the application plugins, required.
-# plugins: <array[string]>    - List of active plugins. Available plugins: oauth
+# plugins: <array[string]>    - List of active plugins. Available plugins: oauth, metric.
+# auto_migrate: bool          - When true, `altair run` applies any plugin-owned migrations before the API server starts.
+#                               Equivalent to passing `--auto-migrate`. golang-migrate's MySQL driver takes an advisory
+#                               lock, so parallel boots against the same DB serialize naturally. Default: false.
 
 version: "1.0"
 port: 1304
@@ -16,3 +19,4 @@ authorization:
 plugins:
   - oauth
   - metric
+auto_migrate: false

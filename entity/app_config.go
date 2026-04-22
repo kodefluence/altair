@@ -8,6 +8,7 @@ type AppConfigOption struct {
 	Port          int
 	ProxyHost     string
 	Plugins       []string
+	AutoMigrate   bool
 	Authorization struct {
 		Username string
 		Password string
@@ -21,6 +22,7 @@ type AppConfig struct {
 	proxyHost         string
 	basicAuthUsername string
 	basicAuthPassword string
+	autoMigrate       bool
 }
 
 func NewAppConfig(option AppConfigOption) AppConfig {
@@ -37,6 +39,7 @@ func NewAppConfig(option AppConfigOption) AppConfig {
 		proxyHost:         option.ProxyHost,
 		basicAuthPassword: option.Authorization.Password,
 		basicAuthUsername: option.Authorization.Username,
+		autoMigrate:       option.AutoMigrate,
 	}
 }
 
@@ -65,11 +68,16 @@ func (a AppConfig) ProxyHost() string {
 	return a.proxyHost
 }
 
+func (a AppConfig) AutoMigrate() bool {
+	return a.autoMigrate
+}
+
 func (a AppConfig) Dump() string {
 	appConfigOption := AppConfigOption{
-		Port:      a.port,
-		Plugins:   a.plugins,
-		ProxyHost: a.proxyHost,
+		Port:        a.port,
+		Plugins:     a.plugins,
+		ProxyHost:   a.proxyHost,
+		AutoMigrate: a.autoMigrate,
 	}
 
 	appConfigOption.Authorization.Username = a.basicAuthUsername

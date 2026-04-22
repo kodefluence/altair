@@ -20,6 +20,7 @@ type baseAppConfig struct {
 	Plugins       []string `yaml:"plugins"`
 	Port          string   `yaml:"port"`
 	ProxyHost     string   `yaml:"proxy_host"`
+	AutoMigrate   bool     `yaml:"auto_migrate"`
 	Authorization struct {
 		Username string `yaml:"username"`
 		Password string `yaml:"password"`
@@ -83,6 +84,7 @@ func (a *app) Compile(configPath string) (core.AppConfig, error) {
 		}
 
 		appConfigOption.Plugins = config.Plugins
+		appConfigOption.AutoMigrate = config.AutoMigrate
 		appConfigOption.Authorization.Username = config.Authorization.Username
 		appConfigOption.Authorization.Password = config.Authorization.Password
 

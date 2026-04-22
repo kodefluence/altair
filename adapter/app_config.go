@@ -19,4 +19,5 @@ func (a *appConfig) BasicAuthPassword() string           { return a.c.BasicAuthP
 func (a *appConfig) ProxyHost() string                   { return a.c.ProxyHost() }
 func (a *appConfig) PluginExists(pluginName string) bool { return a.c.PluginExists(pluginName) }
 func (a *appConfig) Plugins() []string                   { return a.c.Plugins() }
+func (a *appConfig) AutoMigrate() bool                   { return a.c.AutoMigrate() }
 func (a *appConfig) Dump() string                        { return a.c.Dump() }
