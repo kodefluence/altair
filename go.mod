@@ -10,7 +10,6 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/kodefluence/aurelia v0.0.0-20220717092613-4dd6082f36c5
 	github.com/kodefluence/monorepo v1.3.1
-	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.12.2
 	github.com/rs/zerolog v1.27.0
 	github.com/spf13/cobra v1.5.0
@@ -46,6 +45,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/opencontainers/image-spec v1.1.0-rc2 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.2 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
