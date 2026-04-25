@@ -8,6 +8,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/database"
 	"github.com/golang-migrate/migrate/v4/database/mysql"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
+
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/module"
 )

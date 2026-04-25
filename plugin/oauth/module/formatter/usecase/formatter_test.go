@@ -5,11 +5,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kodefluence/aurelia"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/plugin/oauth/module/formatter/usecase"
 	"github.com/kodefluence/altair/util"
-	"github.com/kodefluence/aurelia"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestOauthApplication(t *testing.T) {

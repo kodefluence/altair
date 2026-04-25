@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// go:generate mockgen -source interface.go -destination mock/interface.go -package mock
+//go:generate mockgen -source interface.go -destination mock/interface.go -package mock
 
 type App interface {
 	Controller() Controller

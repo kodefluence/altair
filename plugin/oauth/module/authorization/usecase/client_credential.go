@@ -1,12 +1,13 @@
 package usecase
 
 import (
-	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/kodefluence/monorepo/exception"
 	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
 	"github.com/rs/zerolog"
+
+	"github.com/kodefluence/altair/plugin/oauth/entity"
 )
 
 func (a *Authorization) ClientCredential(ktx kontext.Context, accessTokenReq entity.AccessTokenRequestJSON, oauthApplication entity.OauthApplication) (entity.OauthAccessToken, *entity.OauthRefreshToken, jsonapi.Errors) {

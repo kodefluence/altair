@@ -1,12 +1,13 @@
 package application
 
 import (
+	"github.com/kodefluence/monorepo/db"
+
 	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/oauth/module/application/controller/command"
 	"github.com/kodefluence/altair/plugin/oauth/module/application/controller/downstream"
 	"github.com/kodefluence/altair/plugin/oauth/module/application/controller/http"
 	"github.com/kodefluence/altair/plugin/oauth/module/application/usecase"
-	"github.com/kodefluence/monorepo/db"
 )
 
 func Load(

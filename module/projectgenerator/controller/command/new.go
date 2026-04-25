@@ -7,9 +7,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/kodefluence/altair/module"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+
+	"github.com/kodefluence/altair/module"
 )
 
 type New struct {

@@ -5,13 +5,14 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	mockdb "github.com/kodefluence/monorepo/db/mock"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kodefluence/altair/module/apierror"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/plugin/oauth/module/application/usecase"
 	"github.com/kodefluence/altair/plugin/oauth/module/application/usecase/mock"
 	"github.com/kodefluence/altair/util"
-	mockdb "github.com/kodefluence/monorepo/db/mock"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestValidateApplication(t *testing.T) {

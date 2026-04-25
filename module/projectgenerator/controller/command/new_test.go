@@ -4,12 +4,13 @@ import (
 	"os"
 	"testing"
 
+	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kodefluence/altair/module/app"
 	"github.com/kodefluence/altair/module/controller"
 	"github.com/kodefluence/altair/module/projectgenerator"
 	"github.com/kodefluence/altair/plugin"
-	"github.com/spf13/cobra"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestCommandNew(t *testing.T) {

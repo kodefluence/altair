@@ -79,6 +79,20 @@ func (mr *MockFormatterMockRecorder) AccessToken(e, redirectURI, refreshTokenJSO
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessToken", reflect.TypeOf((*MockFormatter)(nil).AccessToken), e, redirectURI, refreshTokenJSON)
 }
 
+// AccessTokenClientCredentialInsertable mocks base method.
+func (m *MockFormatter) AccessTokenClientCredentialInsertable(application entity.OauthApplication, scope *string) entity.OauthAccessTokenInsertable {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AccessTokenClientCredentialInsertable", application, scope)
+	ret0, _ := ret[0].(entity.OauthAccessTokenInsertable)
+	return ret0
+}
+
+// AccessTokenClientCredentialInsertable indicates an expected call of AccessTokenClientCredentialInsertable.
+func (mr *MockFormatterMockRecorder) AccessTokenClientCredentialInsertable(application, scope interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AccessTokenClientCredentialInsertable", reflect.TypeOf((*MockFormatter)(nil).AccessTokenClientCredentialInsertable), application, scope)
+}
+
 // AccessTokenFromAuthorizationRequestInsertable mocks base method.
 func (m *MockFormatter) AccessTokenFromAuthorizationRequestInsertable(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessTokenInsertable {
 	m.ctrl.T.Helper()

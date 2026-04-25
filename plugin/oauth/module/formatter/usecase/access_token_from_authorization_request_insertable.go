@@ -4,9 +4,10 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/kodefluence/aurelia"
+
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/util"
-	"github.com/kodefluence/aurelia"
 )
 
 func (f *Formatter) AccessTokenFromAuthorizationRequestInsertable(r entity.AuthorizationRequestJSON, application entity.OauthApplication) entity.OauthAccessTokenInsertable {

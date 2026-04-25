@@ -4,12 +4,13 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
-	"github.com/kodefluence/altair/cfg"
-	"github.com/kodefluence/altair/core"
-	"github.com/kodefluence/altair/entity"
 	"github.com/kodefluence/monorepo/db"
 	mockdb "github.com/kodefluence/monorepo/db/mock"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/kodefluence/altair/cfg"
+	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/entity"
 )
 
 func TestDatabaseBearer(t *testing.T) {

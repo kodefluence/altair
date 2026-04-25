@@ -11,15 +11,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/kodefluence/aurelia"
+	mockdb "github.com/kodefluence/monorepo/db/mock"
+	"github.com/kodefluence/monorepo/exception"
+	"github.com/stretchr/testify/assert"
+
 	coreEntity "github.com/kodefluence/altair/entity"
 	coreMock "github.com/kodefluence/altair/mock"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/plugin/oauth/module/authorization/controller/downstream"
 	"github.com/kodefluence/altair/plugin/oauth/module/authorization/controller/downstream/mock"
-	"github.com/kodefluence/aurelia"
-	mockdb "github.com/kodefluence/monorepo/db/mock"
-	"github.com/kodefluence/monorepo/exception"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestOauth(t *testing.T) {

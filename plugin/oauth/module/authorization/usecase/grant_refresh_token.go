@@ -1,10 +1,11 @@
 package usecase
 
 import (
-	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
+
+	"github.com/kodefluence/altair/plugin/oauth/entity"
 )
 
 func (a *Authorization) GrantRefreshToken(ktx kontext.Context, oauthAccessToken entity.OauthAccessToken, oauthApplication entity.OauthApplication, tx db.TX) (entity.OauthRefreshToken, jsonapi.Errors) {

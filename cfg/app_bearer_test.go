@@ -6,11 +6,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kodefluence/altair/adapter"
 	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/entity"
 	"github.com/kodefluence/altair/testhelper"
-	"github.com/stretchr/testify/assert"
 )
 
 type fakeDownStreamPlugin struct{}

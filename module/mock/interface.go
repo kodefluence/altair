@@ -10,11 +10,11 @@ import (
 
 	gin "github.com/gin-gonic/gin"
 	gomock "github.com/golang/mock/gomock"
-	entity "github.com/kodefluence/altair/entity"
 	module "github.com/kodefluence/altair/module"
 	jsonapi "github.com/kodefluence/monorepo/jsonapi"
 	kontext "github.com/kodefluence/monorepo/kontext"
 	cobra "github.com/spf13/cobra"
+	pflag "github.com/spf13/pflag"
 )
 
 // MockApp is a mock of App interface.
@@ -52,176 +52,6 @@ func (m *MockApp) Controller() module.Controller {
 func (mr *MockAppMockRecorder) Controller() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Controller", reflect.TypeOf((*MockApp)(nil).Controller))
-}
-
-// MockConfig is a mock of Config interface.
-type MockConfig struct {
-	ctrl     *gomock.Controller
-	recorder *MockConfigMockRecorder
-}
-
-// MockConfigMockRecorder is the mock recorder for MockConfig.
-type MockConfigMockRecorder struct {
-	mock *MockConfig
-}
-
-// NewMockConfig creates a new mock instance.
-func NewMockConfig(ctrl *gomock.Controller) *MockConfig {
-	mock := &MockConfig{ctrl: ctrl}
-	mock.recorder = &MockConfigMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockConfig) EXPECT() *MockConfigMockRecorder {
-	return m.recorder
-}
-
-// BasicAuthPassword mocks base method.
-func (m *MockConfig) BasicAuthPassword() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "BasicAuthPassword")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// BasicAuthPassword indicates an expected call of BasicAuthPassword.
-func (mr *MockConfigMockRecorder) BasicAuthPassword() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BasicAuthPassword", reflect.TypeOf((*MockConfig)(nil).BasicAuthPassword))
-}
-
-// BasicAuthUsername mocks base method.
-func (m *MockConfig) BasicAuthUsername() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "BasicAuthUsername")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// BasicAuthUsername indicates an expected call of BasicAuthUsername.
-func (mr *MockConfigMockRecorder) BasicAuthUsername() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BasicAuthUsername", reflect.TypeOf((*MockConfig)(nil).BasicAuthUsername))
-}
-
-// Dump mocks base method.
-func (m *MockConfig) Dump() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Dump")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// Dump indicates an expected call of Dump.
-func (mr *MockConfigMockRecorder) Dump() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Dump", reflect.TypeOf((*MockConfig)(nil).Dump))
-}
-
-// Port mocks base method.
-func (m *MockConfig) Port() int {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Port")
-	ret0, _ := ret[0].(int)
-	return ret0
-}
-
-// Port indicates an expected call of Port.
-func (mr *MockConfigMockRecorder) Port() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Port", reflect.TypeOf((*MockConfig)(nil).Port))
-}
-
-// ProxyHost mocks base method.
-func (m *MockConfig) ProxyHost() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ProxyHost")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// ProxyHost indicates an expected call of ProxyHost.
-func (mr *MockConfigMockRecorder) ProxyHost() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ProxyHost", reflect.TypeOf((*MockConfig)(nil).ProxyHost))
-}
-
-// MockPlugin is a mock of Plugin interface.
-type MockPlugin struct {
-	ctrl     *gomock.Controller
-	recorder *MockPluginMockRecorder
-}
-
-// MockPluginMockRecorder is the mock recorder for MockPlugin.
-type MockPluginMockRecorder struct {
-	mock *MockPlugin
-}
-
-// NewMockPlugin creates a new mock instance.
-func NewMockPlugin(ctrl *gomock.Controller) *MockPlugin {
-	mock := &MockPlugin{ctrl: ctrl}
-	mock.recorder = &MockPluginMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockPlugin) EXPECT() *MockPluginMockRecorder {
-	return m.recorder
-}
-
-// Dump mocks base method.
-func (m *MockPlugin) Dump() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Dump")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// Dump indicates an expected call of Dump.
-func (mr *MockPluginMockRecorder) Dump() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Dump", reflect.TypeOf((*MockPlugin)(nil).Dump))
-}
-
-// Exist mocks base method.
-func (m *MockPlugin) Exist(plugin string) bool {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Exist", plugin)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-// Exist indicates an expected call of Exist.
-func (mr *MockPluginMockRecorder) Exist(plugin interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Exist", reflect.TypeOf((*MockPlugin)(nil).Exist), plugin)
-}
-
-// List mocks base method.
-func (m *MockPlugin) List() []string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List")
-	ret0, _ := ret[0].([]string)
-	return ret0
-}
-
-// List indicates an expected call of List.
-func (mr *MockPluginMockRecorder) List() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockPlugin)(nil).List))
-}
-
-// Plugin mocks base method.
-func (m *MockPlugin) Plugin(plugin string) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Plugin", plugin)
-}
-
-// Plugin indicates an expected call of Plugin.
-func (mr *MockPluginMockRecorder) Plugin(plugin interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Plugin", reflect.TypeOf((*MockPlugin)(nil).Plugin), plugin)
 }
 
 // MockController is a mock of Controller interface.
@@ -524,6 +354,18 @@ func (mr *MockCommandControllerMockRecorder) Example() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Example", reflect.TypeOf((*MockCommandController)(nil).Example))
 }
 
+// ModifyFlags mocks base method.
+func (m *MockCommandController) ModifyFlags(flags *pflag.FlagSet) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "ModifyFlags", flags)
+}
+
+// ModifyFlags indicates an expected call of ModifyFlags.
+func (mr *MockCommandControllerMockRecorder) ModifyFlags(flags interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ModifyFlags", reflect.TypeOf((*MockCommandController)(nil).ModifyFlags), flags)
+}
+
 // Run mocks base method.
 func (m *MockCommandController) Run(cmd *cobra.Command, args []string) {
 	m.ctrl.T.Helper()
@@ -771,79 +613,4 @@ func (m *MockRouterPath) GetScope() string {
 func (mr *MockRouterPathMockRecorder) GetScope() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetScope", reflect.TypeOf((*MockRouterPath)(nil).GetScope))
-}
-
-// MockRouterCompiler is a mock of RouterCompiler interface.
-type MockRouterCompiler struct {
-	ctrl     *gomock.Controller
-	recorder *MockRouterCompilerMockRecorder
-}
-
-// MockRouterCompilerMockRecorder is the mock recorder for MockRouterCompiler.
-type MockRouterCompilerMockRecorder struct {
-	mock *MockRouterCompiler
-}
-
-// NewMockRouterCompiler creates a new mock instance.
-func NewMockRouterCompiler(ctrl *gomock.Controller) *MockRouterCompiler {
-	mock := &MockRouterCompiler{ctrl: ctrl}
-	mock.recorder = &MockRouterCompilerMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockRouterCompiler) EXPECT() *MockRouterCompilerMockRecorder {
-	return m.recorder
-}
-
-// Compile mocks base method.
-func (m *MockRouterCompiler) Compile(routesPath string) ([]entity.RouteObject, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Compile", routesPath)
-	ret0, _ := ret[0].([]entity.RouteObject)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// Compile indicates an expected call of Compile.
-func (mr *MockRouterCompilerMockRecorder) Compile(routesPath interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Compile", reflect.TypeOf((*MockRouterCompiler)(nil).Compile), routesPath)
-}
-
-// MockRouterForwarder is a mock of RouterForwarder interface.
-type MockRouterForwarder struct {
-	ctrl     *gomock.Controller
-	recorder *MockRouterForwarderMockRecorder
-}
-
-// MockRouterForwarderMockRecorder is the mock recorder for MockRouterForwarder.
-type MockRouterForwarderMockRecorder struct {
-	mock *MockRouterForwarder
-}
-
-// NewMockRouterForwarder creates a new mock instance.
-func NewMockRouterForwarder(ctrl *gomock.Controller) *MockRouterForwarder {
-	mock := &MockRouterForwarder{ctrl: ctrl}
-	mock.recorder = &MockRouterForwarderMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockRouterForwarder) EXPECT() *MockRouterForwarderMockRecorder {
-	return m.recorder
-}
-
-// Generate mocks base method.
-func (m *MockRouterForwarder) Generate(engine *gin.Engine, metric module.MetricController, routeObjects []entity.RouteObject, downStreamPlugin []module.DownstreamController) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Generate", engine, metric, routeObjects, downStreamPlugin)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Generate indicates an expected call of Generate.
-func (mr *MockRouterForwarderMockRecorder) Generate(engine, metric, routeObjects, downStreamPlugin interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Generate", reflect.TypeOf((*MockRouterForwarder)(nil).Generate), engine, metric, routeObjects, downStreamPlugin)
 }

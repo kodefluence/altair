@@ -10,12 +10,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kodefluence/altair/entity"
 	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/module/mock"
 	"github.com/kodefluence/altair/module/router/usecase"
 	"github.com/kodefluence/altair/testhelper"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestGenerator(t *testing.T) {

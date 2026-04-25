@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/kodefluence/altair/core"
-	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/module"
 )
 
 // Load builds a PluginContext for every active plugin in Registry() and calls
@@ -59,7 +60,7 @@ func run(registry []module.Plugin, appBearer core.AppBearer, pluginBearer core.P
 
 // activePlugins applies the AND-gate. A plugin activated in app.yml but missing
 // its config file is an error — that's an explicit intent the operator can't
-// fulfil. The inverse (config file present, plugin not activated) is silent
+// fulfill. The inverse (config file present, plugin not activated) is silent
 // since operators may stage config ahead of rollout.
 func activePlugins(registry []module.Plugin, appBearer core.AppBearer, pluginBearer core.PluginBearer) ([]module.Plugin, error) {
 	var active []module.Plugin

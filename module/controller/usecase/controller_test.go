@@ -3,11 +3,12 @@ package usecase_test
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/suite"
+
 	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/module/apierror"
 	"github.com/kodefluence/altair/module/controller/usecase"
-	"github.com/spf13/cobra"
-	"github.com/stretchr/testify/suite"
 )
 
 type ControllerSuiteTest struct {

@@ -8,9 +8,10 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kodefluence/altair/testhelper"
 	"github.com/kodefluence/monorepo/kontext"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/kodefluence/altair/testhelper"
 )
 
 type HttpSuiteTest struct {

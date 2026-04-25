@@ -4,15 +4,16 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	mockdb "github.com/kodefluence/monorepo/db/mock"
+	"github.com/kodefluence/monorepo/kontext"
+	"github.com/stretchr/testify/suite"
+
 	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/module/apierror"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/plugin/oauth/module/authorization/usecase"
 	"github.com/kodefluence/altair/plugin/oauth/module/authorization/usecase/mock"
 	"github.com/kodefluence/altair/plugin/oauth/module/formatter"
-	mockdb "github.com/kodefluence/monorepo/db/mock"
-	"github.com/kodefluence/monorepo/kontext"
-	"github.com/stretchr/testify/suite"
 )
 
 type AuthorizationBaseSuiteTest struct {

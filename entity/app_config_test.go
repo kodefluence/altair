@@ -3,9 +3,10 @@ package entity_test
 import (
 	"testing"
 
-	"github.com/kodefluence/altair/entity"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
+
+	"github.com/kodefluence/altair/entity"
 )
 
 func TestAppConfig(t *testing.T) {

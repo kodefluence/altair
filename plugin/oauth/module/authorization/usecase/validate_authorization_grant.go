@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kodefluence/altair/plugin/oauth/entity"
-	"github.com/kodefluence/altair/util"
 	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
+
+	"github.com/kodefluence/altair/plugin/oauth/entity"
+	"github.com/kodefluence/altair/util"
 )
 
 func (a *Authorization) ValidateAuthorizationGrant(ktx kontext.Context, r entity.AuthorizationRequestJSON, application entity.OauthApplication) jsonapi.Errors {

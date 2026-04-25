@@ -5,8 +5,9 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kodefluence/altair/module"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/kodefluence/altair/module"
 )
 
 type DownstreamSuiteTest struct {

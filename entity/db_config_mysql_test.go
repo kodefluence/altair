@@ -4,9 +4,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kodefluence/altair/entity"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/yaml.v2"
+
+	"github.com/kodefluence/altair/entity"
 )
 
 func TestMYSQLDatabaseConfig(t *testing.T) {

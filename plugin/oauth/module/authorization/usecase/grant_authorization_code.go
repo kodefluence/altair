@@ -1,9 +1,10 @@
 package usecase
 
 import (
-	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
+
+	"github.com/kodefluence/altair/plugin/oauth/entity"
 )
 
 func (a *Authorization) GrantAuthorizationCode(ktx kontext.Context, authorizationReq entity.AuthorizationRequestJSON) (interface{}, jsonapi.Errors) {

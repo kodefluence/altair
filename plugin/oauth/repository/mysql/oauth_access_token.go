@@ -5,10 +5,11 @@ import (
 	"errors"
 	"time"
 
-	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/kodefluence/monorepo/exception"
 	"github.com/kodefluence/monorepo/kontext"
+
+	"github.com/kodefluence/altair/plugin/oauth/entity"
 )
 
 // OauthAccessToken handle all database operation to oauth_access_tokens

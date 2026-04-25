@@ -3,9 +3,10 @@ package cfg
 import (
 	"errors"
 
+	"gopkg.in/yaml.v2"
+
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/entity"
-	"gopkg.in/yaml.v2"
 )
 
 var errPluginNotFound = errors.New("Plugin is not exists")

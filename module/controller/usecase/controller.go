@@ -2,8 +2,9 @@ package usecase
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/kodefluence/altair/module"
 	"github.com/spf13/cobra"
+
+	"github.com/kodefluence/altair/module"
 )
 
 type HttpInjector func(httpMethod, relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes

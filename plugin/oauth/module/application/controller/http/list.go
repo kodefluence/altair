@@ -5,9 +5,10 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
+
+	"github.com/kodefluence/altair/module"
 )
 
 // ListController show list of oauth applications

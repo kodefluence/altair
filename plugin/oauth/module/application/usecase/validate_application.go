@@ -1,8 +1,9 @@
 package usecase
 
 import (
-	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/monorepo/jsonapi"
+
+	"github.com/kodefluence/altair/plugin/oauth/entity"
 )
 
 func (am *ApplicationManager) ValidateApplication(data entity.OauthApplicationJSON) jsonapi.Errors {

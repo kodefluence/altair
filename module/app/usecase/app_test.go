@@ -3,9 +3,10 @@ package usecase_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/module/app/usecase"
-	"github.com/stretchr/testify/assert"
 )
 
 type fakeController struct{}

@@ -3,8 +3,9 @@ package entity_test
 import (
 	"testing"
 
-	"github.com/kodefluence/altair/entity"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/kodefluence/altair/entity"
 )
 
 func TestRouterPath(t *testing.T) {

@@ -55,6 +55,11 @@ jobs:
       - name: go build
         run: go build ./...
 
+      - name: Install mockgen
+        # Required by the //go:generate directives across the tree.
+        # Pinned to v1.6.0 to match the github.com/golang/mock dep in go.mod.
+        run: go install github.com/golang/mock/mockgen@v1.6.0
+
       - name: go generate produces no diff
         run: |
           go generate ./...

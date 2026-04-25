@@ -6,10 +6,11 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/kodefluence/altair/module/apierror/usecase"
 	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/kodefluence/altair/module/apierror/usecase"
 )
 
 func TestApiError(t *testing.T) {

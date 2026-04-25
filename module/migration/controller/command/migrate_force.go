@@ -3,9 +3,10 @@ package command
 import (
 	"fmt"
 
-	"github.com/kodefluence/altair/module/migration/usecase"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+
+	"github.com/kodefluence/altair/module/migration/usecase"
 )
 
 // MigrateForce is the escape hatch for a dirty migrations table: sets the

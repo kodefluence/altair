@@ -3,9 +3,10 @@ package cfg_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/testhelper"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestPlugin(t *testing.T) {

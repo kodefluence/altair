@@ -4,9 +4,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/monorepo/exception"
 	"github.com/kodefluence/monorepo/kontext"
+
+	"github.com/kodefluence/altair/plugin/oauth/entity"
 )
 
 func (a *Authorization) ValidateTokenAuthorizationCode(ktx kontext.Context, r entity.AccessTokenRequestJSON, data entity.OauthAccessGrant) exception.Exception {

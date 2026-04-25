@@ -7,16 +7,17 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	"github.com/kodefluence/altair/module/apierror"
-	"github.com/kodefluence/altair/plugin/oauth/entity"
-	"github.com/kodefluence/altair/plugin/oauth/module/application/usecase"
-	"github.com/kodefluence/altair/plugin/oauth/module/application/usecase/mock"
-	"github.com/kodefluence/altair/plugin/oauth/module/formatter"
 	"github.com/kodefluence/monorepo/db"
 	mockdb "github.com/kodefluence/monorepo/db/mock"
 	"github.com/kodefluence/monorepo/exception"
 	"github.com/kodefluence/monorepo/kontext"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/kodefluence/altair/module/apierror"
+	"github.com/kodefluence/altair/plugin/oauth/entity"
+	"github.com/kodefluence/altair/plugin/oauth/module/application/usecase"
+	"github.com/kodefluence/altair/plugin/oauth/module/application/usecase/mock"
+	"github.com/kodefluence/altair/plugin/oauth/module/formatter"
 )
 
 func TestCreate(t *testing.T) {

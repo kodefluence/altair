@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/kodefluence/altair/plugin/oauth/entity"
-	"github.com/kodefluence/altair/util"
 	"github.com/kodefluence/monorepo/kontext"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+
+	"github.com/kodefluence/altair/plugin/oauth/entity"
+	"github.com/kodefluence/altair/util"
 )
 
 // CreateOauthApplication struct of CreateOauthApplication command

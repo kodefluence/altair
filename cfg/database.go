@@ -6,11 +6,12 @@ import (
 	"io"
 	"os"
 
-	"github.com/kodefluence/altair/core"
-	"github.com/kodefluence/altair/entity"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v2"
+
+	"github.com/kodefluence/altair/core"
+	"github.com/kodefluence/altair/entity"
 )
 
 type database struct{}

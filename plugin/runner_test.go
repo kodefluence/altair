@@ -4,8 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kodefluence/altair/module"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/kodefluence/altair/module"
 )
 
 type stubPlugin struct {

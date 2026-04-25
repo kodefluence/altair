@@ -7,11 +7,12 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/kodefluence/monorepo/exception"
+	"github.com/stretchr/testify/suite"
+
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/plugin/oauth/module/authorization/usecase"
 	"github.com/kodefluence/altair/util"
-	"github.com/kodefluence/monorepo/exception"
-	"github.com/stretchr/testify/suite"
 )
 
 type GrantTokenSuiteTest struct {

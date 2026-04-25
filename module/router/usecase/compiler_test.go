@@ -7,11 +7,12 @@ import (
 	"text/template"
 
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
+
 	"github.com/kodefluence/altair/entity"
 	"github.com/kodefluence/altair/module/router/usecase"
 	"github.com/kodefluence/altair/testhelper"
-	"github.com/stretchr/testify/assert"
-	"gopkg.in/yaml.v2"
 )
 
 func TestCompiler(t *testing.T) {

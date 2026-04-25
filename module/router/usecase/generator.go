@@ -11,10 +11,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/kodefluence/altair/entity"
-	"github.com/kodefluence/altair/module"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	"github.com/kodefluence/altair/entity"
+	"github.com/kodefluence/altair/module"
 )
 
 type Generator struct {

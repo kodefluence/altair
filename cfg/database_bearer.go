@@ -4,8 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/monorepo/db"
+
+	"github.com/kodefluence/altair/core"
 )
 
 // ErrDatabasesIsNotExists thrown when database is not exists or not initialized yet in database bearer

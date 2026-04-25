@@ -9,8 +9,9 @@ import (
 	time "time"
 
 	gomock "github.com/golang/mock/gomock"
-	core "github.com/kodefluence/altair/core"
 	db "github.com/kodefluence/monorepo/db"
+
+	core "github.com/kodefluence/altair/core"
 )
 
 // MockAppLoader is a mock of AppLoader interface.

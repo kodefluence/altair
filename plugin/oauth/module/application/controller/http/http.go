@@ -1,9 +1,10 @@
 package http
 
 import (
-	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
+
+	"github.com/kodefluence/altair/plugin/oauth/entity"
 )
 
 //go:generate mockgen -destination ./mock/mock.go -package mock -source ./http.go

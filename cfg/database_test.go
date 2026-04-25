@@ -6,10 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/entity"
 	"github.com/kodefluence/altair/testhelper"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestDatabase(t *testing.T) {
@@ -531,7 +532,7 @@ func TestDatabase(t *testing.T) {
 			})
 
 			t.Run("Idle connection key", func(t *testing.T) {
-				t.Run("New spelling max_idle_connection is honoured", func(t *testing.T) {
+				t.Run("New spelling max_idle_connection is honored", func(t *testing.T) {
 					configPath := "./db_idle_new_spelling/"
 					fileName := "database.yml"
 

@@ -7,9 +7,10 @@ import (
 	"path/filepath"
 
 	"github.com/google/uuid"
+	"gopkg.in/yaml.v2"
+
 	"github.com/kodefluence/altair/entity"
 	"github.com/kodefluence/altair/util"
-	"gopkg.in/yaml.v2"
 )
 
 type Compiler struct{}

@@ -8,9 +8,10 @@ import (
 	"net/http/httptest"
 	"os"
 
-	"github.com/kodefluence/altair/module/apierror"
 	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
+
+	"github.com/kodefluence/altair/module/apierror"
 )
 
 type MockErrorIoReader struct {

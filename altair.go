@@ -20,6 +20,9 @@ import (
 	"github.com/kodefluence/altair/cfg"
 	"github.com/kodefluence/altair/core"
 
+	"github.com/kodefluence/monorepo/db"
+	"github.com/spf13/cobra"
+
 	"github.com/kodefluence/altair/module/apierror"
 	"github.com/kodefluence/altair/module/app"
 	"github.com/kodefluence/altair/module/controller"
@@ -29,8 +32,6 @@ import (
 	"github.com/kodefluence/altair/module/projectgenerator"
 	"github.com/kodefluence/altair/module/router"
 	"github.com/kodefluence/altair/plugin"
-	"github.com/kodefluence/monorepo/db"
-	"github.com/spf13/cobra"
 )
 
 var (

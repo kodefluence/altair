@@ -7,6 +7,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
+	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kodefluence/altair/module/apierror"
 	"github.com/kodefluence/altair/module/controller"
 	"github.com/kodefluence/altair/plugin/oauth/entity"
@@ -14,8 +17,6 @@ import (
 	"github.com/kodefluence/altair/plugin/oauth/module/application/controller/http/mock"
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/kodefluence/altair/util"
-	"github.com/spf13/cobra"
-	"github.com/stretchr/testify/assert"
 )
 
 type responseOne struct {

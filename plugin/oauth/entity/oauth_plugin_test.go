@@ -4,8 +4,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/kodefluence/altair/plugin/oauth/entity"
 )
 
 func TestOauthPlugin(t *testing.T) {

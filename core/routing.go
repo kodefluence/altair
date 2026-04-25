@@ -2,6 +2,7 @@ package core
 
 import (
 	"github.com/gin-gonic/gin"
+
 	"github.com/kodefluence/altair/entity"
 )
 

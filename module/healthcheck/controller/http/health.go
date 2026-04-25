@@ -4,8 +4,9 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/monorepo/kontext"
+
+	"github.com/kodefluence/altair/module"
 )
 
 type HealthController struct{}

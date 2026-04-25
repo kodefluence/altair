@@ -3,9 +3,10 @@ package usecase_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/util"
-	"github.com/stretchr/testify/suite"
 )
 
 type ValidateTokenGrantSuiteTest struct {

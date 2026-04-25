@@ -6,12 +6,13 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/kodefluence/altair/module"
-	"github.com/kodefluence/altair/plugin/oauth/entity"
-	"github.com/kodefluence/altair/util"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/kodefluence/monorepo/exception"
 	"github.com/kodefluence/monorepo/kontext"
+
+	"github.com/kodefluence/altair/module"
+	"github.com/kodefluence/altair/plugin/oauth/entity"
+	"github.com/kodefluence/altair/util"
 )
 
 type ApplicationValidation struct {

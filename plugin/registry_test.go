@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kodefluence/altair/module"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/kodefluence/altair/module"
 )
 
 // TestRegistry_DependsOnReferencesAreResolvable is a compile-time-ish audit:

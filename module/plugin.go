@@ -3,9 +3,10 @@ package module
 import (
 	"io/fs"
 
-	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/rs/zerolog"
+
+	"github.com/kodefluence/altair/core"
 )
 
 // Plugin is the contract every built-in Altair plugin implements. The registry

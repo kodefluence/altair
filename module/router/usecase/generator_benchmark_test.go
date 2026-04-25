@@ -6,11 +6,12 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kodefluence/altair/entity"
 	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/module/router/usecase"
 	"github.com/kodefluence/altair/testhelper"
-	"github.com/stretchr/testify/assert"
 )
 
 func BenchmarkRoute(b *testing.B) {

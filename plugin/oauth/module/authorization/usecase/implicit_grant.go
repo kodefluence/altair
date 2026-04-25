@@ -1,12 +1,13 @@
 package usecase
 
 import (
-	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/monorepo/db"
 	"github.com/kodefluence/monorepo/exception"
 	"github.com/kodefluence/monorepo/jsonapi"
 	"github.com/kodefluence/monorepo/kontext"
 	"github.com/rs/zerolog"
+
+	"github.com/kodefluence/altair/plugin/oauth/entity"
 )
 
 // ImplicitGrant implementation refer to this RFC 6749 Section 4.2 https://www.rfc-editor.org/rfc/rfc6749#section-4.2

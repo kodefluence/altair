@@ -2,9 +2,10 @@ package usecase
 
 import (
 	"github.com/google/uuid"
+	"github.com/kodefluence/aurelia"
+
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/util"
-	"github.com/kodefluence/aurelia"
 )
 
 func (*Formatter) OauthApplicationInsertable(r entity.OauthApplicationJSON) entity.OauthApplicationInsertable {

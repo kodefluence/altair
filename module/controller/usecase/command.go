@@ -1,8 +1,9 @@
 package usecase
 
 import (
-	"github.com/kodefluence/altair/module"
 	"github.com/spf13/cobra"
+
+	"github.com/kodefluence/altair/module"
 )
 
 // TODO: Return error when command already registered

@@ -3,8 +3,9 @@ package metric_test
 import (
 	"testing"
 
-	"github.com/kodefluence/altair/plugin/metric/module/prometheus/controller/metric"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/kodefluence/altair/plugin/metric/module/prometheus/controller/metric"
 )
 
 func TestPrometheus(t *testing.T) {

@@ -4,8 +4,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/aurelia"
+
+	"github.com/kodefluence/altair/plugin/oauth/entity"
 )
 
 func (f *Formatter) RefreshTokenInsertable(application entity.OauthApplication, accessToken entity.OauthAccessToken) entity.OauthRefreshTokenInsertable {

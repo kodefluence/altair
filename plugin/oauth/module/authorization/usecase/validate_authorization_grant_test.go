@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/stretchr/testify/suite"
+
 	"github.com/kodefluence/altair/plugin/oauth/entity"
 	"github.com/kodefluence/altair/util"
-	"github.com/stretchr/testify/suite"
 )
 
 type ValidateAuthorizationGrantSuiteTest struct {

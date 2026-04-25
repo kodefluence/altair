@@ -7,10 +7,11 @@ import (
 	"os"
 	"strconv"
 
+	"gopkg.in/yaml.v2"
+
 	"github.com/kodefluence/altair/adapter"
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/entity"
-	"gopkg.in/yaml.v2"
 )
 
 type app struct{}

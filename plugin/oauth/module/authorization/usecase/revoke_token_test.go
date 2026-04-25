@@ -5,10 +5,11 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/kodefluence/altair/plugin/oauth/entity"
-	"github.com/kodefluence/altair/util"
 	"github.com/kodefluence/monorepo/exception"
 	"github.com/stretchr/testify/suite"
+
+	"github.com/kodefluence/altair/plugin/oauth/entity"
+	"github.com/kodefluence/altair/util"
 )
 
 type RevokeTokenSuiteTest struct {

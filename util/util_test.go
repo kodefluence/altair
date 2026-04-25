@@ -4,9 +4,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kodefluence/altair/testhelper"
 	"github.com/kodefluence/altair/util"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestUtil_ReadFileContent(t *testing.T) {

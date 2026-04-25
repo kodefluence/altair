@@ -86,7 +86,7 @@ func (*ApiError) ForbiddenError(ktx kontext.Context, entityType, reason string) 
 }
 
 func (*ApiError) ValidationError(msg string) jsonapi.Option {
-	err := fmt.Errorf(fmt.Sprintf("Validation error because of: %s", msg))
+	err := fmt.Errorf("Validation error because of: %s", msg)
 	return jsonapi.WithException(
 		"ERR1442",
 		http.StatusUnprocessableEntity,

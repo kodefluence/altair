@@ -6,11 +6,12 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
+
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/module/migration/usecase"
-	"github.com/spf13/cobra"
-	"github.com/spf13/pflag"
 )
 
 // List prints every plugin compiled into this binary with its current
