@@ -22,3 +22,5 @@ build_output/
 .vscode
 routes/
 config/
+# Local-only docs (specs, design notes). Tracked locally but never committed.
+docs/
