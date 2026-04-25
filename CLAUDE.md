@@ -87,6 +87,35 @@ Inside a plugin, the structure mirrors the top-level:
 
 `cfg/app_bearer.go` and `cfg/database_bearer.go` are mutable registries handed to plugin code so plugins can look up DB instances and inject `DownStreamPlugin`s.
 
+## Workflow rule: Test-Driven Development, no assumptions
+
+This is non-negotiable for development in this repo. Before writing any
+production code (or any modification to existing production code that changes
+behaviour), follow this loop:
+
+1. **Assume.** State the assumption explicitly: "I think function X with input Y
+   produces output Z" or "the existing behaviour of X is Z when Y." Write it
+   down in the test name or as a comment.
+2. **Create test.** Codify the assumption as a Go test. The test must be
+   specific enough that a wrong assumption produces a clear failure.
+3. **Verify.** Run the test. For new code, the test should fail before you
+   write the implementation and pass after. For existing code being modified,
+   the test should pin the current observable behaviour first, then evolve as
+   you change the code.
+4. **Ask.** When verification surprises you (the test fails in an unexpected
+   way, or the existing behaviour doesn't match what callers seemed to assume,
+   or the requirement is ambiguous), stop and ask the user. Do not "fix" the
+   test to make it pass against your guess.
+
+This applies to test-coverage work too: when adding tests for code that
+already exists, write the test in a form that captures what you *think* the
+code does, run it, and confirm. If the test fails, the code may have a latent
+bug — do not silently adjust the test to match observed behaviour without
+asking.
+
+The goal is that no behaviour ships without a test that proves it, and no
+assumption survives without verification.
+
 ## Go conventions in this repo
 
 - **Interface ownership.** Every interface lives where it is *consumed*, not where it is implemented. `core/` holds cross-cutting contracts; usecase files declare the narrow interfaces they need (`OauthApplicationRepository`, `Formatter`, `ApplicationManager`). Do not export "one big interface" from a repository or adapter package.
