@@ -7,7 +7,7 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang-migrate/migrate/v4 v4.15.2
 	github.com/golang/mock v1.6.0
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.6.0
 	github.com/kodefluence/aurelia v0.0.0-20220717092613-4dd6082f36c5
 	github.com/kodefluence/monorepo v1.3.1
 	github.com/prometheus/client_golang v1.12.2
