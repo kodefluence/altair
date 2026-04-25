@@ -1,0 +1,54 @@
+name: CodeQL
+
+# GitHub's native SAST. Free for public repos. Catches injection patterns,
+# unsafe deserialization, hardcoded credentials, etc. Results show in the
+# Security tab and as PR annotations.
+#
+# Runs ~3-5 minutes; long enough to make weekly + push the right cadence
+# rather than per-PR (which would block merges on a slow analyzer).
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  schedule:
+    - cron: '0 13 * * 5'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze (Go)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          check-latest: true
+          cache: true
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: go
+          # `security-and-quality` is broader than `security-extended` and
+          # catches code-quality issues; flip to `security-extended` if the
+          # noise outweighs the value.
+          queries: security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:go'

@@ -1,0 +1,72 @@
+name: Trivy
+
+# Scans the Docker image we publish to Docker Hub for OS-level CVEs (alpine
+# packages) and Go-binary CVEs. Different surface from govulncheck — that
+# one looks at source + go.mod, this one looks at the actual published
+# artifact.
+#
+# We scan both on PR (to catch a fresh CVE in a base image bump before
+# merge) and on schedule (to catch a newly-disclosed CVE in an unchanged
+# image).
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'Dockerfile'
+      - 'Makefile'
+      - '.github/workflows/trivy.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'Dockerfile'
+      - 'Makefile'
+      - '.github/workflows/trivy.yml'
+  schedule:
+    - cron: '0 13 * * 5'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  image-scan:
+    name: Image scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          check-latest: true
+          cache: true
+
+      - name: Build linux binary (matches the production Dockerfile copy step)
+        run: make build_linux
+
+      - name: Build local Docker image for scanning
+        run: docker build -t altair-trivy-scan:local -f ./Dockerfile .
+
+      - name: Scan image for HIGH and CRITICAL vulnerabilities
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: altair-trivy-scan:local
+          format: sarif
+          output: trivy-results.sarif
+          severity: HIGH,CRITICAL
+          # Don't fail the build immediately on every CVE — populate the
+          # Security tab and let humans triage. Flip ignore-unfixed to
+          # false and exit-code to 1 once you want hard-fail semantics.
+          ignore-unfixed: true
+          exit-code: '0'
+
+      - name: Upload Trivy results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-image
