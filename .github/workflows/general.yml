@@ -89,7 +89,7 @@ jobs:
           cache: true
 
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6
+        uses: golangci/golangci-lint-action@v9
         with:
           # Pin a recent stable release; bump with intent, not passively.
           # When bumping the linter, also bump go-version above to match.
