@@ -79,7 +79,12 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: stable
+          # golangci-lint v1.64.5 was built against Go 1.23. Pinning matches
+          # the linter's bundled type-checker version; using `stable` here
+          # makes typecheck fail to resolve methods promoted through embedded
+          # external types (e.g. testify's suite.Suite.Assert), even though
+          # `go build` and `go test` succeed against the same code.
+          go-version: '1.23'
           check-latest: true
           cache: true
 
@@ -87,6 +92,7 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           # Pin a recent stable release; bump with intent, not passively.
+          # When bumping the linter, also bump go-version above to match.
           version: v1.64.5
           args: --timeout=5m
 
