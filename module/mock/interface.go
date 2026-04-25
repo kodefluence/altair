@@ -10,12 +10,11 @@ import (
 
 	gin "github.com/gin-gonic/gin"
 	gomock "github.com/golang/mock/gomock"
+	module "github.com/kodefluence/altair/module"
 	jsonapi "github.com/kodefluence/monorepo/jsonapi"
 	kontext "github.com/kodefluence/monorepo/kontext"
 	cobra "github.com/spf13/cobra"
 	pflag "github.com/spf13/pflag"
-
-	module "github.com/kodefluence/altair/module"
 )
 
 // MockApp is a mock of App interface.
