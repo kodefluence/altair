@@ -42,3 +42,16 @@ func TestUtil(t *testing.T) {
 	var intNil *int
 	assert.Equal(t, 0, util.PointerToValue(intNil))
 }
+
+// Assumption: SHA1() returns a 40-char hex string and yields different
+// outputs across calls (driven by uuid.New()).
+func TestSHA1_ReturnsHexAndIsUnique(t *testing.T) {
+	a := util.SHA1()
+	b := util.SHA1()
+	assert.Len(t, a, 40, "SHA-1 hex digest is 40 characters")
+	assert.Len(t, b, 40)
+	assert.NotEqual(t, a, b, "successive SHA1() calls hash different uuids")
+	for _, ch := range a {
+		assert.True(t, (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f'), "non-hex char %q", ch)
+	}
+}

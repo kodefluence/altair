@@ -9,6 +9,8 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/mysql"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 
+	"github.com/kodefluence/monorepo/db"
+
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/module"
 )
@@ -39,15 +41,33 @@ type DriftReport struct {
 // ErrPluginNotInRegistry is returned when a named plugin is not compiled in.
 var ErrPluginNotInRegistry = errors.New("plugin not in registry")
 
+// migrator is the narrow interface against which Runner's actions execute.
+// *migrate.Migrate satisfies it; tests substitute a fake. The interface exists
+// so runOne can be exercised without the real golang-migrate driver, which
+// would require a live mysql.WithInstance handle and SQL-level mocking.
+type migrator interface {
+	Up() error
+	Steps(n int) error
+	Force(version int) error
+	Version() (uint, bool, error)
+}
+
+// migratorFactory builds a migrator for one MigrationSet against the resolved
+// database. The default is realMigratorFactory; tests inject a fake. Returns
+// the migrator, a cleanup func that closes the source driver only (NOT the
+// db driver — see Runner doc comment), and any setup error.
+type migratorFactory func(set module.MigrationSet, sqldb db.DB, dbConfig core.DatabaseConfig, versionTable string) (migrator, func(), error)
+
 // Runner drives migrations for every plugin in the registry. It is safe to
 // call from both `altair run` (auto-migrate path) and `altair plugin migrate:*`
 // (one-shot CLI path). Runner intentionally never calls migrator.Close():
 // the golang-migrate mysql driver's Close() closes the underlying *sql.DB,
 // which is the shared API-server connection pool.
 type Runner struct {
-	registry     []module.Plugin
-	pluginBearer core.PluginBearer
-	dbBearer     core.DatabaseBearer
+	registry        []module.Plugin
+	pluginBearer    core.PluginBearer
+	dbBearer        core.DatabaseBearer
+	migratorFactory migratorFactory
 }
 
 // NewRunner constructs a Runner. pluginBearer is required because Plugin.Migrations()
@@ -55,9 +75,10 @@ type Runner struct {
 // database instance to migrate).
 func NewRunner(registry []module.Plugin, pluginBearer core.PluginBearer, dbBearer core.DatabaseBearer) *Runner {
 	return &Runner{
-		registry:     registry,
-		pluginBearer: pluginBearer,
-		dbBearer:     dbBearer,
+		registry:        registry,
+		pluginBearer:    pluginBearer,
+		dbBearer:        dbBearer,
+		migratorFactory: realMigratorFactory,
 	}
 }
 
@@ -83,7 +104,7 @@ func (r *Runner) Up(pluginName string) error {
 		return err
 	}
 	for _, set := range sets {
-		if err := r.runOne(pluginName, set, func(m *migrate.Migrate) error {
+		if err := r.runOne(pluginName, set, func(m migrator) error {
 			err := m.Up()
 			if errors.Is(err, migrate.ErrNoChange) {
 				return nil
@@ -107,7 +128,7 @@ func (r *Runner) Down(pluginName string, steps int) error {
 		return err
 	}
 	for _, set := range sets {
-		if err := r.runOne(pluginName, set, func(m *migrate.Migrate) error {
+		if err := r.runOne(pluginName, set, func(m migrator) error {
 			err := m.Steps(-steps)
 			if errors.Is(err, migrate.ErrNoChange) {
 				return nil
@@ -128,7 +149,7 @@ func (r *Runner) Force(pluginName string, version int) error {
 		return err
 	}
 	for _, set := range sets {
-		if err := r.runOne(pluginName, set, func(m *migrate.Migrate) error {
+		if err := r.runOne(pluginName, set, func(m migrator) error {
 			return m.Force(version)
 		}); err != nil {
 			return fmt.Errorf("plugin %q: %w", pluginName, err)
@@ -162,7 +183,7 @@ func (r *Runner) Status() ([]PluginMigrationStatus, error) {
 				VersionTable:     r.resolveVersionTable(p.Name(), set),
 				HasMigrations:    true,
 			}
-			if err := r.runOne(p.Name(), set, func(m *migrate.Migrate) error {
+			if err := r.runOne(p.Name(), set, func(m migrator) error {
 				if v, dirty, verr := m.Version(); verr == nil {
 					status.CurrentVersion = v
 					status.CurrentDirty = dirty
@@ -233,7 +254,7 @@ func (r *Runner) findPlugin(name string) (module.Plugin, bool) {
 
 // runOne opens a migrator scoped to set, invokes action, and returns the
 // resulting error. Never calls migrator.Close() — see Runner's doc comment.
-func (r *Runner) runOne(pluginName string, set module.MigrationSet, action func(*migrate.Migrate) error) error {
+func (r *Runner) runOne(pluginName string, set module.MigrationSet, action func(migrator) error) error {
 	if set.DatabaseInstance == "" {
 		return errors.New("migration set has empty DatabaseInstance")
 	}
@@ -245,34 +266,13 @@ func (r *Runner) runOne(pluginName string, set module.MigrationSet, action func(
 
 	versionTable := r.resolveVersionTable(pluginName, set)
 
-	var dbDriver database.Driver
-	switch set.Driver {
-	case "mysql":
-		dbDriver, err = mysql.WithInstance(sqldb.Eject(), &mysql.Config{
-			MigrationsTable: versionTable,
-			DatabaseName:    dbConfig.DBDatabase(),
-		})
-		if err != nil {
-			return err
-		}
-	default:
-		return fmt.Errorf("migration driver %q is not supported", set.Driver)
-	}
-
-	sourceDriver, err := iofs.New(set.FS, set.SourcePath)
+	m, cleanup, err := r.migratorFactory(set, sqldb, dbConfig, versionTable)
 	if err != nil {
 		return err
 	}
-	defer sourceDriver.Close()
+	defer cleanup()
 
-	migrator, err := migrate.NewWithInstance("iofs", sourceDriver, set.Driver, dbDriver)
-	if err != nil {
-		return err
-	}
-	// migrator.Close() would close dbDriver, which closes the shared *sql.DB.
-	// Callers manage sql.DB lifetime via db.CloseAll() on process exit.
-
-	return action(migrator)
+	return action(m)
 }
 
 func (r *Runner) resolveVersionTable(pluginName string, set module.MigrationSet) string {
@@ -280,4 +280,43 @@ func (r *Runner) resolveVersionTable(pluginName string, set module.MigrationSet)
 		return set.VersionTable
 	}
 	return fmt.Sprintf("%s_plugin_db_versions", pluginName)
+}
+
+// realMigratorFactory is the production migrator factory. Constructs the
+// mysql + iofs golang-migrate stack for one MigrationSet against the resolved
+// database. The cleanup func closes the source driver only — closing the
+// database driver would also close the shared *sql.DB.
+func realMigratorFactory(set module.MigrationSet, sqldb db.DB, dbConfig core.DatabaseConfig, versionTable string) (migrator, func(), error) {
+	var dbDriver database.Driver
+	var err error
+
+	switch set.Driver {
+	case "mysql":
+		dbDriver, err = mysql.WithInstance(sqldb.Eject(), &mysql.Config{
+			MigrationsTable: versionTable,
+			DatabaseName:    dbConfig.DBDatabase(),
+		})
+		if err != nil {
+			return nil, nil, err
+		}
+	default:
+		return nil, nil, fmt.Errorf("migration driver %q is not supported", set.Driver)
+	}
+
+	sourceDriver, err := iofs.New(set.FS, set.SourcePath)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	m, err := migrate.NewWithInstance("iofs", sourceDriver, set.Driver, dbDriver)
+	if err != nil {
+		_ = sourceDriver.Close()
+		return nil, nil, err
+	}
+
+	cleanup := func() {
+		_ = sourceDriver.Close()
+	}
+
+	return m, cleanup, nil
 }

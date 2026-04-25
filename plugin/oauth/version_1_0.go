@@ -1,6 +1,7 @@
 package oauth
 
 import (
+	"errors"
 	"time"
 
 	"github.com/kodefluence/altair/module"
@@ -11,7 +12,22 @@ import (
 	"github.com/kodefluence/altair/plugin/oauth/repository/mysql"
 )
 
+// errMissingDecodeConfig and errMissingDatabase guard against PluginContext
+// values constructed outside of plugin.runner.buildContext (which always
+// populates both closures). Production code never trips these — they make
+// plugins safe to call from external test fixtures.
+var (
+	errMissingDecodeConfig = errors.New("oauth plugin: PluginContext.DecodeConfig is nil")
+	errMissingDatabase     = errors.New("oauth plugin: PluginContext.Database is nil")
+)
+
 func loadV1_0(ctx module.PluginContext) error {
+	if ctx.DecodeConfig == nil {
+		return errMissingDecodeConfig
+	}
+	if ctx.Database == nil {
+		return errMissingDatabase
+	}
 	var oauthPluginConfig entity.OauthPlugin
 	if err := ctx.DecodeConfig(&oauthPluginConfig); err != nil {
 		return err
@@ -59,6 +75,12 @@ func loadV1_0(ctx module.PluginContext) error {
 }
 
 func loadCommandV1_0(ctx module.PluginContext) error {
+	if ctx.DecodeConfig == nil {
+		return errMissingDecodeConfig
+	}
+	if ctx.Database == nil {
+		return errMissingDatabase
+	}
 	var oauthPluginConfig entity.OauthPlugin
 	if err := ctx.DecodeConfig(&oauthPluginConfig); err != nil {
 		return err

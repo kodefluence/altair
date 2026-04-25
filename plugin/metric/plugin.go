@@ -2,12 +2,19 @@ package metric
 
 import (
 	_ "embed"
+	"errors"
 	"fmt"
 
 	"github.com/kodefluence/altair/module"
 	"github.com/kodefluence/altair/plugin/metric/entity"
 	"github.com/kodefluence/altair/plugin/metric/module/prometheus"
 )
+
+// errMissingDecodeConfig guards against PluginContext values constructed
+// outside of plugin.runner.buildContext, which always populates DecodeConfig.
+// Production code never trips this — it makes the plugin safe to call from
+// external test fixtures.
+var errMissingDecodeConfig = errors.New("metric plugin: PluginContext.DecodeConfig is nil")
 
 //go:embed config.sample.yml
 var sampleConfig []byte
@@ -44,6 +51,9 @@ func (*Plugin) Load(ctx module.PluginContext) error {
 func (*Plugin) LoadCommand(ctx module.PluginContext) error { return nil }
 
 func loadV1_0(ctx module.PluginContext) error {
+	if ctx.DecodeConfig == nil {
+		return errMissingDecodeConfig
+	}
 	var metricPlugin entity.MetricPlugin
 	if err := ctx.DecodeConfig(&metricPlugin); err != nil {
 		return err

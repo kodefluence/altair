@@ -8,10 +8,11 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	entity "github.com/kodefluence/altair/plugin/oauth/entity"
 	db "github.com/kodefluence/monorepo/db"
 	exception "github.com/kodefluence/monorepo/exception"
 	kontext "github.com/kodefluence/monorepo/kontext"
+
+	entity "github.com/kodefluence/altair/plugin/oauth/entity"
 )
 
 // MockOauthAccessTokenRepository is a mock of OauthAccessTokenRepository interface.

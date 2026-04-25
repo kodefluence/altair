@@ -8,9 +8,10 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	entity "github.com/kodefluence/altair/plugin/oauth/entity"
 	jsonapi "github.com/kodefluence/monorepo/jsonapi"
 	kontext "github.com/kodefluence/monorepo/kontext"
+
+	entity "github.com/kodefluence/altair/plugin/oauth/entity"
 )
 
 // MockAuthorization is a mock of Authorization interface.
