@@ -43,7 +43,7 @@ func WithUpstreamTimeout(d time.Duration) Option {
 }
 
 // WithUpstreamTransport overrides the http.RoundTripper used to call
-// upstreams. Tests inject this to assert client behaviour without standing
+// upstreams. Tests inject this to assert client behavior without standing
 // up a real TCP server; production code should rely on the default shared
 // transport.
 func WithUpstreamTransport(rt http.RoundTripper) Option {
@@ -60,7 +60,7 @@ func WithProxyHost(host string) Option {
 
 // WithMaxRequestBodySize caps inbound request body bytes. Anything larger
 // short-circuits with 413. A value <= 0 disables the cap (the historical
-// behaviour). Use to protect upstreams from clients sending arbitrarily
+// behavior). Use to protect upstreams from clients sending arbitrarily
 // large payloads.
 func WithMaxRequestBodySize(n int64) Option {
 	return func(c *generatorConfig) { c.maxRequestBodySize = n }
@@ -167,7 +167,7 @@ func (g *Generator) decorateProxyRequest(c *gin.Context, urlPath, requestID stri
 		// 413 to give the client an actionable status; ReadAll's other
 		// errors still yield 400 (malformed). The cap is opt-in via
 		// WithMaxRequestBodySize — zero means "unbounded" to preserve the
-		// historical behaviour for deployments that haven't set the field.
+		// historical behavior for deployments that haven't set the field.
 		reader := c.Request.Body
 		if g.maxRequestBodySize > 0 {
 			reader = http.MaxBytesReader(c.Writer, c.Request.Body, g.maxRequestBodySize)

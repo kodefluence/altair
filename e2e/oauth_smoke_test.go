@@ -104,7 +104,7 @@ func TestSmoke_OauthInvalidToken(t *testing.T) {
 
 // T5 — oauth_wrong_scope: token issued with one scope is rejected on a
 // route that requires a different scope. Pins the scope-check downstream
-// plugin behaviour — a regression in `plugin/oauth/module/authorization/
+// plugin behavior — a regression in `plugin/oauth/module/authorization/
 // controller/downstream/` would surface here.
 func TestSmoke_OauthWrongScope(t *testing.T) {
 	h, db := startOauthGateway(t)

@@ -10,7 +10,7 @@
 #                             - Hard cap on inbound request body size. Accepts a raw integer (bytes) or an
 #                               integer with a binary-unit suffix: "1024", "512KB", "10MB", "1GB". Requests
 #                               exceeding the cap are rejected with HTTP 413 before the upstream is contacted.
-#                               Default: 0 (no cap; preserves pre-1.0 behaviour).
+#                               Default: 0 (no cap; preserves pre-1.0 behavior).
 # proxy_host: string          - DEPRECATED. Pre-1.0 top-level alias for proxy.host. Still honored for backward
 #                               compatibility; prefer the nested `proxy:` block above.
 # authorization: <hash>
