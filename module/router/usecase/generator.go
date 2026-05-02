@@ -2,10 +2,10 @@ package usecase
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -18,17 +18,88 @@ import (
 	"github.com/kodefluence/altair/module"
 )
 
-type Generator struct {
-	routerPath       map[string]module.RouterPath
-	downStreamPlugin []module.DownstreamController
-	metrics          []module.MetricController
+// defaultUpstreamTimeout caps how long a single upstream request may take.
+// 30s mirrors the conservative default for outbound HTTP in services that
+// don't have a more specific SLA. Override per-deployment via
+// WithUpstreamTimeout (and once exposed, via app.yml).
+const defaultUpstreamTimeout = 30 * time.Second
+
+type generatorConfig struct {
+	upstreamTimeout    time.Duration
+	upstreamTransport  http.RoundTripper
+	proxyHost          string
+	maxRequestBodySize int64
 }
 
-func NewGenerator(downStreamPlugin []module.DownstreamController, metric []module.MetricController) *Generator {
+// Option configures a Generator. Add a knob via WithXxx; do not extend the
+// positional NewGenerator signature.
+type Option func(*generatorConfig)
+
+// WithUpstreamTimeout bounds the entire upstream round-trip (dial + send +
+// read body). A timeout of 0 disables it; prefer an explicit upper bound in
+// production — a hung upstream otherwise leaks goroutines and FDs forever.
+func WithUpstreamTimeout(d time.Duration) Option {
+	return func(c *generatorConfig) { c.upstreamTimeout = d }
+}
+
+// WithUpstreamTransport overrides the http.RoundTripper used to call
+// upstreams. Tests inject this to assert client behaviour without standing
+// up a real TCP server; production code should rely on the default shared
+// transport.
+func WithUpstreamTransport(rt http.RoundTripper) Option {
+	return func(c *generatorConfig) { c.upstreamTransport = rt }
+}
+
+// WithProxyHost sets the Host header sent on every outbound proxy request.
+// Captured once at Generator construction so we don't pay an os.Getenv
+// syscall per request, and so the value is the same one the rest of the
+// app sees via core.AppConfig.ProxyHost().
+func WithProxyHost(host string) Option {
+	return func(c *generatorConfig) { c.proxyHost = host }
+}
+
+// WithMaxRequestBodySize caps inbound request body bytes. Anything larger
+// short-circuits with 413. A value <= 0 disables the cap (the historical
+// behaviour). Use to protect upstreams from clients sending arbitrarily
+// large payloads.
+func WithMaxRequestBodySize(n int64) Option {
+	return func(c *generatorConfig) { c.maxRequestBodySize = n }
+}
+
+type Generator struct {
+	routerPath         map[string]module.RouterPath
+	downStreamPlugin   []module.DownstreamController
+	metrics            []module.MetricController
+	client             *http.Client
+	proxyHost          string
+	maxRequestBodySize int64
+}
+
+func NewGenerator(downStreamPlugin []module.DownstreamController, metric []module.MetricController, opts ...Option) *Generator {
+	cfg := generatorConfig{upstreamTimeout: defaultUpstreamTimeout}
+	for _, o := range opts {
+		o(&cfg)
+	}
+
+	transport := cfg.upstreamTransport
+	if transport == nil {
+		// One Transport per Generator so connection pooling kicks in across
+		// requests. http.DefaultTransport already configures sensible idle/
+		// dial timeouts; clone so callers tweaking one Generator don't
+		// mutate the package-level default.
+		transport = http.DefaultTransport.(*http.Transport).Clone()
+	}
+
 	return &Generator{
-		routerPath:       map[string]module.RouterPath{},
-		downStreamPlugin: downStreamPlugin,
-		metrics:          metric,
+		routerPath:         map[string]module.RouterPath{},
+		downStreamPlugin:   downStreamPlugin,
+		metrics:            metric,
+		proxyHost:          cfg.proxyHost,
+		maxRequestBodySize: cfg.maxRequestBodySize,
+		client: &http.Client{
+			Transport: transport,
+			Timeout:   cfg.upstreamTimeout,
+		},
 	}
 }
 
@@ -92,8 +163,27 @@ func (g *Generator) decorateProxyRequest(c *gin.Context, urlPath, requestID stri
 	var proxyReq *http.Request
 
 	if c.Request.Body != nil {
-		body, err := io.ReadAll(c.Request.Body)
+		// MaxBytesReader returns *http.MaxBytesError on overflow. Treat as
+		// 413 to give the client an actionable status; ReadAll's other
+		// errors still yield 400 (malformed). The cap is opt-in via
+		// WithMaxRequestBodySize — zero means "unbounded" to preserve the
+		// historical behaviour for deployments that haven't set the field.
+		reader := c.Request.Body
+		if g.maxRequestBodySize > 0 {
+			reader = http.MaxBytesReader(c.Writer, c.Request.Body, g.maxRequestBodySize)
+		}
+
+		body, err := io.ReadAll(reader)
 		if err != nil {
+			var maxBytesErr *http.MaxBytesError
+			if errors.As(err, &maxBytesErr) {
+				log.Warn().Err(err).Stack().Str("host", routeObject.Host).Str("request_id", requestID).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("client_ip", c.ClientIP()).Int64("limit_bytes", g.maxRequestBodySize).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("body_too_large")).Msg("Request body exceeded configured cap")
+				c.JSON(http.StatusRequestEntityTooLarge, gin.H{
+					"status":  http.StatusRequestEntityTooLarge,
+					"message": "Request body too large",
+				})
+				return nil, err
+			}
 			log.Error().Err(err).Stack().Str("host", routeObject.Host).Str("request_id", requestID).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("full_path", c.Request.URL.String()).Str("client_ip", c.ClientIP()).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("read_all_request")).Msg("Error reading incoming request body")
 			c.JSON(http.StatusBadRequest, gin.H{
 				"status":  http.StatusBadRequest,
@@ -140,7 +230,7 @@ func (g *Generator) decorateHeader(c *gin.Context, requestID string, proxyReq *h
 		}
 	}
 
-	proxyReq.Host = os.Getenv("PROXY_HOST")
+	proxyReq.Host = g.proxyHost
 	proxyReq.Header.Add("X-Request-ID", requestID)
 	proxyReq.Header.Set("X-Real-Ip-Address", c.ClientIP())
 	proxyReq.Header.Set("X-Forwarded-For", c.Request.RemoteAddr)
@@ -170,8 +260,7 @@ func (g *Generator) downStreamPluginCallback(c *gin.Context, proxyReq *http.Requ
 func (g *Generator) callDownStreamService(c *gin.Context, proxyReq *http.Request, urlPath, requestID string, routeObject entity.RouteObject) error {
 	defer g.downStreamMetric(c, routeObject.Name, urlPath, time.Now())
 
-	client := http.Client{}
-	proxyRes, err := client.Do(proxyReq)
+	proxyRes, err := g.client.Do(proxyReq)
 	if err != nil {
 		log.Error().Err(err).Stack().Str("host", routeObject.Host).Str("request_id", requestID).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("full_path", c.Request.URL.String()).Str("client_ip", c.ClientIP()).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("client_do")).Msg("Error fowarding the request")
 		c.JSON(http.StatusBadGateway, gin.H{
@@ -182,16 +271,6 @@ func (g *Generator) callDownStreamService(c *gin.Context, proxyReq *http.Request
 	}
 	defer proxyRes.Body.Close()
 
-	resp, err := io.ReadAll(proxyRes.Body)
-	if err != nil {
-		log.Error().Err(err).Stack().Str("host", routeObject.Host).Str("request_id", requestID).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("full_path", c.Request.URL.String()).Str("client_ip", c.ClientIP()).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("read_all_response")).Msg("Error reading the response")
-		c.JSON(http.StatusBadGateway, gin.H{
-			"status":  http.StatusBadGateway,
-			"message": "Bad gateway.",
-		})
-		return err
-	}
-
 	for header, values := range proxyRes.Header {
 		for _, value := range values {
 			c.Writer.Header().Add(header, value)
@@ -199,13 +278,14 @@ func (g *Generator) callDownStreamService(c *gin.Context, proxyReq *http.Request
 	}
 
 	c.Status(proxyRes.StatusCode)
-	_, err = c.Writer.Write(resp)
-	if err != nil {
-		log.Error().Err(err).Stack().Str("host", routeObject.Host).Str("request_id", requestID).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("full_path", c.Request.URL.String()).Str("client_ip", c.ClientIP()).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("writer_write")).Msg("Error reading the response")
-		c.JSON(http.StatusBadGateway, gin.H{
-			"status":  http.StatusBadGateway,
-			"message": "Bad gateway.",
-		})
+
+	// Stream the upstream body straight into the gin writer rather than
+	// io.ReadAll-buffering it first. A 500MB upstream response previously
+	// allocated ~500MB of heap per concurrent request — gone now. If the
+	// copy fails partway, the status code is already on the wire so we
+	// can't overwrite it with a 502; just log and return.
+	if _, err := io.Copy(c.Writer, proxyRes.Body); err != nil {
+		log.Error().Err(err).Stack().Str("host", routeObject.Host).Str("request_id", requestID).Str("prefix", routeObject.Prefix).Str("name", routeObject.Name).Str("path", urlPath).Str("method", c.Request.Method).Str("full_path", c.Request.URL.String()).Str("client_ip", c.ClientIP()).Array("tags", zerolog.Arr().Str("route").Str("generator").Str("generate").Str("copy_response")).Msg("Error streaming the response")
 		return err
 	}
 

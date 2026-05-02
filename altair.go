@@ -31,6 +31,7 @@ import (
 	pluginlist "github.com/kodefluence/altair/module/plugin_list"
 	"github.com/kodefluence/altair/module/projectgenerator"
 	"github.com/kodefluence/altair/module/router"
+	routerusecase "github.com/kodefluence/altair/module/router/usecase"
 	"github.com/kodefluence/altair/plugin"
 )
 
@@ -318,7 +319,13 @@ func runAPI() error {
 
 	reportMigrationDrift(pluginBearer, dbBearer)
 
-	compiler, forwarder := router.Provide(pluginModule.Controller().ListDownstream(), pluginModule.Controller().ListMetric())
+	compiler, forwarder := router.Provide(
+		pluginModule.Controller().ListDownstream(),
+		pluginModule.Controller().ListMetric(),
+		routerusecase.WithUpstreamTimeout(appConfig.UpstreamTimeout()),
+		routerusecase.WithProxyHost(appConfig.ProxyHost()),
+		routerusecase.WithMaxRequestBodySize(appConfig.MaxRequestBodySize()),
+	)
 	routeObjects, err := compiler.Compile("./routes")
 	if err != nil {
 		log.Error().
