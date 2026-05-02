@@ -121,3 +121,39 @@ jobs:
         env:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: goveralls -coverprofile=cover.out -service=github
+
+  smoke:
+    # Full end-to-end smoke matrix (Phase A gateway-only + Phase B oauth +
+    # MySQL). Builds the binary, runs `altair new`, spawns it as a
+    # subprocess, and asserts forwarding + proxy options + the oauth
+    # auth/scope/body matrix. ~10s wall time on the runner; MySQL via the
+    # services: block (no docker-compose / no DinD).
+    # Spec: docs/superpowers/specs/2026-04-23-altair-smoke-test-design.md
+    name: Smoke (e2e)
+    runs-on: ubuntu-latest
+    needs: verify
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: altair_development
+        ports:
+          - '3306:3306'
+        options: >-
+          --health-cmd="mysqladmin ping -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          check-latest: true
+          cache: true
+
+      - name: Smoke Test
+        run: make smoke

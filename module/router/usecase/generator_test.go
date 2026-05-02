@@ -575,6 +575,183 @@ func TestGenerator(t *testing.T) {
 			})
 		})
 
+		t.Run("Rejects request body larger than configured cap with 413", func(t *testing.T) {
+			// Pin the assumption: WithMaxRequestBodySize(N) makes the
+			// gateway return 413 (Request Entity Too Large) for any client
+			// request whose body exceeds N. Default zero-value cap means
+			// unlimited and is exercised by the existing POST/body tests.
+			gatewayEngine := gin.New()
+
+			routeObjects := []entity.RouteObject{{
+				Auth:   "none",
+				Host:   "127.0.0.1:5096",
+				Name:   "limit",
+				Prefix: "/limit",
+				Path:   map[string]entity.RouterPath{"/upload": {Auth: "none"}},
+			}}
+
+			generator := usecase.NewGenerator(
+				nil,
+				[]module.MetricController{testhelper.NewDummyMetric()},
+				usecase.WithMaxRequestBodySize(8), // 8 bytes
+			)
+			assert.Nil(t, generator.Generate(gatewayEngine, routeObjects))
+
+			// Upstream should never be reached — but if it is, fail loud.
+			upstreamHit := false
+			targetEngine := gin.New()
+			targetEngine.POST("/limit/upload", func(c *gin.Context) {
+				upstreamHit = true
+				c.Status(http.StatusOK)
+			})
+
+			srvTarget := &http.Server{Addr: ":5096", Handler: targetEngine}
+			go func() { _ = srvTarget.ListenAndServe() }()
+			defer srvTarget.Close()
+			time.Sleep(100 * time.Millisecond)
+
+			rec := testhelper.PerformRequest(gatewayEngine, "POST", "/limit/upload", strings.NewReader("0123456789ABCDEF"))
+			assert.Equal(t, http.StatusRequestEntityTooLarge, rec.Result().StatusCode)
+			assert.False(t, upstreamHit, "oversized request must not reach upstream")
+		})
+
+		t.Run("Forwards configured proxy host to upstream", func(t *testing.T) {
+			// Pin the assumption: WithProxyHost replaces the per-request
+			// os.Getenv("PROXY_HOST") read with a value captured once at
+			// construction. The upstream sees that exact value as the Host
+			// header — regardless of what the env var holds at request time.
+			gatewayEngine := gin.New()
+
+			routeObjects := []entity.RouteObject{{
+				Auth:   "none",
+				Host:   "127.0.0.1:5097",
+				Name:   "hostcheck",
+				Prefix: "/h",
+				Path:   map[string]entity.RouterPath{"/probe": {Auth: "none"}},
+			}}
+
+			generator := usecase.NewGenerator(
+				nil,
+				[]module.MetricController{testhelper.NewDummyMetric()},
+				usecase.WithProxyHost("captured.example.com"),
+			)
+			assert.Nil(t, generator.Generate(gatewayEngine, routeObjects))
+
+			gotHost := make(chan string, 1)
+			targetEngine := gin.New()
+			targetEngine.GET("/h/probe", func(c *gin.Context) {
+				gotHost <- c.Request.Host
+				c.Status(http.StatusOK)
+			})
+
+			srvTarget := &http.Server{Addr: ":5097", Handler: targetEngine}
+			go func() { _ = srvTarget.ListenAndServe() }()
+			defer srvTarget.Close()
+			time.Sleep(100 * time.Millisecond)
+
+			rec := testhelper.PerformRequest(gatewayEngine, "GET", "/h/probe", nil)
+			assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+
+			select {
+			case got := <-gotHost:
+				assert.Equal(t, "captured.example.com", got)
+			case <-time.After(2 * time.Second):
+				t.Fatal("upstream never received the request")
+			}
+		})
+
+		t.Run("Streams large response body intact", func(t *testing.T) {
+			// Pin the assumption: a multi-MB upstream response is delivered
+			// to the client byte-for-byte, with the upstream status code
+			// preserved. Pre-fix, generator.go did io.ReadAll(proxyRes.Body)
+			// then c.Writer.Write(resp) — buffering the entire body in RAM.
+			// Post-fix uses io.Copy and must still yield a byte-equal payload.
+			gatewayEngine := gin.New()
+
+			routeObjects := []entity.RouteObject{{
+				Auth:   "none",
+				Host:   "127.0.0.1:5098",
+				Name:   "big",
+				Prefix: "/big",
+				Path:   map[string]entity.RouterPath{"/payload": {Auth: "none"}},
+			}}
+
+			// 4MB so we'd notice if buffering is reintroduced; small enough
+			// that the test stays under a second.
+			payload := make([]byte, 4*1024*1024)
+			for i := range payload {
+				payload[i] = byte(i % 251)
+			}
+
+			generator := usecase.NewGenerator(
+				nil,
+				[]module.MetricController{testhelper.NewDummyMetric()},
+			)
+			assert.Nil(t, generator.Generate(gatewayEngine, routeObjects))
+
+			targetEngine := gin.New()
+			targetEngine.GET("/big/payload", func(c *gin.Context) {
+				c.Data(http.StatusTeapot, "application/octet-stream", payload)
+			})
+
+			srvTarget := &http.Server{Addr: ":5098", Handler: targetEngine}
+			go func() { _ = srvTarget.ListenAndServe() }()
+			defer srvTarget.Close()
+			time.Sleep(100 * time.Millisecond)
+
+			rec := testhelper.PerformRequest(gatewayEngine, "GET", "/big/payload", nil)
+			assert.Equal(t, http.StatusTeapot, rec.Result().StatusCode)
+			assert.Equal(t, len(payload), rec.Body.Len())
+			assert.Equal(t, payload, rec.Body.Bytes())
+		})
+
+		t.Run("Upstream exceeds configured timeout returns 502 promptly", func(t *testing.T) {
+			// Pin the assumption: when an upstream hangs longer than the
+			// configured client timeout, the gateway must return 502 (the
+			// existing failure mode for client.Do errors) rather than waiting
+			// indefinitely. Without WithUpstreamTimeout the proxy used a
+			// zero-value http.Client{} that blocked forever — see
+			// generator.go:173 prior to this change.
+			gatewayEngine := gin.New()
+
+			routeObjects := []entity.RouteObject{{
+				Auth:   "none",
+				Host:   "127.0.0.1:5099",
+				Name:   "slow",
+				Prefix: "/slow",
+				Path: map[string]entity.RouterPath{
+					"/hang": {Auth: "none"},
+				},
+			}}
+
+			generator := usecase.NewGenerator(
+				nil,
+				[]module.MetricController{testhelper.NewDummyMetric()},
+				usecase.WithUpstreamTimeout(100*time.Millisecond),
+			)
+			assert.Nil(t, generator.Generate(gatewayEngine, routeObjects))
+
+			targetEngine := gin.New()
+			targetEngine.GET("/slow/hang", func(c *gin.Context) {
+				time.Sleep(3 * time.Second)
+				c.Status(http.StatusOK)
+			})
+
+			srvTarget := &http.Server{Addr: ":5099", Handler: targetEngine}
+			go func() { _ = srvTarget.ListenAndServe() }()
+			defer srvTarget.Close()
+			time.Sleep(100 * time.Millisecond)
+
+			start := time.Now()
+			rec := testhelper.PerformRequest(gatewayEngine, "GET", "/slow/hang", nil)
+			elapsed := time.Since(start)
+
+			assert.Equal(t, http.StatusBadGateway, rec.Result().StatusCode)
+			// Must complete well before the upstream's 3s sleep — otherwise
+			// the timeout isn't being honored.
+			assert.Less(t, elapsed, 1*time.Second, "expected timeout to fire well before upstream sleep finishes, got %s", elapsed)
+		})
+
 		// TODO: add test
 		t.Run("Forwarding error", func(t *testing.T) {
 			t.Run("Do the request error", func(t *testing.T) {

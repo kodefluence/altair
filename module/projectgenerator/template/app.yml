@@ -1,7 +1,18 @@
 # This is the sample of app config
 # version: string             - Template version of app.yaml.
 # port: string | integer      - Exposed port of application, example: 1304. Default: 1304.
-# proxy_host: string          - Proxy host header when forwarding the request. Default: www.local.host
+# proxy: <hash>
+#   host: string              - Proxy host header when forwarding the request. Default: www.local.host
+#   upstream_timeout: string  - Maximum duration for a single upstream round-trip (Go duration syntax: "30s",
+#                               "1m500ms"). Bounds dial + headers + body read; protects the gateway from hung
+#                               upstreams leaking goroutines and FDs. Default: 30s.
+#   max_request_body_size: string
+#                             - Hard cap on inbound request body size. Accepts a raw integer (bytes) or an
+#                               integer with a binary-unit suffix: "1024", "512KB", "10MB", "1GB". Requests
+#                               exceeding the cap are rejected with HTTP 413 before the upstream is contacted.
+#                               Default: 0 (no cap; preserves pre-1.0 behavior).
+# proxy_host: string          - DEPRECATED. Pre-1.0 top-level alias for proxy.host. Still honored for backward
+#                               compatibility; prefer the nested `proxy:` block above.
 # authorization: <hash>
 #   username: string          - Basic auth username for managing the application plugins, required.
 #   password: string          - Basic auth password for managing the application plugins, required.
@@ -12,7 +23,10 @@
 
 version: "1.0"
 port: 1304
-proxy_host: {{ env "PROXY_HOST" }}
+proxy:
+  host: {{ env "PROXY_HOST" }}
+  upstream_timeout: 30s
+  max_request_body_size: 10MB
 authorization:
   username: altair
   password: {{ env "BASIC_AUTH_PASSWORD" }}

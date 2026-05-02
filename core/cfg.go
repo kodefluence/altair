@@ -48,6 +48,8 @@ type AppConfig interface {
 	BasicAuthUsername() string
 	BasicAuthPassword() string
 	ProxyHost() string
+	UpstreamTimeout() time.Duration
+	MaxRequestBodySize() int64
 	PluginExists(pluginName string) bool
 	Plugins() []string
 	AutoMigrate() bool
