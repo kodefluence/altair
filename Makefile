@@ -2,7 +2,16 @@ export VERSION 	?= $(shell git show -q --format=%h)
 export IMAGE 		?= kodefluence/altair
 
 test:
-	go test -race -cover -coverprofile=cover.out $$(go list ./... | grep -Ev "altair$$|core|mock|interfaces|testhelper")
+	go test -race -cover -coverprofile=cover.out $$(go list ./... | grep -Ev "altair$$|core|mock|interfaces|testhelper|/e2e")
+
+# End-to-end smoke test. Builds the binary, scaffolds via `altair new`,
+# spawns a real altair subprocess against an in-process echo upstream, and
+# exercises the proxy path (forwarding, headers, timeout, body cap).
+# Build-tagged so `make test` stays fast; opt in with `make smoke`.
+# Phase A is gateway-only (no MySQL); Phase B will add the oauth+MySQL
+# matrix per docs/superpowers/specs/2026-04-23-altair-smoke-test-design.md.
+smoke:
+	go test -tags=e2e -count=1 -v -timeout=5m ./e2e/...
 
 mock_metric:
 	mockgen -source core/metric.go -destination mock/mock_metric.go -package mock
