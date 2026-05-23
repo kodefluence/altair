@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -41,14 +42,16 @@ type stubAppConfig struct {
 	enabled map[string]bool
 }
 
-func (s *stubAppConfig) Port() int                     { return 0 }
-func (s *stubAppConfig) BasicAuthUsername() string     { return "" }
-func (s *stubAppConfig) BasicAuthPassword() string     { return "" }
-func (s *stubAppConfig) ProxyHost() string             { return "" }
-func (s *stubAppConfig) PluginExists(name string) bool { return s.enabled[name] }
-func (s *stubAppConfig) Plugins() []string             { return nil }
-func (s *stubAppConfig) AutoMigrate() bool             { return false }
-func (s *stubAppConfig) Dump() string                  { return "" }
+func (s *stubAppConfig) Port() int                      { return 0 }
+func (s *stubAppConfig) BasicAuthUsername() string      { return "" }
+func (s *stubAppConfig) BasicAuthPassword() string      { return "" }
+func (s *stubAppConfig) ProxyHost() string              { return "" }
+func (s *stubAppConfig) UpstreamTimeout() time.Duration { return 0 }
+func (s *stubAppConfig) MaxRequestBodySize() int64      { return 0 }
+func (s *stubAppConfig) PluginExists(name string) bool  { return s.enabled[name] }
+func (s *stubAppConfig) Plugins() []string              { return nil }
+func (s *stubAppConfig) AutoMigrate() bool              { return false }
+func (s *stubAppConfig) Dump() string                   { return "" }
 
 type stubAppBearer struct{ cfg core.AppConfig }
 

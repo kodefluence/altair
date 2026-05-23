@@ -234,6 +234,40 @@ authorization:
 plugins:
   - oauth`
 
+var AppConfigWithNestedProxyBlock = `
+version: 1.0
+proxy:
+  host: www.altair.id
+  upstream_timeout: 5s
+  max_request_body_size: 1MB
+authorization:
+  username: altair
+  password: secret
+plugins:
+  - oauth`
+
+var AppConfigWithInvalidBodySize = `
+version: 1.0
+proxy:
+  host: www.altair.id
+  max_request_body_size: not-a-size
+authorization:
+  username: altair
+  password: secret
+plugins:
+  - oauth`
+
+var AppConfigWithInvalidUpstreamTimeout = `
+version: 1.0
+proxy:
+  host: www.altair.id
+  upstream_timeout: not-a-duration
+authorization:
+  username: altair
+  password: secret
+plugins:
+  - oauth`
+
 var AppConfigWithCustomPort = `
 version: 1.0
 port: 7001

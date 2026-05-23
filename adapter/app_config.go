@@ -1,6 +1,8 @@
 package adapter
 
 import (
+	"time"
+
 	"github.com/kodefluence/altair/core"
 	"github.com/kodefluence/altair/entity"
 )
@@ -17,6 +19,8 @@ func (a *appConfig) Port() int                           { return a.c.Port() }
 func (a *appConfig) BasicAuthUsername() string           { return a.c.BasicAuthUsername() }
 func (a *appConfig) BasicAuthPassword() string           { return a.c.BasicAuthPassword() }
 func (a *appConfig) ProxyHost() string                   { return a.c.ProxyHost() }
+func (a *appConfig) UpstreamTimeout() time.Duration      { return a.c.UpstreamTimeout() }
+func (a *appConfig) MaxRequestBodySize() int64           { return a.c.MaxRequestBodySize() }
 func (a *appConfig) PluginExists(pluginName string) bool { return a.c.PluginExists(pluginName) }
 func (a *appConfig) Plugins() []string                   { return a.c.Plugins() }
 func (a *appConfig) AutoMigrate() bool                   { return a.c.AutoMigrate() }

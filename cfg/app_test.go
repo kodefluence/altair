@@ -3,6 +3,7 @@ package cfg_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -104,6 +105,73 @@ func TestApp(t *testing.T) {
 
 					testhelper.RemoveTempTestFiles(configPath)
 				})
+			})
+
+			t.Run("Default upstream timeout is 30s when proxy block omitted", func(t *testing.T) {
+				configPath := "./app_default_timeout/"
+				fileName := "app.yml"
+
+				testhelper.GenerateTempTestFiles(configPath, AppConfigNormal, fileName, 0666)
+
+				appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+				assert.Nil(t, err)
+				assert.Equal(t, 30*time.Second, appConfig.UpstreamTimeout())
+
+				testhelper.RemoveTempTestFiles(configPath)
+			})
+
+			t.Run("Nested proxy block parses host, upstream_timeout, max_request_body_size", func(t *testing.T) {
+				configPath := "./app_nested_proxy/"
+				fileName := "app.yml"
+
+				testhelper.GenerateTempTestFiles(configPath, AppConfigWithNestedProxyBlock, fileName, 0666)
+
+				appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+				assert.Nil(t, err)
+				assert.Equal(t, "www.altair.id", appConfig.ProxyHost())
+				assert.Equal(t, 5*time.Second, appConfig.UpstreamTimeout())
+				assert.Equal(t, int64(1024*1024), appConfig.MaxRequestBodySize())
+
+				testhelper.RemoveTempTestFiles(configPath)
+			})
+
+			t.Run("Default max_request_body_size is 0 (unlimited) when omitted", func(t *testing.T) {
+				configPath := "./app_default_body_size/"
+				fileName := "app.yml"
+
+				testhelper.GenerateTempTestFiles(configPath, AppConfigNormal, fileName, 0666)
+
+				appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+				assert.Nil(t, err)
+				assert.Equal(t, int64(0), appConfig.MaxRequestBodySize())
+
+				testhelper.RemoveTempTestFiles(configPath)
+			})
+
+			t.Run("Invalid max_request_body_size returns error", func(t *testing.T) {
+				configPath := "./app_invalid_body_size/"
+				fileName := "app.yml"
+
+				testhelper.GenerateTempTestFiles(configPath, AppConfigWithInvalidBodySize, fileName, 0666)
+
+				appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+				assert.NotNil(t, err)
+				assert.Nil(t, appConfig)
+
+				testhelper.RemoveTempTestFiles(configPath)
+			})
+
+			t.Run("Invalid upstream_timeout duration string returns error", func(t *testing.T) {
+				configPath := "./app_invalid_timeout/"
+				fileName := "app.yml"
+
+				testhelper.GenerateTempTestFiles(configPath, AppConfigWithInvalidUpstreamTimeout, fileName, 0666)
+
+				appConfig, err := cfg.App().Compile(fmt.Sprintf("%s%s", configPath, fileName))
+				assert.NotNil(t, err)
+				assert.Nil(t, appConfig)
+
+				testhelper.RemoveTempTestFiles(configPath)
 			})
 
 			t.Run("Empty authorization username", func(t *testing.T) {
